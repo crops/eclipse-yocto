@@ -3,6 +3,10 @@
 	<name>org.Yocto.sdk.ide</name>
 	<comment></comment>
 	<projects>
+		<project>org.eclipse.tm.tcf</project>
+		<project>org.eclipse.tm.tcf.core</project>
+		<project>org.eclipse.tm.tcf.rse</project>
+		<project>org.eclipse.tm.tcf.terminals</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

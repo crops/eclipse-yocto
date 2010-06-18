@@ -107,23 +107,9 @@ public class ReconfigYoctoAction extends InvokeAction {
 			YoctoSDKProjectNature.setEnvironmentVariables(project, location, triplet, kernel, rootfs, script);
 			//YoctoSDKProjectNature.configureAutotoolsOptions(project, location, triplet);
 			try {
-			/*
-			ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
-			 
-			ILaunchConfigurationType configType = lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
-			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, "qemu");
-			ArrayList listValue = new ArrayList();
-			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
-			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
-			
-			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
-			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
-			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", "-e &quot;source /usr/local/poky/eabi-glibc/environment-setup-i586-poky-linux;poky-qemu /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/bzImage-qemux86.bin /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/poky-image-sdk-qemux86.ext3;bash&quot;");
-			w_copy.doSave();
-			*/
-			IConsole console = CCorePlugin.getDefault().getConsole("org.Yocto.sdk.ide.YoctoConsole");
-			console.start(project);
-			ConsoleOutputStream consoleOutStream;
+				IConsole console = CCorePlugin.getDefault().getConsole("org.Yocto.sdk.ide.YoctoConsole");
+				console.start(project);
+				ConsoleOutputStream consoleOutStream;
 			
 				consoleOutStream = console.getOutputStream();
 				String messages = YoctoSDKMessages.getString(CONSOLE_MESSAGE);

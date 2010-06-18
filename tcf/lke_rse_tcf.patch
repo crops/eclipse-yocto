@@ -1,0 +1,1678 @@
+Index: plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF	(revision 979)
++++ plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF	(working copy)
+@@ -13,8 +13,13 @@
+  org.eclipse.ui.views,
+  org.eclipse.rse.subsystems.files.core,
+  org.eclipse.rse.subsystems.processes.core,
+- org.eclipse.rse.processes.ui
+-Import-Package: org.eclipse.tm.tcf.core;version="0.2.0",
++ org.eclipse.rse.processes.ui,
++ org.eclipse.rse.subsystems.shells.core;bundle-version="3.1.0",
++ org.eclipse.tm.tcf.terminals;bundle-version="1.0.0",
++ org.eclipse.rse.subsystems.terminals.core;bundle-version="1.0.1"
++Import-Package: com.jcraft.jsch,
++ org.eclipse.rse.subsystems.shells.core.subsystems,
++ org.eclipse.tm.tcf.core;version="0.2.0",
+  org.eclipse.tm.tcf.protocol;version="0.2.0",
+  org.eclipse.tm.tcf.services;version="0.2.0",
+  org.eclipse.tm.tcf.util;version="0.2.0"
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.properties
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.properties	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.properties	(revision 0)
+@@ -0,0 +1,6 @@
++
++
++
++TCFPlugin_Unexpected_Exception=Unexpected {0}: {1}
++TCFTerminalService_Name=TCF Terminal Service
++TelnetTerminalService_Description=TCF Terminal Service Description
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java	(revision 0)
+@@ -0,0 +1,18 @@
++package org.eclipse.tm.internal.tcf.rse;
++
++import org.eclipse.rse.services.files.RemoteFileException;
++import org.eclipse.tm.tcf.protocol.IChannel;
++
++public interface ITCFSessionProvider {
++    public static final int ERROR_CODE = 100; // filed error code
++    public static final int SUCCESS_CODE = 150; // login pass code
++    public static final int CONNECT_CLOSED = 200; // code for end of login attempts
++    public static final int TCP_CONNECT_TIMEOUT = 10; //seconds - TODO: Make configurable    
++
++    public IChannel getChannel();
++    public String getSessionUserId();
++    public String getSessionPassword();
++    public String getSessionHostName();
++    public boolean isSubscribed();
++    public void Subscribe() throws RemoteFileException;
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFService.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFService.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFService.java	(revision 0)
+@@ -0,0 +1,14 @@
++package org.eclipse.tm.internal.tcf.rse;
++
++
++/**
++ * Markup Interface for services using the <code>TCFConnectorSerivce</code>.
++ *
++ * By implementing this interface, services can be recognized
++ * as operating against an TCFConnectorService. The interface
++ * is used as the key in a table for looking up the connector
++ * service when needed.
++ */
++public interface ITCFService {
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(revision 979)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(working copy)
+@@ -13,6 +13,7 @@
+  *******************************************************************************/
+ package org.eclipse.tm.internal.tcf.rse;
+ 
++import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ import java.util.List;
+@@ -20,32 +21,75 @@
+ 
+ import org.eclipse.core.runtime.IProgressMonitor;
+ import org.eclipse.rse.core.model.IHost;
+-import org.eclipse.rse.core.subsystems.BasicConnectorService;
++import org.eclipse.rse.core.model.SystemSignonInformation;
+ import org.eclipse.rse.core.subsystems.CommunicationsEvent;
++import org.eclipse.rse.services.files.RemoteFileException;
++import org.eclipse.rse.ui.subsystems.StandardConnectorService;
++import org.eclipse.tm.internal.tcf.terminals.ITerminalsService;
+ import org.eclipse.tm.tcf.core.AbstractPeer;
+ import org.eclipse.tm.tcf.protocol.IChannel;
+ import org.eclipse.tm.tcf.protocol.IPeer;
+ import org.eclipse.tm.tcf.protocol.IService;
++import org.eclipse.tm.tcf.protocol.IToken;
+ import org.eclipse.tm.tcf.protocol.Protocol;
+ import org.eclipse.tm.tcf.services.IFileSystem;
+ import org.eclipse.tm.tcf.services.ILocator;
++import org.eclipse.tm.tcf.services.IStreams;
+ import org.eclipse.tm.tcf.services.ISysMonitor;
++import org.eclipse.tm.tcf.util.TCFTask;
+ 
++public class TCFConnectorService extends StandardConnectorService implements
++        ITCFSessionProvider {
+ 
+-public class TCFConnectorService extends BasicConnectorService {
++    private IChannel channel;
+ 
+-    private IChannel channel;
+     private Throwable channel_error;
++
+     private final List<Runnable> wait_list = new ArrayList<Runnable>();
+ 
+     private boolean poll_timer_started;
+ 
++    private boolean bSubscribed = false;;
++
++    /* subscribe the stream service on this TCP connection */
++    private IStreams.StreamsListener streamListener = new IStreams.StreamsListener() {
++        public void created(String stream_type, String stream_id,
++                String context_id) {
++            System.out.printf("new stream id: %s , type: %s is created\n",
++                    stream_id, stream_type);
++        }
++
++        /**
++         * Called when a stream is disposed.
++         * 
++         * @param stream_type
++         *            - source type of the stream.
++         * @param stream_id
++         *            - ID of the stream.
++         */
++        public void disposed(String stream_type, String stream_id) {
++            System.out.printf("stream id: %s type: %s is disposed\n",
++                    stream_id, stream_type);
++        }
++    };
++
+     public TCFConnectorService(IHost host, int port) {
+-        super("TCF", "Target Communication Framework", host, port); //$NON-NLS-1$ //$NON-NLS-2$
++        super(TCFConnectorResources.TCFConnectorService_Name,
++                TCFConnectorResources.TCFConnectorService_Description, host,
++                port); //$NON-NLS-1$ //$NON-NLS-2$
+     }
+ 
++    /**
++     * @return true if the associated connector service requires a password.
++     */
+     @Override
+-    protected void internalConnect(final IProgressMonitor monitor) throws Exception {
++    public final boolean requiresPassword() {
++            return false;
++    }
++    
++    @Override
++    protected void internalConnect(final IProgressMonitor monitor)
++            throws Exception {
+         assert !Protocol.isDispatchThread();
+         final Exception[] res = new Exception[1];
+         // Fire comm event to signal state about to change
+@@ -54,39 +98,55 @@
+         synchronized (res) {
+             Protocol.invokeLater(new Runnable() {
+                 public void run() {
+-                    if (!connectTCFChannel(res, monitor)) add_to_wait_list(this);
++                    if (!connectTCFChannel(res, monitor))
++                        add_to_wait_list(this);
+                 }
+             });
+             res.wait();
+         }
++        if (res[0] != null) throw res[0];
+         monitor.done();
+-        if (res[0] != null) throw res[0];
+     }
+ 
+     @Override
+-    protected void internalDisconnect(final IProgressMonitor monitor) throws Exception {
++    protected void internalDisconnect(final IProgressMonitor monitor)
++            throws Exception {
+         assert !Protocol.isDispatchThread();
+         final Exception[] res = new Exception[1];
+         // Fire comm event to signal state about to change
+         fireCommunicationsEvent(CommunicationsEvent.BEFORE_DISCONNECT);
+         monitor.beginTask("Disconnecting " + getHostName(), 1); //$NON-NLS-1$
+-        synchronized (res) {
+-            Protocol.invokeLater(new Runnable() {
+-                public void run() {
+-                    if (!disconnectTCFChannel(res, monitor)) add_to_wait_list(this);
+-                }
+-            });
+-            res.wait();
++        try {
++            /* First UnSubscribe TCP channel */
++            Unsubscribe();
++            /* Disconnecting TCP channel */
++            synchronized (res) {
++                Protocol.invokeLater(new Runnable() {
++                    public void run() {
++                        if (!disconnectTCFChannel(res, monitor))
++                            add_to_wait_list(this);
++                    }
++                });
++                res.wait();
++            }
++            if (res[0] != null) throw res[0];
++
+         }
+-        monitor.done();
+-        if (res[0] != null) throw res[0];
++        catch (Exception e) {
++            e.printStackTrace();
++            throw new RemoteFileException("Error creating Terminal", e); //$NON-NLS-1$
++        }
++        finally {
++            monitor.done();
++        }
+     }
+ 
+     public boolean isConnected() {
+         final boolean res[] = new boolean[1];
+         Protocol.invokeAndWait(new Runnable() {
+             public void run() {
+-               res[0] = channel != null && channel.getState() == IChannel.STATE_OPEN;
++                res[0] = channel != null
++                        && channel.getState() == IChannel.STATE_OPEN;
+             }
+         });
+         return res[0];
+@@ -108,7 +168,8 @@
+         if (wait_list.isEmpty()) return;
+         Runnable[] r = wait_list.toArray(new Runnable[wait_list.size()]);
+         wait_list.clear();
+-        for (int i = 0; i < r.length; i++) r[i].run();
++        for (int i = 0; i < r.length; i++)
++            r[i].run();
+     }
+ 
+     private boolean connectTCFChannel(Exception[] res, IProgressMonitor monitor) {
+@@ -117,9 +178,12 @@
+             case IChannel.STATE_OPEN:
+             case IChannel.STATE_CLOSED:
+                 synchronized (res) {
+-                    if (channel_error instanceof Exception) res[0] = (Exception)channel_error;
+-                    else if (channel_error != null) res[0] = new Exception(channel_error);
+-                    else res[0] = null;
++                    if (channel_error instanceof Exception)
++                        res[0] = (Exception) channel_error;
++                    else if (channel_error != null)
++                        res[0] = new Exception(channel_error);
++                    else
++                        res[0] = null;
+                     res.notify();
+                     return true;
+                 }
+@@ -137,7 +201,7 @@
+             String host = getHostName().toLowerCase();
+             int port = getConnectPort();
+             if (port <= 0) {
+-                //Default fallback
++                // Default fallback
+                 port = TCFConnectorServiceManager.TCF_PORT;
+             }
+             IPeer peer = null;
+@@ -146,8 +210,8 @@
+             for (IPeer p : locator.getPeers().values()) {
+                 Map<String, String> attrs = p.getAttributes();
+                 if ("TCP".equals(attrs.get(IPeer.ATTR_TRANSPORT_NAME)) && //$NON-NLS-1$
+-                        host.equalsIgnoreCase(attrs.get(IPeer.ATTR_IP_HOST)) &&
+-                        port_str.equals(attrs.get(IPeer.ATTR_IP_PORT))) {
++                        host.equalsIgnoreCase(attrs.get(IPeer.ATTR_IP_HOST))
++                        && port_str.equals(attrs.get(IPeer.ATTR_IP_PORT))) {
+                     peer = p;
+                     break;
+                 }
+@@ -192,7 +256,8 @@
+         return false;
+     }
+ 
+-    private boolean disconnectTCFChannel(Exception[] res, IProgressMonitor monitor) {
++    private boolean disconnectTCFChannel(Exception[] res,
++            IProgressMonitor monitor) {
+         if (channel == null || channel.getState() == IChannel.STATE_CLOSED) {
+             synchronized (res) {
+                 res[0] = null;
+@@ -212,9 +277,12 @@
+     }
+ 
+     public <V extends IService> V getService(Class<V> service_interface) {
+-        if (channel == null || channel.getState() != IChannel.STATE_OPEN) throw new Error("Not connected"); //$NON-NLS-1$
++        if (channel == null || channel.getState() != IChannel.STATE_OPEN)
++            throw new Error("Not connected"); //$NON-NLS-1$
+         V m = channel.getRemoteService(service_interface);
+-        if (m == null) throw new Error("Remote peer does not support " + service_interface.getName() + " service"); //$NON-NLS-1$  //$NON-NLS-2$
++        if (m == null)
++            throw new Error(
++                    "Remote peer does not support " + service_interface.getName() + " service"); //$NON-NLS-1$  //$NON-NLS-2$
+         return m;
+     }
+ 
+@@ -225,4 +293,100 @@
+     public IFileSystem getFileSystemService() {
+         return getService(IFileSystem.class);
+     }
++
++    public IChannel getChannel() {
++        // TODO Auto-generated method stub
++        return channel;
++    }
++
++    public String getSessionHostName() {
++        // TODO Auto-generated method stub
++        String hostName = "";
++        IHost host = getHost();
++        if (host != null) hostName = host.getHostName();
++        return hostName;
++    }
++
++    public String getSessionUserId() {
++        // TODO Auto-generated method stub
++        return getUserId();
++    }
++
++    public String getSessionPassword() {
++        // TODO Auto-generated method stub
++        String password = "";
++        SystemSignonInformation ssi = getSignonInformation();
++        if (ssi != null) {
++            password = ssi.getPassword();
++        }
++        return password;
++    }
++
++    public boolean isSubscribed() {
++        // TODO Auto-generated method stub
++        return bSubscribed;
++    }
++
++    public void Unsubscribe() throws IOException {
++        if (bSubscribed) {
++            System.out
++                    .println("Unsubscribe streams before disconnecting TCP channel.");
++            new TCFTask<Object>() {
++                public void run() {
++                    IStreams streams = getService(IStreams.class);
++                    streams.unsubscribe(ITerminalsService.NAME, streamListener,
++                            new IStreams.DoneUnsubscribe() {
++                                public void doneUnsubscribe(IToken token,
++                                        Exception error) {
++                                    // TODO Auto-generated method stub
++                                    System.out.printf(
++                                            "stream type %s unsubscribed\n",
++                                            ITerminalsService.NAME);
++                                    done(this);
++                                }
++                            });
++                }
++            }.getIO();
++            bSubscribed = false;
++        }
++
++    }
++
++    public void Subscribe() throws RemoteFileException {
++        try {
++            new TCFTask<Object>() {
++                public void run() {
++                    if (bSubscribed) {
++                        done(this);   
++                    }
++                    else {
++                        bSubscribed = true;
++                        IStreams streams = getService(IStreams.class);
++                        streams.subscribe(ITerminalsService.NAME, streamListener,
++                                new IStreams.DoneSubscribe() {
++                            public void doneSubscribe(IToken token,
++                                    Exception error) {
++                                // TODO Auto-generated method stub
++                                System.out.println("Stream subscribed");
++                                if (error != null) {
++                                    System.out.println("subscribe error");
++                                    bSubscribed = false;
++                                    error(error);
++                                }
++                                else
++                                    done(this);
++                            }
++
++                        });
++                    }}
++            }.getIO();
++
++        }
++        catch (Exception e) {
++            e.printStackTrace();
++            throw new RemoteFileException(
++                    "Error When Subscribe Terminal streams!", e); //$NON-NLS-1$
++        }
++
++    } 
+ }
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
+@@ -0,0 +1,451 @@
++package org.eclipse.tm.internal.tcf.rse.shells;
++
++import java.io.BufferedWriter;
++import java.io.IOException;
++import java.io.InputStream;
++import java.io.OutputStream;
++import java.io.OutputStreamWriter;
++import java.io.Writer;
++import java.util.HashMap;
++import java.util.Map;
++
++import org.eclipse.core.runtime.IStatus;
++import org.eclipse.osgi.util.NLS;
++import org.eclipse.rse.services.clientserver.PathUtility;
++import org.eclipse.rse.services.clientserver.messages.CommonMessages;
++import org.eclipse.rse.services.clientserver.messages.ICommonMessageIds;
++import org.eclipse.rse.services.clientserver.messages.SimpleSystemMessage;
++import org.eclipse.rse.services.clientserver.messages.SystemMessage;
++import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
++import org.eclipse.rse.services.terminals.AbstractTerminalShell;
++import org.eclipse.rse.services.terminals.ITerminalService;
++import org.eclipse.rse.ui.SystemBasePlugin;
++import org.eclipse.tm.internal.tcf.rse.ITCFSessionProvider;
++import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
++import org.eclipse.tm.internal.tcf.rse.TCFRSETask;
++import org.eclipse.tm.internal.tcf.rse.TCFServiceResources;
++import org.eclipse.tm.internal.tcf.rse.terminals.TCFTerminalService;
++import org.eclipse.tm.internal.tcf.terminals.ITerminalsService;
++import org.eclipse.tm.tcf.protocol.IChannel;
++import org.eclipse.tm.tcf.protocol.IToken;
++import org.eclipse.tm.tcf.services.IStreams;
++
++
++public class TCFTerminalShell extends AbstractTerminalShell {
++    private ITCFSessionProvider fSessionProvider;
++    private IChannel fChannel;
++    private String fPtyType;
++    private ITerminalsService.TerminalContext terminalContext;
++    private String fEncoding;
++    private InputStream fInputStream;
++    private OutputStream fOutputStream;
++    private Writer fOutputStreamWriter;
++    private int fWidth = 0;
++    private int fHeight = 0;
++    private String fContextID;
++    private String in_id;
++    private String out_id;
++    private boolean connected = false;
++    private ITerminalsService terminal;
++    private int status;
++
++    private HashMap<String, String> fLoginProperties = null;
++
++    private static String defaultEncoding = new java.io.InputStreamReader(new java.io.ByteArrayInputStream(new byte[0])).getEncoding();
++    private ITerminalsService.TerminalsListener listeners = new ITerminalsService.TerminalsListener(){
++
++        public void exited(String terminalId, int exitCode) {
++            // TODO Auto-generated method stub
++            System.out.printf("Console terminal shell %s exited, current shell ID %s\n", terminalId, terminalContext.getID()); 
++            if(!terminalContext.getID().equals(terminalId))
++                return;
++            terminal.removeListener(listeners);
++            TCFTerminalShell.this.connected = false;
++        }
++
++
++        public void winSizeChanged(String terminalId, int newWidth,
++                int newHeight) {
++            // TODO Auto-generated method stub
++            System.out.printf("Console terminal shell %s new width %d, height %d\n", terminalId, newWidth, newHeight);
++        }
++    };
++
++    private class LoginThread extends Thread {
++
++        private String username;
++        private String password;
++        private int status = ITCFSessionProvider.SUCCESS_CODE;
++        public LoginThread(String username, String password) {
++            this.username = username;
++            this.password = password;
++        }
++
++        public void run() {
++            if (fLoginProperties == null)
++                this.status = ITCFSessionProvider.ERROR_CODE;
++            String login_required = fLoginProperties.get(TCFTerminalService.PROPERTY_LOGIN_REQUIRED);
++            String login_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_LOGIN_PROMPT);
++            String password_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_PASSWORD_PROMPT);
++            String command_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_COMMAND_PROMPT);
++
++            if (Boolean.valueOf(login_required).booleanValue()) {
++                status = ITCFSessionProvider.SUCCESS_CODE;
++                if (login_prompt != null && login_prompt.length() > 0) {
++                    status = readUntil(login_prompt,fInputStream, false);
++                    write(username + "\n");
++                }
++                if (status == ITCFSessionProvider.SUCCESS_CODE && password_prompt != null && password_prompt.length() > 0) {
++                    status = readUntil(password_prompt,fInputStream, false);
++                    write(password + "\n");
++                }
++                if (status == ITCFSessionProvider.SUCCESS_CODE && command_prompt != null && command_prompt.length() > 0) {
++                    try {
++                        Thread.sleep(1000);
++                    }
++                    catch (InterruptedException e) {
++                        // TODO Auto-generated catch block
++                        e.printStackTrace();
++                    }
++                    finally {
++                        status = readUntil(command_prompt,fInputStream, true);
++                        write("\n");
++                    }
++                }
++            } else {
++                if (command_prompt != null && command_prompt.length() > 0) {
++                    status = readUntil(command_prompt,fInputStream, true);
++                    write("\n");
++                }
++            }
++        }
++
++        public int readUntil(String pattern,InputStream in, boolean bCmdPrompt) {
++            try {
++                char lastChar = pattern.charAt(pattern.length() - 1);
++                StringBuffer sb = new StringBuffer();
++                int ch = in.read();
++                while (ch >= 0) {
++                    char tch = (char) ch;
++                    sb.append(tch);
++                    if (tch=='t' && sb.indexOf("incorrect") >= 0) { //$NON-NLS-1$
++                        return ITCFSessionProvider.ERROR_CODE;
++                    }
++                    if (tch=='d' && sb.indexOf("closed") >= 0) { //$NON-NLS-1$
++                        return ITCFSessionProvider.CONNECT_CLOSED;
++                    }
++                    if (tch == lastChar) {
++                        if (!bCmdPrompt) {
++                            if (sb.toString().endsWith(pattern)) {
++                                return ITCFSessionProvider.SUCCESS_CODE;
++                            }
++                        }
++                        else {
++                            for (int i = 0; i < pattern.length(); i++){
++                                String sPrompt = pattern.substring(i,i+1) + " ";
++                                if (sb.toString().endsWith(sPrompt)) {
++                                    return ITCFSessionProvider.SUCCESS_CODE;
++                                }
++                                
++                            }
++                        }
++                    }
++                    ch = in.read();
++                }
++            } catch (Exception e) {
++                e.printStackTrace();
++                SystemBasePlugin.logError(e.getMessage() == null ?      e.getClass().getName() : e.getMessage(), e);
++            }
++            return ITCFSessionProvider.CONNECT_CLOSED;
++        }        
++        public int getLoginStatus() {
++            return this.status;
++        }
++        
++/* This read has problem because we can't make sure all contents could be read back by once.     
++ *   private int readUntil(String pattern, InputStream in, boolean bCmdPrompt) {
++            try {
++                byte[] b = new byte[1000];
++                
++                int length = in.read(b);
++                if (length > 0) {
++                    String sOutput = new String(b, 0, length);
++                    if (!bCmdPrompt) {
++                        if (sOutput.endsWith(pattern))
++                            return ITCFSessionProvider.SUCCESS_CODE;
++                    }
++                    else {
++                        for (int i = 0; i < pattern.length(); i++) {
++                            String sPrompt = pattern.substring(i, i+1) + " ";
++                            if (sOutput.endsWith(sPrompt))
++                                return ITCFSessionProvider.SUCCESS_CODE;
++                        }
++                    }
++                        
++                }
++                return ITCFSessionProvider.CONNECT_CLOSED;
++            }
++            catch (Exception e) {
++                e.printStackTrace();
++                SystemBasePlugin.logError(e.getMessage() == null ?      e.getClass().getName() : e.getMessage(), e);
++            }
++            return ITCFSessionProvider.CONNECT_CLOSED;
++        }
++        */
++    }
++
++    public void write(String value) {
++        try {
++            int len = value.length() + 6;
++            fOutputStream.write(value.getBytes());
++            System.out.printf("value is %s\n", value);
++            System.out.printf("write: ******************".substring(0, len <= 24 ? len : 24)); //$NON-NLS-1$
++        } catch (Exception e) {
++            e.printStackTrace();
++        }
++    }    
++    /**
++     * Construct a new TCF connection.
++     *
++     * The TCF channel is immediately connected in the Constructor.
++     *
++     * @param sessionProvider TCF session provider
++     * @param ptyType Terminal type to set, or <code>null</code> if not
++     *            relevant
++     * @param encoding The default encoding to use for initial command.
++     * @param environment Environment array to set, or <code>null</code> if
++     *            not relevant.
++     * @param initialWorkingDirectory initial directory to open the Terminal in.
++     *            Use <code>null</code> or empty String ("") to start in a
++     *            default directory. Empty String will typically start in the
++     *            home directory.
++     * @param commandToRun initial command to send.
++     * @throws SystemMessageException in case anything goes wrong. Channels and
++     *             Streams are all cleaned up again in this case.
++     * @see ITerminalService
++     */
++    public TCFTerminalShell(final ITCFSessionProvider sessionProvider, final String ptyType,
++            final String encoding, final String[] environment,
++            String initialWorkingDirectory, String commandToRun, HashMap<String, String> loginProperties)
++    throws SystemMessageException {
++        Map<String, Object> map_ids;
++        Exception nestedException = null;
++        try {
++            fSessionProvider = sessionProvider;
++            fEncoding = encoding;
++            fPtyType = ptyType;
++            fChannel = fSessionProvider.getChannel();
++            fLoginProperties = loginProperties;
++
++            if (fChannel == null || fChannel.getState() != IChannel.STATE_OPEN)
++                throw new Exception("TCP channel is not connected!");
++            if (((TCFConnectorService)sessionProvider).isSubscribed() == false)
++                ((TCFConnectorService)sessionProvider).Subscribe();
++            assert (((TCFConnectorService)sessionProvider).isSubscribed());
++
++            new TCFRSETask<ITerminalsService.TerminalContext>() {
++                public void run() {
++                    terminal = ((TCFConnectorService)sessionProvider).getService(ITerminalsService.class);
++                    terminal.addListener(listeners);
++                    terminal.launch(ptyType, encoding, environment, new ITerminalsService.DoneLaunch() {
++                        public void doneLaunch(IToken token, Exception error,
++                                ITerminalsService.TerminalContext terminal) {
++                            // TODO Auto-generated method stub
++
++                            terminalContext = terminal;
++                            if (error != null) 
++                                error(error);
++                            else done(terminal);
++                        }
++                    });
++                }
++
++            }.getS(null, TCFServiceResources.TCFTerminalService_Name); //$NON-NLS-1$
++
++            fPtyType = terminalContext.getPtyType();
++            fEncoding = terminalContext.getEncoding();
++            fContextID = terminalContext.getID();
++            fWidth = terminalContext.getWidth();
++            fHeight = terminalContext.getHeight();
++            map_ids = terminalContext.getProperties();
++            in_id = (String)map_ids.get(ITerminalsService.PROP_STDOUT_ID);
++            out_id = (String)map_ids.get(ITerminalsService.PROP_STDIN_ID);
++
++            String user = fSessionProvider.getSessionUserId();
++            String password = fSessionProvider.getSessionPassword(); //$NON-NLS-1$
++            status = ITCFSessionProvider.ERROR_CODE;
++
++            IStreams streams = ((TCFConnectorService)sessionProvider).getService(IStreams.class);
++            fOutputStream = new TCFTerminalOutputStream(streams, out_id);
++            fInputStream = new TCFTerminalInputStream(streams, in_id);
++            if (fEncoding != null) {
++                fOutputStreamWriter = new BufferedWriter(new OutputStreamWriter(fOutputStream, encoding));
++            } else {
++                // default encoding == System.getProperty("file.encoding")
++                // TODO should try to determine remote encoding if possible
++                fOutputStreamWriter = new BufferedWriter(new OutputStreamWriter(fOutputStream));
++            }
++
++            long millisToEnd = System.currentTimeMillis() + ITCFSessionProvider.TCP_CONNECT_TIMEOUT*1000;
++            LoginThread checkLogin = new LoginThread(user, password);
++            checkLogin.start();
++            while (checkLogin.isAlive() && System.currentTimeMillis()<millisToEnd)
++                checkLogin.join(500);
++            status = checkLogin.getLoginStatus();
++            checkLogin.join();
++            connected = true;
++            if (initialWorkingDirectory!=null && initialWorkingDirectory.length()>0
++                    && !initialWorkingDirectory.equals(".") //$NON-NLS-1$
++                    && !initialWorkingDirectory.equals("Command Shell") //$NON-NLS-1$ //FIXME workaround for bug 153047
++            ) {
++                writeToShell("cd " + PathUtility.enQuoteUnix(initialWorkingDirectory)); //$NON-NLS-1$
++            }
++
++            if (commandToRun != null && commandToRun.length() > 0) {
++                writeToShell(commandToRun);
++            }
++
++        }
++        catch (Exception e)
++        {
++            e.printStackTrace();
++            nestedException = e;
++        }
++        finally {
++            if (status == ITCFSessionProvider.SUCCESS_CODE) {
++                System.out.println("TCF shell Service: Connected"); //$NON-NLS-1$
++            }
++            else {
++                System.out.println("TCF shell Service: Connect failed"); //$NON-NLS-1$
++                SystemMessage msg;
++                if (nestedException!=null) {
++                    msg = new SimpleSystemMessage(org.eclipse.tm.internal.tcf.rse.Activator.PLUGIN_ID,
++                            ICommonMessageIds.MSG_EXCEPTION_OCCURRED,
++                            IStatus.ERROR,
++                            CommonMessages.MSG_EXCEPTION_OCCURRED, nestedException);
++                } else {
++                    msg = new SimpleSystemMessage(org.eclipse.tm.internal.tcf.rse.Activator.PLUGIN_ID,
++                            ICommonMessageIds.MSG_COMM_AUTH_FAILED,
++                            IStatus.ERROR,
++                            CommonMessages.MSG_COMM_AUTH_FAILED,
++                            NLS.bind(CommonMessages.MSG_COMM_AUTH_FAILED_DETAILS, ((TCFConnectorService)fSessionProvider).getHost().getAliasName()));
++                    msg.makeSubstitution(((TCFConnectorService)fSessionProvider).getHost().getAliasName());
++                }
++                throw new SystemMessageException(msg);
++            }                
++        }
++
++    }
++
++    public void writeToShell(String command) throws IOException {
++        if (isActive()) {
++            if ("#break".equals(command)) { //$NON-NLS-1$
++                command = "\u0003"; // Unicode 3 == Ctrl+C //$NON-NLS-1$
++            } else {
++                command += "\r\n"; //$NON-NLS-1$
++            }
++            fOutputStreamWriter.write(command);
++        }
++    }
++
++    public void exit() {
++
++        // TODO Auto-generated method stub
++        if (fChannel == null || (fChannel.getState() == IChannel.STATE_CLOSED) || !connected) {
++            System.out.println("This terminal shell exits already!");
++            return;
++        }
++        try {
++            getOutputStream().close();
++            getInputStream().close();
++
++        }
++        catch (IOException ioe) {
++            // TODO Auto-generated catch block
++            ioe.printStackTrace();
++        } //$NON-NLS-1$
++
++        try {
++            new TCFRSETask<Object>() {
++                public void run() {
++                    terminalContext.exit(new ITerminalsService.DoneCommand(){
++                        public void doneCommand(IToken token,
++                                Exception error) {
++                            // TODO Auto-generated method stub
++                            if (error != null) 
++                                error(error);
++                            else {
++                                System.out.println("terminal exit command sent");
++                                done(this);
++                            }
++                        }
++                    });
++                }}.getS(null, TCFServiceResources.TCFTerminalService_Name); //seems no need block here. need further modification.
++        }
++        catch (SystemMessageException e) {
++            // TODO Auto-generated catch block
++            e.printStackTrace();
++        } //$NON-NLS-1$;
++    }
++
++    public InputStream getInputStream() {
++        // TODO Auto-generated method stub
++        return fInputStream;
++    }
++
++    public OutputStream getOutputStream() {
++        // TODO Auto-generated method stub
++        return fOutputStream;
++    }
++
++    public boolean isActive() {
++        // TODO Auto-generated method stub
++        if (fChannel != null && !(fChannel.getState() == IChannel.STATE_CLOSED) && connected) {
++            return true;
++        }
++        exit();
++        // shell is not active: check for session lost
++        return false;
++    }
++
++    public String getPtyType() {
++        return fPtyType;
++    }
++
++    public void setTerminalSize(int newWidth, int newHeight) {
++        // do nothing
++        if (fChannel == null || (fChannel.getState() == IChannel.STATE_CLOSED) || !connected) {
++            System.out.println("This terminal shell exits already, can't set size!");
++            return;
++        }
++
++        try {
++            new TCFRSETask<Object>() {
++                public void run() {
++                    if (fChannel != null && connected) {
++                        terminal.setWinSize(fContextID, fWidth, fHeight, new ITerminalsService.DoneCommand(){
++
++                            public void doneCommand(IToken token, Exception error) {
++                                // TODO Auto-generated method stub
++                                if (error != null) 
++                                    error(error);
++                                else
++                                    done(this);
++
++                            }});
++
++                    }   
++                }}.getS(null, TCFServiceResources.TCFTerminalService_Name);
++        }
++        catch (SystemMessageException e) {
++            // TODO Auto-generated catch block
++            e.printStackTrace();
++        } //$NON-NLS-1$;
++    }
++
++    public String getDefaultEncoding() {
++        if (fEncoding != null) return fEncoding;
++        return defaultEncoding;
++    }
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java	(revision 0)
+@@ -0,0 +1,22 @@
++package org.eclipse.tm.internal.tcf.rse.shells;
++
++import org.eclipse.osgi.util.NLS;
++
++
++public class TCFLoginProperties extends NLS {
++    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.shells.TCFLoginProperties"; //$NON-NLS-1$
++    public static final String PropertySet_Description = "TCF Shell login word settings";
++    public static String TCFLOGIN_REQUIRED;
++    public static String TCFLOGIN_PROMPT;
++    public static String TCFPASSWORD_PROMPT;
++    public static String TCFCOMMAND_PROMPT;
++
++    static {
++            NLS.initializeMessages(BUNDLE_NAME, TCFLoginProperties.class);
++    }
++
++    private TCFLoginProperties() {
++    }
++
++    
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFServiceCommandShell.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFServiceCommandShell.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFServiceCommandShell.java	(revision 0)
+@@ -0,0 +1,189 @@
++package org.eclipse.tm.internal.tcf.rse.shells;
++
++import java.util.ArrayList;
++import java.util.StringTokenizer;
++
++import org.eclipse.core.runtime.IPath;
++import org.eclipse.core.runtime.NullProgressMonitor;
++import org.eclipse.core.runtime.Path;
++import org.eclipse.rse.core.subsystems.ISubSystem;
++import org.eclipse.rse.internal.services.shells.TerminalServiceHostShell;
++import org.eclipse.rse.services.shells.IHostOutput;
++import org.eclipse.rse.services.shells.IHostShell;
++import org.eclipse.rse.services.shells.IHostShellChangeEvent;
++import org.eclipse.rse.services.shells.ParsedOutput;
++import org.eclipse.rse.services.shells.Patterns;
++import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
++import org.eclipse.rse.subsystems.shells.core.model.ISystemOutputRemoteTypes;
++import org.eclipse.rse.subsystems.shells.core.model.RemoteError;
++import org.eclipse.rse.subsystems.shells.core.model.RemoteOutput;
++import org.eclipse.rse.subsystems.shells.core.subsystems.IRemoteCmdSubSystem;
++import org.eclipse.rse.subsystems.shells.core.subsystems.IRemoteOutput;
++import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.ServiceCommandShell;
++
++@SuppressWarnings("restriction")
++public class TCFServiceCommandShell extends ServiceCommandShell {
++    private Patterns _patterns;
++    private String _workingDir;
++    private String _curCommand;
++    private IRemoteFileSubSystem _fs;
++
++    public TCFServiceCommandShell(IRemoteCmdSubSystem cmdSS,
++            IHostShell hostShell) {
++        super(cmdSS, hostShell);
++        // TODO Auto-generated constructor stub
++        _patterns = new Patterns();
++        _patterns.update("cmd"); //$NON-NLS-1$
++        ISubSystem[] sses = cmdSS.getHost().getSubSystems();
++        for (int i = 0; i < sses.length; i++)
++        {
++            if (sses[i] instanceof IRemoteFileSubSystem)
++            {
++                _fs = (IRemoteFileSubSystem)sses[i];
++                break;
++            }
++        }
++    }
++
++    public Object getContext()
++    {
++        String workingDir = _workingDir;
++        if (workingDir != null && workingDir.length() > 0)
++        {
++            try {
++                return _fs.getRemoteFileObject(workingDir, new NullProgressMonitor());
++            }
++            catch (Exception e)
++            {
++                e.printStackTrace();
++            }
++        }
++        return null;
++
++    }
++
++    public String getContextString()
++    {
++        return _workingDir;
++    }
++
++    public void shellOutputChanged(IHostShellChangeEvent event)
++    {
++        IHostOutput[] lines = event.getLines();
++        boolean gotCommand = false;
++        ArrayList<RemoteOutput> outputs = new ArrayList<RemoteOutput>(lines.length);
++        for (int i = 0; i < lines.length; i++)
++        {
++            String line = lines[i].getString();
++            System.out.println("shellOutput:"+line);
++            System.out.printf("cur command %s\n", _curCommand);
++            if (line.endsWith(getPromptCommand())) {
++                continue; //ignore our synthetic prompt command
++            }
++            ParsedOutput parsedMsg = null;
++            if (!gotCommand && line.equals(_curCommand)) {
++                gotCommand = true;
++                continue; //ignore remote command echo
++            } else 
++            {
++                try 
++                {
++                    // Bug 160202: Remote shell dies.
++                    if ((_curCommand == null) || (!_curCommand.trim().equals("ls"))) { //$NON-NLS-1$
++                        parsedMsg = _patterns.matchLine(line);
++
++                        // Bug 160202: Remote shell dies.
++                        if (_curCommand != null) {
++                            String temp = _curCommand.trim();
++                            StringTokenizer tokenizer = new StringTokenizer(temp);
++
++                            if (tokenizer.countTokens() == 2) {
++                                String token1 = tokenizer.nextToken();
++                                String token2 = tokenizer.nextToken();
++
++                                if ((token1.equals("ls")) && (token2.indexOf('-') == 0) && (token2.indexOf('l') > 0)) { //$NON-NLS-1$
++                                    if (line.startsWith("total")) { //$NON-NLS-1$
++                                        parsedMsg = null;
++                                    }
++                                }
++                            }
++                        }
++                    }
++                }
++                catch (Throwable e) {
++                    e.printStackTrace();
++                }
++            }
++
++            RemoteOutput output = null;
++
++            String type = "stdout"; //$NON-NLS-1$
++
++            if (parsedMsg != null) {
++                type = parsedMsg.type;
++            }
++
++            if (event.isError()) {
++                output = new RemoteError(this, type);
++            }
++            else  {
++                output = new RemoteOutput(this, type);
++            }
++
++            output.setText(line);
++            if (parsedMsg != null)
++            {
++                String file = parsedMsg.file;
++                if (type.equals(ISystemOutputRemoteTypes.TYPE_PROMPT))
++                {
++                    _workingDir = file;
++                    output.setAbsolutePath(_workingDir);
++                }
++                else if(_workingDir!=null)
++                {
++                    IPath p = new Path(_workingDir).append(file);
++                    output.setAbsolutePath(p.toString());
++                }
++                else
++                {
++                    output.setAbsolutePath(file);
++                }
++                if (parsedMsg.line > 0){
++                    output.setLine(parsedMsg.line);
++                }
++            }
++
++            addOutput(output);
++            outputs.add(output);
++        }
++
++        IRemoteOutput[] remoteOutputs = outputs.toArray(new IRemoteOutput[outputs.size()]);
++        notifyOutputChanged(remoteOutputs, false);  
++    }
++
++    /**
++     * Return the prompt command, such that lines ending with the
++     * prompt command can be removed from output.
++     * Should be overridden in case the IHostShell used for this
++     * service is not an SshHostShell.
++     * @return String promptCommand
++     */
++    protected String getPromptCommand() {
++        IHostShell shell = getHostShell();
++        if (shell instanceof TerminalServiceHostShell) {
++            return ((TerminalServiceHostShell)shell).getPromptCommand();
++        }
++        //return something impossible such that nothing is ever matched
++        return "\uffff"; //$NON-NLS-1$
++    }
++
++    public void writeToShell(String cmd)
++    {
++        _curCommand = cmd;
++        _patterns.update(cmd);
++        System.out.println("execute: cmd " + cmd);
++        super.writeToShell(cmd);
++
++    }
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalInputStream.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalInputStream.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalInputStream.java	(revision 0)
+@@ -0,0 +1,139 @@
++package org.eclipse.tm.internal.tcf.rse.shells;
++
++import java.io.IOException;
++import java.io.InputStream;
++
++import org.eclipse.tm.tcf.protocol.IToken;
++import org.eclipse.tm.tcf.services.IStreams;
++import org.eclipse.tm.tcf.util.TCFTask;
++
++public class TCFTerminalInputStream extends InputStream {
++    private IStreams streams;
++    private boolean connected = true;;/* The stream is connected or not */
++    String is_id;
++    private int value;
++    private boolean bEof = false;;
++
++    public TCFTerminalInputStream(final IStreams streams, final String is_id) throws IOException{
++        if (streams == null) 
++            throw new IOException("TCP streams is null");
++        this.streams = streams;
++        this.is_id = is_id;
++    }
++
++    /* read must be synchronized */
++    @Override
++    public synchronized int read() throws IOException {
++        // TODO Auto-generated method stub        
++        if (!connected) 
++            throw new IOException("istream is not connected");
++        if (bEof) 
++            return -1;
++        try {
++            new TCFTask<Object>() {
++                public void run() {
++                    streams.read(is_id, 1, new IStreams.DoneRead() {                    
++                        public void doneRead(IToken token, Exception error, int lostSize,
++                                byte[] data, boolean eos) {
++                            // TODO Auto-generated method stub
++                            if (error != null) {
++                                error(error);
++                                return;
++                            }
++                            bEof = eos;
++                            if (data != null) {
++                                value = (int)data[0];
++                                if (data.length != 1) {
++                                    System.out.println("TCF inputstream read one byte, yet return more than one byte!");
++                                }
++                            }
++                            else
++                                value = -1;
++                            done(this);
++                        }
++                    });
++                }
++            }.getIO();
++        }
++        catch (Exception e) {
++            e.printStackTrace();
++            throw new IOException(e);
++        }
++        return value;
++    }
++
++    private static class Buffer {
++        byte[] buf;
++        Buffer() {
++        }
++    }
++    private Buffer buffer;
++
++    public synchronized int read(byte b[], final int off, final int len) throws IOException {
++
++
++        if (!connected) 
++            throw new IOException("istream is not connected");
++        if (bEof) return -1;        
++        if (b == null) {
++            throw new NullPointerException();
++        } else if (off < 0 || len < 0 || len > b.length - off) {
++            throw new IndexOutOfBoundsException();
++        } else if (len == 0) {
++            return 0;
++        }
++        try {
++
++            new TCFTask<Buffer>() {
++                public void run() {
++                    streams.read(is_id, len, new IStreams.DoneRead() {                    
++                        public void doneRead(IToken token, Exception error, int lostSize,
++                                byte[] data, boolean eos) {
++                            // TODO Auto-generated method stub
++                            if (error != null) {
++                                error(error);
++                                return;
++                            }
++                            bEof = eos; 
++                            if (data != null) {
++                                buffer = new Buffer();
++                                buffer.buf = data;
++                                
++                            }
++                            done(buffer);
++                        }
++                    });
++                }
++            }.getIO();
++
++            if (buffer.buf != null) {
++                int length = buffer.buf.length;
++                System.arraycopy(buffer.buf, 0, b, off, length);
++                System.out.println("read a line:"+ new String(b, off,length));            
++                return length;
++            }
++            else if (bEof) 
++                return -1;
++            else return 0;
++        } catch (Exception ee) {
++            ee.printStackTrace();
++            throw new IOException(ee);
++        }
++    }
++
++    public void close() throws IOException {
++        if (!connected) return;
++        new TCFTask<Object>() {
++            public void run() {
++                streams.disconnect(is_id, new IStreams.DoneDisconnect() {
++                    public void doneDisconnect(IToken token, Exception error) {
++                        connected = false;
++                        done(this);
++                    }
++                });
++            }
++        }.getIO();        
++        connected = false;
++    }
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalOutputStream.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalOutputStream.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalOutputStream.java	(revision 0)
+@@ -0,0 +1,100 @@
++package org.eclipse.tm.internal.tcf.rse.shells;
++
++import java.io.IOException;
++
++import java.io.OutputStream;
++
++import org.eclipse.tm.tcf.protocol.IToken;
++import org.eclipse.tm.tcf.services.IStreams;
++import org.eclipse.tm.tcf.util.TCFTask;
++
++public class TCFTerminalOutputStream extends OutputStream {
++
++    private final IStreams streams;
++    private boolean connected = true;
++    private boolean write_eof;
++    String os_id;
++
++    public TCFTerminalOutputStream(final IStreams streams, final String os_id) throws IOException{
++        if (streams == null) throw new IOException("istream is null");
++        this.streams = streams;
++        this.os_id = os_id;
++        write_eof = false;
++    }
++
++    @Override
++    public synchronized void write(final byte b[], final int off, final int len) throws IOException {
++        /* If eof is written, we can't write anything into the stream */
++        if (!connected || write_eof) 
++            throw new IOException("stream is not connected or write_eof already!");
++        System.out.println("write line: " + new String(b, off, len) );
++        try {
++            new TCFTask<Object>() {
++                public void run() {
++                    streams.write(os_id, b, off, len, new IStreams.DoneWrite() {
++                        public void doneWrite(IToken token, Exception error) {
++                            // TODO: stream write error handling
++                            if (error != null) error(error);
++                            done(this);
++                        }
++                    });
++
++                }
++            }.getIO();
++        }
++        catch (Exception e)
++        {
++            throw new IOException(e);
++        }
++    }
++
++    @Override
++    public synchronized void write(int b) throws IOException {
++
++        // TODO Auto-generated method stub
++        try {
++            final byte[] buf = new byte[1];
++            buf[0] = (byte)b;
++            this.write(buf, 0, 1);
++        }
++        catch(IOException ioe) {
++            ioe.printStackTrace();
++            throw new IOException(ioe);
++        }
++
++    }
++
++    /* close must be called --Need to reconsider it in the future*/
++    public void close() throws IOException {
++        if (!connected) 
++            return;
++        try {
++            new TCFTask<Object>() {
++                public void run() {
++                    streams.eos(os_id, new IStreams.DoneEOS() {
++                        public void doneEOS(IToken token, Exception error) {
++                            // TODO Auto-generated method stub
++                            write_eof = true;
++                            done(this);
++                        }
++                    });
++                }
++            }.getIO();
++            new TCFTask<Object>() {
++                public void run() {
++                    streams.disconnect(os_id, new IStreams.DoneDisconnect() {
++                        public void doneDisconnect(IToken token, Exception error) {
++                            connected = false;
++                            done(this);                        
++                        }
++                    });
++
++                }
++            }.getIO();   
++        }
++        catch(Exception e) {
++            throw new IOException(e);   
++        }
++    }
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellSubSystemConfiguration.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellSubSystemConfiguration.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellSubSystemConfiguration.java	(revision 0)
+@@ -0,0 +1,69 @@
++package org.eclipse.tm.internal.tcf.rse.shells;
++
++import org.eclipse.rse.core.model.IHost;
++import org.eclipse.rse.core.subsystems.IConnectorService;
++import org.eclipse.rse.core.subsystems.ISubSystem;
++import org.eclipse.rse.services.shells.IHostShell;
++import org.eclipse.rse.services.shells.IShellService;
++import org.eclipse.rse.subsystems.shells.core.subsystems.IRemoteCmdSubSystem;
++import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IServiceCommandShell;
++import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.ShellServiceSubSystem;
++import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.ShellServiceSubSystemConfiguration;
++import org.eclipse.tm.internal.tcf.rse.*;
++import org.eclipse.tm.internal.tcf.rse.terminals.TCFTerminalService;
++import org.eclipse.tm.internal.tcf.terminals.ITerminalsService;
++
++public class TCFShellSubSystemConfiguration extends
++        ShellServiceSubSystemConfiguration {
++
++    public TCFShellSubSystemConfiguration() {
++        super();
++    }
++
++    /* (non-Javadoc)
++     * @see org.eclipse.rse.core.subsystems.SubSystemConfiguration#isFactoryFor(java.lang.Class)
++     */
++    public boolean isFactoryFor(Class subSystemType) {
++        boolean isFor = ShellServiceSubSystem.class.equals(subSystemType);
++        return isFor;
++}
++
++
++    /**
++     * Instantiate and return an instance of OUR subsystem. 
++     * Do not populate it yet though!
++     * @see org.eclipse.rse.core.subsystems.SubSystemConfiguration#createSubSystemInternal(IHost)
++     */
++    public ISubSystem createSubSystemInternal(IHost host) 
++    {
++            TCFConnectorService connectorService = (TCFConnectorService)getConnectorService(host);
++            ISubSystem subsys = new ShellServiceSubSystem(host, connectorService, createShellService(host));
++            return subsys;
++    }
++    
++    public IConnectorService getConnectorService(IHost host) {
++        return TCFConnectorServiceManager.getInstance().getConnectorService(host, ITerminalsService.class);
++}
++
++    public void setConnectorService(IHost host,
++                IConnectorService connectorService) {
++        TCFConnectorServiceManager.getInstance().setConnectorService(host, ITerminalsService.class, connectorService);
++    }
++
++    public Class<ITCFService> getServiceImplType()
++    {
++            return ITCFService.class;
++    }
++    
++    public IServiceCommandShell createRemoteCommandShell(IRemoteCmdSubSystem cmdSS, IHostShell hostShell) {         
++        return new TCFServiceCommandShell(cmdSS, hostShell);
++    }
++
++    public IShellService createShellService(IHost host) {
++        TCFConnectorService cserv = (TCFConnectorService)getConnectorService(host);
++        
++        return (IShellService) (new TCFTerminalService(cserv)).getAdapter(IShellService.class);
++    }
++
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties	(revision 0)
+@@ -0,0 +1,10 @@
++
++# NLS_MESSAGEFORMAT_VAR
++# NLS_ENCODING=UTF-8
++
++#!!!!Please don't remove the end of "space" after all prompts.
++#It's important for match login process
++TCFLOGIN_REQUIRED=true
++TCFLOGIN_PROMPT=ogin: 
++TCFPASSWORD_PROMPT=assword: 
++TCFCOMMAND_PROMPT=$# 
+\ No newline at end of file
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceSubSystemConfiguration.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceSubSystemConfiguration.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceSubSystemConfiguration.java	(revision 0)
+@@ -0,0 +1,59 @@
++package org.eclipse.tm.internal.tcf.rse.terminals;
++
++import org.eclipse.rse.core.model.IHost;
++import org.eclipse.rse.core.subsystems.IConnectorService;
++import org.eclipse.rse.core.subsystems.ISubSystem;
++import org.eclipse.rse.services.terminals.ITerminalService;
++import org.eclipse.rse.subsystems.terminals.core.TerminalServiceSubSystem;
++import org.eclipse.rse.subsystems.terminals.core.TerminalServiceSubSystemConfiguration;
++import org.eclipse.tm.internal.tcf.rse.ITCFService;
++import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
++import org.eclipse.tm.internal.tcf.rse.TCFConnectorServiceManager;
++import org.eclipse.tm.internal.tcf.terminals.ITerminalsService;
++
++public class TCFTerminalServiceSubSystemConfiguration extends
++        TerminalServiceSubSystemConfiguration {
++
++   public boolean isFactoryFor(Class subSystemType) {
++       boolean isFor = TerminalServiceSubSystem.class.equals(subSystemType);
++       return isFor;
++   }
++
++   /**
++    * Instantiate and return an instance of OUR subsystem. Do not populate it
++    * yet though!
++    *
++    * @see org.eclipse.rse.core.subsystems.SubSystemConfiguration#createSubSystemInternal(IHost)
++    */
++   public ISubSystem createSubSystemInternal(IHost host) {
++       TCFConnectorService connectorService = (TCFConnectorService) getConnectorService(host);
++       ISubSystem subsys = new TerminalServiceSubSystem(host,
++               connectorService, createTerminalService(host));
++       return subsys;
++   }
++
++       /**
++        * @inheritDoc
++        * @since 1.0
++        */
++   public ITerminalService createTerminalService(IHost host) {
++       TCFConnectorService cserv = (TCFConnectorService) getConnectorService(host);
++               return new TCFTerminalService(cserv);
++   }
++
++   public IConnectorService getConnectorService(IHost host) {
++       return TCFConnectorServiceManager.getInstance().getConnectorService(
++               host, ITCFService.class);
++   }
++
++   public void setConnectorService(IHost host,
++           IConnectorService connectorService) {
++       TCFConnectorServiceManager.getInstance().setConnectorService(host,
++               ITCFService.class, connectorService);
++   }
++
++   public Class getServiceImplType() {
++       return ITCFService.class;
++   }
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
+@@ -0,0 +1,72 @@
++package org.eclipse.tm.internal.tcf.rse.terminals;
++
++import org.eclipse.core.runtime.IProgressMonitor;
++import org.eclipse.rse.core.model.IPropertySet;
++import org.eclipse.rse.core.model.PropertyType;
++import org.eclipse.rse.core.model.PropertySet;
++
++import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
++import org.eclipse.rse.services.terminals.AbstractTerminalService;
++import org.eclipse.rse.services.terminals.ITerminalShell;
++import org.eclipse.tm.internal.tcf.rse.ITCFSessionProvider;
++import org.eclipse.tm.internal.tcf.rse.TCFConnectorResources;
++import org.eclipse.tm.internal.tcf.rse.TCFServiceResources;
++import org.eclipse.tm.internal.tcf.rse.shells.TCFLoginProperties;
++import org.eclipse.tm.internal.tcf.rse.shells.TCFTerminalShell;
++
++import java.util.HashMap;
++
++public class TCFTerminalService extends AbstractTerminalService{
++    private final ITCFSessionProvider fSessionProvider;    
++
++    public static final String PROPERTY_LOGIN_REQUIRED = "Login.Required"; //$NON-NLS-1$
++    public static final String PROPERTY_LOGIN_PROMPT = "Login.Prompt"; //$NON-NLS-1$
++    public static final String PROPERTY_PASSWORD_PROMPT = "Password.Prompt"; //$NON-NLS-1$
++    public static final String PROPERTY_COMMAND_PROMPT = "Command.Prompt"; //$NON-NLS-1$
++    
++    private HashMap<String, String> fLoginProperties;
++
++    /**
++     * Return the TCF property set, and fill it with default values if it has
++     * not been created yet. Extender may override in order to set different
++     * default values.
++     *
++     * @return a property set holding properties understood by the telnet
++     *         connector service.
++     */
++    protected void setTCFProperties() {
++        fLoginProperties = new HashMap<String, String>();
++        fLoginProperties.put(PROPERTY_LOGIN_REQUIRED, TCFLoginProperties.TCFLOGIN_REQUIRED);
++        fLoginProperties.put(PROPERTY_LOGIN_PROMPT, TCFLoginProperties.TCFLOGIN_PROMPT);
++        fLoginProperties.put(PROPERTY_PASSWORD_PROMPT, TCFLoginProperties.TCFPASSWORD_PROMPT);
++        fLoginProperties.put(PROPERTY_COMMAND_PROMPT, TCFLoginProperties.TCFCOMMAND_PROMPT);        
++    }
++    
++    public ITerminalShell launchTerminal(String ptyType, String encoding,
++            String[] environment, String initialWorkingDirectory,
++            String commandToRun, IProgressMonitor monitor)
++            throws SystemMessageException {
++        // TODO Auto-generated method stub
++            TCFTerminalShell hostShell = new TCFTerminalShell(fSessionProvider, ptyType, encoding, environment, initialWorkingDirectory, commandToRun, fLoginProperties);
++        return hostShell;
++    }
++
++
++    public TCFTerminalService(ITCFSessionProvider sessionProvider) {
++        fSessionProvider = sessionProvider;
++        if (fLoginProperties == null)
++            setTCFProperties();
++    }
++
++    public ITCFSessionProvider getSessionProvider() {
++                return fSessionProvider;
++        }
++    
++    public String getName() {
++        return TCFServiceResources.TCFTerminalService_Name;
++    }
++
++    public String getDescription() {
++        return TCFServiceResources.TCFTerminalService_Description;
++    }
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
+@@ -0,0 +1,17 @@
++package org.eclipse.tm.internal.tcf.rse;
++
++import org.eclipse.osgi.util.NLS;
++
++public class TCFConnectorResources extends NLS {
++    private static final String BUNDLE_NAME = "org.eclipse.tm.tcf.rse.TCFConnectorResources"; //$NON-NLS-1$
++    static {
++            NLS.initializeMessages(BUNDLE_NAME, TCFConnectorResources.class);
++    }
++    private TCFConnectorResources() {
++    }
++
++    public static String TCFConnectorService_Name;
++    public static String TCFConnectorService_Description;
++    public static String TelnetTerminalService_Description;
++
++}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.java	(revision 0)
+@@ -0,0 +1,27 @@
++package org.eclipse.tm.internal.tcf.rse;
++
++import org.eclipse.osgi.util.NLS;
++
++public class TCFServiceResources extends NLS {
++    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.TCFServiceResources"; //$NON-NLS-1$
++
++    public static String TCFPlugin_Unexpected_Exception;
++    
++    public static String TCFTerminalService_Description;
++
++    public static String TCFTerminalService_Name;
++    
++    
++    static {
++            // initialize resource bundle
++            NLS.initializeMessages(BUNDLE_NAME, TCFServiceResources.class);
++    }
++
++    private TCFServiceResources(){
++            
++    }
++
++}
++
++
++
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
+@@ -0,0 +1,4 @@
++TCFConnectorService_Name=TCF Connector Service
++TCFConnectorService_Description=Target Communication Framework
++
++PropertySet_Description=TCF login properties. Set these according to your remote system's login prompts.
+\ No newline at end of file
+Index: plugins/org.eclipse.tm.tcf.rse/plugin.xml
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/plugin.xml	(revision 979)
++++ plugins/org.eclipse.tm.tcf.rse/plugin.xml	(working copy)
+@@ -27,6 +27,22 @@
+             vendor="Wind River">
+       </configuration>
+       </extension>
++	<extension
++		point="org.eclipse.rse.core.subsystemConfigurations">
++		<configuration
++        category="shells"
++        class="org.eclipse.tm.internal.tcf.rse.shells.TCFShellSubSystemConfiguration"
++        description="Shells"
++        icon="icons/system-processes.gif"
++        iconlive="icons/system-processes-live.gif"
++        id="org.eclipse.tm.tcf.rse.Shells"
++        name="Shells"
++        priority="200"
++        serviceType="_ssh._tcp;_sftp-ssh._tcp"
++        systemTypeIds="org.eclipse.tm.tcf.rse.systemType"
++        vendor="Intel">
++		</configuration>
++	</extension>
+    <extension
+          point="org.eclipse.rse.core.subsystemConfigurations">
+       <configuration
+@@ -42,6 +58,22 @@
+             vendor="Wind River">
+       </configuration>
+    </extension>
++    <extension
++        point="org.eclipse.rse.core.subsystemConfigurations">
++        <configuration
++        category="terminals"
++        class="org.eclipse.tm.internal.tcf.rse.terminals.TCFTerminalServiceSubSystemConfiguration"
++        description="Terminals"
++        icon="icons/system-processes.gif"
++        iconlive="icons/system-processes-live.gif"
++        id="TCF.terminals"
++        name="Terminals"
++        priority="200"
++        serviceType="_ssh._tcp;_sftp-ssh._tcp"
++        systemTypeIds="org.eclipse.tm.tcf.rse.systemType"
++        vendor="Intel">
++        </configuration>
++    </extension>   
+    <extension point="org.eclipse.core.runtime.adapters">
+       <factory 
+             class="org.eclipse.tm.internal.tcf.rse.processes.TCFSystemViewProcessAdapterFactory" 

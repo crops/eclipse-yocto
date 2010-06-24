@@ -10,7 +10,8 @@ The current implmentaion is based on TCF contribution SVN revision 979. (svn://d
 2. Apply the patches.
 
 	cd tcf_local
-	patch -p0 < ../r979_agent_lianhao.patch
+	patch -p0 < ../r979_terminal_agent.patch
+	patch -p0 < ../r979_terminal.patch
 	patch -p0 < ../lke_rse_tcf.patch
  
    After the successful patch, only the following components are useful for CDT remote debug. Other plugins are not required.

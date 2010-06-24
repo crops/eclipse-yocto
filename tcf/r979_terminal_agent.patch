@@ -1,627 +1,3 @@
-Index: plugins/org.eclipse.tm.tcf.terminals/.classpath
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/.classpath	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/.classpath	(revision 0)
-@@ -0,0 +1,7 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<classpath>
-+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-+	<classpathentry kind="src" path="src"/>
-+	<classpathentry kind="output" path="bin"/>
-+</classpath>
-
-Property changes on: plugins/org.eclipse.tm.tcf.terminals/.classpath
-___________________________________________________________________
-Added: svn:executable
-   + *
-
-Index: plugins/org.eclipse.tm.tcf.terminals/META-INF/MANIFEST.MF
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/META-INF/MANIFEST.MF	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/META-INF/MANIFEST.MF	(revision 0)
-@@ -0,0 +1,14 @@
-+Manifest-Version: 2.0
-+Bundle-ManifestVersion: 2
-+Bundle-Name: %pluginName
-+Bundle-SymbolicName: org.eclipse.tm.tcf.terminals;singleton:=true
-+Bundle-Version: 1.0.0.qualifier
-+Bundle-Activator: org.eclipse.tm.internal.tcf.terminals.Activator
-+Bundle-Vendor: %providerName
-+Require-Bundle: org.eclipse.core.runtime,
-+ org.eclipse.tm.tcf
-+Bundle-ActivationPolicy: lazy
-+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-+Import-Package: org.eclipse.tm.tcf.core;version="0.2.0",
-+ org.eclipse.tm.tcf.protocol;version="0.2.0"
-+Export-Package: org.eclipse.tm.internal.tcf.terminals
-Index: plugins/org.eclipse.tm.tcf.terminals/.project
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/.project	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/.project	(revision 0)
-@@ -0,0 +1,28 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<projectDescription>
-+	<name>org.eclipse.tm.tcf.terminals</name>
-+	<comment></comment>
-+	<projects>
-+	</projects>
-+	<buildSpec>
-+		<buildCommand>
-+			<name>org.eclipse.jdt.core.javabuilder</name>
-+			<arguments>
-+			</arguments>
-+		</buildCommand>
-+		<buildCommand>
-+			<name>org.eclipse.pde.ManifestBuilder</name>
-+			<arguments>
-+			</arguments>
-+		</buildCommand>
-+		<buildCommand>
-+			<name>org.eclipse.pde.SchemaBuilder</name>
-+			<arguments>
-+			</arguments>
-+		</buildCommand>
-+	</buildSpec>
-+	<natures>
-+		<nature>org.eclipse.pde.PluginNature</nature>
-+		<nature>org.eclipse.jdt.core.javanature</nature>
-+	</natures>
-+</projectDescription>
-
-Property changes on: plugins/org.eclipse.tm.tcf.terminals/.project
-___________________________________________________________________
-Added: svn:executable
-   + *
-
-Index: plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/TerminalsServiceProxy.java
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/TerminalsServiceProxy.java	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/TerminalsServiceProxy.java	(revision 0)
-@@ -0,0 +1,192 @@
-+/*******************************************************************************
-+ * Copyright (c) 2010 Intel, Inc. and others.
-+ * All rights reserved. This program and the accompanying materials
-+ * are made available under the terms of the Eclipse Public License v1.0
-+ * which accompanies this distribution, and is available at
-+ * http://www.eclipse.org/legal/epl-v10.html
-+ *
-+ * Contributors:
-+ *     Intel - initial API and implementation
-+ *******************************************************************************/
-+
-+package org.eclipse.tm.internal.tcf.terminals;
-+
-+import java.io.IOException;
-+import java.util.HashMap;
-+import java.util.Map;
-+
-+import org.eclipse.tm.internal.tcf.terminals.ITerminalsService;
-+import org.eclipse.tm.tcf.core.Command;
-+import org.eclipse.tm.tcf.protocol.IChannel;
-+import org.eclipse.tm.tcf.protocol.IToken;
-+import org.eclipse.tm.tcf.protocol.JSON;
-+import org.eclipse.tm.tcf.protocol.Protocol;
-+
-+public class TerminalsServiceProxy implements ITerminalsService {
-+
-+    private final IChannel channel;
-+    private final Map<TerminalsListener,IChannel.IEventListener> listeners =
-+        new HashMap<TerminalsListener,IChannel.IEventListener>();
-+    
-+    private class TerminalContext implements ITerminalsService.TerminalContext {
-+
-+        private final Map<String,Object> props;
-+
-+        TerminalContext(Map<String,Object> props) {
-+            this.props = props;
-+        }
-+
-+        public String getID() {
-+            return (String)props.get(PROP_ID);
-+        }
-+
-+        public String getPtyType() {
-+            return (String)props.get(PROP_PTY_TYPE);
-+        }
-+
-+        public String getEncoding() {
-+            return (String)props.get(PROP_ENCODING);
-+        }
-+        
-+        public int getWidth() {
-+            return ((Integer)props.get(PROP_WIDTH)).intValue();
-+        }
-+        
-+        public int getHeight() {
-+            return ((Integer)props.get(PROP_HEIGHT)).intValue();
-+        }        
-+
-+        public IToken exit(final DoneCommand done) {
-+            return new Command(channel, TerminalsServiceProxy.this,
-+                    "exit", new Object[]{ getID() }) {
-+                @Override
-+                public void done(Exception error, Object[] args) {
-+                    if (error == null) {
-+                        assert args.length == 1;
-+                        error = toError(args[0]);
-+                    }
-+                    done.doneCommand(token, error);
-+                }
-+            }.token;
-+        }
-+
-+        public Map<String, Object> getProperties() {
-+            return props;
-+        }
-+
-+        public String toString() {
-+            return "[Terminals Context " + props.toString() + "]";
-+        }
-+    }
-+
-+    TerminalsServiceProxy(IChannel channel) {
-+        this.channel = channel;
-+    }
-+
-+    /**
-+     * Return service name, as it appears on the wire - a TCF name of the service.
-+     */
-+    public String getName() {
-+        return NAME;
-+    }
-+    
-+    public IToken getContext(String id, final DoneGetContext done)
-+    {
-+    	return new Command(channel, this,
-+                "getContext", new Object[]{ id }) {
-+            @SuppressWarnings("unchecked")
-+            @Override
-+            public void done(Exception error, Object[] args) {
-+                TerminalContext ctx = null;
-+                if (error == null) {
-+                    assert args.length == 2;
-+                    error = toError(args[0]);
-+                    if (args[1] != null) ctx = new TerminalContext((Map<String, Object>)args[1]);
-+                }
-+                done.doneGetContext(token, error, ctx);
-+            }
-+        }.token;
-+    }
-+    
-+    public IToken launch(String type, String encoding, String[] environment, final DoneLaunch done)
-+    {
-+    	return new Command(channel, this, "launch", 
-+    			new Object[]{ type, encoding, environment}) {
-+    		@SuppressWarnings("unchecked")
-+    		@Override
-+    		public void done(Exception error, Object[] args) {
-+    			TerminalContext ctx=null;
-+    			if (error == null) {
-+    				assert args.length == 2;
-+                    error = toError(args[0]);
-+                    if (args[1] != null) ctx = new TerminalContext((Map<String, Object>)args[1]);
-+    			}
-+    			done.doneLaunch(token, error, ctx);
-+    		}
-+    	}.token;
-+    }
-+
-+    public IToken setWinSize(String context_id, int newWidth, int newHeight,  final DoneCommand done)
-+    {
-+    	return new Command(channel, this, "setWinSize", 
-+    			new Object[]{ context_id, newWidth, newHeight}) {
-+    		@Override
-+    		public void done(Exception error, Object[] args) {
-+    			if (error == null) {
-+                    assert args.length == 1;
-+                    error = toError(args[0]);
-+                }
-+                done.doneCommand(token, error);
-+    		}
-+    	}.token;
-+    }
-+    
-+    public void addListener(final TerminalsListener listener) 
-+    {
-+    	IChannel.IEventListener l = new IChannel.IEventListener() {
-+    		public void event(String name, byte[] data) {
-+    			try {
-+                    Object[] args = JSON.parseSequence(data);
-+                    if (name.equals("exited")) {
-+                        assert args.length == 2;
-+                        listener.exited((String)args[0], ((Number)args[1]).intValue());
-+                    }else if(name.equals("winSizeChanged")) {
-+                    	assert args.length == 3;
-+                    	listener.winSizeChanged((String)args[0], ((Number)args[1]).intValue(), ((Number)args[2]).intValue());
-+                    }else {
-+                        throw new IOException("Terminals service: unknown event: " + name);
-+                    }
-+    			}catch (Throwable x) {
-+                    channel.terminate(x);
-+                }
-+    		}
-+    	};
-+    	channel.addEventListener(this, l);
-+        listeners.put(listener, l);
-+    }
-+    
-+    @Override
-+	public void removeListener(TerminalsListener listener) {
-+    	IChannel.IEventListener l = listeners.remove(listener);
-+        if (l != null) channel.removeEventListener(this, l);
-+	}
-+    
-+    static {
-+        /*
-+         * Make Terminal Service proxy available to all potential clients by creating
-+         * the proxy object every time a TCF communication channel is opened.
-+         * Note: extension point "org.eclipse.tm.tcf.startup" is used to load this class
-+         * at TCF startup time, so proxy factory is properly activated even if nobody
-+         * import directly from this plugin.
-+         */
-+        Protocol.addChannelOpenListener(new Protocol.ChannelOpenListener() {
-+
-+            public void onChannelOpen(IChannel channel) {
-+                // Check if remote server provides Daytime service
-+                if (channel.getRemoteService(ITerminalsService.NAME) == null) return;
-+                // Create service proxy
-+                channel.setServiceProxy(ITerminalsService.class, new TerminalsServiceProxy(channel));
-+            }
-+        });
-+    }
-+}
-Index: plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/ITerminalsService.java
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/ITerminalsService.java	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/ITerminalsService.java	(revision 0)
-@@ -0,0 +1,193 @@
-+/*******************************************************************************
-+ * Copyright (c) 2010 Intel, Inc. and others.
-+ * All rights reserved. This program and the accompanying materials
-+ * are made available under the terms of the Eclipse Public License v1.0
-+ * which accompanies this distribution, and is available at
-+ * http://www.eclipse.org/legal/epl-v10.html
-+ *
-+ * Contributors:
-+ *     Intel - initial API and implementation
-+ *******************************************************************************/
-+
-+package org.eclipse.tm.internal.tcf.terminals;
-+
-+import java.util.Map;
-+
-+import org.eclipse.tm.tcf.protocol.IService;
-+import org.eclipse.tm.tcf.protocol.IToken;
-+
-+/**
-+ * ITerminalsService allows to launch a new terminal on the remote target system.
-+ */
-+public interface ITerminalsService extends IService {
-+
-+    /**
-+     * This service name, as it appears on the wire - a TCF name of the service.
-+     */
-+	static final String NAME = "Terminals";
-+    /**
-+     * Retrieve context info for given context ID.
-+     * A context corresponds to an terminal.
-+     * Context IDs are valid across TCF services, so it is allowed to issue
-+     * 'ITerminals.getContext' command with a context that was obtained,
-+     * for example, from Memory service.
-+     * However, 'ITerminals.getContext' is supposed to return only terminal specific data,
-+     * If the ID is not a terminal ID, 'ITerminals.getContext' may not return any
-+     * useful information
-+     *
-+     * @param id – context ID.
-+     * @param done - call back interface called when operation is completed.
-+     */
-+    IToken getContext(String id, DoneGetContext done);
-+
-+    /**
-+     * Client call back interface for getContext().
-+     */
-+    interface DoneGetContext {
-+        /**
-+         * Called when contexts data retrieval is done.
-+         * @param error – error description if operation failed, null if succeeded.
-+         * @param context – context data.
-+         */
-+        void doneGetContext(IToken token, Exception error, TerminalContext context);
-+    }
-+    /**
-+     * Context property names.
-+     */
-+    static final String
-+        /** The TCF context ID */
-+        PROP_ID = "ID",
-+
-+        /** The pty type */
-+        PROP_PTY_TYPE = "PtyType",
-+
-+        /** terminal encoding */
-+        PROP_ENCODING = "Encoding",
-+
-+        /** window width size */
-+        PROP_WIDTH = "Width",
-+        
-+        /** window height size */
-+        PROP_HEIGHT = "Height",
-+
-+        /** Process standard input stream ID */
-+        PROP_STDIN_ID = "StdInID",
-+
-+        /** Process standard output stream ID */
-+        PROP_STDOUT_ID = "StdOutID",
-+
-+        /** Process standard error stream ID */
-+        PROP_STDERR_ID = "StdErrID";
-+    
-+    interface TerminalContext {
-+
-+        /**
-+         * Get context ID.
-+         * Same as getProperties().get(“ID”)
-+         */
-+        String getID();
-+
-+        /**
-+         * Get terminal type.
-+         * Same as getProperties().get(“PtyType”)
-+         */
-+        String getPtyType();
-+
-+         /**
-+         * Get encoding.
-+         * Same as getProperties().get(“Encoding”)
-+         */
-+        String getEncoding();
-+         
-+        /**
-+         * Get width.
-+         * Same as getProperties().get(“Width”)
-+         */
-+        int getWidth();
-+        
-+        /**
-+         * Get height.
-+         * Same as getProperties().get(“Height”)
-+         */
-+        int getHeight();
-+  
-+        /**
-+         * Get all available context properties.
-+         * @return Map 'property name' -> 'property value'
-+         */
-+        Map<String, Object> getProperties();
-+
-+        /**
-+         * Exit the terminal.
-+         * @param done - call back interface called when operation is completed.
-+         * @return pending command handle, can be used to cancel the command.
-+         */
-+        IToken exit(DoneCommand done);
-+    }
-+
-+    interface DoneCommand {
-+        void doneCommand(IToken token, Exception error);
-+    }
-+    /**
-+     * Launch a new terminal toremote machine.
-+     * @param type - requested terminal type for the new terminal.
-+     * @param encoding - requested encoding for the new terminal.
-+     * @param environment - Array of environment variable strings.
-+     * if null then default set of environment variables will be used.
-+     * @param done - call back interface called when operation is completed.
-+     * @return pending command handle, can be used to cancel the command.
-+     */
-+    IToken launch(String type, String encoding, String[] environment, 
-+                  DoneLaunch done);
-+    
-+    /**
-+     * Call-back interface to be called when "start" command is complete.
-+     */
-+    interface DoneLaunch {
-+        void doneLaunch(IToken token, Exception error, TerminalContext terminal);
-+    }
-+    
-+    
-+    /**
-+     * Set the terminal widows size
-+     * @param context_id - context ID.
-+     * @param signal - signal code.
-+     * @param done - call back interface called when operation is completed.
-+     * @return pending command handle, can be used to cancel the command.
-+     */
-+    IToken setWinSize(String context_id, int newWidth, int newHeight, DoneCommand done);
-+    
-+    /**
-+     * Add terminals service event listener.
-+     * @param listener - event listener implementation.
-+     */
-+    void addListener(TerminalsListener listener);
-+
-+    /**
-+     * Remove terminals service event listener.
-+     * @param listener - event listener implementation.
-+     */
-+    void removeListener(TerminalsListener listener);
-+
-+    /**
-+     * Process event listener is notified when a terminal exits.
-+     * Event are reported only for terminals that were started by 'launch' command.
-+     */
-+    interface TerminalsListener {
-+
-+        /**
-+         * Called when a terminal exits.
-+         * @param terminal_id - terminal context ID
-+         * @param exit_code - terminal exit code
-+         */
-+        void exited(String terminal_id, int exit_code);
-+
-+        /**
-+         * Called when a terminal exits.
-+         * @param terminal_id - terminal context ID
-+         * @param newWidth – new terminal width
-+         * @param newHeight – new terminal height
-+         */
-+        void winSizeChanged (String terminal_id, int newWidth, int newHeight);
-+    }
-+}
-Index: plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/Activator.java
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/Activator.java	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/terminals/Activator.java	(revision 0)
-@@ -0,0 +1,50 @@
-+package org.eclipse.tm.internal.tcf.terminals;
-+
-+import org.eclipse.core.runtime.Plugin;
-+import org.osgi.framework.BundleContext;
-+
-+/**
-+ * The activator class controls the plug-in life cycle
-+ */
-+public class Activator extends Plugin {
-+
-+	// The plug-in ID
-+	public static final String PLUGIN_ID = "org.eclipse.tm.tcf.terminals";
-+
-+	// The shared instance
-+	private static Activator plugin;
-+	
-+	/**
-+	 * The constructor
-+	 */
-+	public Activator() {
-+	}
-+
-+	/*
-+	 * (non-Javadoc)
-+	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
-+	 */
-+	public void start(BundleContext context) throws Exception {
-+		super.start(context);
-+		plugin = this;
-+	}
-+
-+	/*
-+	 * (non-Javadoc)
-+	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
-+	 */
-+	public void stop(BundleContext context) throws Exception {
-+		plugin = null;
-+		super.stop(context);
-+	}
-+
-+	/**
-+	 * Returns the shared instance
-+	 *
-+	 * @return the shared instance
-+	 */
-+	public static Activator getDefault() {
-+		return plugin;
-+	}
-+
-+}
-Index: plugins/org.eclipse.tm.tcf.terminals/plugin.properties
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/plugin.properties	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/plugin.properties	(revision 0)
-@@ -0,0 +1,13 @@
-+###############################################################################
-+# Copyright (c) 2010 Intel, Inc. and others.
-+# All rights reserved. This program and the accompanying materials
-+# are made available under the terms of the Eclipse Public License v1.0
-+# which accompanies this distribution, and is available at
-+# http://www.eclipse.org/legal/epl-v10.html
-+#  
-+# Contributors:
-+#     Intel - initial implementation
-+###############################################################################
-+pluginName = TCF Terminals service (Incubation)
-+providerName = Eclipse.org
-+
-Index: plugins/org.eclipse.tm.tcf.terminals/build.properties
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/build.properties	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/build.properties	(revision 0)
-@@ -0,0 +1,6 @@
-+source.. = src/
-+output.. = bin/
-+bin.includes = META-INF/,\
-+               .,\
-+               plugin.xml,\
-+               about.html
-Index: plugins/org.eclipse.tm.tcf.terminals/about.html
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/about.html	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/about.html	(revision 0)
-@@ -0,0 +1,28 @@
-+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-+<html xmlns="http://www.w3.org/1999/xhtml">
-+<head>
-+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-+<title>About</title>
-+</head>
-+<body lang="EN-US">
-+<h2>About This Content</h2>
-+ 
-+<p>January 10, 2008</p>	
-+<h3>License</h3>
-+
-+<p>The Eclipse Foundation makes available all content in this plug-in (&quot;Content&quot;).  Unless otherwise 
-+indicated below, the Content is provided to you under the terms and conditions of the
-+Eclipse Public License Version 1.0 (&quot;EPL&quot;).  A copy of the EPL is available 
-+at <a href="http://www.eclipse.org/legal/epl-v10.html">http://www.eclipse.org/legal/epl-v10.html</a>.
-+For purposes of the EPL, &quot;Program&quot; will mean the Content.</p>
-+
-+<p>If you did not receive this Content directly from the Eclipse Foundation, the Content is 
-+being redistributed by another party (&quot;Redistributor&quot;) and different terms and conditions may
-+apply to your use of any object code in the Content.  Check the Redistributor's license that was 
-+provided with the Content.  If no such license exists, contact the Redistributor.  Unless otherwise
-+indicated below, the terms and conditions of the EPL still apply to any source code in the Content
-+and such source code may be obtained at <a href="http://www.eclipse.org/">http://www.eclipse.org</a>.</p>
-+
-+</body>
-+</html>
-\ No newline at end of file
-Index: plugins/org.eclipse.tm.tcf.terminals/plugin.xml
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/plugin.xml	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/plugin.xml	(revision 0)
-@@ -0,0 +1,11 @@
-+<?xml version="1.0" encoding="UTF-8"?>
-+<?eclipse version="3.4"?>
-+<plugin>
-+   <extension
-+         point="org.eclipse.tm.tcf.startup">
-+      <class
-+            name="org.eclipse.tm.internal.tcf.terminals.TerminalsServiceProxy">
-+      </class>
-+   </extension>
-+
-+</plugin>
-Index: plugins/org.eclipse.tm.tcf.terminals/.settings/org.eclipse.jdt.core.prefs
-===================================================================
---- plugins/org.eclipse.tm.tcf.terminals/.settings/org.eclipse.jdt.core.prefs	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.terminals/.settings/org.eclipse.jdt.core.prefs	(revision 0)
-@@ -0,0 +1,8 @@
-+#Mon Jun 07 11:42:38 CST 2010
-+eclipse.preferences.version=1
-+org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
-+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.6
-+org.eclipse.jdt.core.compiler.compliance=1.6
-+org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
-+org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
-+org.eclipse.jdt.core.compiler.source=1.6
-
-Property changes on: plugins/org.eclipse.tm.tcf.terminals/.settings/org.eclipse.jdt.core.prefs
-___________________________________________________________________
-Added: svn:executable
-   + *
-
 Index: org.eclipse.tm.tcf.terminals.agent/terminals.c
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/terminals.c	(revision 0)
@@ -1473,12 +849,6 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.c
 +    add_command_handler(proto, TERMINALS, "exit", command_exit);
 +    add_command_handler(proto, TERMINALS, "setWinSize", command_set_win_size);
 +}
-
-Property changes on: org.eclipse.tm.tcf.terminals.agent/terminals.c
-___________________________________________________________________
-Added: svn:executable
-   + *
-
 Index: org.eclipse.tm.tcf.terminals.agent/main/services-ext.h
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/main/services-ext.h	(revision 0)
@@ -1541,11 +911,79 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.h
 +extern void ini_terminals_service(Protocol * proto);
 +
 +#endif /*TERMINALS_H_*/
+Index: org.eclipse.tm.tcf.terminals.agent/config.h
+===================================================================
+--- org.eclipse.tm.tcf.terminals.agent/config.h	(revision 0)
++++ org.eclipse.tm.tcf.terminals.agent/config.h	(revision 0)
+@@ -0,0 +1,63 @@
++/*******************************************************************************
++ * Copyright (c) 2008 Wind River Systems, Inc. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * and Eclipse Distribution License v1.0 which accompany this distribution.
++ * The Eclipse Public License is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ * and the Eclipse Distribution License is available at
++ * http://www.eclipse.org/org/documents/edl-v10.php.
++ *
++ * Contributors:
++ *     Wind River Systems - initial API and implementation
++ *******************************************************************************/
++
++/*
++ * This file contains "define" statements that control agent configuration.
++ * SERVICE_* definitions control which service implementations are included into the agent.
++ *
++ * This is example agent configuration. It includes only few standard services,
++ * and one example service: Day Time.
++ */
++
++#ifndef D_config
++#define D_config
++
++#include <framework/mdep.h>
++
++#if defined(WIN32) || defined(__CYGWIN__)
++#  define TARGET_UNIX       0
++#elif defined(_WRS_KERNEL)
++#  define TARGET_UNIX       0
++#else
++#  define TARGET_UNIX       1
++#endif
++
++#define SERVICE_Locator     1
++#define SERVICE_Processes   1
++#define SERVICE_Streams     1
++#define SERVICE_FileSystem  1
++#define SERVICE_SysMonitor  TARGET_UNIX
++
++#define ENABLE_ZeroCopy     1
++
++#if !defined(ENABLE_Splice)
++#  if ENABLE_ZeroCopy
++#    include <fcntl.h>
++#    if defined(SPLICE_F_MOVE)
++#      define ENABLE_Splice       1
++#    else
++#      define ENABLE_Splice       0
++#    endif
++#  else
++#    define ENABLE_Splice       0
++#  endif
++#endif
++
++#define ENABLE_SSL          0
++
++#define ENABLE_Trace        1
++#define ENABLE_Discovery    1
++
++
++#endif /* D_config */
 Index: org.eclipse.tm.tcf.terminals.agent/Makefile
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/Makefile	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/Makefile	(revision 0)
-@@ -0,0 +1,31 @@
+@@ -0,0 +1,34 @@
 +TCF_AGENT_DIR=../agent
 +
 +include $(TCF_AGENT_DIR)/Makefile.inc
@@ -1554,6 +992,9 @@ Index: org.eclipse.tm.tcf.terminals.agent/Makefile
 +
 +HFILES := $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.h)) $(HFILES)
 +CFILES := $(sort $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.c)) $(CFILES))
++
++#no using SSL
++LIBS = -lpthread -lrt
 +
 +EXECS = $(BINDIR)/agent$(EXTEXE)
 +
@@ -1577,9 +1018,3 @@ Index: org.eclipse.tm.tcf.terminals.agent/Makefile
 +clean:
 +	rm -rf $(BINDIR)
 +
-
-Property changes on: org.eclipse.tm.tcf.terminals.agent/Makefile
-___________________________________________________________________
-Added: svn:executable
-   + *
-

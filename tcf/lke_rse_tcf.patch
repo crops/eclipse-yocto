@@ -409,7 +409,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
-@@ -0,0 +1,442 @@
+@@ -0,0 +1,446 @@
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import java.io.BufferedWriter;
@@ -500,6 +500,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +            String login_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_LOGIN_PROMPT);
 +            String password_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_PASSWORD_PROMPT);
 +            String command_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_COMMAND_PROMPT);
++            String pwd_required = fLoginProperties.get(TCFTerminalService.PROPERTY_PWD_REQUIRED);
 +
 +            if (Boolean.valueOf(login_required).booleanValue()) {
 +                status = ITCFSessionProvider.SUCCESS_CODE;
@@ -507,10 +508,13 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +                    status = readUntil(login_prompt,fInputStream, false);
 +                    write(username + "\n");
 +                }
-+                if (status == ITCFSessionProvider.SUCCESS_CODE && password_prompt != null && password_prompt.length() > 0) {
-+                    status = readUntil(password_prompt,fInputStream, false);
-+                    write(password + "\n");
-+                }
++                if (Boolean.valueOf(pwd_required).booleanValue()) {
++                    System.out.println("\nlogin need to input password line");
++                    if (status == ITCFSessionProvider.SUCCESS_CODE && password_prompt != null && password_prompt.length() > 0) {
++                        status = readUntil(password_prompt,fInputStream, false);
++                        write(password + "\n");
++                    }
++                }                    
 +                if (status == ITCFSessionProvider.SUCCESS_CODE && command_prompt != null && command_prompt.length() > 0) {
 +                    status = readUntil(command_prompt,fInputStream, true);
 +                    write("\n");
@@ -856,7 +860,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java	(revision 0)
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,23 @@
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import org.eclipse.osgi.util.NLS;
@@ -866,6 +870,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.shells.TCFLoginProperties"; //$NON-NLS-1$
 +    public static final String PropertySet_Description = "TCF Shell login word settings";
 +    public static String TCFLOGIN_REQUIRED;
++    public static String TCFPWD_REQUIRED;
 +    public static String TCFLOGIN_PROMPT;
 +    public static String TCFPASSWORD_PROMPT;
 +    public static String TCFCOMMAND_PROMPT;
@@ -1400,7 +1405,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties	(revision 0)
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,11 @@
 +
 +# NLS_MESSAGEFORMAT_VAR
 +# NLS_ENCODING=UTF-8
@@ -1408,6 +1413,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +#!!!!Please don't remove the end of "space" after all prompts.
 +#It's important for match login process
 +TCFLOGIN_REQUIRED=true
++TCFPWD_REQUIRED=false
 +TCFLOGIN_PROMPT=ogin: 
 +TCFPASSWORD_PROMPT=assword: 
 +TCFCOMMAND_PROMPT=$# 
@@ -1480,7 +1486,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,74 @@
 +package org.eclipse.tm.internal.tcf.rse.terminals;
 +
 +import org.eclipse.core.runtime.IProgressMonitor;
@@ -1503,6 +1509,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +    private final ITCFSessionProvider fSessionProvider;    
 +
 +    public static final String PROPERTY_LOGIN_REQUIRED = "Login.Required"; //$NON-NLS-1$
++    public static final String PROPERTY_PWD_REQUIRED="Pwd.Required";
 +    public static final String PROPERTY_LOGIN_PROMPT = "Login.Prompt"; //$NON-NLS-1$
 +    public static final String PROPERTY_PASSWORD_PROMPT = "Password.Prompt"; //$NON-NLS-1$
 +    public static final String PROPERTY_COMMAND_PROMPT = "Command.Prompt"; //$NON-NLS-1$
@@ -1520,9 +1527,10 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +    protected void setTCFProperties() {
 +        fLoginProperties = new HashMap<String, String>();
 +        fLoginProperties.put(PROPERTY_LOGIN_REQUIRED, TCFLoginProperties.TCFLOGIN_REQUIRED);
++        fLoginProperties.put(PROPERTY_PWD_REQUIRED, TCFLoginProperties.TCFPWD_REQUIRED);
 +        fLoginProperties.put(PROPERTY_LOGIN_PROMPT, TCFLoginProperties.TCFLOGIN_PROMPT);
 +        fLoginProperties.put(PROPERTY_PASSWORD_PROMPT, TCFLoginProperties.TCFPASSWORD_PROMPT);
-+        fLoginProperties.put(PROPERTY_COMMAND_PROMPT, TCFLoginProperties.TCFCOMMAND_PROMPT);        
++        fLoginProperties.put(PROPERTY_COMMAND_PROMPT, TCFLoginProperties.TCFCOMMAND_PROMPT);
 +    }
 +    
 +    public ITerminalShell launchTerminal(String ptyType, String encoding,

@@ -192,7 +192,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		}
 		if (!found_oprofile_launcher) {
 			String oprofileUI_str = getOProfileUI();
-			if (oprofileUI_str.isEmpty())
+			if ((oprofileUI_str.isEmpty()) || (oprofileUI_str == null))
 				return;
 			try {
 				ILaunchConfigurationWorkingCopy oprofile_copy = configType.newInstance(project, "OProfileUI");
@@ -221,6 +221,6 @@ public class YoctoSDKProjectNature implements IProjectNature {
             }
         } catch (IOException e) {
         }
-        return null;
+        return "";
 	}
 }

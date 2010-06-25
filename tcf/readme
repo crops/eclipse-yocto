@@ -1,90 +1,175 @@
-The current implmentaion is based on TCF contribution SVN revision 979. (svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk)
+The current implmentaion is based on TCF contribution SVN revision 979. 
+(svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk)
 
-- Build
-1. Check out the TCF contribution code revision 979 from TCF SVN repository.
+I. Build
+================================
+1. Check out the TCF contribution code revision 979 from TCF SVN 
+repository.
 	
-	svn co -r 979 svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk tcf_local/
+svn co -r 979 svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk tcf_local/
 
-   To use SVN inside Intel firewall, please use tsocks.(http://opensource.intel.com/linux-wiki/LinuxDesktop?highlight=%28tsocks%29#head-7dfffbdc3bda005c74d26ed2af467643dc89844b)
+To use SVN inside Intel firewall, please use tsocks.
+(http://opensource.intel.com/linux-wiki/LinuxDesktop?highlight=%28tsocks%29#head-7dfffbdc3bda005c74d26ed2af467643dc89844b)
 
 2. Apply the patches.
 
-	cd tcf_local
-	patch -p0 < ../r979_terminal_agent.patch
-	patch -p0 < ../r979_terminal.patch
-	patch -p0 < ../lke_rse_tcf.patch
+cd tcf_local
+patch -p0 < ../r979_terminal_agent.patch
+patch -p0 < ../r979_terminal.patch
+patch -p0 < ../lke_rse_tcf.patch
  
-   After the successful patch, only the following components are useful for CDT remote debug. Other plugins are not required.
-	plugins/org.eclipse.tm.tcf/
-		TCF plugin for Eclipse integration.
+After the successful patch, only the following components are useful
+for CDT remote debug. Other plugins are not required.
 
-	plugins/org.eclipse.tm.tcf.core/
-		TCF Java framework and intefaces for standard services.
+plugins/org.eclipse.tm.tcf/
+	TCF plugin for Eclipse integration.
 
-	plugins/org.eclipse.tm.tcf.rse/
-		RSE plugin using TCF.
+plugins/org.eclipse.tm.tcf.core/
+	TCF Java framework and intefaces for standard services.
 
-	plugins/org.eclipse.tm.tcf.terminals/
-		TCF Java interfaces & eclipse integration for terminal service.
+plugins/org.eclipse.tm.tcf.rse/
+	RSE plugin using TCF.
 
-	agent/
-		TCF reference agent for standard services.
+plugins/org.eclipse.tm.tcf.terminals/
+	TCF Java interfaces & eclipse integration for terminal service.
 
-	org.eclipse.tm.tcf.terminals.agent/
-		TCF reference agent with addtional terminal service.
+agent/
+	TCF reference agent for standard services.
+
+org.eclipse.tm.tcf.terminals.agent/
+	TCF reference agent with addtional terminal service.
 
 3. Build the agent on remote target side.
-(This step can be skipped if the agent is already included in the poky generated image)
+(This step can be skipped if the agent is already included in 
+the poky generated image)
 
-	1) copy the directories "agent/" or "org.eclipse.tm.tcf.terminals.agent/" to the remote target machine.
-	2) cd "org.eclipse.tm.tcf.terminals.agent/"
-	3) make
+  1) copy the directories "agent/" or "org.eclipse.tm.tcf.terminals.agent/" 
+     to the remote target machine.
+  2) cd "org.eclipse.tm.tcf.terminals.agent/"
+  3) make
 
 4. Import the eclipse plugins on host side.
-	1) In eclipse, choose from menu File->Import->General->"Existing projects into workspace", browse to the "tcf_local/plugins" direcotry, and click "OK".
-	2) Check the following plugins:
-		org.eclipse.tm.tcf
-		org.eclipse.tm.tcf.core
-		org.eclipse.tm.tcf.rse
-		org.eclipse.tm.tcf.terminals
-	3) Click "Finish" to import the eclipse plugins.
-	4) Select Project->"Build All" to build the plugins. If the build process complains about missing dependent plugin, please see Note 2) below.
+  1) In eclipse, choose from menu 
+     File->Import->General->"Existing projects into workspace", 
+     browse to the "tcf_local/plugins" direcotry, and click "OK".
+  2) Check the following plugins:
+       org.eclipse.tm.tcf
+       org.eclipse.tm.tcf.core
+       org.eclipse.tm.tcf.rse
+       org.eclipse.tm.tcf.terminals
+  3) Click "Finish" to import the eclipse plugins.
+  4) Select Project->"Build All" to build the plugins. If the 
+     build process complains about missing dependent plugin, 
+     please see Note 2 below.
 
 
-- Usage
+II. Usage
+================================
 On remote target side
 1. Build & run tcf agent on target. 
-(This step can be skipped if the agent is already included in the poky generated iamge)
-	- cd to direcotry "org.eclipse.tm.tcf.terminals.agent".
-	- type "make" to build the tcf agent.
-	- run the tcf agent with root privilege on target. 
-		e.g. sudo obj/GNU/Linux/x86_64/Debug/agent -Llog.txt
+(This step can be skipped if the agent is already included in 
+the poky generated iamge)
+
+  - cd to direcotry "org.eclipse.tm.tcf.terminals.agent".
+  - type "make" to build the tcf agent.
+  - run the tcf agent with root privilege on target. 
+      e.g. sudo obj/GNU/Linux/x86_64/Debug/agent -Llog.txt
 
 On Host side
-2. Launch the RSE plugin for TCF(org.eclipse.tm.tcf.rse). Make sure the org.eclipse.tm.tcf.terminals plugin is launched along with that plugin.
+2. Launch the RSE plugin for TCF(org.eclipse.tm.tcf.rse). 
+Make sure the org.eclipse.tm.tcf.terminals plugin is launched along 
+with that plugin.
 
 3. CDT remote debug. 
-	1) Choose from menu Run->"Debug Configurations..."->"C/C++ Remote Application", and click the "New launch configuration" button.
-	2) In the "Main" tab, Click "New..." button.
-	3) In the "New Connection" dialogue, choose "TCF" as system type and click "Next".
-	4) Input the ip address of the remote target machine in "Host name:", choose an arbitary unique name for "Connection name:", and click "Next".
-	5) Make sure "TCF.terminals" is checked and click "Next".
-	6) Make sure "org.eclipse.tm.tcf.rse.Files" is checked and click "Next".
-	7) Make sure "org.eclipse.tm.tcf.rse.Processes" is checked and click "Next".
-	8) Make sure "org.eclipse.tm.tcf.rse.Shells" is checked and click "Finish" to close the "New Connection" dialogue.
-	9) In the "Main" tab, choose the connection just created from the "Connection" drop-list.
-	10) In the "Main" tab, enter in the "Remote Absolute File Path for C/C++ Application". This is where the debugged application to be downloaded to the remote target side. e.g. "/tmp/helloworld".
-	11) In the "Debugger" tab, please choose the correct "GDB debugger". Usually you should choose the cross-gdb which matches the host and target machine.
-	12) Click "Debug".
-	13) In the popped up "Enter Password" dialogue, enter the correct "User ID" and "Password" and click "OK". It will be used to login to the remote target machine.
+  1) Choose from menu Run->"Debug Configurations..."->
+     "C/C++ Remote Application", and click the "New launch configuration" 
+     button.
+  2) In the "Main" tab, click "New..." button and it will launch a 
+     "New Connection" wizard.
+  3) In the "New Connection" dialogue, choose "TCF" as system type and 
+     click "Next".
+  4) Input the ip address of the remote target machine in "Host name:", 
+     choose an arbitary unique name for "Connection name:", and click 
+     "Next".
+  5) Make sure "org.eclipse.tm.tcf.rse.Terminals" is checked, make sure 
+     you have input the correct TCF session properties in the TCF 
+     Connector Service and click "Next". (See Note 3 below)
+  6) Make sure "org.eclipse.tm.tcf.rse.Files" is checked and click "Next".
+  7) Make sure "org.eclipse.tm.tcf.rse.Processes" is checked and click 
+     "Next".
+  8) Make sure "org.eclipse.tm.tcf.rse.Shells" is checked, make sure you 
+     have input the correct TCF session properties in the TCF Connector 
+     Service. (See Note 3 below)
+  9) Click "Finish" to close the "New Connection" dialogue.
+  10) In the "Main" tab, choose the connection just created from the 
+      "Connection" drop-list.
+  11) In the "Main" tab, enter the "Remote Absolute File Path for 
+      C/C++ Application". This is where the debugged application to be 
+      downloaded to the remote target side. e.g. "/tmp/helloworld".
+  12) In the "Debugger" tab, please choose the correct "GDB debugger". 
+      Usually you should choose the cross-gdb which matches the host 
+      and target machine. (see Known limitations 2.)
+  13) Click "Debug".
+  14) In the popped up "Enter Password" dialogue, enter the correct 
+      "User ID" and "Password" and click "OK". It will be used to 
+      login to the remote target machine.
 
-- Note: 
-1) If you want to integrate OSEL project wizard with TCF, just make sure your OSEL plugin depend on rse/tcf all related and direct launch your OSEL project. So that you can start an OSEL project and use TCF debugging.
+III. Note
+================================
+1. Sometimes the eclispe would report a exception of 
+   "Java.lang.OutOfMemoryError: PermGen space" and the application hangs. 
+   This is because the JVM garbage collection doesn't clean the permenant 
+   generation space, which is used to store meta-data descriptions of 
+   classes. To fix this problem, please add "-XX:MaxPermSize=256M" to the
+   "VM arguements" when launching the plug-ins. 
 
-2) The following eclipse plugins should be installed before build TCF related plugins.
-	CDT v6.0.2: http://download.eclipse.org/tools/cdt/releases/galileo
-	RSE v3.1.2: http://download.eclipse.org/dsdp/tm/updates/3.1/ 
+2. The following eclipse plugins should be installed before building 
+   TCF related plugins.
 
-- Known limitations:
-Authentication retry is not implemented. You only have one chance to input password. If fails(you did not remember password), you need to re-launch shell/terminal... If you remember password, you need disconnect and re-connect.
+      CDT v6.0.2: http://download.eclipse.org/tools/cdt/releases/galileo
+      RSE v3.1.2: http://download.eclipse.org/dsdp/tm/updates/3.1/ 
 
+3. TCF Connector Service Properties.
+The TCF connector service properties are used for the TCF based RSE 
+terminals and shells subsystems. 
+
+To change these properties, click the "TCF Connection Settings" under 
+the "Available Services" in the wizard, in the right, a list of 
+properties is shown and ready for change.
+
+Here is a list of the properties:
+
+  - Command.Prompt
+  This is a string of which the shell/terminal prompt string on the remote 
+  target system will end with. The default value is 
+  "# "(Pay attention there is a space after the '#').
+
+  - Login.Prompt 
+  This is a string of which the login prompt string on the remote target 
+  system will end with. The default value is "ogin: "(Pay attention 
+  there is a space after the ':').
+
+  - Login.Required 
+  Set to "true" if the remote target system requires the user to input 
+  login user name for terminal/shell services. Otherwise set to "false". 
+  The default value is "true".
+
+  - Password.Prompt 
+  This is a string of which the password prompt string on the remote target 
+  system will end with. The default value is "assword: ".(Pay attention 
+  there is a space after the ':')
+
+  - Pwd.Required
+  Setting to "true" if the remote target system requires the user to input 
+  password for terminal/shell services. Otherwise set to "false". The 
+  default value is "false".
+
+IV. Known limitations
+================================
+1. Authentication retry is not implemented. The user only has one chance to 
+   input the correct password. If it fails, the user needs to re-launch 
+   shell/terminal. If the user has checked the "Save password" in the prompt 
+   dialogue, it needs to be disconnected and re-connected.
+
+2. Users have to set the correct cross-gdb debugger manually in the 
+   "Debugger" tab in the remote debug configuration.

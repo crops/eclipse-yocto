@@ -2,7 +2,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF	(revision 979)
 +++ plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF	(working copy)
-@@ -13,8 +13,13 @@
+@@ -13,8 +13,14 @@
   org.eclipse.ui.views,
   org.eclipse.rse.subsystems.files.core,
   org.eclipse.rse.subsystems.processes.core,
@@ -11,24 +11,14 @@ Index: plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF
 + org.eclipse.rse.processes.ui,
 + org.eclipse.rse.subsystems.shells.core;bundle-version="3.1.0",
 + org.eclipse.tm.tcf.terminals;bundle-version="1.0.0",
-+ org.eclipse.rse.subsystems.terminals.core;bundle-version="1.0.1"
++ org.eclipse.rse.subsystems.terminals.core;bundle-version="1.0.1",
++ org.eclipse.core.resources
 +Import-Package: com.jcraft.jsch,
 + org.eclipse.rse.subsystems.shells.core.subsystems,
 + org.eclipse.tm.tcf.core;version="0.2.0",
   org.eclipse.tm.tcf.protocol;version="0.2.0",
   org.eclipse.tm.tcf.services;version="0.2.0",
   org.eclipse.tm.tcf.util;version="0.2.0"
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.properties
-===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.properties	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.properties	(revision 0)
-@@ -0,0 +1,6 @@
-+
-+
-+
-+TCFPlugin_Unexpected_Exception=Unexpected {0}: {1}
-+TCFTerminalService_Name=TCF Terminal Service
-+TelnetTerminalService_Description=TCF Terminal Service Description
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java	(revision 0)
@@ -83,11 +73,13 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
  import java.util.ArrayList;
  import java.util.HashMap;
  import java.util.List;
-@@ -20,32 +21,75 @@
+@@ -20,32 +21,101 @@
  
  import org.eclipse.core.runtime.IProgressMonitor;
  import org.eclipse.rse.core.model.IHost;
 -import org.eclipse.rse.core.subsystems.BasicConnectorService;
++import org.eclipse.rse.core.model.IPropertySet;
++import org.eclipse.rse.core.model.PropertyType;
 +import org.eclipse.rse.core.model.SystemSignonInformation;
  import org.eclipse.rse.core.subsystems.CommunicationsEvent;
 +import org.eclipse.rse.services.files.RemoteFileException;
@@ -109,16 +101,24 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
 +        ITCFSessionProvider {
  
 -public class TCFConnectorService extends BasicConnectorService {
-+    private IChannel channel;
++    public static final String PROPERTY_SET_NAME = "TCF Connection Settings";
++    public static final String PROPERTY_LOGIN_REQUIRED = "Login.Required"; //$NON-NLS-1$
++    public static final String PROPERTY_PWD_REQUIRED="Pwd.Required";
++    public static final String PROPERTY_LOGIN_PROMPT = "Login.Prompt"; //$NON-NLS-1$
++    public static final String PROPERTY_PASSWORD_PROMPT = "Password.Prompt"; //$NON-NLS-1$
++    public static final String PROPERTY_COMMAND_PROMPT = "Command.Prompt"; //$NON-NLS-1$
  
--    private IChannel channel;
+     private IChannel channel;
++
      private Throwable channel_error;
 +
      private final List<Runnable> wait_list = new ArrayList<Runnable>();
  
      private boolean poll_timer_started;
  
-+    private boolean bSubscribed = false;;
++    private boolean bSubscribed = false;
++    
++    private IPropertySet tcfPropertySet = null;
 +
 +    /* subscribe the stream service on this TCP connection */
 +    private IStreams.StreamsListener streamListener = new IStreams.StreamsListener() {
@@ -147,7 +147,22 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
 +        super(TCFConnectorResources.TCFConnectorService_Name,
 +                TCFConnectorResources.TCFConnectorService_Description, host,
 +                port); //$NON-NLS-1$ //$NON-NLS-2$
++        tcfPropertySet = getTCFPropertySet();
      }
++    
++    public IPropertySet getTCFPropertySet() {
++        IPropertySet tcfSet = getPropertySet(PROPERTY_SET_NAME);
++        if (tcfSet == null) {
++            tcfSet = createPropertySet(PROPERTY_SET_NAME, TCFConnectorResources.PropertySet_Description);
++            //add default values if not set
++            tcfSet.addProperty(PROPERTY_LOGIN_REQUIRED, "true", PropertyType.getEnumPropertyType(new String[] {"true", "false"}));
++            tcfSet.addProperty(PROPERTY_PWD_REQUIRED, "false", PropertyType.getEnumPropertyType(new String[] {"true", "false"}));
++            tcfSet.addProperty(PROPERTY_LOGIN_PROMPT, "ogin: ", PropertyType.getStringPropertyType());
++            tcfSet.addProperty(PROPERTY_PASSWORD_PROMPT, "assword: ", PropertyType.getStringPropertyType());
++            tcfSet.addProperty(PROPERTY_COMMAND_PROMPT, "#", PropertyType.getStringPropertyType());
++        }
++        return tcfSet;
++    }
  
 +    /**
 +     * @return true if the associated connector service requires a password.
@@ -164,7 +179,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          assert !Protocol.isDispatchThread();
          final Exception[] res = new Exception[1];
          // Fire comm event to signal state about to change
-@@ -54,39 +98,55 @@
+@@ -54,39 +124,55 @@
          synchronized (res) {
              Protocol.invokeLater(new Runnable() {
                  public void run() {
@@ -233,7 +248,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
              }
          });
          return res[0];
-@@ -108,7 +168,8 @@
+@@ -108,7 +194,8 @@
          if (wait_list.isEmpty()) return;
          Runnable[] r = wait_list.toArray(new Runnable[wait_list.size()]);
          wait_list.clear();
@@ -243,7 +258,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
      }
  
      private boolean connectTCFChannel(Exception[] res, IProgressMonitor monitor) {
-@@ -117,9 +178,12 @@
+@@ -117,9 +204,12 @@
              case IChannel.STATE_OPEN:
              case IChannel.STATE_CLOSED:
                  synchronized (res) {
@@ -259,7 +274,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      res.notify();
                      return true;
                  }
-@@ -137,7 +201,7 @@
+@@ -137,7 +227,7 @@
              String host = getHostName().toLowerCase();
              int port = getConnectPort();
              if (port <= 0) {
@@ -268,7 +283,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                  port = TCFConnectorServiceManager.TCF_PORT;
              }
              IPeer peer = null;
-@@ -146,8 +210,8 @@
+@@ -146,8 +236,8 @@
              for (IPeer p : locator.getPeers().values()) {
                  Map<String, String> attrs = p.getAttributes();
                  if ("TCP".equals(attrs.get(IPeer.ATTR_TRANSPORT_NAME)) && //$NON-NLS-1$
@@ -279,7 +294,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      peer = p;
                      break;
                  }
-@@ -192,7 +256,8 @@
+@@ -192,7 +282,8 @@
          return false;
      }
  
@@ -289,7 +304,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          if (channel == null || channel.getState() == IChannel.STATE_CLOSED) {
              synchronized (res) {
                  res[0] = null;
-@@ -212,9 +277,12 @@
+@@ -212,9 +303,12 @@
      }
  
      public <V extends IService> V getService(Class<V> service_interface) {
@@ -304,7 +319,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          return m;
      }
  
-@@ -225,4 +293,100 @@
+@@ -225,4 +319,100 @@
      public IFileSystem getFileSystemService() {
          return getService(IFileSystem.class);
      }
@@ -409,7 +424,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
-@@ -0,0 +1,446 @@
+@@ -0,0 +1,403 @@
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import java.io.BufferedWriter;
@@ -423,6 +438,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +
 +import org.eclipse.core.runtime.IStatus;
 +import org.eclipse.osgi.util.NLS;
++import org.eclipse.rse.core.model.IPropertySet;
 +import org.eclipse.rse.services.clientserver.PathUtility;
 +import org.eclipse.rse.services.clientserver.messages.CommonMessages;
 +import org.eclipse.rse.services.clientserver.messages.ICommonMessageIds;
@@ -435,8 +451,6 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +import org.eclipse.tm.internal.tcf.rse.ITCFSessionProvider;
 +import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
 +import org.eclipse.tm.internal.tcf.rse.TCFRSETask;
-+import org.eclipse.tm.internal.tcf.rse.TCFServiceResources;
-+import org.eclipse.tm.internal.tcf.rse.terminals.TCFTerminalService;
 +import org.eclipse.tm.internal.tcf.terminals.ITerminalsService;
 +import org.eclipse.tm.tcf.protocol.IChannel;
 +import org.eclipse.tm.tcf.protocol.IToken;
@@ -461,7 +475,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +    private ITerminalsService terminal;
 +    private int status;
 +
-+    private HashMap<String, String> fLoginProperties = null;
++    private IPropertySet tcfPropertySet = null;
 +
 +    private static String defaultEncoding = new java.io.InputStreamReader(new java.io.ByteArrayInputStream(new byte[0])).getEncoding();
 +    private ITerminalsService.TerminalsListener listeners = new ITerminalsService.TerminalsListener(){
@@ -494,40 +508,38 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +        }
 +
 +        public void run() {
-+            if (fLoginProperties == null)
-+                this.status = ITCFSessionProvider.ERROR_CODE;
-+            String login_required = fLoginProperties.get(TCFTerminalService.PROPERTY_LOGIN_REQUIRED);
-+            String login_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_LOGIN_PROMPT);
-+            String password_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_PASSWORD_PROMPT);
-+            String command_prompt = fLoginProperties.get(TCFTerminalService.PROPERTY_COMMAND_PROMPT);
-+            String pwd_required = fLoginProperties.get(TCFTerminalService.PROPERTY_PWD_REQUIRED);
++            tcfPropertySet = ((TCFConnectorService)fSessionProvider).getTCFPropertySet();
++            String login_required = tcfPropertySet.getPropertyValue(TCFConnectorService.PROPERTY_LOGIN_REQUIRED);
++            String login_prompt = tcfPropertySet.getPropertyValue(TCFConnectorService.PROPERTY_LOGIN_PROMPT);
++            String password_prompt =tcfPropertySet.getPropertyValue(TCFConnectorService.PROPERTY_PASSWORD_PROMPT);
++            String command_prompt = tcfPropertySet.getPropertyValue(TCFConnectorService.PROPERTY_COMMAND_PROMPT);
++            String pwd_required = tcfPropertySet.getPropertyValue(TCFConnectorService.PROPERTY_PWD_REQUIRED);
 +
 +            if (Boolean.valueOf(login_required).booleanValue()) {
 +                status = ITCFSessionProvider.SUCCESS_CODE;
 +                if (login_prompt != null && login_prompt.length() > 0) {
-+                    status = readUntil(login_prompt,fInputStream, false);
++                    status = readUntil(login_prompt,fInputStream);
 +                    write(username + "\n");
 +                }
 +                if (Boolean.valueOf(pwd_required).booleanValue()) {
-+                    System.out.println("\nlogin need to input password line");
 +                    if (status == ITCFSessionProvider.SUCCESS_CODE && password_prompt != null && password_prompt.length() > 0) {
-+                        status = readUntil(password_prompt,fInputStream, false);
++                        status = readUntil(password_prompt,fInputStream);
 +                        write(password + "\n");
 +                    }
 +                }                    
 +                if (status == ITCFSessionProvider.SUCCESS_CODE && command_prompt != null && command_prompt.length() > 0) {
-+                    status = readUntil(command_prompt,fInputStream, true);
++                    status = readUntil(command_prompt,fInputStream);
 +                    write("\n");
 +                }
 +            } else {
 +                if (command_prompt != null && command_prompt.length() > 0) {
-+                    status = readUntil(command_prompt,fInputStream, true);
++                    status = readUntil(command_prompt,fInputStream);
 +                    write("\n");
 +                }
 +            }
 +        }
 +
-+        public int readUntil(String pattern,InputStream in, boolean bCmdPrompt) {
++        public int readUntil(String pattern,InputStream in) {
 +            try {
 +                char lastChar = pattern.charAt(pattern.length() - 1);
 +                StringBuffer sb = new StringBuffer();
@@ -542,63 +554,24 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +                        return ITCFSessionProvider.CONNECT_CLOSED;
 +                    }
 +                    if (tch == lastChar) {
-+                        if (!bCmdPrompt) {
-+                            if (sb.toString().endsWith(pattern)) {
-+                                return ITCFSessionProvider.SUCCESS_CODE;
-+                            }
-+                        }
-+                        else {
-+                            for (int i = 0; i < pattern.length() - 1; i++){
-+                                String sPrompt = pattern.substring(i,i+1) + " ";
-+                                if (sb.toString().endsWith(sPrompt)) {
-+                                    return ITCFSessionProvider.SUCCESS_CODE;
-+                                }
-+                                
-+                            }
++                        if (sb.toString().endsWith(pattern)) {
++                            return ITCFSessionProvider.SUCCESS_CODE;
 +                        }
 +                    }
 +                    ch = in.read();
-+                }
-+            } catch (Exception e) {
-+                e.printStackTrace();
-+                SystemBasePlugin.logError(e.getMessage() == null ?      e.getClass().getName() : e.getMessage(), e);
-+            }
-+            return ITCFSessionProvider.CONNECT_CLOSED;
-+        }        
-+        public int getLoginStatus() {
-+            return this.status;
-+        }
-+        
-+/* This read has problem because we can't make sure all contents could be read back by once.     
-+ *   private int readUntil(String pattern, InputStream in, boolean bCmdPrompt) {
-+            try {
-+                byte[] b = new byte[1000];
-+                
-+                int length = in.read(b);
-+                if (length > 0) {
-+                    String sOutput = new String(b, 0, length);
-+                    if (!bCmdPrompt) {
-+                        if (sOutput.endsWith(pattern))
-+                            return ITCFSessionProvider.SUCCESS_CODE;
-+                    }
-+                    else {
-+                        for (int i = 0; i < pattern.length(); i++) {
-+                            String sPrompt = pattern.substring(i, i+1) + " ";
-+                            if (sOutput.endsWith(sPrompt))
-+                                return ITCFSessionProvider.SUCCESS_CODE;
-+                        }
-+                    }
-+                        
-+                }
-+                return ITCFSessionProvider.CONNECT_CLOSED;
++                } 
 +            }
 +            catch (Exception e) {
 +                e.printStackTrace();
 +                SystemBasePlugin.logError(e.getMessage() == null ?      e.getClass().getName() : e.getMessage(), e);
 +            }
 +            return ITCFSessionProvider.CONNECT_CLOSED;
++        }        
++
++            public int getLoginStatus() {
++            return this.status;
 +        }
-+        */
++        
 +    }
 +
 +    public void write(String value) {
@@ -633,7 +606,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +     */
 +    public TCFTerminalShell(final ITCFSessionProvider sessionProvider, final String ptyType,
 +            final String encoding, final String[] environment,
-+            String initialWorkingDirectory, String commandToRun, HashMap<String, String> loginProperties)
++            String initialWorkingDirectory, String commandToRun)
 +    throws SystemMessageException {
 +        Map<String, Object> map_ids;
 +        Exception nestedException = null;
@@ -642,7 +615,6 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +            fEncoding = encoding;
 +            fPtyType = ptyType;
 +            fChannel = fSessionProvider.getChannel();
-+            fLoginProperties = loginProperties;
 +
 +            if (fChannel == null || fChannel.getState() != IChannel.STATE_OPEN)
 +                throw new Exception("TCP channel is not connected!");
@@ -667,7 +639,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +                    });
 +                }
 +
-+            }.getS(null, TCFServiceResources.TCFTerminalService_Name); //$NON-NLS-1$
++            }.getS(null, TCFShellServiceResources.TCFShellService_Name); //$NON-NLS-1$
 +
 +            fPtyType = terminalContext.getPtyType();
 +            fEncoding = terminalContext.getEncoding();
@@ -787,7 +759,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +                            }
 +                        }
 +                    });
-+                }}.getS(null, TCFServiceResources.TCFTerminalService_Name); //seems no need block here. need further modification.
++                }}.getS(null, TCFShellServiceResources.TCFShellService_Name); //seems no need block here. need further modification.
 +        }
 +        catch (SystemMessageException e) {
 +            // TODO Auto-generated catch block
@@ -842,7 +814,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +                            }});
 +
 +                    }   
-+                }}.getS(null, TCFServiceResources.TCFTerminalService_Name);
++                }}.getS(null, TCFShellServiceResources.TCFShellService_Name);
 +        }
 +        catch (SystemMessageException e) {
 +            // TODO Auto-generated catch block
@@ -856,6 +828,38 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +    }
 +
 +}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.java	(revision 0)
+@@ -0,0 +1,27 @@
++package org.eclipse.tm.internal.tcf.rse.shells;
++
++import org.eclipse.osgi.util.NLS;
++
++public class TCFShellServiceResources extends NLS {
++    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.shells.TCFShellServiceResources"; //$NON-NLS-1$
++
++    public static String TCFPlugin_Unexpected_Exception;
++    
++    public static String TCFShellService_Description;
++
++    public static String TCFShellService_Name;
++    
++    
++    static {
++            // initialize resource bundle
++            NLS.initializeMessages(BUNDLE_NAME, TCFShellServiceResources.class);
++    }
++
++    private TCFShellServiceResources(){
++            
++    }
++
++}
++
++
++
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java	(revision 0)
@@ -1401,23 +1405,28 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +
 +
 +}
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.properties
 ===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.properties	(revision 0)
-@@ -0,0 +1,11 @@
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.properties	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.properties	(revision 0)
+@@ -0,0 +1,6 @@
 +
-+# NLS_MESSAGEFORMAT_VAR
-+# NLS_ENCODING=UTF-8
 +
-+#!!!!Please don't remove the end of "space" after all prompts.
-+#It's important for match login process
-+TCFLOGIN_REQUIRED=true
-+TCFPWD_REQUIRED=false
-+TCFLOGIN_PROMPT=ogin: 
-+TCFPASSWORD_PROMPT=assword: 
-+TCFCOMMAND_PROMPT=$# 
-\ No newline at end of file
++
++TCFPlugin_Unexpected_Exception=Unexpected {0}: {1}
++TCFShellService_Name=TCF Shell Service
++TCFShellService_Description=TCF Shell Service Description
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.properties
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.properties	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.properties	(revision 0)
+@@ -0,0 +1,6 @@
++
++
++
++TCFPlugin_Unexpected_Exception=Unexpected {0}: {1}
++TCFTerminalService_Name=TCF Terminal Service
++TCFTerminalService_Description=TCF Terminal Service Description
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceSubSystemConfiguration.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceSubSystemConfiguration.java	(revision 0)
@@ -1482,11 +1491,43 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +   }
 +
 +}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.java	(revision 0)
+@@ -0,0 +1,27 @@
++package org.eclipse.tm.internal.tcf.rse.terminals;
++
++import org.eclipse.osgi.util.NLS;
++
++public class TCFTerminalServiceResources extends NLS {
++    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.terminals.TCFTerminalServiceResources"; //$NON-NLS-1$
++
++    public static String TCFPlugin_Unexpected_Exception;
++    
++    public static String TCFTerminalService_Description;
++
++    public static String TCFTerminalService_Name;
++    
++    
++    static {
++            // initialize resource bundle
++            NLS.initializeMessages(BUNDLE_NAME, TCFTerminalServiceResources.class);
++    }
++
++    private TCFTerminalServiceResources(){
++            
++    }
++
++}
++
++
++
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,55 @@
 +package org.eclipse.tm.internal.tcf.rse.terminals;
 +
 +import org.eclipse.core.runtime.IProgressMonitor;
@@ -1498,8 +1539,6 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +import org.eclipse.rse.services.terminals.AbstractTerminalService;
 +import org.eclipse.rse.services.terminals.ITerminalShell;
 +import org.eclipse.tm.internal.tcf.rse.ITCFSessionProvider;
-+import org.eclipse.tm.internal.tcf.rse.TCFConnectorResources;
-+import org.eclipse.tm.internal.tcf.rse.TCFServiceResources;
 +import org.eclipse.tm.internal.tcf.rse.shells.TCFLoginProperties;
 +import org.eclipse.tm.internal.tcf.rse.shells.TCFTerminalShell;
 +
@@ -1508,122 +1547,76 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +public class TCFTerminalService extends AbstractTerminalService{
 +    private final ITCFSessionProvider fSessionProvider;    
 +
-+    public static final String PROPERTY_LOGIN_REQUIRED = "Login.Required"; //$NON-NLS-1$
-+    public static final String PROPERTY_PWD_REQUIRED="Pwd.Required";
-+    public static final String PROPERTY_LOGIN_PROMPT = "Login.Prompt"; //$NON-NLS-1$
-+    public static final String PROPERTY_PASSWORD_PROMPT = "Password.Prompt"; //$NON-NLS-1$
-+    public static final String PROPERTY_COMMAND_PROMPT = "Command.Prompt"; //$NON-NLS-1$
 +    
-+    private HashMap<String, String> fLoginProperties;
 +
 +    /**
 +     * Return the TCF property set, and fill it with default values if it has
 +     * not been created yet. Extender may override in order to set different
 +     * default values.
 +     *
-+     * @return a property set holding properties understood by the telnet
++     * @return a property set holding properties understood by the TCF
 +     *         connector service.
 +     */
-+    protected void setTCFProperties() {
-+        fLoginProperties = new HashMap<String, String>();
-+        fLoginProperties.put(PROPERTY_LOGIN_REQUIRED, TCFLoginProperties.TCFLOGIN_REQUIRED);
-+        fLoginProperties.put(PROPERTY_PWD_REQUIRED, TCFLoginProperties.TCFPWD_REQUIRED);
-+        fLoginProperties.put(PROPERTY_LOGIN_PROMPT, TCFLoginProperties.TCFLOGIN_PROMPT);
-+        fLoginProperties.put(PROPERTY_PASSWORD_PROMPT, TCFLoginProperties.TCFPASSWORD_PROMPT);
-+        fLoginProperties.put(PROPERTY_COMMAND_PROMPT, TCFLoginProperties.TCFCOMMAND_PROMPT);
-+    }
-+    
 +    public ITerminalShell launchTerminal(String ptyType, String encoding,
 +            String[] environment, String initialWorkingDirectory,
 +            String commandToRun, IProgressMonitor monitor)
 +            throws SystemMessageException {
 +        // TODO Auto-generated method stub
-+            TCFTerminalShell hostShell = new TCFTerminalShell(fSessionProvider, ptyType, encoding, environment, initialWorkingDirectory, commandToRun, fLoginProperties);
++            TCFTerminalShell hostShell = new TCFTerminalShell(fSessionProvider, ptyType, encoding, environment, initialWorkingDirectory, commandToRun);
 +        return hostShell;
 +    }
 +
 +
 +    public TCFTerminalService(ITCFSessionProvider sessionProvider) {
 +        fSessionProvider = sessionProvider;
-+        if (fLoginProperties == null)
-+            setTCFProperties();
 +    }
 +
 +    public ITCFSessionProvider getSessionProvider() {
 +                return fSessionProvider;
 +        }
-+    
++    @Override
 +    public String getName() {
-+        return TCFServiceResources.TCFTerminalService_Name;
++        return TCFTerminalServiceResources.TCFTerminalService_Name;
 +    }
-+
++    @Override
 +    public String getDescription() {
-+        return TCFServiceResources.TCFTerminalService_Description;
++        return TCFTerminalServiceResources.TCFTerminalService_Description;
 +    }
 +}
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,19 @@
 +package org.eclipse.tm.internal.tcf.rse;
 +
 +import org.eclipse.osgi.util.NLS;
 +
 +public class TCFConnectorResources extends NLS {
-+    private static final String BUNDLE_NAME = "org.eclipse.tm.tcf.rse.TCFConnectorResources"; //$NON-NLS-1$
++    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.TCFConnectorResources";
 +    static {
-+            NLS.initializeMessages(BUNDLE_NAME, TCFConnectorResources.class);
++        NLS.initializeMessages(BUNDLE_NAME, TCFConnectorResources.class);
 +    }
 +    private TCFConnectorResources() {
++        
 +    }
-+
++    
 +    public static String TCFConnectorService_Name;
 +    public static String TCFConnectorService_Description;
-+    public static String TelnetTerminalService_Description;
++    public static String PropertySet_Description;
++    
 +
 +}
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.java
-===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.java	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFServiceResources.java	(revision 0)
-@@ -0,0 +1,27 @@
-+package org.eclipse.tm.internal.tcf.rse;
-+
-+import org.eclipse.osgi.util.NLS;
-+
-+public class TCFServiceResources extends NLS {
-+    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.TCFServiceResources"; //$NON-NLS-1$
-+
-+    public static String TCFPlugin_Unexpected_Exception;
-+    
-+    public static String TCFTerminalService_Description;
-+
-+    public static String TCFTerminalService_Name;
-+    
-+    
-+    static {
-+            // initialize resource bundle
-+            NLS.initializeMessages(BUNDLE_NAME, TCFServiceResources.class);
-+    }
-+
-+    private TCFServiceResources(){
-+            
-+    }
-+
-+}
-+
-+
-+
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,5 @@
 +TCFConnectorService_Name=TCF Connector Service
 +TCFConnectorService_Description=Target Communication Framework
-+
 +PropertySet_Description=TCF login properties. Set these according to your remote system's login prompts.
++
++ 
 \ No newline at end of file
 Index: plugins/org.eclipse.tm.tcf.rse/plugin.xml
 ===================================================================
@@ -1661,10 +1654,10 @@ Index: plugins/org.eclipse.tm.tcf.rse/plugin.xml
 +        <configuration
 +        category="terminals"
 +        class="org.eclipse.tm.internal.tcf.rse.terminals.TCFTerminalServiceSubSystemConfiguration"
-+        description="Terminals"
++        description="TCF Terminal Service Description"
 +        icon="icons/system-processes.gif"
 +        iconlive="icons/system-processes-live.gif"
-+        id="TCF.terminals"
++        id="org.eclipse.tm.tcf.rse.Terminals"
 +        name="Terminals"
 +        priority="200"
 +        serviceType="_ssh._tcp;_sftp-ssh._tcp"

@@ -105,7 +105,7 @@ public class ReconfigYoctoAction extends InvokeAction {
 		if (location != null) {
 			
 			YoctoSDKProjectNature.setEnvironmentVariables(project, location, triplet, kernel, rootfs, script);
-			//YoctoSDKProjectNature.configureAutotoolsOptions(project, location, triplet);
+			YoctoSDKProjectNature.configureAutotoolsOptions(project, location, triplet);
 			try {
 				IConsole console = CCorePlugin.getDefault().getConsole("org.Yocto.sdk.ide.YoctoConsole");
 				console.start(project);

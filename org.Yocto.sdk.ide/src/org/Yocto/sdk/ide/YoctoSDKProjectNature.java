@@ -167,7 +167,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdk_location, toolchain_triplet, qemu_kernel, qemu_rootfs, env_script);
 		if (result == SDKCheckResults.SDK_PASS){
 			setEnvironmentVariables(project, sdk_location, toolchain_triplet, qemu_kernel, qemu_rootfs, env_script);
-			//configureAutotoolsOptions(project, toolchain_location, toolchain_triplet);
+			configureAutotoolsOptions(project, sdk_location, toolchain_triplet);
 		}else {
 			String title   =  YoctoSDKMessages.getString(WIZARD_WARNING_TITLE);		
 			String message =  YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Wizard);

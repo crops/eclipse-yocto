@@ -94,6 +94,11 @@
    <extension
          point="org.eclipse.cdt.core.templates">
       <template
+            id="org.Yocto.sdk.ide.template.emptyProject"
+            location="templates/projecttemplates/EmptyProject/template.xml"
+            projectType="org.Yocto.sdk.ide.projectType">
+      </template>
+      <template
             filterPattern=".*gcc"
             id="org.Yocto.sdk.ide.template.helloWorldCProject"
             location="templates/projecttemplates/HelloWorldCAutotoolsProject/template.xml"

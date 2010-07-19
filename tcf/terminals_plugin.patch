@@ -3,19 +3,19 @@ Index: plugins/org.eclipse.tm.tcf.terminals/META-INF/MANIFEST.MF
 --- plugins/org.eclipse.tm.tcf.terminals/META-INF/MANIFEST.MF	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.terminals/META-INF/MANIFEST.MF	(revision 0)
 @@ -0,0 +1,14 @@
-+Manifest-Version: 2.0
++Manifest-Version: 1.0
 +Bundle-ManifestVersion: 2
 +Bundle-Name: %pluginName
 +Bundle-SymbolicName: org.eclipse.tm.tcf.terminals;singleton:=true
-+Bundle-Version: 1.0.0.qualifier
++Bundle-Version: 0.3.0.qualifier
 +Bundle-Activator: org.eclipse.tm.internal.tcf.terminals.Activator
 +Bundle-Vendor: %providerName
 +Require-Bundle: org.eclipse.core.runtime,
 + org.eclipse.tm.tcf
 +Bundle-ActivationPolicy: lazy
 +Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-+Import-Package: org.eclipse.tm.tcf.core;version="0.2.0",
-+ org.eclipse.tm.tcf.protocol;version="0.2.0"
++Import-Package: org.eclipse.tm.tcf.core;version="0.3.0",
++ org.eclipse.tm.tcf.protocol;version="0.3.0"
 +Export-Package: org.eclipse.tm.internal.tcf.terminals
 Index: plugins/org.eclipse.tm.tcf.terminals/.classpath
 ===================================================================
@@ -534,13 +534,19 @@ Index: plugins/org.eclipse.tm.tcf.terminals/build.properties
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.terminals/build.properties	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.terminals/build.properties	(revision 0)
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,12 @@
 +source.. = src/
 +output.. = bin/
 +bin.includes = META-INF/,\
 +               .,\
 +               plugin.xml,\
-+               about.html
++               about.html,\
++               plugin.properties
++src.includes = src/,\
++               plugin.xml,\
++               about.html,\
++               META-INF/,\
++               plugin.properties
 Index: plugins/org.eclipse.tm.tcf.terminals/plugin.xml
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.terminals/plugin.xml	(revision 0)

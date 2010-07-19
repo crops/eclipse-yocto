@@ -1,12 +1,12 @@
-The current implmentaion is based on TCF contribution SVN revision 979. 
-(svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk)
+The current implmentaion is based on TCF contribution 0.3.0(SVN revision 998).
+(svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0)
 
 I. Build
 ================================
-1. Check out the TCF contribution code revision 979 from TCF SVN 
+1. Check out the TCF contribution code version 0.3.0 from TCF SVN 
 repository.
 	
-svn co -r 979 svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk tcf_local/
+svn co svn://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0 tcf_local/
 
 To use SVN inside Intel firewall, please use tsocks.
 (http://opensource.intel.com/linux-wiki/LinuxDesktop?highlight=%28tsocks%29#head-7dfffbdc3bda005c74d26ed2af467643dc89844b)
@@ -14,8 +14,8 @@ To use SVN inside Intel firewall, please use tsocks.
 2. Apply the patches.
 
 cd tcf_local
-patch -p0 < ../r979_terminal_agent.patch
-patch -p0 < ../r979_terminal.patch
+patch -p0 < ../terminals_agent.patch
+patch -p0 < ../terminals_plugin.patch
 patch -p0 < ../lke_rse_tcf.patch
  
 After the successful patch, only the following components are useful

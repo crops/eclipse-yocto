@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 import java.io.*;
 
 import org.eclipse.cdt.core.CCorePlugin;
@@ -49,6 +50,19 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static final String WIZARD_WARNING_TITLE = "Wizard.SDK.Warning.Title";
 	private static final String DEFAULT_WHICH_COMMAND = "which";
 	private static final String DEFAULT_WHICH_OPROFILEUI = "oprofile-viewer";
+	private static final String DEFAULT_HOST_NAME_COMMAND = "uname -m";
+	private static final String DEFAULT_POKY_SURFIX = "-poky-linux";
+	private static final String DEFAULT_NATIVE_SYSROOTS_SURFIX = "-pokysdk-linux";
+	private static final String DEFAULT_HOST = "i586-poky-linux";
+	private static final String DEFAULT_NATIVE_SYSROOTS = "i586-pokysdk-linux";
+	private static final String DEFAULT_SYSROOTS_STR = "/sysroots/";
+	private static final String DEFAULT_USER_BIN_STR = "/usr/bin/";
+	private static final String DEFAULT_BIN_STR = "/bin/";
+	private static final String DEFAULT_PKGCONFIG_PATH_SURFIX = "/usr/lib/pkgconfig";
+	private static final String DEFAULT_HOST_STR = "host";
+	private static final String DEFAULT_TARGET_STR = "target";
+	private static final String DEFAULT_POKY_BUILD_PREFIX = "/build/tmp/";
+	private static final String DEFAULT_LINUX_STR = "-linux";
 	
 	private IProject proj;
 
@@ -74,11 +88,14 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	}
 	
 	public static void setEnvironmentVariables(IProject project, 
-												String sdk_location, 
-												String toolchain_triplet,
+												String sdkroot,
+												String toolchain_location, 
+												String target,
+												String target_qemu,
 												String qemu_kernel,
 												String qemu_rootfs,
-												String env_script){
+												String env_script,
+												String ip_addr){
 		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
 		ICConfigurationDescription ccdesc = cpdesc.getActiveConfiguration();
 		IEnvironmentVariableManager manager = CCorePlugin.getDefault().getBuildEnvironmentManager();
@@ -86,88 +103,130 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String delimiter = manager.getDefaultDelimiter();
 
 		//Add store to the per project configuration
-		env.addVariable("sdk_location", sdk_location, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		// host_alias
-		env.addVariable("host_alias", toolchain_triplet, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		// qemu settings
-		env.addVariable("qemu_kernel", qemu_kernel, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		env.addVariable("qemu_rootfs", qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		env.addVariable("env_script", env_script, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		env.addVariable(PreferenceConstants.SDK_ROOT, sdkroot, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		env.addVariable(PreferenceConstants.TOOLCHAIN_ROOT, toolchain_location, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		env.addVariable(PreferenceConstants.TARGET, target, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		env.addVariable(PreferenceConstants.TARGET_QEMU, target_qemu, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		env.addVariable(PreferenceConstants.SETUP_ENV_SCRIPT, env_script, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		// PATH
 		String sys_path    = System.getenv("PATH");
 		String Yocto_path = "";
-		if (sys_path != null) {
-			Yocto_path = sdk_location + File.separator + "bin" + delimiter + sys_path;
-		} else {
-			Yocto_path = sdk_location + File.separator + "bin";
-		}
-		env.addVariable("PATH", Yocto_path, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		
-		// PKG_CONFIG_SYSROOT_DIR
-		String Yocto_pkg_sys_root = sdk_location + File.separator + toolchain_triplet + File.separator;
-		env.addVariable("PKG_CONFIG_SYSROOT_DIR", Yocto_pkg_sys_root, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-
-		// PKG_CONFIG_PATH
-        String Yocto_pkg_path = Yocto_pkg_sys_root + File.separator + "usr" + File.separator + "lib"   + File.separator + "pkgconfig";
-        //String Yocto_pkg_path2 = Yocto_pkg_sys_root + File.separator + "usr" + File.separator + "share" + File.separator + "pkgconfig";
-        //String Yocto_pkg_path =  Yocto_pkg_path1 + delimiter + Yocto_pkg_path2;
-        env.addVariable("PKG_CONFIG_PATH", Yocto_pkg_path, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-
-        
-		try {
-			CoreModel.getDefault().setProjectDescription(project, cpdesc);
-			ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
-			ILaunchConfigurationType[] types = lManager.getLaunchConfigurationTypes();
-			ILaunchMode[] modes = lManager.getLaunchModes();
-			ILaunchConfigurationType configType = lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
-			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, "qemu"+"_"+project.getName());
-			ArrayList listValue = new ArrayList();
-			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
-			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
+		String host = getHostName();
+		host = host.substring(0, host.length() - 1);
+	
+		if (sdkroot.equals("true")) {
+			if (host.contains("i") && host.contains("86")) {
+				host = DEFAULT_NATIVE_SYSROOTS;
+			} else
+				host = host + DEFAULT_NATIVE_SYSROOTS_SURFIX;
+			Yocto_path = toolchain_location + DEFAULT_SYSROOTS_STR + host + DEFAULT_USER_BIN_STR; 
+			String target_arg = "";
+			StringTokenizer tok= new StringTokenizer(target, "-"); //$NON-NLS-1$
+			if (tok.hasMoreTokens()) {
+				target_arg= tok.nextToken() + DEFAULT_POKY_SURFIX;
+			};
 			
-			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
-			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
-			String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " " + qemu_rootfs+";bash\"";
-			//w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", "-e \"source /usr/local/poky/eabi-glibc/environment-setup-i586-poky-linux;poky-qemu /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/bzImage-qemux86.bin /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/poky-image-sdk-qemux86.ext3;bash\"");
-			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
-			w_copy.doSave();
-			createOProfileUI(project, configType, listValue);
-		} catch (CoreException e) {
-			// do nothing
-		}	
+			// PKG_CONFIG_SYSROOT_DIR
+			String Yocto_pkg_sys_root = toolchain_location  + DEFAULT_SYSROOTS_STR + target_arg;
+			env.addVariable("PKG_CONFIG_SYSROOT_DIR", Yocto_pkg_sys_root, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+
+			// PKG_CONFIG_PATH
+	        String Yocto_pkg_path = Yocto_pkg_sys_root + DEFAULT_PKGCONFIG_PATH_SURFIX;
+	        //String Yocto_pkg_path2 = Yocto_pkg_sys_root + File.separator + "usr" + File.separator + "share" + File.separator + "pkgconfig";
+	        //String Yocto_pkg_path =  Yocto_pkg_path1 + delimiter + Yocto_pkg_path2;
+	        env.addVariable("PKG_CONFIG_PATH", Yocto_pkg_path, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		} else {
+			//Use poky tree
+			String Yocto_path_prefix = toolchain_location + DEFAULT_POKY_BUILD_PREFIX + DEFAULT_SYSROOTS_STR + host + DEFAULT_LINUX_STR;
+			Yocto_path = Yocto_path_prefix + DEFAULT_USER_BIN_STR + delimiter + Yocto_path_prefix + DEFAULT_BIN_STR;
+		}
+		if (sys_path != null) {
+			Yocto_path = Yocto_path + delimiter + sys_path;
+		} 
+		env.addVariable("PATH", Yocto_path, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		if (target_qemu.equals("true")) {
+			env.addVariable(PreferenceConstants.QEMU_KERNEL, qemu_kernel, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			env.addVariable(PreferenceConstants.QEMU_ROOTFS, qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			env.addVariable(PreferenceConstants.IP_ADDR, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
+			
+			try {
+				CoreModel.getDefault().setProjectDescription(project, cpdesc);
+				ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
+				ILaunchConfigurationType[] types = lManager.getLaunchConfigurationTypes();
+				ILaunchMode[] modes = lManager.getLaunchModes();
+				ILaunchConfigurationType configType = lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
+				ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, "qemu"+"_"+project.getName());
+				ArrayList listValue = new ArrayList();
+				listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
+				w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
+				
+				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
+				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
+				String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " " + qemu_rootfs+";bash\"";
+				//w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", "-e \"source /usr/local/poky/eabi-glibc/environment-setup-i586-poky-linux;poky-qemu /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/bzImage-qemux86.bin /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/poky-image-sdk-qemux86.ext3;bash\"");
+				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
+				w_copy.doSave();
+				createOProfileUI(project, configType, listValue);
+			} catch (CoreException e) {
+				// do nothing
+			}	
+		} else {
+			env.addVariable(PreferenceConstants.QEMU_KERNEL, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
+			env.addVariable(PreferenceConstants.QEMU_ROOTFS, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
+			env.addVariable(PreferenceConstants.IP_ADDR, ip_addr, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		}
+		
 	}
 	
-	public static void configureAutotoolsOptions(IProject project, String toolchain_location, String toolchain_triplet) {
-		String host_arg = "host_alias=" + toolchain_triplet;
+	public static void configureAutotoolsOptions(IProject project, String target) {
+		String target_arg = "";
+		StringTokenizer tok= new StringTokenizer(target, "-"); //$NON-NLS-1$
+		if (tok.hasMoreTokens()) {
+			target_arg= tok.nextToken() + DEFAULT_POKY_SURFIX;
+		};
 
 		IManagedBuildInfo info = ManagedBuildManager.getBuildInfo(project);
 		IConfiguration icfg = info.getDefaultConfiguration();
-		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, icfg.getName());
+		String id = icfg.getId();
+		String name = icfg.getName();
+		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);
+	    cfg.setOption(DEFAULT_HOST_STR, target_arg);
+	    cfg.setOption(DEFAULT_TARGET_STR, target_arg);
+	    AutotoolsConfigurationManager.getInstance().addConfiguration(project, cfg);
+	    /*
 		Collection<IConfigureOption> values = cfg.getOptions().values(); 
 		for (Iterator<IConfigureOption> j = values.iterator(); j.hasNext();) {
 			IConfigureOption opt = j.next();
-			if (opt.getName().equals("user")){
-				opt.setValue(host_arg);
-			} else if (opt.getName().equals("autogenOpts")){
-				opt.setValue(host_arg);
+			String optName = opt.getName();
+			String value;
+			if (optName.equals("host")){
+				value = opt.getValue();
+				opt.setValue(host);
+			} else if (optName.equals("target")){
+				value = opt.getValue();
+				opt.setValue(target_arg);
 			}
 		}
-
+		*/
 		AutotoolsConfigurationManager.getInstance().saveConfigs(project);
+		
 	}
 	
 	public static void configureAutotools(IProject project) {
 		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
-		String sdk_location  = store.getString(PreferenceConstants.SDK_LOCATION);
-		String toolchain_triplet  = store.getString(PreferenceConstants.TOOLCHAIN_TRIPLET);
+		String sdkroot = store.getString(PreferenceConstants.SDK_ROOT);
+		String sdk_location  = store.getString(PreferenceConstants.TOOLCHAIN_ROOT);
+		String target  = store.getString(PreferenceConstants.TARGET);
+		String target_qemu = store.getString(PreferenceConstants.TARGET_QEMU);
 		String qemu_kernel = store.getString(PreferenceConstants.QEMU_KERNEL);
 		String qemu_rootfs = store.getString(PreferenceConstants.QEMU_ROOTFS);
 		String env_script = store.getString(PreferenceConstants.SETUP_ENV_SCRIPT);
+		String ip_addr = store.getString(PreferenceConstants.IP_ADDR);
 
-		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdk_location, toolchain_triplet, qemu_kernel, qemu_rootfs, env_script);
+		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, sdk_location, target, target_qemu, qemu_kernel, qemu_rootfs, env_script, ip_addr);
 		if (result == SDKCheckResults.SDK_PASS){
-			setEnvironmentVariables(project, sdk_location, toolchain_triplet, qemu_kernel, qemu_rootfs, env_script);
-			configureAutotoolsOptions(project, sdk_location, toolchain_triplet);
+			setEnvironmentVariables(project, sdkroot, sdk_location, target, target_qemu, qemu_kernel, qemu_rootfs, env_script, ip_addr);
+			configureAutotoolsOptions(project, target);
 		}else {
 			String title   =  YoctoSDKMessages.getString(WIZARD_WARNING_TITLE);		
 			String message =  YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
@@ -222,5 +281,22 @@ public class YoctoSDKProjectNature implements IProjectNature {
         } catch (IOException e) {
         }
         return "";
+	}
+	
+	protected static String getHostName() {
+		String host_name_command = DEFAULT_HOST_NAME_COMMAND;
+		try {
+			Process proc = ProcessFactory.getFactory().exec(host_name_command);
+			if (proc != null) {
+				ByteArrayOutputStream outstream = new ByteArrayOutputStream();
+				ByteArrayOutputStream errstream = new ByteArrayOutputStream();
+	            ProcessClosure closure = new ProcessClosure(proc, outstream, errstream);
+	            closure.runBlocking();
+	            if (outstream.size() != 0)
+	            	return outstream.toString();
+			}
+		} catch (IOException e) {
+	    }
+	    return "";
 	}
 }

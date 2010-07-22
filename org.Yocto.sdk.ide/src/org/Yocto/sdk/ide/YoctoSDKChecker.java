@@ -5,8 +5,11 @@ import java.io.File;
 public class YoctoSDKChecker {
 	public static enum SDKCheckResults {
 		SDK_PASS,
-		SDK_LOCATION_EMPTY,
-		SDK_TRIPLET_EMPTY,
+		TOOLCHAIN_LOCATION_EMPTY,
+		TOOLCHAIN_LOCATION_NON_EXIST,
+		TARGET_EMPTY,
+		QEMU_KERNEL_EMPTY,
+		QEMU_ROOTFS_EMPTY,
 		SDK_BIN_NON_EXIST,
 		SDK_SYSROOT_NON_EXIST,
 		SDK_PKGCONFIG_NON_EXIST,
@@ -40,39 +43,55 @@ public class YoctoSDKChecker {
 	private static final String PREFERENCES_SDK_ROOTFS_NONEXIST    = "Preferences.SDK.Rootfs.Nonexist";
 	private static final String PREFERENCES_SDK_ENVSCRIPT_NONEXIST = "Preferences.SDK.EnvScript.Nonexist";
 
-	public static SDKCheckResults checkYoctoSDK(String toolchain_location, String toolchain_triplet,
-			String qemu_kernel, String qemu_rootfs, String env_script) {
+	public static SDKCheckResults checkYoctoSDK(String sdkroot, String toolchain_location, String target, String target_qemu,
+			String qemu_kernel, String qemu_rootfs, String env_script, String ip_addr) {
 		if (toolchain_location.isEmpty()) {
-			return SDKCheckResults.SDK_LOCATION_EMPTY;			
-		} else if (toolchain_triplet.isEmpty()) {
-			return SDKCheckResults.SDK_TRIPLET_EMPTY;
-		} else if (!qemu_kernel.isEmpty()) {
-			File kernel_file = new File(qemu_kernel);
-			if (!kernel_file.exists())
-				return SDKCheckResults.SDK_QEMU_KERNEL_NON_EXIST;
-		} else if (!qemu_rootfs.isEmpty()) {
-			File rootfs_dir = new File(qemu_rootfs);
-			if (!rootfs_dir.exists())
-				return SDKCheckResults.SDK_QEMU_ROOTFS_NON_EXIST;
-		} else if (!env_script.isEmpty()) {
+			return SDKCheckResults.TOOLCHAIN_LOCATION_EMPTY;			
+		} else {
+			File toolchain = new File(toolchain_location);
+			if (!toolchain.exists())
+				return SDKCheckResults.TOOLCHAIN_LOCATION_NON_EXIST;
+		}
+		if (target.isEmpty()) {
+			return SDKCheckResults.TARGET_EMPTY;
+		}
+		if (target_qemu.equals("true")) {
+			if (qemu_kernel.isEmpty())
+				return SDKCheckResults.QEMU_KERNEL_EMPTY;
+			else {
+				File kernel_file = new File(qemu_kernel);
+				if (!kernel_file.exists())
+					return SDKCheckResults.SDK_QEMU_KERNEL_NON_EXIST;
+			}
+			if (qemu_rootfs.isEmpty())
+				return SDKCheckResults.QEMU_ROOTFS_EMPTY;
+			else {
+				File rootfs_dir = new File(qemu_rootfs);
+				if (!rootfs_dir.exists())
+					return SDKCheckResults.SDK_QEMU_ROOTFS_NON_EXIST;
+			}
+		}
+		if (!env_script.isEmpty()) {
 			File script_file = new File(env_script);
 			if (!script_file.exists())
 				return SDKCheckResults.SDK_ENV_SETUP_SCRIPT_NON_EXIST;
-		}else{
+		}
+		/*
+		else{
 			String Yocto_sdk_path = toolchain_location + File.separator + "bin";
 	        File sdk_bin_dir = new File(Yocto_sdk_path);
 	        if (! sdk_bin_dir.exists())
 	        	return SDKCheckResults.SDK_BIN_NON_EXIST;
 		}
-		
+		*/
 		return SDKCheckResults.SDK_PASS;
 	}
 
 	private static String getWizardErrorMessage(SDKCheckResults result) {
 		switch (result) {
-		case SDK_LOCATION_EMPTY:
+		case TOOLCHAIN_LOCATION_EMPTY:
 			return  YoctoSDKMessages.getString(WIZARD_SDK_LOCATION_EMPTY);
-		case SDK_TRIPLET_EMPTY:
+		case TARGET_EMPTY:
 			return  YoctoSDKMessages.getString(WIZARD_SDK_TRIPLET_EMPTY);
 		case SDK_BIN_NON_EXIST:
 			return  YoctoSDKMessages.getString(WIZARD_SDK_BIN_NONEXIST);
@@ -87,9 +106,9 @@ public class YoctoSDKChecker {
 
 	private static String getMenuErrorMessage(SDKCheckResults result) {
 		switch (result) {
-		case SDK_LOCATION_EMPTY:
+		case TOOLCHAIN_LOCATION_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_LOCATION_EMPTY);
-		case SDK_TRIPLET_EMPTY:
+		case TARGET_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_TRIPLET_EMPTY);
 		case SDK_BIN_NON_EXIST:
 			return  YoctoSDKMessages.getString(MENU_SDK_BIN_NONEXIST);

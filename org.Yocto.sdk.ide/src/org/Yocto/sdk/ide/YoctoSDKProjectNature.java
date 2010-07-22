@@ -1,9 +1,6 @@
 package org.Yocto.sdk.ide;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.io.*;
 
@@ -22,16 +19,13 @@ import org.eclipse.cdt.utils.spawner.*;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchMode;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -39,7 +33,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.linuxtools.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.AutotoolsConfigurationManager;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.IAConfiguration;
-import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.IConfigureOption;
 import org.Yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
 import org.Yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.Yocto.sdk.ide.preferences.PreferenceConstants;
@@ -53,16 +46,19 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static final String DEFAULT_HOST_NAME_COMMAND = "uname -m";
 	private static final String DEFAULT_POKY_SURFIX = "-poky-linux";
 	private static final String DEFAULT_NATIVE_SYSROOTS_SURFIX = "-pokysdk-linux";
-	private static final String DEFAULT_HOST = "i586-poky-linux";
 	private static final String DEFAULT_NATIVE_SYSROOTS = "i586-pokysdk-linux";
 	private static final String DEFAULT_SYSROOTS_STR = "/sysroots/";
-	private static final String DEFAULT_USER_BIN_STR = "/usr/bin/";
+	private static final String DEFAULT_USER_BIN_STR = "/usr/bin";
 	private static final String DEFAULT_BIN_STR = "/bin/";
 	private static final String DEFAULT_PKGCONFIG_PATH_SURFIX = "/usr/lib/pkgconfig";
 	private static final String DEFAULT_HOST_STR = "host";
 	private static final String DEFAULT_TARGET_STR = "target";
+	private static final String DEFAULT_BUILD_STR = "build";
+	private static final String DEFAULT_AUTOGEN_OPT_STR = "autogenOpts";
 	private static final String DEFAULT_POKY_BUILD_PREFIX = "/build/tmp/";
 	private static final String DEFAULT_LINUX_STR = "-linux";
+	private static final String DEFAULT_SITE_STR = "/site-config-";
+	private static final String DEFAULT_OPTION_PREFIX_STR = "--";
 	
 	private IProject proj;
 
@@ -113,28 +109,22 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String Yocto_path = "";
 		String host = getHostName();
 		host = host.substring(0, host.length() - 1);
-	
+		String target_arg = "";
+		StringTokenizer tok= new StringTokenizer(target, "-"); //$NON-NLS-1$
+		if (tok.hasMoreTokens()) {
+			target_arg= tok.nextToken() + DEFAULT_POKY_SURFIX;
+		}
+		
 		if (sdkroot.equals("true")) {
 			if (host.contains("i") && host.contains("86")) {
 				host = DEFAULT_NATIVE_SYSROOTS;
 			} else
 				host = host + DEFAULT_NATIVE_SYSROOTS_SURFIX;
 			Yocto_path = toolchain_location + DEFAULT_SYSROOTS_STR + host + DEFAULT_USER_BIN_STR; 
-			String target_arg = "";
-			StringTokenizer tok= new StringTokenizer(target, "-"); //$NON-NLS-1$
-			if (tok.hasMoreTokens()) {
-				target_arg= tok.nextToken() + DEFAULT_POKY_SURFIX;
-			};
 			
-			// PKG_CONFIG_SYSROOT_DIR
-			String Yocto_pkg_sys_root = toolchain_location  + DEFAULT_SYSROOTS_STR + target_arg;
-			env.addVariable("PKG_CONFIG_SYSROOT_DIR", Yocto_pkg_sys_root, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-
-			// PKG_CONFIG_PATH
-	        String Yocto_pkg_path = Yocto_pkg_sys_root + DEFAULT_PKGCONFIG_PATH_SURFIX;
-	        //String Yocto_pkg_path2 = Yocto_pkg_sys_root + File.separator + "usr" + File.separator + "share" + File.separator + "pkgconfig";
-	        //String Yocto_pkg_path =  Yocto_pkg_path1 + delimiter + Yocto_pkg_path2;
-	        env.addVariable("PKG_CONFIG_PATH", Yocto_pkg_path, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			//CONFIG_SITE
+			String Yocto_pkg_config_site = toolchain_location + DEFAULT_SITE_STR + target_arg;
+			env.addVariable("CONFIG_SITE", Yocto_pkg_config_site, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		} else {
 			//Use poky tree
 			String Yocto_path_prefix = toolchain_location + DEFAULT_POKY_BUILD_PREFIX + DEFAULT_SYSROOTS_STR + host + DEFAULT_LINUX_STR;
@@ -144,7 +134,14 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			Yocto_path = Yocto_path + delimiter + sys_path;
 		} 
 		env.addVariable("PATH", Yocto_path, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		if (target_qemu.equals("true")) {
+		// PKG_CONFIG_SYSROOT_DIR
+		String Yocto_pkg_sys_root = toolchain_location  + DEFAULT_SYSROOTS_STR + target_arg;
+		env.addVariable("PKG_CONFIG_SYSROOT_DIR", Yocto_pkg_sys_root, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+
+		// PKG_CONFIG_PATH
+        String Yocto_pkg_path = Yocto_pkg_sys_root + DEFAULT_PKGCONFIG_PATH_SURFIX;
+        env.addVariable("PKG_CONFIG_PATH", Yocto_pkg_path, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		if (target_qemu.equals(IPreferenceStore.TRUE)) {
 			env.addVariable(PreferenceConstants.QEMU_KERNEL, qemu_kernel, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 			env.addVariable(PreferenceConstants.QEMU_ROOTFS, qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 			env.addVariable(PreferenceConstants.IP_ADDR, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
@@ -152,18 +149,16 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			try {
 				CoreModel.getDefault().setProjectDescription(project, cpdesc);
 				ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
-				ILaunchConfigurationType[] types = lManager.getLaunchConfigurationTypes();
-				ILaunchMode[] modes = lManager.getLaunchModes();
 				ILaunchConfigurationType configType = lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
 				ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, "qemu"+"_"+project.getName());
-				ArrayList listValue = new ArrayList();
+				ArrayList<String> listValue = new ArrayList<String>();
 				listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
 				w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
 				
 				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
 				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 				String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " " + qemu_rootfs+";bash\"";
-				//w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", "-e \"source /usr/local/poky/eabi-glibc/environment-setup-i586-poky-linux;poky-qemu /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/bzImage-qemux86.bin /home/jzhang/poky-purple-3.2.1/build/tmp/deploy/images/poky-image-sdk-qemux86.ext3;bash\"");
+				
 				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
 				w_copy.doSave();
 				createOProfileUI(project, configType, listValue);
@@ -184,30 +179,20 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		if (tok.hasMoreTokens()) {
 			target_arg= tok.nextToken() + DEFAULT_POKY_SURFIX;
 		};
-
+		String host = getHostName();
+		host = host.substring(0, host.length() - 1);
+		host += DEFAULT_LINUX_STR;
+		String auto_gen_opt = DEFAULT_OPTION_PREFIX_STR + DEFAULT_HOST_STR + "="  + target_arg + " " + DEFAULT_OPTION_PREFIX_STR 
+								+ DEFAULT_BUILD_STR + "=" + host;
 		IManagedBuildInfo info = ManagedBuildManager.getBuildInfo(project);
 		IConfiguration icfg = info.getDefaultConfiguration();
 		String id = icfg.getId();
-		String name = icfg.getName();
+		
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);
 	    cfg.setOption(DEFAULT_HOST_STR, target_arg);
 	    cfg.setOption(DEFAULT_TARGET_STR, target_arg);
+	    cfg.setOption(DEFAULT_AUTOGEN_OPT_STR, auto_gen_opt);
 	    AutotoolsConfigurationManager.getInstance().addConfiguration(project, cfg);
-	    /*
-		Collection<IConfigureOption> values = cfg.getOptions().values(); 
-		for (Iterator<IConfigureOption> j = values.iterator(); j.hasNext();) {
-			IConfigureOption opt = j.next();
-			String optName = opt.getName();
-			String value;
-			if (optName.equals("host")){
-				value = opt.getValue();
-				opt.setValue(host);
-			} else if (optName.equals("target")){
-				value = opt.getValue();
-				opt.setValue(target_arg);
-			}
-		}
-		*/
 		AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 		
 	}
@@ -234,7 +219,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		}
 	}
 	
-	protected static void createOProfileUI(IProject project, ILaunchConfigurationType configType, ArrayList listValue) {
+	protected static void createOProfileUI(IProject project, ILaunchConfigurationType configType, ArrayList<String> listValue) {
 		//Create one instance of OProfileUI launcher
 		IWorkspaceRoot wp_root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] projects = wp_root.getProjects();

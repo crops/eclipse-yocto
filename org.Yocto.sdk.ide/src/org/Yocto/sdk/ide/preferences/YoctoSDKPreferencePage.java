@@ -1,26 +1,12 @@
 package org.Yocto.sdk.ide.preferences;
 
 import org.eclipse.cdt.ui.templateengine.uitree.InputUIElement;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
-import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.StringFieldEditor;
 
 import org.Yocto.sdk.ide.YoctoSDKChecker;
 import org.Yocto.sdk.ide.YoctoSDKMessages;
@@ -29,7 +15,6 @@ import org.Yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
 import org.Yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
@@ -57,25 +42,16 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	private static final String PREFERENCES_SDK_TARGET = "Preference.SDK.Target.Name";
     private static final String PREFERENCES_INFORM_TITLE   = "Preferences.SDK.Informing.Title";
     private static final String PREFERENCES_INFORM_MESSAGE = "Preferences.SDK.Informing.Message";
-    private static final String PREFERENCES_SDK_ROOT = "Preferences.SDK.Root.Name";
+    private static final String PREFERENCES_TOOLCHAIN_ROOT = "Preferences.SDK.Root.Name";
     private static final String PREFERENCES_TOOLCHAIN_TRIPLET  = "Preferences.Toolchain.Triplet.Name";
     private static final String PREFERENCES_QEMU_KERNEL = "Preferences.QEMU.Kernel.Name";
     private static final String PREFERENCES_QEMU_ROOTFS = "Preferences.QEMU.ROOTFS.Name";
     private static final String PREFERENCES_SETUP_ENV_SCRIPT = "Preferences.SetupEnv.Script.Name";
-    
     private static final String PREFERENCES_CROSS_COMPILER_ROOT_LOC = "Preferences.Cross.Compiler.Root.Location";
-   
     private static final String PREFERENCES_TARGET_SELECTION = "Preferences.Target.Selection";
     
-  
-    
-    private DirectoryFieldEditor dirEditor;
-    private StringFieldEditor strEditor;
-    private FileFieldEditor fileEditor;
-    
-    private ArrayList fCheckBoxes;
-	private ArrayList fRadioButtons;
-	private ArrayList fTextControls;
+	private ArrayList<Button> fRadioButtons;
+	private ArrayList<Text> fTextControls;
 
 	private SelectionListener fSelectionListener;
 	private ModifyListener fModifyListener;
@@ -110,13 +86,9 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		//super(GRID);
         setPreferenceStore(YoctoSDKPlugin.getDefault().getPreferenceStore());
         //setDescription(YoctoSDKMessages.getString(PREFERENCES_Yocto_CONFIG));
-        
-     // title used when opened programatically
-		setTitle("test");
 
-		fRadioButtons= new ArrayList();
-		fCheckBoxes= new ArrayList();
-		fTextControls= new ArrayList();
+		fRadioButtons= new ArrayList<Button>();
+		fTextControls= new ArrayList<Text>();
 
 		fSelectionListener= new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {}
@@ -135,7 +107,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 	private String[] getTargetArches() {
 		String archStr= PreferenceConstants.TARGET_ARCHITECTURE_LIST;
-		ArrayList archList = new ArrayList();
+		ArrayList<String> archList = new ArrayList<String>();
 		StringTokenizer tok= new StringTokenizer(archStr, ","); //$NON-NLS-1$
 		while (tok.hasMoreTokens()) {
 			archList.add(tok.nextToken());
@@ -144,7 +116,6 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		return (String[])archList.toArray(new String[archList.size()]);
 	}
 	
-
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
@@ -155,25 +126,12 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		initializeDialogUnits(parent);
 
 		final Composite result= new Composite(parent, SWT.NONE);
-		/*
-		GridLayout layout= new GridLayout();
-		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-		layout.marginWidth= 0;
-		layout.verticalSpacing= convertVerticalDLUsToPixels(10);
-		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-		layout.numColumns= 2;
-		result.setLayout(layout);
-
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan= 2;
-		*/
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
 		result.setLayout(layout);
 	
 		script_label= new Label(result, SWT.NONE);
 		script_label.setText("Environment script: ");
-		//script_label.setLayoutData(new GridData());
 		Composite textContainer = new Composite(result, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(gd);
@@ -269,8 +227,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	private Button addRadioButton(Composite parent, String label, String key, String value) {
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
-		//gd.horizontalIndent= indent;
-
+	
 		Button button= new Button(parent, SWT.RADIO);
 		button.setText(label);
 		button.setData(new String[] { key, value });
@@ -291,48 +248,6 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		rootfs_button.setEnabled(qemuSelection);
 		
 		ip_value.setEnabled(!qemuSelection);
-		/*
-		fSrcFolderNameLabel.setEnabled(useFolders);
-		fBinFolderNameLabel.setEnabled(useFolders);
-		if (useFolders) {
-			String srcName= fSrcFolderNameText.getText();
-			String binName= fBinFolderNameText.getText();
-			if (srcName.length() + binName.length() == 0) {
-				updateStatus(new StatusInfo(IStatus.ERROR,  PreferencesMessages.NewJavaProjectPreferencePage_folders_error_namesempty));
-				return;
-			}
-			IWorkspace workspace= JavaPlugin.getWorkspace();
-			IProject dmy= workspace.getRoot().getProject("project"); //$NON-NLS-1$
-
-			IStatus status;
-			IPath srcPath= dmy.getFullPath().append(srcName);
-			if (srcName.length() != 0) {
-				status= workspace.validatePath(srcPath.toString(), IResource.FOLDER);
-				if (!status.isOK()) {
-					String message= Messages.format(PreferencesMessages.NewJavaProjectPreferencePage_folders_error_invalidsrcname, status.getMessage());
-					updateStatus(new StatusInfo(IStatus.ERROR, message));
-					return;
-				}
-			}
-			IPath binPath= dmy.getFullPath().append(binName);
-			if (binName.length() != 0) {
-				status= workspace.validatePath(binPath.toString(), IResource.FOLDER);
-				if (!status.isOK()) {
-					String message= Messages.format(PreferencesMessages.NewJavaProjectPreferencePage_folders_error_invalidbinname, status.getMessage());
-					updateStatus(new StatusInfo(IStatus.ERROR, message));
-					return;
-				}
-			}
-			IClasspathEntry entry= JavaCore.newSourceEntry(srcPath);
-			status= JavaConventions.validateClasspath(JavaCore.create(dmy), new IClasspathEntry[] { entry }, binPath);
-			if (!status.isOK()) {
-				String message= PreferencesMessages.NewJavaProjectPreferencePage_folders_error_invalidcp;
-				updateStatus(new StatusInfo(IStatus.ERROR, message));
-				return;
-			}
-		}
-		updateStatus(new StatusInfo()); // set to OK
-		*/
 	}
 
 	/*
@@ -402,8 +317,6 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	
 		labelControl.setLayoutData(gd);
 
-		//gd= new GridData(GridData.FILL_HORIZONTAL);
-		//gd.widthHint= convertWidthInCharsToPixels(30);
 		final Text text;
 			
 		text = new Text(parent, SWT.SINGLE | SWT.LEAD | SWT.BORDER);

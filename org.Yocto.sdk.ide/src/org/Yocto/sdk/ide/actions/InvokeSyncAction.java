@@ -8,17 +8,14 @@ import org.eclipse.cdt.core.CommandLauncher;
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.resources.IConsole;
-import org.eclipse.cdt.internal.core.ProcessClosure;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.AutotoolsNewMakeGenerator;
 import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.InvokeAction;
 import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.InvokeMessages;
@@ -29,8 +26,6 @@ import org.Yocto.sdk.ide.YoctoSDKPlugin;
 public class InvokeSyncAction extends InvokeAction {
 	protected void executeLocalConsoleCommand(final IConsole console, final String actionName, final String command,
 			final String[] argumentList, final IPath execDir, final String password) throws CoreException, IOException {
-		
-		IProgressMonitor monitor = new NullProgressMonitor();
 		
 		String errMsg = null;
 		IProject project = getSelectedContainer().getProject();
@@ -70,8 +65,9 @@ public class InvokeSyncAction extends InvokeAction {
 				envList.add(variables[i].getName()
 						+ "=" + variables[i].getValue()); //$NON-NLS-1$
 			}
+			// add any additional environment variables specified ahead of script
 			if (additionalEnvs.size() > 0)
-				envList.addAll(additionalEnvs); // add any additional environment variables specified ahead of script
+				envList.addAll(additionalEnvs); 
 			env = (String[]) envList.toArray(new String[envList.size()]);
 		}
 		OutputStream stdout = consoleOutStream;
@@ -83,31 +79,22 @@ public class InvokeSyncAction extends InvokeAction {
 					execDir, new NullProgressMonitor());
 
 		if (proc != null) {
-			// Close the input of the process since we will never write to
-			// it
-		
+			// Close the input of the process since we will never write to it
 			OutputStream out = proc.getOutputStream();
 			if (!password.isEmpty()) {
 				out.write(password.getBytes());
 				out.write("\n".getBytes());
 			}
 			out.close();
-			//ProcessClosure closure = new ProcessClosure(proc, stdout, stderr);
-			//closure.runNonBlocking();
+			
 			if (launcher.waitAndRead(stdout, stderr) != CommandLauncher.OK) {
-					errMsg = launcher.getErrorMessage();
-			//if (launcher.waitAndRead(stdout, stderr, new SubProgressMonitor(
-			//		monitor, IProgressMonitor.UNKNOWN)) != CommandLauncher.OK) {
-			//	errMsg = launcher.getErrorMessage();
+				errMsg = launcher.getErrorMessage();
 			}
 		} else {
 			errMsg = launcher.getErrorMessage();
 		}
 		
 		if (errMsg != null)
-			YoctoSDKPlugin.logErrorMessage(errMsg);
-		
-	}
-	
-	
+			YoctoSDKPlugin.logErrorMessage(errMsg);	
+	}	
 }

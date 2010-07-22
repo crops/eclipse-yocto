@@ -31,7 +31,7 @@ public class YoctoSDKChecker {
 	private static final String WIZARD_SDK_PKGCONFIG_NONEXIST = "Wizard.SDK.Pkgconfig.Nonexist";
 
 	private static final String MENU_SDK_LOCATION_EMPTY     = "Menu.SDK.Location.Empty";
-	private static final String MENU_SDK_TRIPLET_EMPTY      = "Menu.SDK.Triplet.Empty";
+	private static final String MENU_SDK_TARGET_EMPTY      = "Menu.SDK.Target.Empty";
 	private static final String MENU_SDK_BIN_NONEXIST       = "Menu.SDK.Bin.Nonexist";
 	private static final String MENU_SDK_SYSROOT_NONEXIST   = "Menu.SDK.Sysroot.Nonexist";
 	private static final String MENU_SDK_PKGCONFIG_NONEXIST = "Menu.SDK.Pkgconfig.Nonexist";
@@ -52,7 +52,7 @@ public class YoctoSDKChecker {
 			if (!toolchain.exists())
 				return SDKCheckResults.TOOLCHAIN_LOCATION_NON_EXIST;
 		}
-		if (target.isEmpty()) {
+		if (target.isEmpty() || target==null) {
 			return SDKCheckResults.TARGET_EMPTY;
 		}
 		if (target_qemu.equals("true")) {
@@ -109,7 +109,7 @@ public class YoctoSDKChecker {
 		case TOOLCHAIN_LOCATION_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_LOCATION_EMPTY);
 		case TARGET_EMPTY:
-			return  YoctoSDKMessages.getString(MENU_SDK_TRIPLET_EMPTY);
+			return  YoctoSDKMessages.getString(MENU_SDK_TARGET_EMPTY);
 		case SDK_BIN_NON_EXIST:
 			return  YoctoSDKMessages.getString(MENU_SDK_BIN_NONEXIST);
 		case SDK_SYSROOT_NON_EXIST:

@@ -1,7 +1,6 @@
 package org.Yocto.sdk.ide.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
@@ -19,11 +18,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.InvokeAction;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.core.runtime.Plugin;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+
 import org.Yocto.sdk.ide.YoctoSDKMessages;
 import org.Yocto.sdk.ide.YoctoSDKPlugin;
 import org.Yocto.sdk.ide.YoctoSDKProjectNature;

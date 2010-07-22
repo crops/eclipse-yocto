@@ -18,8 +18,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
 		store.setDefault(PreferenceConstants.TOOLCHAIN_ROOT, true);
-		//store.setDefault(PreferenceConstants.ROOT_DIR_NAME, "rootdir"); //$NON-NLS-1$
-		//store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.TARGET_QEMU, true);
 
 		store.setDefault(PreferenceConstants.TARGET_ARCH_LIST, PreferenceConstants.TARGET_ARCHITECTURE_LIST);

@@ -59,6 +59,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static final String DEFAULT_LINUX_STR = "-linux";
 	private static final String DEFAULT_SITE_STR = "/site-config-";
 	private static final String DEFAULT_OPTION_PREFIX_STR = "--";
+	private static final String DEFAULT_CONFIGURE_STR = "configure";
+	private static final String DEFAULT_AUTOGEN_STR = "autogen";
 	
 	private IProject proj;
 
@@ -175,9 +177,11 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	
 	public static void configureAutotoolsOptions(IProject project, String target) {
 		String target_arg = "";
+		String target_token = "";
 		StringTokenizer tok= new StringTokenizer(target, "-"); //$NON-NLS-1$
 		if (tok.hasMoreTokens()) {
-			target_arg= tok.nextToken() + DEFAULT_POKY_SURFIX;
+			target_token = tok.nextToken();
+			target_arg= target_token + DEFAULT_POKY_SURFIX;
 		};
 		String host = getHostName();
 		host = host.substring(0, host.length() - 1);
@@ -188,9 +192,14 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		IConfiguration icfg = info.getDefaultConfiguration();
 		String id = icfg.getId();
 		
+		String command_prefix = "CFLAGS=\"-g -O2 -march="+target_token+"\" CPPFLAGS=\"-g -O2 -march="+target_token+"\"";
+		String autogen_setting = command_prefix+" autogen.sh";
+		String configure_setting = command_prefix + " configure";
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);
-	    cfg.setOption(DEFAULT_HOST_STR, target_arg);
+	    cfg.setOption(DEFAULT_CONFIGURE_STR, configure_setting);
+		cfg.setOption(DEFAULT_HOST_STR, target_arg);
 	    cfg.setOption(DEFAULT_TARGET_STR, target_arg);
+	    cfg.setOption(DEFAULT_AUTOGEN_STR, autogen_setting);
 	    cfg.setOption(DEFAULT_AUTOGEN_OPT_STR, auto_gen_opt);
 	    AutotoolsConfigurationManager.getInstance().addConfiguration(project, cfg);
 		AutotoolsConfigurationManager.getInstance().saveConfigs(project);

@@ -1406,12 +1406,12 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +    }
 +    
 +    public IConnectorService getConnectorService(IHost host) {
-+        return TCFConnectorServiceManager.getInstance().getConnectorService(host, ITerminalsService.class);
++        return TCFConnectorServiceManager.getInstance().getConnectorService(host, ITCFService.class);
 +}
 +
 +    public void setConnectorService(IHost host,
 +                IConnectorService connectorService) {
-+        TCFConnectorServiceManager.getInstance().setConnectorService(host, ITerminalsService.class, connectorService);
++        TCFConnectorServiceManager.getInstance().setConnectorService(host, ITCFService.class, connectorService);
 +    }
 +
 +    public Class<ITCFService> getServiceImplType()
@@ -1598,6 +1598,34 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +        return TCFTerminalServiceResources.TCFTerminalService_Description;
 +    }
 +}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java	(revision 1078)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java	(working copy)
+@@ -31,6 +31,7 @@
+ import org.eclipse.rse.subsystems.files.core.subsystems.IHostFileToRemoteFileAdapter;
+ import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
+ import org.eclipse.rse.ui.SystemBasePlugin;
++import org.eclipse.tm.internal.tcf.rse.ITCFService;
+ import org.eclipse.tm.internal.tcf.rse.ITCFSubSystem;
+ import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
+ import org.eclipse.tm.internal.tcf.rse.TCFConnectorServiceManager;
+@@ -78,13 +79,13 @@
+     @Override
+     public IConnectorService getConnectorService(IHost host) {
+         return TCFConnectorServiceManager.getInstance()
+-            .getConnectorService(host, ITCFSubSystem.class);
++            .getConnectorService(host, ITCFService.class);
+     }
+ 
+     @Override
+     @SuppressWarnings("unchecked")
+     public Class getServiceImplType() {
+-        return TCFFileService.class;
++        return ITCFService.class;
+     }
+ 
+     @Override
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
@@ -1622,6 +1650,36 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
 +    
 +
 +}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java	(revision 1078)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java	(working copy)
+@@ -18,6 +18,7 @@
+ import org.eclipse.rse.subsystems.processes.core.subsystem.IHostProcessToRemoteProcessAdapter;
+ import org.eclipse.rse.subsystems.processes.servicesubsystem.ProcessServiceSubSystem;
+ import org.eclipse.rse.subsystems.processes.servicesubsystem.ProcessServiceSubSystemConfiguration;
++import org.eclipse.tm.internal.tcf.rse.ITCFService;
+ import org.eclipse.tm.internal.tcf.rse.ITCFSubSystem;
+ import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
+ import org.eclipse.tm.internal.tcf.rse.TCFConnectorServiceManager;
+@@ -29,7 +30,7 @@
+     @Override
+     @SuppressWarnings("unchecked")
+     public Class getServiceImplType() {
+-        return TCFProcessService.class;
++        return ITCFService.class;
+     }
+ 
+     @Override
+@@ -50,7 +51,7 @@
+     @Override
+     public IConnectorService getConnectorService(IHost host) {
+         return TCFConnectorServiceManager.getInstance()
+-            .getConnectorService(host, ITCFSubSystem.class);
++            .getConnectorService(host, ITCFService.class);
+     }
+ 
+     @Override
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)

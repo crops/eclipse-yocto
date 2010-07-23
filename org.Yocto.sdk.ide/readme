@@ -13,12 +13,13 @@ $ /home/user/eclipse/eclipse&
 The Yocto Linux SDK Eclipse plug-in depends on some Eclipse projects plug-ins which include Eclipse C/C++ Development Tools (CDT), Autotools support for CDT (Incubation) and Target Management (RSE).
 
 After installing Eclipse and first time bring up the IDE, go to Help->Install New Software and click on "Available Software Sites".  Ensure you have the following name checked:
-Helios
-Target Management 3.2 Updates
-The Eclipse Project Updates
+CDT - http://download.eclipse.org/tools/cdt/releases/helios
+Helios - http://download.eclipse.org/releases/helios
+Target Management 3.2 Updates - http://download.eclipse.org/dsdp/tm/updates/3.2
+The Eclipse Project Updates - http://download.eclipse.org/eclipse/updates/3.6
 
 For CDT and Autotools support:
-From "Work with:" drop down list, select "--All Available Sites--", expand the "Programming Languages" list and select "Autotools support for CDT (Incubation)" and "C/C++ Development Tools", then click on "Next>" button and following through for updates.
+From "Work with:" drop down list, select "--All Available Sites--", expand the "Programming Languages" list and select "Autotools support for CDT (Incubation)" and "C/C++ Development Tools", then click on "Next>" button and following through for updates.  Then expand "CDT Optional Features" and select "C/C++ Remote Launch", then click on "Next>" and follow through for updates.
 
 For RSE:
 From "Work with:" drop down list, select "--All Available Sites--", and select "TM and RSE Main Features", then click on "Next>" button and following through for updates.

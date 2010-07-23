@@ -4,7 +4,7 @@
 		id="MoblinEmptyProject" label="%EmptyProject.template.label" description="%EmptyProject.template.description"
 		 help="help.html">
 
-	<process type="org.OSEL.sdk.ide.NewOSELProject">
+	<process type="org.Yocto.sdk.ide.NewYoctoProject">
 		<simple name="name" value="$(projectName)" /> 
 		<simple name="artifactExtension" value="exe" /> 
 		<simple name="isCProject" value="false" /> 

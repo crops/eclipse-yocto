@@ -17,7 +17,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
-		store.setDefault(PreferenceConstants.TOOLCHAIN_ROOT, true);
+		store.setDefault(PreferenceConstants.TOOLCHAIN_ROOT, "");
+		store.setDefault(PreferenceConstants.SDK_ROOT, true);
 		store.setDefault(PreferenceConstants.TARGET_QEMU, true);
 
 		store.setDefault(PreferenceConstants.TARGET_ARCH_LIST, PreferenceConstants.TARGET_ARCHITECTURE_LIST);

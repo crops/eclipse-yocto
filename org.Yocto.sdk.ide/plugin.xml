@@ -104,6 +104,12 @@
             location="templates/projecttemplates/HelloWorldCAutotoolsProject/template.xml"
             projectType="org.Yocto.sdk.ide.projectType">
       </template>
+      <template
+            filterPattern=".*g\+\+"
+            id="org.Yocto.sdk.ide.template.helloWorldCPPProject"
+            location="templates/projecttemplates/HelloWorldCPPAutotoolsProject/template.xml"
+            projectType="org.Yocto.sdk.ide.projectType">
+      </template>
    </extension>
    <extension
          point="org.eclipse.cdt.core.templateProcessTypes">

@@ -983,7 +983,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/Makefile
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/Makefile	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/Makefile	(revision 0)
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,39 @@
 +TCF_AGENT_DIR=../agent
 +
 +include $(TCF_AGENT_DIR)/Makefile.inc
@@ -1001,8 +1001,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/Makefile
 +all:	$(EXECS)
 +
 +$(BINDIR)/libtcf$(EXTLIB) : $(OFILES)
-+	$(AR) -rc $@ $^
-+	$(RANLIB)
++	$(AR) rcs $@ $^
 +
 +$(BINDIR)/agent$(EXTEXE): $(BINDIR)/main/main$(EXTOBJ) $(BINDIR)/libtcf$(EXTLIB)
 +	$(CC) $(CFLAGS) -o $@ $(BINDIR)/main/main$(EXTOBJ) $(BINDIR)/libtcf$(EXTLIB) $(LIBS)
@@ -1014,6 +1013,12 @@ Index: org.eclipse.tm.tcf.terminals.agent/Makefile
 +$(BINDIR)/%$(EXTOBJ): $(TCF_AGENT_DIR)/%.c $(HFILES) Makefile
 +	@mkdir -p $(dir $@)
 +	$(CC) $(CFLAGS) -c -o $@ $<
++
++install: all
++	install -d -m 755 $(INSTALLROOT)$(SBIN)
++	install -d -m 755 $(INSTALLROOT)$(INIT)
++	install -c $(BINDIR)/agent -m 755 $(INSTALLROOT)$(SBIN)/tcf-agent
++	install -c $(TCF_AGENT_DIR)/main/tcf-agent.init -m 755 $(INSTALLROOT)$(INIT)/tcf-agent
 +
 +clean:
 +	rm -rf $(BINDIR)

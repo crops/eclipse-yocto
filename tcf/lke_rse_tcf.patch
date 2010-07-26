@@ -1,6 +1,6 @@
 Index: plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF
 ===================================================================
---- plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF	(revision 1078)
+--- plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF	(revision 1079)
 +++ plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF	(working copy)
 @@ -7,17 +7,27 @@
  Bundle-Vendor: %providerName
@@ -36,6 +36,50 @@ Index: plugins/org.eclipse.tm.tcf.rse/META-INF/MANIFEST.MF
 -Eclipse-LazyStart: true
 -Bundle-RequiredExecutionEnvironment: J2SE-1.5
 +
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java	(revision 1079)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java	(working copy)
+@@ -78,13 +78,13 @@
+     @Override
+     public IConnectorService getConnectorService(IHost host) {
+         return TCFConnectorServiceManager.getInstance()
+-            .getConnectorService(host, ITCFSubSystem.class);
++            .getConnectorService(host, getServiceImplType());
+     }
+ 
+     @Override
+     @SuppressWarnings("unchecked")
+     public Class getServiceImplType() {
+-        return TCFFileService.class;
++        return ITCFSubSystem.class;
+     }
+ 
+     @Override
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
+@@ -0,0 +1,19 @@
++package org.eclipse.tm.internal.tcf.rse;
++
++import org.eclipse.osgi.util.NLS;
++
++public class TCFConnectorResources extends NLS {
++    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.TCFConnectorResources";
++    static {
++        NLS.initializeMessages(BUNDLE_NAME, TCFConnectorResources.class);
++    }
++    private TCFConnectorResources() {
++        
++    }
++    
++    public static String TCFConnectorService_Name;
++    public static String TCFConnectorService_Description;
++    public static String PropertySet_Description;
++    
++
++}
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java	(revision 0)
@@ -59,28 +103,35 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSe
 +    public boolean isSubscribed();
 +    public void Subscribe() throws RemoteFileException;
 +}
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFService.java
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java
 ===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFService.java	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFService.java	(revision 0)
-@@ -0,0 +1,14 @@
-+package org.eclipse.tm.internal.tcf.rse;
-+
-+
-+/**
-+ * Markup Interface for services using the <code>TCFConnectorSerivce</code>.
-+ *
-+ * By implementing this interface, services can be recognized
-+ * as operating against an TCFConnectorService. The interface
-+ * is used as the key in a table for looking up the connector
-+ * service when needed.
-+ */
-+public interface ITCFService {
-+
-+}
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java	(revision 1079)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java	(working copy)
+@@ -26,10 +26,8 @@
+ 
+     private final TCFProcessAdapter process_adapter = new TCFProcessAdapter();
+ 
+-    @Override
+-    @SuppressWarnings("unchecked")
+-    public Class getServiceImplType() {
+-        return TCFProcessService.class;
++    public Class<ITCFSubSystem> getServiceImplType() {
++        return ITCFSubSystem.class;
+     }
+ 
+     @Override
+@@ -50,7 +48,7 @@
+     @Override
+     public IConnectorService getConnectorService(IHost host) {
+         return TCFConnectorServiceManager.getInstance()
+-            .getConnectorService(host, ITCFSubSystem.class);
++            .getConnectorService(host, getServiceImplType());
+     }
+ 
+     @Override
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java
 ===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(revision 1078)
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(revision 1079)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(working copy)
 @@ -13,6 +13,7 @@
   *******************************************************************************/
@@ -1406,17 +1457,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +    }
 +    
 +    public IConnectorService getConnectorService(IHost host) {
-+        return TCFConnectorServiceManager.getInstance().getConnectorService(host, ITCFService.class);
++        return TCFConnectorServiceManager.getInstance().getConnectorService(host, getServiceImplType());
 +}
 +
 +    public void setConnectorService(IHost host,
 +                IConnectorService connectorService) {
-+        TCFConnectorServiceManager.getInstance().setConnectorService(host, ITCFService.class, connectorService);
++        TCFConnectorServiceManager.getInstance().setConnectorService(host, getServiceImplType(), connectorService);
 +    }
 +
-+    public Class<ITCFService> getServiceImplType()
++    public Class<ITCFSubSystem> getServiceImplType()
 +    {
-+            return ITCFService.class;
++            return ITCFSubSystem.class;
 +    }
 +    
 +    public IServiceCommandShell createRemoteCommandShell(IRemoteCmdSubSystem cmdSS, IHostShell hostShell) {         
@@ -1431,6 +1482,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +
 +
 +}
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
+@@ -0,0 +1,5 @@
++TCFConnectorService_Name=TCF Connector Service
++TCFConnectorService_Description=Target Communication Framework
++PropertySet_Description=TCF login properties. Set these according to your remote system's login prompts.
++
++ 
+\ No newline at end of file
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.properties
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.properties	(revision 0)
@@ -1455,7 +1517,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +import org.eclipse.rse.services.terminals.ITerminalService;
 +import org.eclipse.rse.subsystems.terminals.core.TerminalServiceSubSystem;
 +import org.eclipse.rse.subsystems.terminals.core.TerminalServiceSubSystemConfiguration;
-+import org.eclipse.tm.internal.tcf.rse.ITCFService;
++import org.eclipse.tm.internal.tcf.rse.ITCFSubSystem;
 +import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
 +import org.eclipse.tm.internal.tcf.rse.TCFConnectorServiceManager;
 +import org.eclipse.tm.internal.tcf.terminals.ITerminalsService;
@@ -1492,17 +1554,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +
 +   public IConnectorService getConnectorService(IHost host) {
 +       return TCFConnectorServiceManager.getInstance().getConnectorService(
-+               host, ITCFService.class);
++               host, getServiceImplType());
 +   }
 +
 +   public void setConnectorService(IHost host,
 +           IConnectorService connectorService) {
 +       TCFConnectorServiceManager.getInstance().setConnectorService(host,
-+               ITCFService.class, connectorService);
++               getServiceImplType(), connectorService);
 +   }
 +
-+   public Class getServiceImplType() {
-+       return ITCFService.class;
++   public Class<ITCFSubSystem> getServiceImplType() {
++       return ITCFSubSystem.class;
 +   }
 +
 +}
@@ -1598,102 +1660,9 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 +        return TCFTerminalServiceResources.TCFTerminalService_Description;
 +    }
 +}
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java
-===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java	(revision 1078)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileSubSystemConfiguration.java	(working copy)
-@@ -31,6 +31,7 @@
- import org.eclipse.rse.subsystems.files.core.subsystems.IHostFileToRemoteFileAdapter;
- import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
- import org.eclipse.rse.ui.SystemBasePlugin;
-+import org.eclipse.tm.internal.tcf.rse.ITCFService;
- import org.eclipse.tm.internal.tcf.rse.ITCFSubSystem;
- import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
- import org.eclipse.tm.internal.tcf.rse.TCFConnectorServiceManager;
-@@ -78,13 +79,13 @@
-     @Override
-     public IConnectorService getConnectorService(IHost host) {
-         return TCFConnectorServiceManager.getInstance()
--            .getConnectorService(host, ITCFSubSystem.class);
-+            .getConnectorService(host, ITCFService.class);
-     }
- 
-     @Override
-     @SuppressWarnings("unchecked")
-     public Class getServiceImplType() {
--        return TCFFileService.class;
-+        return ITCFService.class;
-     }
- 
-     @Override
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java
-===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
-@@ -0,0 +1,19 @@
-+package org.eclipse.tm.internal.tcf.rse;
-+
-+import org.eclipse.osgi.util.NLS;
-+
-+public class TCFConnectorResources extends NLS {
-+    private static final String BUNDLE_NAME = "org.eclipse.tm.internal.tcf.rse.TCFConnectorResources";
-+    static {
-+        NLS.initializeMessages(BUNDLE_NAME, TCFConnectorResources.class);
-+    }
-+    private TCFConnectorResources() {
-+        
-+    }
-+    
-+    public static String TCFConnectorService_Name;
-+    public static String TCFConnectorService_Description;
-+    public static String PropertySet_Description;
-+    
-+
-+}
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java
-===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java	(revision 1078)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/processes/TCFProcessSubSystemConfiguration.java	(working copy)
-@@ -18,6 +18,7 @@
- import org.eclipse.rse.subsystems.processes.core.subsystem.IHostProcessToRemoteProcessAdapter;
- import org.eclipse.rse.subsystems.processes.servicesubsystem.ProcessServiceSubSystem;
- import org.eclipse.rse.subsystems.processes.servicesubsystem.ProcessServiceSubSystemConfiguration;
-+import org.eclipse.tm.internal.tcf.rse.ITCFService;
- import org.eclipse.tm.internal.tcf.rse.ITCFSubSystem;
- import org.eclipse.tm.internal.tcf.rse.TCFConnectorService;
- import org.eclipse.tm.internal.tcf.rse.TCFConnectorServiceManager;
-@@ -29,7 +30,7 @@
-     @Override
-     @SuppressWarnings("unchecked")
-     public Class getServiceImplType() {
--        return TCFProcessService.class;
-+        return ITCFService.class;
-     }
- 
-     @Override
-@@ -50,7 +51,7 @@
-     @Override
-     public IConnectorService getConnectorService(IHost host) {
-         return TCFConnectorServiceManager.getInstance()
--            .getConnectorService(host, ITCFSubSystem.class);
-+            .getConnectorService(host, ITCFService.class);
-     }
- 
-     @Override
-Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties
-===================================================================
---- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
-+++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.properties	(revision 0)
-@@ -0,0 +1,5 @@
-+TCFConnectorService_Name=TCF Connector Service
-+TCFConnectorService_Description=Target Communication Framework
-+PropertySet_Description=TCF login properties. Set these according to your remote system's login prompts.
-+
-+ 
-\ No newline at end of file
 Index: plugins/org.eclipse.tm.tcf.rse/plugin.xml
 ===================================================================
---- plugins/org.eclipse.tm.tcf.rse/plugin.xml	(revision 1078)
+--- plugins/org.eclipse.tm.tcf.rse/plugin.xml	(revision 1079)
 +++ plugins/org.eclipse.tm.tcf.rse/plugin.xml	(working copy)
 @@ -37,6 +37,22 @@
              vendor="Wind River">

@@ -29,12 +29,16 @@ public class YoctoSDKChecker {
 	private static final String WIZARD_SDK_BIN_NONEXIST       = "Wizard.SDK.Bin.Nonexist";
 	private static final String WIZARD_SDK_SYSROOT_NONEXIST   = "Wizard.SDK.Sysroot.Nonexist";
 	private static final String WIZARD_SDK_PKGCONFIG_NONEXIST = "Wizard.SDK.Pkgconfig.Nonexist";
+	private static final String WIZARD_QEMU_KERNEL_EMPTY 	  = "Wizard.Qemu.Kernel.Empty";
+	private static final String WIZARD_QEMU_ROOTFS_EMPTY = "Wizard.Qemu.Rootfs.Empty";
 
 	private static final String MENU_SDK_LOCATION_EMPTY     = "Menu.SDK.Location.Empty";
 	private static final String MENU_SDK_TARGET_EMPTY      = "Menu.SDK.Target.Empty";
 	private static final String MENU_SDK_BIN_NONEXIST       = "Menu.SDK.Bin.Nonexist";
 	private static final String MENU_SDK_SYSROOT_NONEXIST   = "Menu.SDK.Sysroot.Nonexist";
 	private static final String MENU_SDK_PKGCONFIG_NONEXIST = "Menu.SDK.Pkgconfig.Nonexist";
+	private static final String MENU_QEMU_KERNEL_EMPTY = "Menu.Qemu.Kernel.Empty";
+	private static final String MENU_QEMU_ROOTFS_EMPTY = "Menu.Qemu.Rootfs.Empty";
 
 	private static final String PREFERENCES_SDK_BIN_NONEXIST       = "Preferences.SDK.Bin.Nonexist";
 	private static final String PREFERENCES_SDK_SYSROOT_NONEXIST   = "Preferences.SDK.Sysroot.Nonexist";
@@ -110,9 +114,9 @@ public class YoctoSDKChecker {
 		case TARGET_EMPTY:
 			return  YoctoSDKMessages.getString(WIZARD_SDK_TARGET_EMPTY);
 		case QEMU_KERNEL_EMPTY:
-			return YoctoSDKMessages.getString(QEMU_KERNEL_EMPTY);
+			return YoctoSDKMessages.getString(WIZARD_QEMU_KERNEL_EMPTY);
 		case QEMU_ROOTFS_EMPTY:
-			return YoctoSDKMessages.getString(QEMU_ROOTFS_EMPTY);
+			return YoctoSDKMessages.getString(WIZARD_QEMU_ROOTFS_EMPTY);
 		case QEMU_KERNEL_NON_EXIST:
 			return YoctoSDKMessages.getString(QEMU_KERNEL_NONEXIST);
 		case QEMU_ROOTFS_NON_EXIST:
@@ -135,9 +139,9 @@ public class YoctoSDKChecker {
 		case TARGET_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_TARGET_EMPTY);
 		case QEMU_KERNEL_EMPTY:
-			return YoctoSDKMessages.getString(QEMU_KERNEL_EMPTY);
+			return YoctoSDKMessages.getString(MENU_QEMU_KERNEL_EMPTY);
 		case QEMU_ROOTFS_EMPTY:
-			return YoctoSDKMessages.getString(QEMU_ROOTFS_EMPTY);
+			return YoctoSDKMessages.getString(MENU_QEMU_ROOTFS_EMPTY);
 		case QEMU_KERNEL_NON_EXIST:
 			return YoctoSDKMessages.getString(QEMU_KERNEL_NONEXIST);
 		case QEMU_ROOTFS_NON_EXIST:

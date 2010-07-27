@@ -61,6 +61,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static final String DEFAULT_OPTION_PREFIX_STR = "--";
 	private static final String DEFAULT_CONFIGURE_STR = "configure";
 	private static final String DEFAULT_AUTOGEN_STR = "autogen";
+	private static IProgressMonitor monitor;
 	
 	private IProject proj;
 
@@ -82,7 +83,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		//AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
 		@SuppressWarnings("unused")
 		ICommand[] command = project.getDescription().getBuildSpec();
-		AutotoolsNewProjectNature.addNature(project, YoctoSDK_NATURE_ID, monitor);		
+		AutotoolsNewProjectNature.addNature(project, YoctoSDK_NATURE_ID, monitor);
+		monitor = monitor;
 	}
 	
 	public static void setEnvironmentVariables(IProject project, 
@@ -113,8 +115,10 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		host = host.substring(0, host.length() - 1);
 		String target_arg = "";
 		StringTokenizer tok= new StringTokenizer(target, "-"); //$NON-NLS-1$
+		String target_str = "";
 		if (tok.hasMoreTokens()) {
-			target_arg= tok.nextToken() + DEFAULT_POKY_SURFIX;
+			target_str = tok.nextToken();
+			target_arg= target_str + DEFAULT_POKY_SURFIX;
 		}
 		
 		if (sdkroot.equals("true")) {
@@ -150,9 +154,30 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			
 			try {
 				CoreModel.getDefault().setProjectDescription(project, cpdesc);
+				
+				IWorkspaceRoot wp_root = ResourcesPlugin.getWorkspace().getRoot();
+				IProject[] projects = wp_root.getProjects();
+				
+				String qemu_launch_str = "qemu_"+target_str+".launch";
+				boolean found_qemu_launcher = false;
+				IFile qemu_launch_file = null;
+				for (int i = 0; i < projects.length; i++) {
+					IProject project_i = projects[i];
+					qemu_launch_file = project_i.getFile(qemu_launch_str);
+					if (qemu_launch_file.exists()) {
+						found_qemu_launcher = true;
+						break;
+					} 
+				}
+				
+				if (found_qemu_launcher) {
+					qemu_launch_file.delete(true, monitor);
+				}
+				
 				ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
 				ILaunchConfigurationType configType = lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
-				ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, "qemu"+"_"+project.getName());
+				//ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, "qemu"+"_"+project.getName());
+				ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, "qemu_"+target_str);
 				ArrayList<String> listValue = new ArrayList<String>();
 				listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
 				w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
@@ -197,8 +222,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String configure_setting = command_prefix + " configure";
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);
 	    cfg.setOption(DEFAULT_CONFIGURE_STR, configure_setting);
-		cfg.setOption(DEFAULT_HOST_STR, target_arg);
-	    cfg.setOption(DEFAULT_TARGET_STR, target_arg);
+		cfg.setOption(DEFAULT_BUILD_STR, target_arg);
+	    cfg.setOption(DEFAULT_HOST_STR, target_arg);
 	    cfg.setOption(DEFAULT_AUTOGEN_STR, autogen_setting);
 	    cfg.setOption(DEFAULT_AUTOGEN_OPT_STR, auto_gen_opt);
 	    AutotoolsConfigurationManager.getInstance().addConfiguration(project, cfg);

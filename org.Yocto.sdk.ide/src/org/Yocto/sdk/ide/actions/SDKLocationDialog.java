@@ -33,6 +33,7 @@ import org.Yocto.sdk.ide.YoctoSDKChecker;
 import org.Yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
 import org.Yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.Yocto.sdk.ide.preferences.PreferenceConstants;
+import org.Yocto.sdk.ide.preferences.YoctoSDKPreferencePage;
 
 public class SDKLocationDialog extends Dialog {
 	private String title;
@@ -54,9 +55,7 @@ public class SDKLocationDialog extends Dialog {
 	private String qemu_rootfs_value;
 	private String qemu_kernel_ret_value = null;
 	private String qemu_rootfs_ret_value = null;
-	private String env_script_name;
-	private String env_script_value;
-	private String env_script_ret_value = null;
+
 	private String ip_addr_name;
 	private String ip_addr_value;
 	private String ip_addr_ret_value = null;
@@ -64,7 +63,6 @@ public class SDKLocationDialog extends Dialog {
 	private Text root_value;
 	private Text kernel_value;
 	private Text rootfs_value;
-	private Text script_value;
 	private Text ip_value;
 
 	private Text errorMessageText;
@@ -83,14 +81,14 @@ public class SDKLocationDialog extends Dialog {
 	private Button RealHWButton;
 	private Button kernel_button;
 	private Button rootfs_button;
-	private Button script_button;
+	
 	private Button root_button;
 
 	private Label root_label;
 	private Label kernel_label;
 	private Label rootfs_label;
 	private Label ip_label;
-	private Label script_label;
+	
 
 	public SDKLocationDialog(Shell parentShell, String dialogTitle, String sdkroot_name, String sdkroot_value,
 							String location_name, String location_value, 
@@ -112,8 +110,6 @@ public class SDKLocationDialog extends Dialog {
         this.qemu_kernel_value = kernel_value;
         this.qemu_rootfs_name = rootfs_name;
         this.qemu_rootfs_value = rootfs_value;
-        this.env_script_name = script_name;
-        this.env_script_value = script_value;
         this.ip_addr_name = ip_name;
         this.ip_addr_value = ip_value;
         
@@ -153,15 +149,6 @@ public class SDKLocationDialog extends Dialog {
 		GridLayout layout = new GridLayout(2, false);
 		result.setLayout(layout);
 		
-		script_label= new Label(result, SWT.NONE);
-		script_label.setText("Environment script: ");
-		Composite textContainer = new Composite(result, SWT.NONE);
-		textContainer.setLayout(new GridLayout(2, false));
-		textContainer.setLayoutData(gd);
-		script_value= addTextControlText(textContainer, script_label, PreferenceConstants.SETUP_ENV_SCRIPT, env_script_value);
-		script_value.addModifyListener(fModifyListener);
-		script_button = addTextControlButton(textContainer, script_value, PreferenceConstants.SETUP_ENV_SCRIPT);
-
 		Group crossCompilerGroup= new Group(result, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
@@ -187,7 +174,7 @@ public class SDKLocationDialog extends Dialog {
 
 		root_label = new Label(crossCompilerGroup, SWT.NONE);
 		root_label.setText("Root Location: ");
-		textContainer = new Composite(crossCompilerGroup, SWT.NONE);
+		Composite textContainer = new Composite(crossCompilerGroup, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		root_value = addTextControlText(textContainer, root_label, PreferenceConstants.TOOLCHAIN_ROOT, toolchain_value);
@@ -198,10 +185,10 @@ public class SDKLocationDialog extends Dialog {
 		targetArchLabel.setText("Target Architecture: ");
 		targetArchLabel.setLayoutData(new GridData());
 
-		String[] targetArches = getTargetArches();
-		int index= getTargetIndex(target_value);
+		String[] targetList = YoctoSDKPreferencePage.getTargetList();
 		targetArchCombo= new Combo(result, SWT.READ_ONLY);
-		targetArchCombo.setItems(targetArches);
+		targetArchCombo.setItems(targetList);
+		int index = getTargetIndex(targetList, target_value);
 		targetArchCombo.select(index);
 		targetArchCombo.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL));
 
@@ -259,7 +246,7 @@ public class SDKLocationDialog extends Dialog {
 		ip_value= addTextControlText(targetGroup, ip_label, PreferenceConstants.IP_ADDR, ip_addr_value);
 		ip_value.addModifyListener(fModifyListener);
 		
-		validateInput();
+		
 
 		Composite textConatiner6 = new Composite(result, SWT.NONE);
 		textConatiner6.setLayout(new GridLayout(1, false));
@@ -270,7 +257,7 @@ public class SDKLocationDialog extends Dialog {
         errorMessageText.setBackground(errorMessageText.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
         errorMessageText.setForeground(errorMessageText.getDisplay().getSystemColor(SWT.COLOR_RED));
         setErrorMessage(null);
-
+        validateInput();
 		return result;
 	}
 
@@ -320,7 +307,7 @@ public class SDKLocationDialog extends Dialog {
 		return button;
 	}
 	
-	protected void validateInput() {
+	protected boolean validateInput() {
   		String sdkroot;
 		String target_qemu;
 		if (SDKRootButton.getSelection()) 
@@ -354,7 +341,6 @@ public class SDKLocationDialog extends Dialog {
         	qemu_rootfs = rootfs_value.getText();
         } else 
         	ip_addr = ip_value.getText();
-        String env_script = script_value.getText();
         
 		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, 
 															toolchain_location, 
@@ -362,12 +348,14 @@ public class SDKLocationDialog extends Dialog {
 															target_qemu,
 															qemu_kernel,
 															qemu_rootfs,
-															env_script,
 															ip_addr);
+		boolean pass = true;
 		if (result != SDKCheckResults.SDK_PASS) {
 			errorMessage = YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Menu);
+			pass = false;
 		}
         setErrorMessage(errorMessage);
+        return pass;
 
     }
 
@@ -394,6 +382,11 @@ public class SDKLocationDialog extends Dialog {
 	
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
+			if (!validateInput()) {
+				Button ok_button = getButton(IDialogConstants.OK_ID);
+				ok_button.setEnabled(true);
+				return;
+			}
 			if (SDKRootButton.getSelection())
 				sdkroot_ret_value = IPreferenceStore.TRUE;
 			else
@@ -406,7 +399,6 @@ public class SDKLocationDialog extends Dialog {
 				target_qemu_ret_value = IPreferenceStore.FALSE;
 			qemu_kernel_ret_value = kernel_value.getText();
 			qemu_rootfs_ret_value = rootfs_value.getText();
-			env_script_ret_value = script_value.getText();
 			ip_addr_ret_value = ip_value.getText();
 		}
 		super.buttonPressed(buttonId);
@@ -436,10 +428,6 @@ public class SDKLocationDialog extends Dialog {
 		return qemu_rootfs_ret_value;
 	}
 	
-	public String getEnvScript() {
-		return env_script_ret_value;
-	}
-	
 	public String getIPAddr() {
 		return ip_addr_ret_value;
 	}
@@ -452,27 +440,12 @@ public class SDKLocationDialog extends Dialog {
 		validateInput();
 	}
 	
-	private String[] getTargetArches() {
-		String archStr= PreferenceConstants.TARGET_ARCHITECTURE_LIST;
-		ArrayList<String> archList = new ArrayList<String>();
-		StringTokenizer tok= new StringTokenizer(archStr, ","); //$NON-NLS-1$
-		while (tok.hasMoreTokens()) {
-			archList.add(tok.nextToken());
-		}
-		
-		return (String[])archList.toArray(new String[archList.size()]);
-	}
-	
-	private int getTargetIndex(String target) {
-		int index = 0;
-		String archStr= PreferenceConstants.TARGET_ARCHITECTURE_LIST;
-		StringTokenizer tok= new StringTokenizer(archStr, ","); //$NON-NLS-1$
-		while (tok.hasMoreTokens()) {
-			String value = (String)tok.nextToken();
+	private int getTargetIndex(String[] targetList, String target) {
+		for (int i = 0; i < targetList.length; i++) {
+			String value = targetList[i];
 			if (value.equals(target)) {
-				return index;
+				return i;
 			}
-			index++;
 		}
 		return -1;
 	}

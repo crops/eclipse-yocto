@@ -148,11 +148,15 @@ public class YoctoSDKProjectNature implements IProjectNature {
 								
 								env.addVariable("CONFIG_SITE", Yocto_pkg_config_site, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 							} else if (line.contains("CONFIGURE_FLAGS")) {
-								CONFIGURE_FLAGS_str = line.substring(line.indexOf('=') + 1);
+								int begin_index = 0;
+								int end_index = 0;
+								begin_index = line.indexOf('=') + 2;
+								end_index = line.indexOf('"', begin_index);
+								CONFIGURE_FLAGS_str = line.substring(begin_index, end_index);
 								env.addVariable("CONFIGURE_FLAGS_str", CONFIGURE_FLAGS_str, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 								int index = line.indexOf("target");
-								int begin_index = line.indexOf('=', index);
-								int end_index = line.indexOf(' ', index);
+								begin_index = line.indexOf('=', index);
+								end_index = line.indexOf(' ', index);
 								target_str = line.substring(begin_index+1, end_index);
 								
 								index = line.indexOf("host");

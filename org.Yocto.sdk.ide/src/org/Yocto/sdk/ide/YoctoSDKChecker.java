@@ -25,6 +25,7 @@ public class YoctoSDKChecker {
 	};
 
 	private static final String WIZARD_SDK_LOCATION_EMPTY     = "Wizard.SDK.Location.Empty";
+	private static final String WIZARD_TOOLCHAIN_LOCATION_NONEXIST = "Wizard.Toolcahin.Location.Nonexist";
 	private static final String WIZARD_SDK_TARGET_EMPTY      = "Wizard.SDK.Target.Empty";
 	private static final String WIZARD_SDK_BIN_NONEXIST       = "Wizard.SDK.Bin.Nonexist";
 	private static final String WIZARD_SDK_SYSROOT_NONEXIST   = "Wizard.SDK.Sysroot.Nonexist";
@@ -35,6 +36,7 @@ public class YoctoSDKChecker {
 	private static final String WIZARD_QEMU_ROOTFS_NONEXIST   = "Wizard.Qemu.Rootfs.Nonexist";
 
 	private static final String MENU_SDK_LOCATION_EMPTY     = "Menu.SDK.Location.Empty";
+	private static final String MENU_TOOLCHAIN_LOCATION_NONEXIST = "Menu.Toolchain.Location.Nonexist";
 	private static final String MENU_SDK_TARGET_EMPTY      = "Menu.SDK.Target.Empty";
 	private static final String MENU_SDK_BIN_NONEXIST       = "Menu.SDK.Bin.Nonexist";
 	private static final String MENU_SDK_SYSROOT_NONEXIST   = "Menu.SDK.Sysroot.Nonexist";
@@ -50,6 +52,7 @@ public class YoctoSDKChecker {
 	
 	private static final String ENV_SCRIPT_NONEXIST = "Env.Script.Nonexist";
 	
+	private static final String PREFERENCES_TOOLCHAIN_LOCATION_NONEXIST = "Preferences.Toolchain.Location.Nonexist";
 	private static final String PREFERENCES_QEMU_KERNEL_EMPTY = "Preferences.Qemu.Kernel.Empty";
 	private static final String PREFERENCES_QEMU_ROOTFS_EMPTY = "Preferences.Qemu.Rootfs.Empty";
 	private static final String PREFERENCES_QEMU_KERNEL_NONEXIST   = "Preferences.Qemu.Kernel.Nonexist";
@@ -117,6 +120,8 @@ public class YoctoSDKChecker {
 		switch (result) {
 		case TOOLCHAIN_LOCATION_EMPTY:
 			return  YoctoSDKMessages.getString(WIZARD_SDK_LOCATION_EMPTY);
+		case TOOLCHAIN_LOCATION_NON_EXIST:
+			return YoctoSDKMessages.getString(WIZARD_TOOLCHAIN_LOCATION_NONEXIST);
 		case TARGET_EMPTY:
 			return  YoctoSDKMessages.getString(WIZARD_SDK_TARGET_EMPTY);
 		case QEMU_KERNEL_EMPTY:
@@ -142,6 +147,8 @@ public class YoctoSDKChecker {
 		switch (result) {
 		case TOOLCHAIN_LOCATION_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_LOCATION_EMPTY);
+		case TOOLCHAIN_LOCATION_NON_EXIST:
+			return YoctoSDKMessages.getString(MENU_TOOLCHAIN_LOCATION_NONEXIST);
 		case TARGET_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_TARGET_EMPTY);
 		case QEMU_KERNEL_EMPTY:
@@ -167,6 +174,8 @@ public class YoctoSDKChecker {
 		switch (result) {
 		case TOOLCHAIN_LOCATION_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_LOCATION_EMPTY);
+		case TOOLCHAIN_LOCATION_NON_EXIST:
+			return YoctoSDKMessages.getString(PREFERENCES_TOOLCHAIN_LOCATION_NONEXIST);
 		case TARGET_EMPTY:
 			return  YoctoSDKMessages.getString(MENU_SDK_TARGET_EMPTY);
 		case SDK_BIN_NON_EXIST:

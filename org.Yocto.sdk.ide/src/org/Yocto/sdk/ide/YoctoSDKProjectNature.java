@@ -66,7 +66,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static String host_str = "";
 	private static String build_str = "";
 	private static String CFLAGS_str = "";
-	private static String CPPFLAGS_str = "";
+	private static String CXXFLAGS_str = "";
 	private static String CONFIGURE_FLAGS_str = "";
 	
 	private IProject proj;
@@ -105,6 +105,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		ICConfigurationDescription ccdesc = cpdesc.getActiveConfiguration();
 		IEnvironmentVariableManager manager = CCorePlugin.getDefault().getBuildEnvironmentManager();
 		IContributedEnvironment env = manager.getContributedEnvironment();
+	
 		String delimiter = manager.getDefaultDelimiter();
 
 		//Add store to the per project configuration
@@ -166,7 +167,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 							} else if (line.contains("CFLAGS")) {
 								CFLAGS_str = line.substring(line.indexOf('=') +1);
 							} else if (line.contains("CXXFLAGS")){
-								CPPFLAGS_str = line.substring(line.indexOf('=') + 1);
+								CXXFLAGS_str = line.substring(line.indexOf('=') + 1);
 							}
 									
 						}
@@ -184,15 +185,12 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			String Yocto_path_prefix = toolchain_location + DEFAULT_POKY_BUILD_PREFIX + DEFAULT_SYSROOTS_STR + host + DEFAULT_LINUX_STR;
 			Yocto_path = Yocto_path_prefix + DEFAULT_USER_BIN_STR + delimiter + Yocto_path_prefix + DEFAULT_BIN_STR;
 		}
-		
-		if (target_qemu.equals(IPreferenceStore.TRUE)) {
-			env.addVariable(PreferenceConstants.QEMU_KERNEL, qemu_kernel, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-			env.addVariable(PreferenceConstants.QEMU_ROOTFS, qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-			env.addVariable(PreferenceConstants.IP_ADDR, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
+		try {
+			if (target_qemu.equals(IPreferenceStore.TRUE)) {
+				env.addVariable(PreferenceConstants.QEMU_KERNEL, qemu_kernel, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+				env.addVariable(PreferenceConstants.QEMU_ROOTFS, qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+				env.addVariable(PreferenceConstants.IP_ADDR, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
 			
-			try {
-				CoreModel.getDefault().setProjectDescription(project, cpdesc);
-				
 				IWorkspaceRoot wp_root = ResourcesPlugin.getWorkspace().getRoot();
 				IProject[] projects = wp_root.getProjects();
 				
@@ -230,15 +228,16 @@ public class YoctoSDKProjectNature implements IProjectNature {
 				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
 				w_copy.doSave();
 				createOProfileUI(project, configType, listValue);
-			} catch (CoreException e) {
-				// do nothing
-			}	
-		} else {
-			env.addVariable(PreferenceConstants.QEMU_KERNEL, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
-			env.addVariable(PreferenceConstants.QEMU_ROOTFS, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
-			env.addVariable(PreferenceConstants.IP_ADDR, ip_addr, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		}
-		
+			
+			} else {
+				env.addVariable(PreferenceConstants.QEMU_KERNEL, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
+				env.addVariable(PreferenceConstants.QEMU_ROOTFS, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
+				env.addVariable(PreferenceConstants.IP_ADDR, ip_addr, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			}
+			CoreModel.getDefault().setProjectDescription(project,cpdesc);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}	
 	}
 	
 	public static void configureAutotoolsOptions(IProject project, String target) {
@@ -246,7 +245,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		IConfiguration icfg = info.getDefaultConfiguration();
 		String id = icfg.getId();
 		
-		String command_prefix = "CFLAGS=" + CFLAGS_str + " CPPFLAGS=" + CPPFLAGS_str + "";
+		String command_prefix = "CFLAGS=" + CFLAGS_str + " CXXFLAGS=" + CXXFLAGS_str + "";
 		String autogen_setting = command_prefix+" autogen.sh";
 		String configure_setting = command_prefix + " configure";
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);

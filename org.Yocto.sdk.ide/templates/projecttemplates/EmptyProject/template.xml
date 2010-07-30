@@ -7,7 +7,7 @@
 	<process type="org.Yocto.sdk.ide.NewYoctoProject">
 		<simple name="name" value="$(projectName)" /> 
 		<simple name="artifactExtension" value="exe" /> 
-		<simple name="isCProject" value="false" /> 
+		<simple name="isCProject" value="true" /> 
 	</process>
 
 </template>

@@ -123,7 +123,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		
 		if (sdkroot.equals("true")) {
 			try {
-				File env_script_file = new File(toolchain_location+"/"+"environment-setup-"+target+DEFAULT_POKY_SURFIX);
+				env_script = toolchain_location+"/"+"environment-setup-"+target+DEFAULT_POKY_SURFIX;
+				File env_script_file = new File(env_script);
 				if (env_script_file.exists()) {
 					BufferedReader input = new BufferedReader(new FileReader(env_script_file));
 					try {
@@ -169,9 +170,9 @@ public class YoctoSDKProjectNature implements IProjectNature {
 								end_index = line.indexOf('"', index);
 								build_str = line.substring(begin_index+1, end_index);
 							} else if (line.contains("CFLAGS")) {
-								CFLAGS_str = line.substring(line.indexOf('=') +1);
+								CFLAGS_str = line.substring(line.indexOf('"') +1);
 							} else if (line.contains("CXXFLAGS")){
-								CXXFLAGS_str = line.substring(line.indexOf('=') + 1);
+								CXXFLAGS_str = line.substring(line.indexOf('"') + 1);
 							}
 									
 						}
@@ -249,7 +250,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		IConfiguration icfg = info.getDefaultConfiguration();
 		String id = icfg.getId();
 		
-		String command_prefix = "CFLAGS=" + CFLAGS_str + " CXXFLAGS=" + CXXFLAGS_str + "";
+		String command_prefix = "CFLAGS=\" -g -O2 " + CFLAGS_str + " CXXFLAGS=\" -g -O2 " + CXXFLAGS_str + "";
 		String autogen_setting = command_prefix+" autogen.sh";
 		String configure_setting = command_prefix + " configure";
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);

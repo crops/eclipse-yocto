@@ -85,11 +85,6 @@
 				<simple name="replaceable" value="true"/>
 			</element>
 			<element>
-				<simple name="source" value="src/Basename.desktop.in.src"/>
-				<simple name="target" value="$(sourceDir)/$(projectName).desktop.in"/>
-				<simple name="replaceable" value="true"/>
-			</element>
-			<element>
 				<simple name="source" value="src/ChangeLog"/>
 				<simple name="target" value="ChangeLog"/>
 				<simple name="replaceable" value="true"/>

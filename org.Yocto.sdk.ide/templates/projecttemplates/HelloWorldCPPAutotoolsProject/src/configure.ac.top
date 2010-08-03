@@ -31,16 +31,13 @@ PKG_PROG_PKG_CONFIG
 AC_SUBST($(projectName)_CFLAGS)
 AC_SUBST($(projectName)_LIBS)
 
-desktopdir=${datadir}/applications
-AC_SUBST(desktopdir)
 
-icondir=${datadir}/icons/hicolor/32x32/apps
-AC_SUBST(icondir)
+#icondir=${datadir}/icons/hicolor/32x32/apps
+#AC_SUBST(icondir)
 
 AC_OUTPUT([
 Makefile
 $(sourceDir)/Makefile
-$(sourceDir)/$(projectName).desktop
 ])
 
 echo ""

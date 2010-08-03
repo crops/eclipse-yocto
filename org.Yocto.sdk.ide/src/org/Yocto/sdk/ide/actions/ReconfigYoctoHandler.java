@@ -9,7 +9,6 @@ import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.AbstractAutotool
 @SuppressWarnings("restriction")
 public class ReconfigYoctoHandler extends AbstractAutotoolsHandler {
 
-	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ReconfigYoctoAction a = new ReconfigYoctoAction();
 		Object o = event.getApplicationContext();

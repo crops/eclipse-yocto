@@ -94,8 +94,15 @@
    <extension
          point="org.eclipse.cdt.core.templates">
       <template
-            id="org.Yocto.sdk.ide.template.emptyProject"
-            location="templates/projecttemplates/EmptyProject/template.xml"
+            filterPattern=".*gcc"
+            id="org.Yocto.sdk.ide.template.emptyCProject"
+            location="templates/projecttemplates/EmptyCProject/template.xml"
+            projectType="org.Yocto.sdk.ide.projectType">
+      </template>
+      <template
+            filterPattern=".*g\+\+"
+            id="org.Yocto.sdk.ide.template.emptyCPPProject"
+            location="templates/projecttemplates/EmptyCPPProject/template.xml"
             projectType="org.Yocto.sdk.ide.projectType">
       </template>
       <template
@@ -125,6 +132,7 @@
                nullable="true">
          </simple>
          <simple
+               external="true"
                name="artifactExtension">
          </simple>
          <simple

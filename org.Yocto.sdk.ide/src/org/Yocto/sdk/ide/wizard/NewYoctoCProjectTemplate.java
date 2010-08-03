@@ -84,11 +84,14 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				ManagedBuildManager.saveBuildInfo(project, true);
 
 				restoreAutoBuild(workspace);
-			}
-			else {
+			} else {
+				IWorkspace workspace = ResourcesPlugin.getWorkspace();
+				turnOffAutoBuild(workspace);
 				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);				
 				YoctoSDKProjectNature.configureAutotools(project);
+				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
+				//restoreAutoBuild(workspace);
 			}
 		} catch (CoreException e) {
 			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage(), e); //$NON-NLS-1$

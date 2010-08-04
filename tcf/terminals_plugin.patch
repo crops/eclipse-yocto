@@ -234,10 +234,10 @@ Index: plugins/org.eclipse.tm.tcf.terminals/src/org/eclipse/tm/internal/tcf/term
 +        listeners.put(listener, l);
 +    }
 +    
-+    @Override
++     
 +	public void removeListener(TerminalsListener listener) {
-+    	IChannel.IEventListener l = listeners.remove(listener);
-+        if (l != null) channel.removeEventListener(this, l);
++    	  IChannel.IEventListener l = listeners.remove(listener);
++         if (l != null) channel.removeEventListener(this, l);
 +	}
 +    
 +    static {

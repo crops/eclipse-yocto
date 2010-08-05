@@ -534,7 +534,7 @@ Index: plugins/org.eclipse.tm.tcf.terminals/build.properties
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.terminals/build.properties	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.terminals/build.properties	(revision 0)
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,8 @@
 +source.. = src/
 +output.. = bin/
 +bin.includes = META-INF/,\
@@ -542,11 +542,7 @@ Index: plugins/org.eclipse.tm.tcf.terminals/build.properties
 +               plugin.xml,\
 +               about.html,\
 +               plugin.properties
-+src.includes = src/,\
-+               plugin.xml,\
-+               about.html,\
-+               META-INF/,\
-+               plugin.properties
++src.includes = about.html
 Index: plugins/org.eclipse.tm.tcf.terminals/plugin.xml
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.terminals/plugin.xml	(revision 0)

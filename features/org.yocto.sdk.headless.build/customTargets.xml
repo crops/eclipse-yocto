@@ -88,6 +88,7 @@
 		<copy todir="${buildDirectory}/features/org.yocto.sdk.feature" failonerror="true" >
                     <fileset dir="${otherSrcDirectory}/features/org.yocto.sdk.feature"/>
                 </copy>
+                <copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
 	</target>
 
 	<!-- ===================================================================== -->

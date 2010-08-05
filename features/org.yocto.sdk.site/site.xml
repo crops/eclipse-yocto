@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description url="http://sdk.yocto.org/releases/1.0.0">
+   <description name="Yocto SDK update site" url="http://sdk.yocto.org/releases/1.0.0">
       Yocto SDK update site
    </description>
-   <feature url="features/org.yocto.sdk.feature_1.0.0.201008051633.jar" id="org.yocto.sdk.feature" version="1.0.0.201008051633">
+   <feature url="features/org.yocto.sdk.feature_1.0.0.@qualifier@.jar" id="org.yocto.sdk.feature" version="1.0.0.@qualifier@">
       <category name="org.yocto.sdk"/>
    </feature>
    <category-def name="org.yocto.sdk" label="Development tools &amp; SDKs for Yocto Linux"/>

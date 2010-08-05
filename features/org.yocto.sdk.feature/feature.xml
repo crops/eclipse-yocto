@@ -28,8 +28,11 @@
    </license>
 
    <url>
-      <update label="%updateSiteName"/>
+      <update label="%updateSiteName" url="http://sdk.yocto.org/release"/>
    </url>
+
+   <includes
+         id="org.yocto.sdk.feature.source" version="1.0.0.qualifier"/>
 
    <requires>
       <import plugin="org.eclipse.osgi"/>
@@ -67,14 +70,14 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-	 
+
    <plugin
          id="org.eclipse.tm.tcf.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-   
+
    <plugin
          id="org.eclipse.tm.tcf.rse"
          download-size="0"
@@ -95,6 +98,5 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-   
-   <includes id="org.yocto.sdk.feature.source" />
+
 </feature>

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description name="Yocto SDK update site" url="http://sdk.yocto.org/releases/1.0.0">
-      Yocto SDK update site
-   </description>
    <feature url="features/org.yocto.sdk_1.0.0.qualifier.jar" id="org.yocto.sdk" version="1.0.0.qualifier">
       <category name="Yocto SDK"/>
    </feature>

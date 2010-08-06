@@ -10,7 +10,7 @@
         Intel - initial API and implementation
  -->
 <feature
-      id="org.yocto.sdk.feature"
+      id="org.yocto.sdk"
       label="%featureName"
       version="1.0.0.qualifier"
       provider-name="%providerName">
@@ -32,7 +32,7 @@
    </url>
 
    <includes
-         id="org.yocto.sdk.feature.source" version="1.0.0.qualifier"/>
+         id="org.yocto.sdk.source"/>
 
    <requires>
       <import plugin="org.eclipse.osgi"/>

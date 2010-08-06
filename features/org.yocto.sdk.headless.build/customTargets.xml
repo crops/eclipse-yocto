@@ -84,11 +84,11 @@
 		    <fileset dir="${otherSrcDirectory}/plugins/org.Yocto.sdk.ide"/>
 		</copy>
 		<delete dir="${buildDirectory}/features"/>
-		<mkdir  dir="${buildDirectory}/features"/>
-		<copy todir="${buildDirectory}/features/org.yocto.sdk.feature" failonerror="true" >
-                    <fileset dir="${otherSrcDirectory}/features/org.yocto.sdk.feature"/>
+		<copy todir="${buildDirectory}/features" failonerror="true" >
+                    <fileset dir="${otherSrcDirectory}/features"/>
                 </copy>
                 <copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
+                <copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/category.xml" todir="${buildDirectory}" />
 	</target>
 
 	<!-- ===================================================================== -->

@@ -87,16 +87,9 @@ mkdir ${BUILD_DIR} || fail $? "Create temporary build directory ${BUILD_DIR}"
 #git clone
 GIT_URL=git://git.pokylinux.org/eclipse-poky.git
 GIT_DIR=${BUILD_SRC}
-#git clone ${GIT_URL} ${GIT_DIR} || fail $? "git clone ${GIT_URL}" 
-
-mkdir ${GIT_DIR}
-cp -r /home/lulianhao/working/eclipse-poky/features ${GIT_DIR}/
-cp -r /home/lulianhao/working/eclipse-poky/plugins  ${GIT_DIR}/
-mkdir ${GIT_DIR}/tcf
-cp  /home/lulianhao/working/eclipse-poky/tcf/*.patch ${GIT_DIR}/tcf/
-
+git clone ${GIT_URL} ${GIT_DIR} || fail $? "git clone ${GIT_URL}" 
 cd ${GIT_DIR}
-#git checkout origin/${BRANCH} || fail $? "git checkout origin/${BRANCH}"
+git checkout origin/${BRANCH} || fail $? "git checkout origin/${BRANCH}"
 cd ${TOP}
 
 #build 

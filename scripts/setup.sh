@@ -100,14 +100,14 @@ update_feature_remote()
   fi
   
   echo "installing $2 ${remote_ver} ..."
-set -x
+
   java ${PROXY_PARAM} -jar ${LAUNCHER} \
     -application org.eclipse.update.core.standaloneUpdate \
     -command install \
     -from $1 \
     -featureId $2 \
     -version ${remote_ver}
-set +x
+
   return 0;
 }
 
@@ -148,7 +148,7 @@ fi
 
 echo "Your build environment is now created."
 echo ""
-echo "Run ECLIPSE_HOME=${cur_dir}/eclipse `dirname $0`/build.sh <branch name> <release name> to build"
+echo "Run ECLIPSE_HOME=${curdir}/eclipse `dirname $0`/build.sh <branch name> <release name> to build"
 echo ""
 
 exit 0

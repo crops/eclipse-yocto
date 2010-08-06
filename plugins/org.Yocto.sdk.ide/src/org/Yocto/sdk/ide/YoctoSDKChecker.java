@@ -81,38 +81,13 @@ public class YoctoSDKChecker {
 				if (!kernel_file.exists())
 					return SDKCheckResults.QEMU_KERNEL_NON_EXIST;
 			}
-			if (qemu_rootfs.isEmpty())
-				return SDKCheckResults.QEMU_ROOTFS_EMPTY;
-			else {
+			if (!qemu_rootfs.isEmpty()) {
 				File rootfs_dir = new File(qemu_rootfs);
 				if (!rootfs_dir.exists())
 					return SDKCheckResults.QEMU_ROOTFS_NON_EXIST;
 			}
 		}
-		/*
-		if (!qemu_kernel.isEmpty()) {
-			File kernel_file = new File(qemu_kernel);
-			if (!kernel_file.exists())
-				return SDKCheckResults.SDK_QEMU_KERNEL_NON_EXIST;
-		}
-		if (!qemu_rootfs.isEmpty()) {
-			File rootfs_dir = new File(qemu_rootfs);
-			if (!rootfs_dir.exists())
-				return SDKCheckResults.SDK_QEMU_ROOTFS_NON_EXIST;
-		}
-		if (!env_script.isEmpty()) {
-			File script_file = new File(env_script);
-			if (!script_file.exists())
-				return SDKCheckResults.SDK_ENV_SETUP_SCRIPT_NON_EXIST;
-		}
 		
-		else{
-			String Yocto_sdk_path = toolchain_location + File.separator + "bin";
-	        File sdk_bin_dir = new File(Yocto_sdk_path);
-	        if (! sdk_bin_dir.exists())
-	        	return SDKCheckResults.SDK_BIN_NON_EXIST;
-		}
-		*/
 		return SDKCheckResults.SDK_PASS;
 	}
 

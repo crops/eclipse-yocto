@@ -51,10 +51,10 @@ public class SDKLocationDialog extends Dialog {
 	private String target_qemu_ret_value;
 	private String qemu_kernel_name;
 	private String qemu_kernel_value;
-	private String qemu_rootfs_name;
-	private String qemu_rootfs_value;
+	//private String qemu_rootfs_name;
+	//private String qemu_rootfs_value;
 	private String qemu_kernel_ret_value = null;
-	private String qemu_rootfs_ret_value = null;
+	//private String qemu_rootfs_ret_value = null;
 
 	private String ip_addr_name;
 	private String ip_addr_value;
@@ -62,7 +62,7 @@ public class SDKLocationDialog extends Dialog {
 	
 	private Text root_value;
 	private Text kernel_value;
-	private Text rootfs_value;
+	//private Text rootfs_value;
 	private Text ip_value;
 
 	private Text errorMessageText;
@@ -80,13 +80,13 @@ public class SDKLocationDialog extends Dialog {
 	private Button QEMUButton;
 	private Button RealHWButton;
 	private Button kernel_button;
-	private Button rootfs_button;
+	//private Button rootfs_button;
 	
 	private Button root_button;
 
 	private Label root_label;
 	private Label kernel_label;
-	private Label rootfs_label;
+	//private Label rootfs_label;
 	private Label ip_label;
 	
 
@@ -95,7 +95,7 @@ public class SDKLocationDialog extends Dialog {
 							String target_name, String target_value,
 							String targetQemu_name, String targetQemu_value,
 							 String kernel_name, String kernel_value,
-							 String rootfs_name, String rootfs_value, 
+							 //String rootfs_name, String rootfs_value, 
 							 String script_name, String script_value, String ip_name, String ip_value,IInputValidator validator) {
         super(parentShell);
         this.sdkroot_name = sdkroot_name;
@@ -108,8 +108,8 @@ public class SDKLocationDialog extends Dialog {
         this.target_qemu_value = targetQemu_value;
         this.qemu_kernel_name = kernel_name;
         this.qemu_kernel_value = kernel_value;
-        this.qemu_rootfs_name = rootfs_name;
-        this.qemu_rootfs_value = rootfs_value;
+        //this.qemu_rootfs_name = rootfs_name;
+        //this.qemu_rootfs_value = rootfs_value;
         this.ip_addr_name = ip_name;
         this.ip_addr_value = ip_value;
         
@@ -220,6 +220,7 @@ public class SDKLocationDialog extends Dialog {
 		kernel_value.addModifyListener(fModifyListener);
 		kernel_button = addTextControlButton(textContainer, kernel_value, PreferenceConstants.QEMU_KERNEL);
 
+		/*
 		rootfs_label= new Label(targetGroup, SWT.NONE);
 		rootfs_label.setText("Root Filesystem: ");
 		textContainer = new Composite(targetGroup, SWT.NONE);
@@ -228,7 +229,7 @@ public class SDKLocationDialog extends Dialog {
 		rootfs_value= addTextControlText(textContainer, rootfs_label, PreferenceConstants.QEMU_ROOTFS, qemu_rootfs_value);
 		rootfs_value.addModifyListener(fModifyListener);
 		rootfs_button = addTextControlButton(textContainer, rootfs_value, PreferenceConstants.QEMU_ROOTFS);
-		
+		*/
 		if (target_qemu_value.equals(IPreferenceStore.TRUE)) {
 			RealHWButton = addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_QEMU, IPreferenceStore.FALSE);
 			RealHWButton.addSelectionListener(fSelectionListener);
@@ -323,9 +324,9 @@ public class SDKLocationDialog extends Dialog {
 			target_qemu = IPreferenceStore.FALSE;
 		
 		kernel_value.setEnabled(qemuSelection);
-		rootfs_value.setEnabled(qemuSelection);
-		rootfs_value.setEnabled(qemuSelection);
-		rootfs_button.setEnabled(qemuSelection);
+		//rootfs_value.setEnabled(qemuSelection);
+		//rootfs_value.setEnabled(qemuSelection);
+		//rootfs_button.setEnabled(qemuSelection);
 		
 		ip_value.setEnabled(!qemuSelection);
 		
@@ -334,21 +335,28 @@ public class SDKLocationDialog extends Dialog {
         String target  = targetArchCombo.getText();
         
         String qemu_kernel = null;
-        String qemu_rootfs = null;
+        //String qemu_rootfs = null;
         String ip_addr = null;
         if (qemuSelection) {
         	qemu_kernel = kernel_value.getText();
-        	qemu_rootfs = rootfs_value.getText();
+        	//qemu_rootfs = rootfs_value.getText();
         } else 
         	ip_addr = ip_value.getText();
         
-		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, 
+		/*SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, 
 															toolchain_location, 
 															target,
 															target_qemu,
 															qemu_kernel,
 															qemu_rootfs,
 															ip_addr);
+															*/
+        SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, 
+				toolchain_location, 
+				target,
+				target_qemu,
+				qemu_kernel,
+				ip_addr);
 		boolean pass = true;
 		if (result != SDKCheckResults.SDK_PASS) {
 			errorMessage = YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Menu);
@@ -398,7 +406,7 @@ public class SDKLocationDialog extends Dialog {
 			else 
 				target_qemu_ret_value = IPreferenceStore.FALSE;
 			qemu_kernel_ret_value = kernel_value.getText();
-			qemu_rootfs_ret_value = rootfs_value.getText();
+			//qemu_rootfs_ret_value = rootfs_value.getText();
 			ip_addr_ret_value = ip_value.getText();
 		}
 		super.buttonPressed(buttonId);
@@ -423,11 +431,11 @@ public class SDKLocationDialog extends Dialog {
 	public String getQEMUKernel() {
 		return qemu_kernel_ret_value;
 	}
-	
+	/*
 	public String getQEMURootfs() {
 		return qemu_rootfs_ret_value;
 	}
-	
+	*/
 	public String getIPAddr() {
 		return ip_addr_ret_value;
 	}

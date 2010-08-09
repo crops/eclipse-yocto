@@ -108,14 +108,14 @@ public class ReconfigYoctoAction extends InvokeAction {
 				target_qemu,
 				YoctoSDKMessages.getString(QEMU_KERNEL),
 				qemu_kernel,
-				YoctoSDKMessages.getString(QEMU_ROOTFS),
-				qemu_rootfs,
+				//YoctoSDKMessages.getString(QEMU_ROOTFS),
+				//qemu_rootfs,
 				YoctoSDKMessages.getString(SETUP_ENV_SCRIPT),
 				env_script,
 				YoctoSDKMessages.getString(IP_ADDR),
 				ip_addr,
 				null);
-
+	
 		optionDialog.open();
 		
 		String SDK = optionDialog.getSDKRoot();
@@ -123,10 +123,11 @@ public class ReconfigYoctoAction extends InvokeAction {
 		String targetRet = optionDialog.getTarget(); 
 		String qemu = optionDialog.getTargetQemu();
 		String kernel = optionDialog.getQEMUKernel();
-		String rootfs = optionDialog.getQEMURootfs();
+		//String rootfs = optionDialog.getQEMURootfs();
 		String ipaddr = optionDialog.getIPAddr();
 		if (location != null) {			
-			YoctoSDKProjectNature.setEnvironmentVariables(project, SDK, location, targetRet, qemu, kernel, rootfs, ipaddr);
+			//YoctoSDKProjectNature.setEnvironmentVariables(project, SDK, location, targetRet, qemu, kernel, rootfs, ipaddr);
+			YoctoSDKProjectNature.setEnvironmentVariables(project, SDK, location, targetRet, qemu, kernel, ipaddr);
 			YoctoSDKProjectNature.configureAutotoolsOptions(project, targetRet);
 			try {
 				IConsole console = CCorePlugin.getDefault().getConsole("org.Yocto.sdk.ide.YoctoConsole");

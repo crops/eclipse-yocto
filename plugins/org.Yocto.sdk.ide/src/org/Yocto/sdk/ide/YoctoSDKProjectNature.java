@@ -251,7 +251,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		IConfiguration icfg = info.getDefaultConfiguration();
 		String id = icfg.getId();
 		
-		String command_prefix = "CFLAGS=\" -g -O2 " + CFLAGS_str + " CXXFLAGS=\" -g -O2 " + CXXFLAGS_str + "";
+		String command_prefix = "CFLAGS=\" -g -O0 " + CFLAGS_str + " CXXFLAGS=\" -g -O0 " + CXXFLAGS_str + "";
 		String autogen_setting = command_prefix+" autogen.sh";
 		String configure_setting = command_prefix + " configure";
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);

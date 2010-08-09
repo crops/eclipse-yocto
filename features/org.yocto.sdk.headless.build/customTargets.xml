@@ -178,6 +178,24 @@
 	<!-- ===================================================================== -->
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
+		<antcall target="updateSiteContent" />
+	</target>
+
+	<target name="updateSiteContent" if="p2.gathering">
+		<property file="${buildDirectory}/finalFeaturesVersions.properties" />
+		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
+		<replace file="${buildDirectory}/site.xml">
+			<replacefilter token="@genVerion@" value="${org.yocto.sdk}"/>
+		</replace>
+		<zip destfile="${buildDirectory}/${buildLabel}/org.yocto.sdk-${buildId}-group.group.group.zip" update="true">
+			<zipfileset dir="${buildDirectory}">
+				<include name="site.xml"/>
+			</zipfileset>
+			<zipfileset dir="${otherSrcDirectory}/features/org.yocto.sdk.site">
+			     <include name="index.html"/>
+			</zipfileset>
+			<zipfileset dir="${otherSrcDirectory}/features/org.yocto.sdk.site/web" prefix="web"/>
+		</zip>
 	</target>
 
 	<!-- ===================================================================== -->

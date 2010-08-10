@@ -70,7 +70,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static String CONFIGURE_FLAGS_str = "";
 	
 	private IProject proj;
-	
+	private static String Yocto_native_path = "";
 
 	public void configure() throws CoreException {
 	}
@@ -140,6 +140,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 								env.addVariable("PKG_CONFIG_SYSROOT_DIR", Yocto_pkg_sys_root, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 							} else if (line.contains("PATH") && !line.contains("LD_LIBRARY_PATH")) {
 								Yocto_path = line.substring(line.indexOf('=')+1, line.indexOf('$'));
+								Yocto_native_path = Yocto_path.substring(0, Yocto_path.length() - 1);
 								if (sys_path != null) {
 									Yocto_path = Yocto_path + sys_path;
 								}
@@ -221,12 +222,14 @@ public class YoctoSDKProjectNature implements IProjectNature {
 				if (qemu_surfix.contains("86")) {
 					qemu_surfix = "X86";
 				}
-				ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, "qemu_"+qemu_surfix);
+				
+				ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, "qemu_"+qemu_surfix);
+			
 				ArrayList<String> listValue = new ArrayList<String>();
 				listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
 				w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
 				
-				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
+				//w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
 				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 				//String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " " + qemu_rootfs+";bash\"";
 				String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " ;bash\"";
@@ -308,10 +311,10 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			if ((oprofileUI_str.isEmpty()) || (oprofileUI_str == null))
 				return;
 			try {
-				ILaunchConfigurationWorkingCopy oprofile_copy = configType.newInstance(project, "OProfileUI");
+				ILaunchConfigurationWorkingCopy oprofile_copy = configType.newInstance(null, "OProfileUI");
 				
 				oprofile_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
-				oprofile_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
+				//oprofile_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
 				oprofile_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", oprofileUI_str);
 				oprofile_copy.doSave();
 			} catch (CoreException e) {
@@ -320,6 +323,11 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	}
 	
 	protected static String getOProfileUI() {
+		
+		String file_str = Yocto_native_path + "/oprofile-viewer";
+		File Yocto_oprofile = new File(file_str);
+		if (Yocto_oprofile.exists())
+			return file_str;
 		
         String which_command_str = DEFAULT_WHICH_COMMAND + " " + DEFAULT_WHICH_OPROFILEUI;
         try {

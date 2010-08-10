@@ -45,6 +45,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static final String DEFAULT_WHICH_OPROFILEUI = "oprofile-viewer";
 	private static final String DEFAULT_HOST_NAME_COMMAND = "uname -m";
 	private static final String DEFAULT_POKY_SURFIX = "-poky-linux";
+	private static final String DEFAULT_GDB_SURFIX = "-gdb";
 
 	private static final String DEFAULT_SYSROOTS_STR = "/sysroots/";
 	private static final String DEFAULT_USER_BIN_STR = "/usr/bin";
@@ -68,6 +69,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static String CFLAGS_str = "";
 	private static String CXXFLAGS_str = "";
 	private static String CONFIGURE_FLAGS_str = "";
+	private static String env_script = "";
 	
 	private IProject proj;
 	private static String Yocto_native_path = "";
@@ -118,8 +120,6 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String sys_path    = System.getenv("PATH");
 		String Yocto_path = "";
 		String host = getHostName();
-		
-		String env_script = "";
 		
 		if (sdkroot.equals("true")) {
 			try {
@@ -192,57 +192,27 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			Yocto_path = Yocto_path_prefix + DEFAULT_USER_BIN_STR + delimiter + Yocto_path_prefix + DEFAULT_BIN_STR;
 		}
 		try {
+			ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType configType = lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
+			ILaunchConfigurationType debug_configType = lManager.getLaunchConfigurationType("org.eclipse.rse.remotecdt.RemoteApplicationLaunch");
+			String cross_debugger = Yocto_native_path+"/"+target_str+DEFAULT_GDB_SURFIX;
+			createRemoteDebugLauncher(project, debug_configType, cross_debugger);
+			ArrayList<String> listValue = new ArrayList<String>();
+			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
 			if (target_qemu.equals(IPreferenceStore.TRUE)) {
 				env.addVariable(PreferenceConstants.QEMU_KERNEL, qemu_kernel, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 				//env.addVariable(PreferenceConstants.QEMU_ROOTFS, qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 				env.addVariable(PreferenceConstants.IP_ADDR, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
-			
-				IWorkspaceRoot wp_root = ResourcesPlugin.getWorkspace().getRoot();
-				IProject[] projects = wp_root.getProjects();
-				
-				String qemu_launch_str = "qemu_"+target_str+".launch";
-				boolean found_qemu_launcher = false;
-				IFile qemu_launch_file = null;
-				for (int i = 0; i < projects.length; i++) {
-					IProject project_i = projects[i];
-					qemu_launch_file = project_i.getFile(qemu_launch_str);
-					if (qemu_launch_file.exists()) {
-						found_qemu_launcher = true;
-						break;
-					} 
-				}
-				
-				if (found_qemu_launcher) {
-					qemu_launch_file.delete(true, myMonitor);
-				}
-				
-				ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
-				ILaunchConfigurationType configType = lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
-				String qemu_surfix = target_str;
-				if (qemu_surfix.contains("86")) {
-					qemu_surfix = "X86";
-				}
-				
-				ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, "qemu_"+qemu_surfix);
-			
-				ArrayList<String> listValue = new ArrayList<String>();
-				listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
-				w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
-				
-				//w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
-				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
-				//String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " " + qemu_rootfs+";bash\"";
-				String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " ;bash\"";
-				
-				w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
-				w_copy.doSave();
-				createOProfileUI(project, configType, listValue);
+			   
+				//createOProfileUI(project, configType, listValue);
+				createQemuLauncher(project, configType, listValue, qemu_kernel);
 			
 			} else {
 				env.addVariable(PreferenceConstants.QEMU_KERNEL, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
 				//env.addVariable(PreferenceConstants.QEMU_ROOTFS, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
 				env.addVariable(PreferenceConstants.IP_ADDR, ip_addr, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 			}
+			createOProfileUI(project, configType, listValue);
 			CoreModel.getDefault().setProjectDescription(project,cpdesc);
 		} catch (CoreException e) {
 			e.printStackTrace();
@@ -291,8 +261,57 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		}
 	}
 	
+	protected static void createRemoteDebugLauncher(IProject project, 
+											ILaunchConfigurationType configType,  
+											String cross_gdb) {
+		try {
+			String gdb_surfix = target_str;
+			if (gdb_surfix.contains("86")) {
+				gdb_surfix = "X86";
+			}
+
+			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, project.getName()+"_gdb_"+gdb_surfix);
+			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.AUTO_SOLIB", true);
+			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.DEBUG_NAME", cross_gdb);
+			String projectName = project.getName();
+			String project_src = "src/"+projectName;
+			w_copy.setAttribute("org.eclipse.cdt.launch.PROJECT_ATTR", projectName);
+			w_copy.setAttribute("org.eclipse.cdt.launch.PROGRAM_NAME", project_src);
+		
+			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.protocol", "mi");
+			w_copy.doSave();
+		} catch (CoreException e) {
+		}
+	}
+
+	protected static void createQemuLauncher(IProject project, 
+											ILaunchConfigurationType configType, 
+											ArrayList<String> listValue, 
+											String qemu_kernel) {
+		try {
+			String qemu_surfix = target_str;
+			if (qemu_surfix.contains("86")) {
+				qemu_surfix = "X86";
+			}
+		
+			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, "qemu_"+qemu_surfix);
+	
+			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
+		
+			//w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
+			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
+			//String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " " + qemu_rootfs+";bash\"";
+			String argument = "-e \"source " + env_script + ";poky-qemu " + qemu_kernel + " ;bash\"";
+		
+			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
+			w_copy.doSave();
+		} catch (CoreException e) {
+		}
+		
+	}
 	protected static void createOProfileUI(IProject project, ILaunchConfigurationType configType, ArrayList<String> listValue) {
 		//Create one instance of OProfileUI launcher
+		
 		IWorkspaceRoot wp_root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] projects = wp_root.getProjects();
 		

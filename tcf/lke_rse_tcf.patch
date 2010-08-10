@@ -362,7 +362,27 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      peer = p;
                      break;
                  }
-@@ -192,7 +282,8 @@
+@@ -171,17 +261,18 @@
+ 
+                 public void congestionLevel(int level) {
+                 }
+-
+                 public void onChannelClosed(Throwable error) {
+                     assert channel != null;
+                     channel.removeChannelListener(this);
+                     channel_error = error;
++
+                     if (wait_list.isEmpty()) {
+                         fireCommunicationsEvent(CommunicationsEvent.CONNECTION_ERROR);
+                     }
+                     else {
+                         run_wait_list();
+                     }
++                    bSubscribed = false;
+                     channel = null;
+                     channel_error = null;
+                 }
+@@ -192,7 +283,8 @@
          return false;
      }
  
@@ -372,7 +392,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          if (channel == null || channel.getState() == IChannel.STATE_CLOSED) {
              synchronized (res) {
                  res[0] = null;
-@@ -212,9 +303,12 @@
+@@ -212,9 +304,12 @@
      }
  
      public <V extends IService> V getService(Class<V> service_interface) {
@@ -387,7 +407,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          return m;
      }
  
-@@ -225,4 +319,100 @@
+@@ -225,4 +320,100 @@
      public IFileSystem getFileSystemService() {
          return getService(IFileSystem.class);
      }
@@ -524,7 +544,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
-@@ -0,0 +1,402 @@
+@@ -0,0 +1,435 @@
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import java.io.BufferedWriter;
@@ -683,6 +703,19 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +            e.printStackTrace();
 +        }
 +    }    
++
++    private int login(String username, String password) throws InterruptedException
++    {
++        long millisToEnd = System.currentTimeMillis() + ITCFSessionProvider.TCP_CONNECT_TIMEOUT*1000;
++        LoginThread checkLogin = new LoginThread(username, password);
++        status = ITCFSessionProvider.ERROR_CODE;
++        checkLogin.start();
++        while (checkLogin.isAlive() && System.currentTimeMillis()<millisToEnd)
++            checkLogin.join(500);
++        status = checkLogin.getLoginStatus();
++        checkLogin.join();
++        return status;
++    }
 +    /**
 +     * Construct a new TCF connection.
 +     *
@@ -764,13 +797,24 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +                fOutputStreamWriter = new BufferedWriter(new OutputStreamWriter(fOutputStream));
 +            }
 +
-+            long millisToEnd = System.currentTimeMillis() + ITCFSessionProvider.TCP_CONNECT_TIMEOUT*1000;
-+            LoginThread checkLogin = new LoginThread(user, password);
-+            checkLogin.start();
-+            while (checkLogin.isAlive() && System.currentTimeMillis()<millisToEnd)
-+                checkLogin.join(500);
-+            status = checkLogin.getLoginStatus();
-+            checkLogin.join();
++            try {
++                status = login(user, password);
++            }
++            finally
++            {
++                if ((status == ITCFSessionProvider.CONNECT_CLOSED))
++                    System.out.print("First time login fails, retry!");
++            }
++
++            //give another chance of retrying
++            if ((status == ITCFSessionProvider.CONNECT_CLOSED))
++            {
++                ((TCFConnectorService)sessionProvider).Unsubscribe();
++                    ((TCFConnectorService)sessionProvider).Subscribe();
++                assert (((TCFConnectorService)sessionProvider).isSubscribed());
++                status = login(user, password);
++            }
++            
 +            connected = true;
 +            if (initialWorkingDirectory!=null && initialWorkingDirectory.length()>0
 +                    && !initialWorkingDirectory.equals(".") //$NON-NLS-1$
@@ -796,17 +840,26 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +            else {
 +                System.out.println("TCF shell Service: Connect failed"); //$NON-NLS-1$
 +                SystemMessage msg;
++                        
 +                if (nestedException!=null) {
 +                    msg = new SimpleSystemMessage(org.eclipse.tm.internal.tcf.rse.Activator.PLUGIN_ID,
 +                            ICommonMessageIds.MSG_EXCEPTION_OCCURRED,
 +                            IStatus.ERROR,
 +                            CommonMessages.MSG_EXCEPTION_OCCURRED, nestedException);
 +                } else {
++                    String strErr;
++                    if (status == ITCFSessionProvider.CONNECT_CLOSED)
++                        strErr = "Connection closed!";
++                    else if (status == ITCFSessionProvider.ERROR_CODE)
++                        strErr = "Login Incorrect or meet other unknown error!";
++                    else
++                        strErr = "Not identified Errors";
++
 +                    msg = new SimpleSystemMessage(org.eclipse.tm.internal.tcf.rse.Activator.PLUGIN_ID,
 +                            ICommonMessageIds.MSG_COMM_AUTH_FAILED,
 +                            IStatus.ERROR,
-+                            CommonMessages.MSG_COMM_AUTH_FAILED,
-+                            NLS.bind(CommonMessages.MSG_COMM_AUTH_FAILED_DETAILS, ((TCFConnectorService)fSessionProvider).getHost().getAliasName()));
++                            strErr,
++                            "Meet error when trying to login in!");
 +                    msg.makeSubstitution(((TCFConnectorService)fSessionProvider).getHost().getAliasName());
 +                }
 +                throw new SystemMessageException(msg);

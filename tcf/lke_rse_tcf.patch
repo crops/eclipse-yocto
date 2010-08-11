@@ -56,6 +56,94 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
      }
  
      @Override
+Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileService.java
+===================================================================
+--- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileService.java	(revision 1079)
++++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileService.java	(working copy)
+@@ -226,13 +226,80 @@
+         }.getS(monitor, "Delete"); //$NON-NLS-1$
+     }
+ 
++    private void internalDelete(String parent, String name,
++            IProgressMonitor monitor) 
++    throws SystemMessageException, InterruptedException
++    {
++        if (monitor != null)
++        {
++            if (monitor.isCanceled())
++            {
++                throw new InterruptedException("User cancelled the delete operation!");
++            }
++        }
++
++        try 
++        {
++            final String new_path = toRemotePath(parent, name);
++            IHostFile[] arrFiles = internalFetch(new_path, null,
++                    FILE_TYPE_FILES_AND_FOLDERS, monitor);
++            if (arrFiles == null || arrFiles.length <= 0)
++            {
++                //This is an empty directory, directly delete!
++                delete(parent, name, monitor);
++            }
++            else
++            {
++                for (int i = 0; i < arrFiles.length; i++)
++                {
++
++                    if (arrFiles[i].isFile())
++                    {
++                        delete(new_path, arrFiles[i].getName(), monitor);
++                    }
++                    else
++                        internalDelete(new_path, arrFiles[i].getName(), monitor);
++                }
++                //now the folder becomes empty, let us delete it!
++                delete(parent, name, monitor);
++            }
++        }
++        catch (SystemMessageException e) {
++            // TODO Auto-generated catch block
++            e.printStackTrace();
++            throw new SystemMessageException(e.getSystemMessage());
++        }
++        catch (InterruptedException e) {
++            throw new InterruptedException("User cancelled the delete operation!");
++        }
++    }
++
+     @Override
+     public void deleteBatch(String[] remoteParents, String[] fileNames,
+             IProgressMonitor monitor)
+-            throws SystemMessageException {
+-        for (int i = 0; i < remoteParents.length; i++) {
+-            delete(remoteParents[i], fileNames[i], monitor);
++    throws SystemMessageException {
++        if (monitor != null)
++            monitor.beginTask("Deleting selected folders or files!", remoteParents.length);  
++        try
++        {
++            for (int i = 0; i < remoteParents.length; i++) {
++                IHostFile curFile = getFile(remoteParents[i], fileNames[i], monitor);
++                if (curFile.isFile())
++                    delete(remoteParents[i], fileNames[i], monitor);
++                else
++                    internalDelete(remoteParents[i], fileNames[i], monitor);                    
++            }
+         }
++        catch (Exception x) {
++            if (x instanceof SystemMessageException) throw (SystemMessageException)x;
++            else if (x instanceof InterruptedException) {
++                System.out.println("user cancelled the delete operation!");
++            }
++            throw new SystemOperationFailedException(Activator.PLUGIN_ID, x);
++        }
++        finally {
++            monitor.done();
++        }
+     }
+ 
+     public void download(final String parent,
 Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)

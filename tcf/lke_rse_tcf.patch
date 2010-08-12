@@ -60,7 +60,147 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileService.java	(revision 1079)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileService.java	(working copy)
-@@ -226,13 +226,80 @@
+@@ -18,6 +18,7 @@
+ import java.io.BufferedOutputStream;
+ import java.io.File;
+ import java.io.FileInputStream;
++import java.io.FileNotFoundException;
+ import java.io.FileOutputStream;
+ import java.io.IOException;
+ import java.io.InputStream;
+@@ -131,22 +132,127 @@
+         return s;
+     }
+ 
++    /* Delete from UI action will call deleteBatch interface, yet
++     * for copy from UI action, it will call copy! It's totally
++     * inconsistency. For solving the problem, we have to modify
++     * the copy itself and made it recursive. We can't modify it
++     * in the same way as delete does!
++     *  
++     */
++
++    public void internalCopy(String srcParent,
++            String srcName, String tgtParent, String tgtName, IProgressMonitor monitor)
++            throws SystemMessageException, InterruptedException {
++        //Note the dst directory or file exist surely since UI operations have
++        //done something, rename it to copy of XXX
++        if (monitor != null)
++        {
++            if (monitor.isCanceled())
++            {
++                throw new InterruptedException("User cancelled the copy operation!");
++            }
++        }       
++
++        try
++        {
++            //firstly create the target directory!
++            this.createFolder(tgtParent, tgtName, monitor);
++            //then copy the next level directory!
++            final String new_srcpath = toRemotePath(srcParent, srcName);
++            final String new_tgtpath = toRemotePath(tgtParent, tgtName);
++            IHostFile[] arrFiles = internalFetch(new_srcpath, null,
++                    FILE_TYPE_FILES_AND_FOLDERS, monitor);
++            if (arrFiles == null || arrFiles.length <=0 )
++                return;
++            else
++            {
++                for (int i = 0; i < arrFiles.length; i++)
++                {
++                    String srcFile = toRemotePath(new_srcpath, arrFiles[i].getName());
++                    String tgtFile = toRemotePath(new_tgtpath, arrFiles[i].getName());
++                    if (arrFiles[i].isFile())
++                    {
++                        copy(srcFile, tgtFile, monitor);
++                    }
++                    else
++                    {
++                        //do recursive directory copy!
++                        internalCopy(new_srcpath, arrFiles[i].getName(), new_tgtpath,
++                                arrFiles[i].getName(), monitor);
++                    }
++                }
++            }
++        }
++        catch (SystemMessageException e)
++        {
++            e.printStackTrace();
++            throw new SystemMessageException(e.getSystemMessage());
++        }
++        catch (InterruptedException e)
++        {
++            throw new InterruptedException("User cancelled the copy operation!");
++        }        
++    }
++    
+     public void copy(String srcParent,
+             String srcName, String tgtParent, String tgtName, IProgressMonitor monitor)
+             throws SystemMessageException {
+-        final String src = toRemotePath(srcParent, srcName);
+-        final String tgt = toRemotePath(tgtParent, tgtName);
++        
++        if (monitor != null)
++            monitor.beginTask("Copying remote files!", 2);
++        
++        try {
++
++            IHostFile curFile = getFile(srcParent, srcName, monitor);
++            final String srcFile = toRemotePath(srcParent, srcName);
++            final String tgtFile = toRemotePath(tgtParent, tgtName);
++
++            if (curFile.isFile())
++                copy(srcFile, tgtFile, monitor);
++            else if (curFile.isDirectory())
++            {
++                internalCopy(srcParent, srcName, tgtParent, tgtName, monitor);
++            }
++            else
++            {
++                FileNotFoundException e =
++                    new FileNotFoundException("Failed to find the to be " +
++                    		"copied file or directory!");
++                throw new SystemMessageException(getMessage(e));
++            }
++        }
++        catch (Exception e) {
++            e.printStackTrace();
++            // TODO Auto-generated catch block
++            if (e instanceof SystemMessageException)
++                throw (SystemMessageException)e;
++            else if (e instanceof InterruptedException)
++            {
++                System.out.println("User cancelled the copy operatioin!");
++            }
++            throw new SystemOperationFailedException(Activator.PLUGIN_ID, e);
++            
++        }
++        finally {
++            if (monitor != null)
++                monitor.done();
++        }
++    }
++
++    public void copy(final String srcFile, final String tgtFile, IProgressMonitor monitor)
++            throws SystemMessageException {
++        System.out.printf("copy file %s to target %s", srcFile, tgtFile);
+         new TCFRSETask<Boolean>() {
+             public void run() {
+                 IFileSystem fs = connector.getFileSystemService();
+-                fs.copy(src, tgt, false, false, new IFileSystem.DoneCopy() {
++                fs.copy(srcFile, tgtFile, false, false, new IFileSystem.DoneCopy() {
+                     public void doneCopy(IToken token, FileSystemException error) {
+                         if (error != null) error(error);
+                         else done(Boolean.TRUE);
+                     }
+                 });
+             }
+-        }.getS(monitor, "Copy: " + srcName); //$NON-NLS-1$
++        }.getS(monitor, "Copy: " + srcFile); //$NON-NLS-1$
+     }
+ 
+     public void copyBatch(String[] srcParents,
+@@ -226,13 +332,81 @@
          }.getS(monitor, "Delete"); //$NON-NLS-1$
      }
  
@@ -127,7 +267,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
 +                IHostFile curFile = getFile(remoteParents[i], fileNames[i], monitor);
 +                if (curFile.isFile())
 +                    delete(remoteParents[i], fileNames[i], monitor);
-+                else
++                else if (curFile.isDirectory())
 +                    internalDelete(remoteParents[i], fileNames[i], monitor);                    
 +            }
          }
@@ -139,7 +279,8 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
 +            throw new SystemOperationFailedException(Activator.PLUGIN_ID, x);
 +        }
 +        finally {
-+            monitor.done();
++            if (monitor != null)
++                monitor.done();
 +        }
      }
  

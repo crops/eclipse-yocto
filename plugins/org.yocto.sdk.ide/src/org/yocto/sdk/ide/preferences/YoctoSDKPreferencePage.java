@@ -80,17 +80,17 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	private Button QEMUButton;
 	private Button RealHWButton;
 	private Button kernel_button;
-	//private Button rootfs_button;
+	private Button rootfs_button;
 	private Button root_button;
 
 	private Label root_label;
 	private Label kernel_label;
-	//private Label rootfs_label;
+	private Label rootfs_label;
 	private Label ip_label;
 	
 	private Text root_value;
 	private Text kernel_value;
-	//private Text rootfs_value;
+	private Text rootfs_value;
 	private Text ip_value;
 
 	public YoctoSDKPreferencePage() {
@@ -187,7 +187,6 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		kernel_value.addModifyListener(fModifyListener);
 		kernel_button = addTextControlButton(textContainer, kernel_value, PreferenceConstants.QEMU_KERNEL);
 
-		/*
 		rootfs_label= new Label(targetGroup, SWT.NONE);
 		rootfs_label.setText("Root Filesystem: ");
 		textContainer = new Composite(targetGroup, SWT.NONE);
@@ -196,7 +195,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		rootfs_value= addTextControlText(textContainer, rootfs_label, PreferenceConstants.QEMU_ROOTFS);
 		rootfs_value.addModifyListener(fModifyListener);
 		rootfs_button = addTextControlButton(textContainer, rootfs_value, PreferenceConstants.QEMU_ROOTFS);
-	    */
+	   
 		RealHWButton = addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_QEMU, IPreferenceStore.FALSE);
 		RealHWButton.addSelectionListener(fSelectionListener);
 		
@@ -247,9 +246,8 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			target_qemu = IPreferenceStore.FALSE;
 		
 		kernel_value.setEnabled(qemuSelection);
-		//rootfs_value.setEnabled(qemuSelection);
-		//rootfs_value.setEnabled(qemuSelection);
-		//rootfs_button.setEnabled(qemuSelection);
+		rootfs_value.setEnabled(qemuSelection);
+		rootfs_button.setEnabled(qemuSelection);
 		
 		ip_value.setEnabled(!qemuSelection);
 		
@@ -258,15 +256,15 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
         String target  = targetArchCombo.getText();
         
         String qemu_kernel = null;
-        //String qemu_rootfs = null;
+        String qemu_rootfs = null;
         String ip_addr = null;
         if (qemuSelection) {
         	qemu_kernel = kernel_value.getText();
-        	//qemu_rootfs = rootfs_value.getText();
+        	qemu_rootfs = rootfs_value.getText();
         } else 
         	ip_addr = ip_value.getText();
         //String env_script = script_value.getText();
-        /*
+       
 		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, 
 															toolchain_location, 
 															target,
@@ -274,13 +272,14 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 															qemu_kernel,
 															qemu_rootfs,
 															ip_addr);
-															*/
+		/*													
         SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, 
 				toolchain_location, 
 				target,
 				target_qemu,
 				qemu_kernel,
 				ip_addr); 
+				*/
 		boolean pass = true;
 		if (result != SDKCheckResults.SDK_PASS) {
 			errorMessage = YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Preferences);
@@ -378,7 +377,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				String dirName;
-				if (key.equals(PreferenceConstants.TOOLCHAIN_ROOT))
+				if (key.equals(PreferenceConstants.TOOLCHAIN_ROOT) || key.equals(PreferenceConstants.QEMU_ROOTFS))
 					dirName = new DirectoryDialog(parent.getShell()).open();
 				else
 					dirName = new FileDialog(parent.getShell()).open();

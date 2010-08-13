@@ -14,7 +14,7 @@ public class YoctoSDKChecker {
 		SDK_SYSROOT_NON_EXIST,
 		SDK_PKGCONFIG_NON_EXIST,
 		QEMU_KERNEL_NON_EXIST,
-		//QEMU_ROOTFS_NON_EXIST,
+		QEMU_ROOTFS_NON_EXIST,
 		ENV_SETUP_SCRIPT_NON_EXIST
 	};
 
@@ -33,7 +33,7 @@ public class YoctoSDKChecker {
 	private static final String WIZARD_QEMU_KERNEL_EMPTY 	  = "Wizard.Qemu.Kernel.Empty";
 	//private static final String WIZARD_QEMU_ROOTFS_EMPTY = "Wizard.Qemu.Rootfs.Empty";
 	private static final String WIZARD_QEMU_KERNEL_NONEXIST   = "Wizard.Qemu.Kernel.Nonexist";
-	//private static final String WIZARD_QEMU_ROOTFS_NONEXIST   = "Wizard.Qemu.Rootfs.Nonexist";
+	private static final String WIZARD_QEMU_ROOTFS_NONEXIST   = "Wizard.Qemu.Rootfs.Nonexist";
 
 	private static final String MENU_SDK_LOCATION_EMPTY     = "Menu.SDK.Location.Empty";
 	private static final String MENU_TOOLCHAIN_LOCATION_NONEXIST = "Menu.Toolchain.Location.Nonexist";
@@ -44,7 +44,7 @@ public class YoctoSDKChecker {
 	private static final String MENU_QEMU_KERNEL_EMPTY = "Menu.Qemu.Kernel.Empty";
 	//private static final String MENU_QEMU_ROOTFS_EMPTY = "Menu.Qemu.Rootfs.Empty";
 	private static final String MENU_QEMU_KERNEL_NONEXIST = "Menu.Qemu.Kernel.Nonexist";
-	//private static final String MENU_QEMU_ROOTFS_NONEXIST = "Menu.Qemu.Rootfs.Nonexist";
+	private static final String MENU_QEMU_ROOTFS_NONEXIST = "Menu.Qemu.Rootfs.Nonexist";
 
 	private static final String PREFERENCES_SDK_BIN_NONEXIST       = "Preferences.SDK.Bin.Nonexist";
 	private static final String PREFERENCES_SDK_SYSROOT_NONEXIST   = "Preferences.SDK.Sysroot.Nonexist";
@@ -54,14 +54,14 @@ public class YoctoSDKChecker {
 	
 	private static final String PREFERENCES_TOOLCHAIN_LOCATION_NONEXIST = "Preferences.Toolchain.Location.Nonexist";
 	private static final String PREFERENCES_QEMU_KERNEL_EMPTY = "Preferences.Qemu.Kernel.Empty";
-	//private static final String PREFERENCES_QEMU_ROOTFS_EMPTY = "Preferences.Qemu.Rootfs.Empty";
+	private static final String PREFERENCES_QEMU_ROOTFS_EMPTY = "Preferences.Qemu.Rootfs.Empty";
 	private static final String PREFERENCES_QEMU_KERNEL_NONEXIST   = "Preferences.Qemu.Kernel.Nonexist";
-	//private static final String PREFERENCES_QEMU_ROOTFS_NONEXIST   = "Preferences.Qemu.Rootfs.Nonexist";
+	private static final String PREFERENCES_QEMU_ROOTFS_NONEXIST   = "Preferences.Qemu.Rootfs.Nonexist";
 
-	/*public static SDKCheckResults checkYoctoSDK(String sdkroot, String toolchain_location, String target, String target_qemu,
-			String qemu_kernel, String qemu_rootfs, String ip_addr) {*/
 	public static SDKCheckResults checkYoctoSDK(String sdkroot, String toolchain_location, String target, String target_qemu,
-			String qemu_kernel, String ip_addr) {
+			String qemu_kernel, String qemu_rootfs, String ip_addr) {
+	//public static SDKCheckResults checkYoctoSDK(String sdkroot, String toolchain_location, String target, String target_qemu,
+	//		String qemu_kernel, String ip_addr) {
 		if (toolchain_location.isEmpty()) {
 			return SDKCheckResults.TOOLCHAIN_LOCATION_EMPTY;			
 		} else {
@@ -81,13 +81,13 @@ public class YoctoSDKChecker {
 				if (!kernel_file.exists())
 					return SDKCheckResults.QEMU_KERNEL_NON_EXIST;
 			}
-			/*
+			
 			if (!qemu_rootfs.isEmpty()) {
 				File rootfs_dir = new File(qemu_rootfs);
 				if (!rootfs_dir.exists())
 					return SDKCheckResults.QEMU_ROOTFS_NON_EXIST;
 			}
-			*/
+		
 		}
 		
 		return SDKCheckResults.SDK_PASS;
@@ -107,8 +107,8 @@ public class YoctoSDKChecker {
 		//	return YoctoSDKMessages.getString(WIZARD_QEMU_ROOTFS_EMPTY);
 		case QEMU_KERNEL_NON_EXIST:
 			return YoctoSDKMessages.getString(WIZARD_QEMU_KERNEL_NONEXIST);
-		//case QEMU_ROOTFS_NON_EXIST:
-		//	return YoctoSDKMessages.getString(WIZARD_QEMU_ROOTFS_NONEXIST);
+		case QEMU_ROOTFS_NON_EXIST:
+			return YoctoSDKMessages.getString(WIZARD_QEMU_ROOTFS_NONEXIST);
 		case SDK_BIN_NON_EXIST:
 			return  YoctoSDKMessages.getString(WIZARD_SDK_BIN_NONEXIST);
 		case SDK_SYSROOT_NON_EXIST:
@@ -134,8 +134,8 @@ public class YoctoSDKChecker {
 		//	return YoctoSDKMessages.getString(MENU_QEMU_ROOTFS_EMPTY);
 		case QEMU_KERNEL_NON_EXIST:
 			return YoctoSDKMessages.getString(MENU_QEMU_KERNEL_NONEXIST);
-		//case QEMU_ROOTFS_NON_EXIST:
-		//	return YoctoSDKMessages.getString(MENU_QEMU_ROOTFS_NONEXIST);
+		case QEMU_ROOTFS_NON_EXIST:
+			return YoctoSDKMessages.getString(MENU_QEMU_ROOTFS_NONEXIST);
 		case SDK_BIN_NON_EXIST:
 			return  YoctoSDKMessages.getString(MENU_SDK_BIN_NONEXIST);
 		case SDK_SYSROOT_NON_EXIST:
@@ -167,8 +167,8 @@ public class YoctoSDKChecker {
 		//	return YoctoSDKMessages.getString(PREFERENCES_QEMU_ROOTFS_EMPTY);
 		case QEMU_KERNEL_NON_EXIST:
 			return YoctoSDKMessages.getString(PREFERENCES_QEMU_KERNEL_NONEXIST);
-		//case QEMU_ROOTFS_NON_EXIST:
-		//	return YoctoSDKMessages.getString(PREFERENCES_QEMU_ROOTFS_NONEXIST);
+		case QEMU_ROOTFS_NON_EXIST:
+			return YoctoSDKMessages.getString(PREFERENCES_QEMU_ROOTFS_NONEXIST);
 		case ENV_SETUP_SCRIPT_NON_EXIST:
 			return YoctoSDKMessages.getString(ENV_SCRIPT_NONEXIST);
 		default:

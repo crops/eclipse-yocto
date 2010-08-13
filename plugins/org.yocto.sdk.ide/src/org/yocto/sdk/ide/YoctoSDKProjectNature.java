@@ -101,7 +101,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			String target,
 			String target_qemu,
 			String qemu_kernel,
-			//String qemu_rootfs,
+			String qemu_rootfs,
 			String ip_addr){
 		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
 		ICConfigurationDescription ccdesc = cpdesc.getActiveConfiguration();
@@ -201,7 +201,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
 			if (target_qemu.equals(IPreferenceStore.TRUE)) {
 				env.addVariable(PreferenceConstants.QEMU_KERNEL, qemu_kernel, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-				//env.addVariable(PreferenceConstants.QEMU_ROOTFS, qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+				env.addVariable(PreferenceConstants.QEMU_ROOTFS, qemu_rootfs, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 				env.addVariable(PreferenceConstants.IP_ADDR, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
 			   
 				//createOProfileUI(project, configType, listValue);
@@ -209,7 +209,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			
 			} else {
 				env.addVariable(PreferenceConstants.QEMU_KERNEL, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
-				//env.addVariable(PreferenceConstants.QEMU_ROOTFS, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
+				env.addVariable(PreferenceConstants.QEMU_ROOTFS, "", IEnvironmentVariable.ENVVAR_REMOVE, delimiter, ccdesc);
 				env.addVariable(PreferenceConstants.IP_ADDR, ip_addr, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 			}
 			createOProfileUI(project, configType, listValue);
@@ -246,13 +246,13 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String target  = store.getString(PreferenceConstants.TARGET);
 		String target_qemu = store.getString(PreferenceConstants.TARGET_QEMU);
 		String qemu_kernel = store.getString(PreferenceConstants.QEMU_KERNEL);
-		//String qemu_rootfs = store.getString(PreferenceConstants.QEMU_ROOTFS);
+		String qemu_rootfs = store.getString(PreferenceConstants.QEMU_ROOTFS);
 		String ip_addr = store.getString(PreferenceConstants.IP_ADDR);
 
-		//SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, sdk_location, target, target_qemu, qemu_kernel, qemu_rootfs, ip_addr);
-		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, sdk_location, target, target_qemu, qemu_kernel, ip_addr);
+		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, sdk_location, target, target_qemu, qemu_kernel, qemu_rootfs, ip_addr);
+		//SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(sdkroot, sdk_location, target, target_qemu, qemu_kernel, ip_addr);
 		if (result == SDKCheckResults.SDK_PASS){
-			setEnvironmentVariables(project, sdkroot, sdk_location, target, target_qemu, qemu_kernel, ip_addr);
+			setEnvironmentVariables(project, sdkroot, sdk_location, target, target_qemu, qemu_kernel, qemu_rootfs, ip_addr);
 			configureAutotoolsOptions(project, target);
 		}else {
 			String title   =  YoctoSDKMessages.getString(WIZARD_WARNING_TITLE);		

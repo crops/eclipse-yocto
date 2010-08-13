@@ -93,7 +93,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.Yocto.sdk.ide"
+         id="org.yocto.sdk.ide"
          download-size="0"
          install-size="0"
          version="0.0.0"

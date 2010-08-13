@@ -80,8 +80,8 @@
 		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0/plugins/org.eclipse.tm.tcf.rse"/>
 		    <arg value="plugins/org.eclipse.tm.tcf.rse"/>
 		</exec>
-		<copy todir="${buildDirectory}/plugins/org.Yocto.sdk.ide" failonerror="true">
-		    <fileset dir="${otherSrcDirectory}/plugins/org.Yocto.sdk.ide"/>
+		<copy todir="${buildDirectory}/plugins/org.yocto.sdk.ide" failonerror="true">
+		    <fileset dir="${otherSrcDirectory}/plugins/org.yocto.sdk.ide"/>
 		</copy>
 		<delete dir="${buildDirectory}/features"/>
 		<copy todir="${buildDirectory}/features" failonerror="true" >

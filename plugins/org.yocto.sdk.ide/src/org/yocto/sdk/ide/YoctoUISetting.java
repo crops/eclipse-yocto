@@ -45,15 +45,6 @@ public class YoctoUISetting {
 
 	private Button btnKernelLoc;
 	private Button btnRootFSLoc;
-	private Button btnOK;
-
-	public Button getBtnOK() {
-		return btnOK;
-	}
-
-	public void setBtnOK(Button btnOK) {
-		this.btnOK = btnOK;
-	}
 
 	private Text textKernelLoc;
 	private Text textRootFSLoc;
@@ -300,14 +291,7 @@ public class YoctoUISetting {
 			if (shell != null)
 				shell.dispose();
 
-			if (btnOK != null)
-				btnOK.setEnabled(false);
 			throw new YoctoGeneralException(strErrorMessage);
-		}
-		else
-		{
-			if (btnOK != null)
-				btnOK.setEnabled(true);
 		}
 		return pass;
 	}

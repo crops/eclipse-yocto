@@ -62,11 +62,7 @@ public class OprofileModel extends BaseModel {
 			//starting oprofile-server
 			app.start(args,null);
 			monitor.worked(1);
-			InputStream in=app.getInputStream();
-			int i;
-			while((i=in.read())!=-1) {
-				System.out.printf("%c",i&0xff);
-			}
+
 			exit_code=app.waitFor(monitor);
 			app.terminate();
 			if(exit_code!=0) {
@@ -141,13 +137,14 @@ public class OprofileModel extends BaseModel {
 			startServer(new SubProgressMonitor(monitor,30));
 			
 			//start local oprofile-viewer
-			String [] cmdarray=new String[5];
-			cmdarray[0]="oprofile-viewer";
-			cmdarray[1]="-h";
-			cmdarray[2]=target.getRemoteHostName();
-			cmdarray[3]="-s";
-			cmdarray[4]=getSearchPath();
-			Process p=Runtime.getRuntime().exec(cmdarray,null,null);
+			String searchPath=getSearchPath();
+			
+			Process p=Runtime.getRuntime().exec(
+					(searchPath!=null) ? 
+						new String[] {"oprofile-viewer","-h",target.getRemoteHostName(),"-s",searchPath} : 
+						new String[] {"oprofile-viewer","-h",target.getRemoteHostName()},
+					null,
+					null);
 			
 			//wait for oprofile-viewer to finish
 			monitor.worked(40);

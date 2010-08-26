@@ -2,7 +2,6 @@ package org.yocto.sdk.remotetools.views;
 
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 
@@ -15,7 +14,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.SWT;
-import org.yocto.sdk.remotetools.InternalTest;
 
 
 /**

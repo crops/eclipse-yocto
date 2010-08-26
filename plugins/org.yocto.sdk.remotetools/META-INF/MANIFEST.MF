@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Remotetools
+Bundle-SymbolicName: org.yocto.sdk.remotetools; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.yocto.sdk.remotetools.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.rse.core;bundle-version="3.0.0",
+ org.eclipse.rse.services;bundle-version="3.0.0",
+ org.eclipse.rse.subsystems.files.core;bundle-version="3.0.0",
+ org.eclipse.rse.ui;bundle-version="3.0.0",
+ org.eclipse.tm.tcf.core;bundle-version="0.3.0",
+ org.yocto.sdk.ide,
+ org.eclipse.tm.terminal;bundle-version="[3.0.1,3.1.0)",
+ org.eclipse.rse.subsystems.terminals.core;bundle-version="[1.0.0,2.0.0)",
+ org.eclipse.rse.terminals.ui;bundle-version="1.0.100"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.core.resources,
+ org.eclipse.debug.internal.ui,
+ org.eclipse.ui.forms.widgets

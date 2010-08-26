@@ -14,10 +14,10 @@ public class YoctoSDKMessages {
 			fgResourceBundle = null;
 		}
 	}
-	
+
 	private YoctoSDKMessages() {
 	}
-		
+
 	public static String getString(String key) {
 		try {
 			return fgResourceBundle.getString(key);
@@ -27,7 +27,7 @@ public class YoctoSDKMessages {
 			return "#" + key + "#"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
-	
+
 	/**
 	 * Gets a string from the resource bundle and formats it with the argument
 	 * 

@@ -9,7 +9,6 @@ import org.yocto.sdk.ide.YoctoSDKPlugin;
  * Class used to initialize default preference values.
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -18,11 +17,13 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
 		store.setDefault(PreferenceConstants.TOOLCHAIN_ROOT, "/opt/poky");
-		store.setDefault(PreferenceConstants.SDK_ROOT, true);
-		store.setDefault(PreferenceConstants.TARGET_QEMU, false);
-		store.setDefault(PreferenceConstants.TARGET, "i586");
-		store.setDefault(PreferenceConstants.TARGET_ARCH_LIST, PreferenceConstants.TARGET_ARCHITECTURE_LIST);
-		store.setDefault(PreferenceConstants.TARGET_ARCH_INDEX, 0);
+		store.setDefault(PreferenceConstants.SDK_MODE, true);
+		store.setDefault(PreferenceConstants.TARGET_MODE, false);
+		store.setDefault(PreferenceConstants.TARGET_ARCH_INDEX, -1);
+		store.setDefault(PreferenceConstants.IP_ADDR, "");
+		store.setDefault(PreferenceConstants.QEMU_KERNEL, "");
+		store.setDefault(PreferenceConstants.QEMU_ROOTFS, "");
+		store.setDefault(PreferenceConstants.TOOLCHAIN_TRIPLET, "");
 	}
 
 }

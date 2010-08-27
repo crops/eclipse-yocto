@@ -26,6 +26,8 @@ abstract public class TerminalHandler extends AbstractHandler {
 	
 	protected SimpleSettingDialog setting;
 	
+	protected String changeTerm="export TERM=vt100;";
+	
 	abstract protected String getInitCmd();
 	abstract protected void initialize(ExecutionEvent event) throws ExecutionException;
 	
@@ -66,7 +68,7 @@ abstract public class TerminalHandler extends AbstractHandler {
 				}
 				if (terminalSubSystem.isConnected()) {
 					CTabItem tab = viewer.getTabFolder().createTabItem(
-							terminalSubSystem.getHost(), getInitCmd());
+							terminalSubSystem.getHost(), changeTerm + getInitCmd());
 					//since RSETerminalConnector not exit the shell during the diconnection,
 					//we have manually exit it here
 					try {

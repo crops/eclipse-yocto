@@ -79,7 +79,7 @@ while [ $# -gt 0 ]; do
 done
 
 #get application
-APP_NAME=$1
+APP=$1
 shift 1
 
 #get app argument
@@ -90,7 +90,7 @@ if [ "x$DAEMON" != "x" -a "x$LOGFILE" != "x" ]; then
   help
 fi
 if [ "x$DAEMON" != "x" ]; then
-  APP=`which $APP_NAME`
+  APP=`which $APP`
 fi
 if [ "x$APP" == "x" ]; then
   help

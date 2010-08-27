@@ -92,7 +92,7 @@ public class PowertopModel extends BaseModel {
 			exit_code=app.waitFor(monitor);
 			app.terminate();
 			if(exit_code!=0) {
-				throw new Exception("Starting oprofile-server failed with exit code " + new Integer(exit_code).toString());
+				throw new Exception("Starting powertop failed with exit code " + new Integer(exit_code).toString());
 			}
 		}finally {
 			monitor.done();

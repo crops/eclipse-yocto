@@ -70,7 +70,7 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=window">
+            locationURI="menu:window?after=additions">
          <menu
                id="runYoctoTools"
                label="YoctoTools">    
@@ -103,6 +103,13 @@
                label="%command.name.latencytop"
                style="push">
          </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="menu:window?after=runYoctoTools">
+         <separator
+               name="org.yocto.sdk.remotetools.separator1"
+               visible="true">
+         </separator>
       </menuContribution>
    </extension>
    <extension

@@ -3,24 +3,16 @@ package org.yocto.sdk.ide;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
-import java.io.*;
-
-
 import org.eclipse.cdt.core.model.CoreModel;
-import org.eclipse.cdt.internal.core.*;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
-import org.eclipse.cdt.utils.spawner.*;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -35,8 +27,6 @@ import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 public class YoctoSDKProjectNature implements IProjectNature {
 	public static final  String YoctoSDK_NATURE_ID = YoctoSDKPlugin.getUniqueIdentifier() + ".YoctoSDKNature";
 	private static final String WIZARD_WARNING_TITLE = "Wizard.SDK.Warning.Title";
-	private static final String DEFAULT_WHICH_COMMAND = "which";
-	private static final String DEFAULT_WHICH_OPROFILEUI = "oprofile-viewer";
 
 	private static final String DEFAULT_GDB_SURFIX = "-gdb";
 	private static final String DEFAULT_USR_BIN = "/usr/bin/";
@@ -53,7 +43,6 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static final String DEFAULT_AUTOGEN_STR = "autogen";
 
 	private IProject proj;
-	private static String Yocto_native_path = "";
 
 	public void configure() throws CoreException {
 	}
@@ -105,7 +94,6 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE) {
 				createQemuLauncher(project, configType, listValue, sFileName, elem);
 			} 
-			createOProfileUI(project, configType, listValue);
 			CoreModel.getDefault().setProjectDescription(project,cpdesc);
 		} catch (CoreException e) {
 			e.printStackTrace();
@@ -119,12 +107,12 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		IConfiguration icfg = info.getDefaultConfiguration();
 		String id = icfg.getId();
 		String command_prefix = "CFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CFLAGS") 
-			+ "\" CXXFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CXXFLAGS") + "\"";
+		+ "\" CXXFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CXXFLAGS") + "\"";
 		String autogen_setting = command_prefix+" autogen.sh";
 		String configure_setting = command_prefix + " configure";
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);
 		String strConfigure = YoctoSDKUtils.getEnvValue(project, "CONFIGURE_FLAGS");
-		
+
 		cfg.setOption(DEFAULT_CONFIGURE_STR, configure_setting);
 		cfg.setOption(DEFAULT_BUILD_STR, YoctoSDKUtils.splitString(strConfigure, "--build="));
 		cfg.setOption(DEFAULT_HOST_STR, YoctoSDKUtils.splitString(strConfigure, "--host="));
@@ -199,7 +187,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 
 			String argument = "-e \"source " + sScriptFile + ";runqemu-nfs " +
-					elem.getStrQemuKernelLoc() + " " + elem.getStrQemuRootFSLoc() + ";bash\"";
+			elem.getStrQemuKernelLoc() + " " + elem.getStrQemuRootFSLoc() + ";bash\"";
 
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
 			w_copy.doSave();
@@ -208,59 +196,5 @@ public class YoctoSDKProjectNature implements IProjectNature {
 
 	}
 
-	protected static void createOProfileUI(IProject project, ILaunchConfigurationType configType, ArrayList<String> listValue) {
-		//Create one instance of OProfileUI launcher
-
-		IWorkspaceRoot wp_root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject[] projects = wp_root.getProjects();
-
-		boolean found_oprofile_launcher = false;
-		for (int i = 0; i < projects.length; i++) {
-			IProject project_i = projects[i];
-			String oprofile_str = "OProfileUI.launch";
-			IFile oprofile_file = project_i.getFile(oprofile_str);
-			if (oprofile_file.exists()) {
-				found_oprofile_launcher = true;
-				break;
-			} 
-		}
-		if (!found_oprofile_launcher) {
-			String oprofileUI_str = getOProfileUI();
-			if ((oprofileUI_str.isEmpty()) || (oprofileUI_str == null))
-				return;
-			try {
-				ILaunchConfigurationWorkingCopy oprofile_copy = configType.newInstance(null, "OProfileUI");
-
-				oprofile_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
-				//oprofile_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE", "${projects:}");
-				oprofile_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", oprofileUI_str);
-				oprofile_copy.doSave();
-			} catch (CoreException e) {
-			}
-		}
-	}
-
-	protected static String getOProfileUI() {
-
-		String file_str = Yocto_native_path + "/oprofile-viewer";
-		File Yocto_oprofile = new File(file_str);
-		if (Yocto_oprofile.exists())
-			return file_str;
-
-		String which_command_str = DEFAULT_WHICH_COMMAND + " " + DEFAULT_WHICH_OPROFILEUI;
-		try {
-			Process proc = ProcessFactory.getFactory().exec(which_command_str);
-			if (proc != null) {
-				ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-				ByteArrayOutputStream errstream = new ByteArrayOutputStream();
-				ProcessClosure closure = new ProcessClosure(proc, outstream, errstream);
-				closure.runBlocking();
-				if (outstream.size() != 0)
-					return outstream.toString();
-			}
-		} catch (IOException e) {
-		}
-		return "";
-	}
 
 }

@@ -17,13 +17,27 @@ help ()
 
 killproc() {        # kill the named process(es)
     pid=`/bin/pidof $1`
-    [ "$pid" != "" ] && kill $pid
+    [ "x$pid" != "x" ] && kill $pid
 }
 
 start () 
 {
+        pid=`/bin/pidof $APP`
+        [ "x$pid" != "x" ] && return 0
+        
         if [ "x$DAEMON" != "x" ]; then
-            start-stop-daemon -S -b --oknodo -x $APP -- $APPARG
+            if [ "x$APPARG" != "x" ]; then
+                start-stop-daemon -S -b --oknodo -x $APP -- $APPARG
+            else
+                start-stop-daemon -S -b --oknodo -x $APP
+            fi
+            
+            #wait for sometime for the backend app to bring up & daemonzie
+            ret=$?
+            if [ $ret -eq 0 ]; then
+               sleep 1
+            fi
+            return $ret           
         elif [ "x$LOGFILE" != "x" ]; then
             $APP $APPARG $>${LOGFILE}
         else

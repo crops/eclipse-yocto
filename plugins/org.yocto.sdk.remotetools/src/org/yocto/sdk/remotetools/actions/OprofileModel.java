@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -93,35 +94,60 @@ public class OprofileModel extends BaseModel {
 			monitor.done();
 		}
 	}
+	
+	private String getSearchPath()
+	{
+		try
+		{
+			String search=null;
+			IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
+			String env_script=store.getString(PreferenceConstants.TOOLCHAIN_ROOT) +
+								"/" + 
+								"environment-setup-" +
+								store.getString(PreferenceConstants.TOOLCHAIN_TRIPLET);
+			File file = new File(env_script);
 
-	private String getSearchPath() {
-		String search=null;
-		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
-		String env_script=store.getString(PreferenceConstants.TOOLCHAIN_ROOT) +
-							"/" + 
-							"environment-setup-" +
-							store.getString(PreferenceConstants.TOOLCHAIN_TRIPLET);
-		File env_script_file = new File(env_script);
-		try {
-			if (env_script_file.exists()) {
-				BufferedReader input = new BufferedReader(new FileReader(env_script_file));
-				try {
+			if (file.exists()) {
+				BufferedReader input = new BufferedReader(new FileReader(file));
+
+				try
+				{
 					String line = null;
-					while ((line = input.readLine()) != null) {
-						if (line.contains(" PATH=")) {
-							search = line.substring(line.indexOf('=')+1);
-							search = search.substring(0,search.length()-1);
+
+					while ((line = input.readLine()) != null)
+					{
+						if (!line.startsWith("export"))
+							continue;
+						String sKey = line.substring("export".length() + 1, line.indexOf('='));
+						if(!sKey.equals("PATH"))
+							continue;
+						String sValue = line.substring(line.indexOf('=') + 1);
+						if (sValue.startsWith("\"") && sValue.endsWith("\""))
+							sValue = sValue.substring(sValue.indexOf('"') + 1, sValue.lastIndexOf('"'));
+						/* If PATH ending with $PATH, we need to join with current system path */
+						if (sKey.equalsIgnoreCase("PATH")) {
+							if (sValue.lastIndexOf("$PATH") >= 0)
+								sValue = sValue.substring(0, sValue.lastIndexOf("$PATH")) + System.getenv("PATH");
 						}
+						search=sValue;
+						//System.out.printf("get env key %s value %s\n", sKey, sValue);
 					}
-				}finally {
+
+				}
+				finally {
 					input.close();
 				}
 			}
-		}catch (IOException e) {
+
+			return search;
+
+		} 
+		catch (IOException e)
+		{
 			e.printStackTrace();
-			search=null;
+			return null;
 		}
-		return search;
+
 	}
 
 	@Override

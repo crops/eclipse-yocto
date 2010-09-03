@@ -45,6 +45,7 @@ public class YoctoUISetting {
 
 	private Button btnKernelLoc;
 	private Button btnRootFSLoc;
+	private Button btnToolChainLoc;
 
 	private Text textKernelLoc;
 	private Text textRootFSLoc;
@@ -168,8 +169,9 @@ public class YoctoUISetting {
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		textRootLoc = (Text)addTextControl(textContainer,
 				PreferenceConstants.TOOLCHAIN_ROOT, yoctoUIElement.getStrToolChainRoot());
-		addFileSelectButton(textContainer, textRootLoc, PreferenceConstants.TOOLCHAIN_ROOT);
+		btnToolChainLoc = addFileSelectButton(textContainer, textRootLoc, PreferenceConstants.TOOLCHAIN_ROOT);
 
+		updateSDKControlState();
 		Label targetArchLabel= new Label(crossCompilerGroup, SWT.NONE);
 		targetArchLabel.setText("Target Architecture: ");
 
@@ -230,7 +232,7 @@ public class YoctoUISetting {
 		ip_label.setAlignment(SWT.RIGHT);
 		textIP= (Text)addTextControl(targetGroup, PreferenceConstants.IP_ADDR, yoctoUIElement.getStrDeviceIP());
 
-		updateControlState();
+		updateQemuControlState();
 
 		//we add the listener at the end for avoiding the useless event trigger when control
 		//changed or modified.
@@ -305,7 +307,7 @@ public class YoctoUISetting {
 		return fControls;
 	}
 
-	private void updateControlState()
+	private void updateQemuControlState()
 	{
 		boolean bQemuMode = btnQemu.getSelection();
 
@@ -316,13 +318,35 @@ public class YoctoUISetting {
 		textIP.setEnabled(!bQemuMode);
 	}
 
+	private void updateSDKControlState()
+	{
+		if (btnSDKRoot.getSelection())
+		{
+			textRootLoc.setText("/opt/poky");
+			textRootLoc.setEnabled(false);
+			btnToolChainLoc.setEnabled(false);
+		}
+		else {
+			if (!yoctoUIElement.getStrToolChainRoot().equals("/opt/poky"))
+			{
+				textRootLoc.setText(yoctoUIElement.getStrToolChainRoot());
+			}
+			textRootLoc.setEnabled(true);
+			btnToolChainLoc.setEnabled(true);
+		}
+	}
+
 	private void controlChanged(Widget widget) {
 
 		if (widget == btnSDKRoot || widget == btnPokyRoot)
+		{
+
 			setTargetCombo(targetArchCombo);
+			updateSDKControlState();
+		}
 
 		if (widget == btnDevice || widget == btnQemu)
-			updateControlState();
+			updateQemuControlState();
 	}
 
 	private void controlModified(Widget widget) {

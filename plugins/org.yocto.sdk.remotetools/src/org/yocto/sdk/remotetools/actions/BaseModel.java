@@ -50,9 +50,8 @@ abstract public class BaseModel implements IRunnableWithProgress {
 		}
 	}
 	
-	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException,
-			InterruptedException {
+    InterruptedException {
 	
 		try {
 			init(new SubProgressMonitor(monitor,5));

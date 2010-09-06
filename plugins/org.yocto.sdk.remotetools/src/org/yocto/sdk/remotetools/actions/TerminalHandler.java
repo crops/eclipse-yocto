@@ -44,7 +44,6 @@ abstract public class TerminalHandler extends AbstractHandler {
         return terminalShell;
     }
 
-	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
 		initialize(event);

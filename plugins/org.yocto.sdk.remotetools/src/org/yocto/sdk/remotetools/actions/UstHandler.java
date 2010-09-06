@@ -11,7 +11,6 @@ import org.eclipse.ui.progress.IProgressService;
 
 public class UstHandler extends AbstractHandler {
 
-	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 

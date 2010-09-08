@@ -91,6 +91,7 @@ public class RemoteInputStream extends InputStream /* implements IRemoteStream*/
         if (arr == null) throw new NullPointerException();
         if (off < 0 || len < 0 || len > arr.length - off) throw new IndexOutOfBoundsException();
         int pos = 0;
+        
         while (pos < len) {
             if (buf != null && buf.offset <= offset && buf.offset + buf.buf.length > offset) {
                 int buf_pos = (int)(offset - buf.offset);
@@ -100,13 +101,17 @@ public class RemoteInputStream extends InputStream /* implements IRemoteStream*/
                 pos += n;
                 offset += n;
             }
-            else {
+            else if(pos == 0){
+            	//got nothing yet 
                 int c = read();
                 if (c == -1) {
                     if (pos == 0) return -1;
                     break;
                 }
                 arr[off + pos++] = (byte)c;
+            }else {
+            	//already got something
+            	break;
             }
         }
         return pos;

@@ -2,7 +2,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.c
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/terminals.c	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/terminals.c	(revision 0)
-@@ -0,0 +1,846 @@
+@@ -0,0 +1,872 @@
 +/*******************************************************************************
 + * Copyright (c) 2008 Wind River Systems, Inc. and others.
 + * All rights reserved. This program and the accompanying materials
@@ -15,6 +15,19 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.c
 + *
 + * Contributors:
 + *     Wind River Systems - initial API and implementation
++ *******************************************************************************/
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * and Eclipse Distribution License v1.0 which accompany this distribution.
++ * The Eclipse Public License is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ * and the Eclipse Distribution License is available at
++ * http://www.eclipse.org/org/documents/edl-v10.php.
++ *
++ * Contributors:
++ *     Intel  - initial API and implementation
 + *******************************************************************************/
 +
 +/*
@@ -595,10 +608,23 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.c
 +        if (*pid == 0) {
 +            int fd = -1;
 +            int fd_tty_slave = -1;
++            char env_term[TERM_PROP_DEF_SIZE];
 +
 +            if (*pty_type) {
-+                char env_term[TERM_PROP_DEF_SIZE];
 +                snprintf(env_term, sizeof(env_term), "TERM=%s", pty_type);
++                newenvp = envp_add(envp, envp_len, env_term);
++                if (newenvp == NULL) {
++                    err = ENOMEM;
++                } else if (envp) {
++                    loc_free(envp);
++                    envp = NULL;
++                }
++            }
++
++            if (!err && *encoding) {
++                envp = newenvp;
++                envp_len += 1;
++                snprintf(env_term, sizeof(env_term), "LANG=%s", encoding);
 +                newenvp = envp_add(envp, envp_len, env_term);
 +                if (newenvp == NULL) {
 +                    err = ENOMEM;
@@ -853,7 +879,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/main/services-ext.h
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/main/services-ext.h	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/main/services-ext.h	(revision 0)
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,38 @@
 +/*******************************************************************************
 + * Copyright (c) 2007, 2010 Wind River Systems, Inc. and others.
 + * All rights reserved. This program and the accompanying materials
@@ -866,6 +892,19 @@ Index: org.eclipse.tm.tcf.terminals.agent/main/services-ext.h
 + *
 + * Contributors:
 + *     Wind River Systems - initial API and implementation
++ *******************************************************************************/
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * and Eclipse Distribution License v1.0 which accompany this distribution.
++ * The Eclipse Public License is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ * and the Eclipse Distribution License is available at
++ * http://www.eclipse.org/org/documents/edl-v10.php.
++ *
++ * Contributors:
++ *     Intel  - initial API and implementation
 + *******************************************************************************/
 +
 +/*
@@ -883,7 +922,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.h
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/terminals.h	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/terminals.h	(revision 0)
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,40 @@
 +/*******************************************************************************
 + * Copyright (c) 2008 Wind River Systems, Inc. and others.
 + * All rights reserved. This program and the accompanying materials
@@ -897,9 +936,22 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.h
 + * Contributors:
 + *     Wind River Systems - initial API and implementation
 + *******************************************************************************/
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * and Eclipse Distribution License v1.0 which accompany this distribution.
++ * The Eclipse Public License is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ * and the Eclipse Distribution License is available at
++ * http://www.eclipse.org/org/documents/edl-v10.php.
++ *
++ * Contributors:
++ *     Intel  - initial API and implementation
++ *******************************************************************************/
 +
 +/*
-+ * Sample TCF service header file.
++ * TCF terminals service header file.
 + */
 +
 +#ifndef TERMINALS_H_

@@ -33,9 +33,10 @@ public class SDKLocationDialog extends Dialog {
 				
 		try {
 			yoctoUISetting.createComposite(result);
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Menu);
+			yoctoUISetting.validateInput(SDKCheckRequestFrom.Menu, false);
 		} catch (YoctoGeneralException e) {
 			// TODO Auto-generated catch block
+			System.out.println("Have you ever set the project specific Yocto Settings?");
 			System.out.println(e.getMessage());
 		}
 
@@ -53,7 +54,7 @@ public class SDKLocationDialog extends Dialog {
 		if (buttonId == IDialogConstants.OK_ID) {
 			//this should not be called in fact, because widget change should be called firstly!
 			try {
-				yoctoUISetting.validateInput(SDKCheckRequestFrom.Menu);
+				yoctoUISetting.validateInput(SDKCheckRequestFrom.Menu, true);
 				this.setElem(yoctoUISetting.getCurrentInput());
 				super.buttonPressed(buttonId);
 			} catch (YoctoGeneralException e) {

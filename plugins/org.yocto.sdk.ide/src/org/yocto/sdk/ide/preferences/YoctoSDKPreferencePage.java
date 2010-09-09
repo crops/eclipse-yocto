@@ -50,7 +50,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		
 		try {
 			yoctoUISetting.createComposite(result);
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences);
+			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
 			Dialog.applyDialogFont(result);
 			return result;
 		} catch (YoctoGeneralException e) {
@@ -67,7 +67,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		
 		
 		try {
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences);
+			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
 
 			YoctoUIElement elem = yoctoUISetting.getCurrentInput();
 			YoctoSDKUtils.saveElemToStore(elem);
@@ -91,13 +91,28 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		{
 			Control control = arrControls.get(i);
 			String[] controlData = (String[])control.getData();
-			String sValue = store.getDefaultString(controlData[0]);
+			String sKey = controlData[0];
+			if (control instanceof Button)
+			{
+				sKey = sKey.substring(0, sKey.lastIndexOf("_"));
+			}
+			String sValue = store.getDefaultString(sKey);
 			if (control instanceof Button)
 			{
 				if (sValue.equalsIgnoreCase("true"))
-					((Button)control).setSelection(true);
+				{
+					if (controlData[0].endsWith("_1")) //the 1st radio button of the group
+						((Button)control).setSelection(true);
+					else
+						((Button)control).setSelection(false);//the 2nd radio button of the group
+				}
 				else
-					((Button)control).setSelection(false);
+				{
+					if (controlData[0].endsWith("_1")) //the 1st radio button of the group
+						((Button)control).setSelection(false);
+					else
+						((Button)control).setSelection(true);//the 2nd radio button of the group
+				}
 			}
 			else if (control instanceof Text)
 			{
@@ -105,15 +120,17 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			}
 			else if (control instanceof Combo)
 			{
-				((Combo)control).select(Integer.valueOf(sValue).intValue());
+				if (!sValue.isEmpty())
+					((Combo)control).select(Integer.valueOf(sValue).intValue());
 			}
 		}
 
 		try {
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences);
+			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
 		} catch (YoctoGeneralException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Have you ever set Yocto Reference before?");
+			System.out.println(e.getMessage());
 		}
 		super.performDefaults();
 	}

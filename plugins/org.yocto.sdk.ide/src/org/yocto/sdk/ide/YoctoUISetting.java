@@ -78,7 +78,7 @@ public class YoctoUISetting {
 	private Control addControls(Control fControl, final String sKey, String sValue)
 	{
 
-		fControl.setData(sKey, sValue);
+		fControl.setData(new String[]{sKey,sValue});
 		fControls.add(fControl);
 		return fControl;
 
@@ -137,8 +137,7 @@ public class YoctoUISetting {
 		Label root_label;
 		Label kernel_label;
 		Label rootfs_label;
-		Label ip_label;
-
+		Label ip_label; 
 
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
@@ -154,12 +153,12 @@ public class YoctoUISetting {
 
 		if (yoctoUIElement.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
 
-			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "SDK Root Mode", PreferenceConstants.SDK_MODE, true);
-			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Poky Tree Mode", PreferenceConstants.SDK_MODE, false);
+			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "SDK Root Mode", PreferenceConstants.SDK_MODE + "_1", true);
+			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Poky Tree Mode", PreferenceConstants.SDK_MODE + "_2", false);
 		}
 		else {
-			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "SDK Root Mode", PreferenceConstants.SDK_MODE, false);
-			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Poky Tree Mode", PreferenceConstants.SDK_MODE, true);
+			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "SDK Root Mode", PreferenceConstants.SDK_MODE + "_1", false);
+			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Poky Tree Mode", PreferenceConstants.SDK_MODE + "_2", true);
 		}
 
 		root_label = new Label(crossCompilerGroup, SWT.NONE);
@@ -198,12 +197,12 @@ public class YoctoUISetting {
 		targetGroup.setText("Target Options:");
 
 		if (yoctoUIElement.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE) {
-			btnQemu = (Button)addRadioButton(targetGroup, "QEMU", PreferenceConstants.TARGET_MODE, true);
-			btnDevice = (Button)addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_MODE, false);
+			btnQemu = (Button)addRadioButton(targetGroup, "QEMU", PreferenceConstants.TARGET_MODE + "_1", true);
+			btnDevice = (Button)addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_MODE + "_2", false);
 		}
 		else {
-			btnQemu = (Button)addRadioButton(targetGroup, "QEMU", PreferenceConstants.TARGET_MODE, false);
-			btnDevice = (Button)addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_MODE, true);
+			btnQemu = (Button)addRadioButton(targetGroup, "QEMU", PreferenceConstants.TARGET_MODE + "_1", false);
+			btnDevice = (Button)addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_MODE + "_2", true);
 		}
 
 		//QEMU Setup
@@ -273,7 +272,7 @@ public class YoctoUISetting {
 		return elem;
 	}
 
-	public boolean validateInput(SDKCheckRequestFrom from) throws YoctoGeneralException {
+	public boolean validateInput(SDKCheckRequestFrom from, boolean bPrompt) throws YoctoGeneralException {
 		YoctoUIElement elem = getCurrentInput();
 		boolean pass = true;
 		String strErrorMessage;
@@ -284,14 +283,17 @@ public class YoctoUISetting {
 		if (result != SDKCheckResults.SDK_PASS) {
 			strErrorMessage = YoctoSDKUtils.getErrorMessage(result, from);
 			pass = false;
-			Display display = Display.getCurrent();
-			Shell shell = new Shell(display);
-			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			msgBox.setText("Yocto Configuration Error");
-			msgBox.setMessage(strErrorMessage);
-			msgBox.open();
-			if (shell != null)
-				shell.dispose();
+			if (bPrompt)
+			{
+				Display display = Display.getCurrent();
+				Shell shell = new Shell(display);
+				MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+				msgBox.setText("Yocto Configuration Error");
+				msgBox.setMessage(strErrorMessage);
+				msgBox.open();
+				if (shell != null)
+					shell.dispose();
+			}
 
 			throw new YoctoGeneralException(strErrorMessage);
 		}

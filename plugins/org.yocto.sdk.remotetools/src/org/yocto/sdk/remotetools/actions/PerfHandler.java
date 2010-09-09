@@ -18,7 +18,7 @@ public class PerfHandler extends TerminalHandler {
 
 		setting=new SimpleSettingDialog(
 				window.getShell(),
-				"Latencytop",
+				"Perf",
 				IBaseConstants.CONNECTION_NAME_LATENCYTOP
 				);
 	}

@@ -20,6 +20,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.linuxtools.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.AutotoolsConfigurationManager;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.IAConfiguration;
+import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 
 
 @SuppressWarnings("restriction")
@@ -123,9 +124,18 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 	}
 
-	public static void configureAutotools(IProject project, YoctoUIElement elem) {
-		setEnvironmentVariables(project, elem);
-		configureAutotoolsOptions(project);
+	public static void configureAutotools(IProject project) throws YoctoGeneralException {
+		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
+		YoctoSDKUtils.SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
+		if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
+			String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
+			throw new YoctoGeneralException(strErrorMsg);
+		}
+		else
+		{
+			setEnvironmentVariables(project, elem);
+			configureAutotoolsOptions(project);
+		}
 	}
 
 	protected static void createRemoteDebugLauncher(IProject project, 

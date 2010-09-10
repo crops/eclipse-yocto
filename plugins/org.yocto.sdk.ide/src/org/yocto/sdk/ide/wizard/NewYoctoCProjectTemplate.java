@@ -31,9 +31,6 @@ import org.eclipse.linuxtools.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.AutotoolsConfigurationManager;
 import org.yocto.sdk.ide.YoctoGeneralException;
 import org.yocto.sdk.ide.YoctoSDKProjectNature;
-import org.yocto.sdk.ide.YoctoSDKUtils;
-import org.yocto.sdk.ide.YoctoUIElement;
-import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 
 
 @SuppressWarnings("restriction")
@@ -54,9 +51,6 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		String isCProjectValue = args[3].getSimpleValue();
 		boolean isCProject = Boolean.valueOf(isCProjectValue).booleanValue();
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
-		YoctoSDKUtils.SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
-
 		try {
 			if (!project.exists()) {
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -86,15 +80,8 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 					AutotoolsConfigurationManager.getInstance().getConfiguration(project, cfg.getName(), true);
 				}
 				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
-
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
-				if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
-					String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
-					throw new YoctoGeneralException(strErrorMsg);
-				}
-
-				YoctoSDKProjectNature.configureAutotools(project, elem);
-
+				YoctoSDKProjectNature.configureAutotools(project);
 				info.setValid(true);
 				ManagedBuildManager.saveBuildInfo(project, true);
 
@@ -105,12 +92,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				turnOffAutoBuild(workspace);
 				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
-				if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
-					String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
-					throw new YoctoGeneralException(strErrorMsg);
-				}
-
-				YoctoSDKProjectNature.configureAutotools(project, elem);
+				YoctoSDKProjectNature.configureAutotools(project);
 				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 				//restoreAutoBuild(workspace);
 				IDiscoveredPathManager manager = MakeCorePlugin.getDefault().getDiscoveryManager();

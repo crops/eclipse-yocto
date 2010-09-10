@@ -76,7 +76,7 @@ public class BaseSettingDialog extends Dialog {
 		
 		/* The RSE Connection dropdown with New button. */
 		SWTFactory.createVerticalSpacer(comp, 1);
-		createRemoteConnectionGroup(comp, 4);
+		createRemoteConnectionGroup(comp);
 		
 		return comp;
 	}
@@ -88,15 +88,14 @@ public class BaseSettingDialog extends Dialog {
 		updateCurConn();
 	}
 
-	protected void createRemoteConnectionGroup(Composite parent, int colSpan) {
+	protected void createRemoteConnectionGroup(Composite parent) {
 		Composite projComp = new Composite(parent, SWT.NONE);
 		GridLayout projLayout = new GridLayout();
-		projLayout.numColumns = 3;
+		projLayout.numColumns = 6;
 		projLayout.marginHeight = 0;
 		projLayout.marginWidth = 0;
 		projComp.setLayout(projLayout);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = colSpan;
 		projComp.setLayoutData(gd);
 
 		connectionLabel = new Label(projComp, SWT.NONE);
@@ -104,10 +103,10 @@ public class BaseSettingDialog extends Dialog {
 		gd = new GridData();
 		gd.horizontalSpan = 1;
 		connectionLabel.setLayoutData(gd);
-
+		
 		connectionCombo = new Combo(projComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 1;
+		gd.horizontalSpan = 4;
 		connectionCombo.setLayoutData(gd);
 		connectionCombo.addModifyListener(new ModifyListener() {
 
@@ -129,6 +128,9 @@ public class BaseSettingDialog extends Dialog {
 				updateConnectionPulldown();
 			}
 		});
+		gd = new GridData();
+		gd.horizontalSpan = 1;
+		newRemoteConnectionButton.setLayoutData(gd);
 
 		updateConnectionPulldown();
 	}

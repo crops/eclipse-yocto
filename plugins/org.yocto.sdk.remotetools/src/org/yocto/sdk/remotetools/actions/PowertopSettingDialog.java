@@ -71,9 +71,9 @@ public class PowertopSettingDialog extends BaseSettingDialog {
 		projComp.setLayoutData(gd);
 		
 		Label label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Argument_Text);
+		label.setText(Messages.Powertop_Time_Text);
 		gd = new GridData();
-		gd.horizontalSpan = 4;
+		gd.horizontalSpan = 1;
 		label.setLayoutData(gd);
 		
 		timeText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
@@ -84,11 +84,14 @@ public class PowertopSettingDialog extends BaseSettingDialog {
 			}
 		});
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 1;
+		gd.horizontalSpan = 3;
 		timeText.setLayoutData(gd);
 		
 		
 		showPidButton=SWTFactory.createCheckButton(projComp, Messages.Powertop_ShowPid_Text, null, showPid, 1);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		showPidButton.setLayoutData(gd);
 		
 	}
 

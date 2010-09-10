@@ -17,16 +17,14 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.linuxtools.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.AutotoolsConfigurationManager;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.IAConfiguration;
-import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
+
 
 @SuppressWarnings("restriction")
 public class YoctoSDKProjectNature implements IProjectNature {
 	public static final  String YoctoSDK_NATURE_ID = YoctoSDKPlugin.getUniqueIdentifier() + ".YoctoSDKNature";
-	private static final String WIZARD_WARNING_TITLE = "Wizard.SDK.Warning.Title";
 
 	private static final String DEFAULT_GDB_SURFIX = "-gdb";
 	private static final String DEFAULT_USR_BIN = "/usr/bin/";
@@ -68,6 +66,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem){
 		String sFileName;
 		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
+		
 
 		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
 			sFileName = elem.getStrToolChainRoot()+"/" + DEFAULT_ENV_FILE_PREFIX+elem.getStrTarget();
@@ -124,21 +123,9 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 	}
 
-	public static void configureAutotools(IProject project) {
-
-		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
-
-		YoctoSDKUtils.SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
-
-		if (result == YoctoSDKUtils.SDKCheckResults.SDK_PASS){
-			setEnvironmentVariables(project, elem);
-			configureAutotoolsOptions(project);
-		}
-		else {
-			String title   =  YoctoSDKMessages.getString(WIZARD_WARNING_TITLE);		
-			String message =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
-			MessageDialog.openWarning(YoctoSDKPlugin.getActiveWorkbenchShell(), title, message);
-		}
+	public static void configureAutotools(IProject project, YoctoUIElement elem) {
+		setEnvironmentVariables(project, elem);
+		configureAutotoolsOptions(project);
 	}
 
 	protected static void createRemoteDebugLauncher(IProject project, 

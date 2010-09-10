@@ -29,7 +29,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.linuxtools.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.AutotoolsConfigurationManager;
+import org.yocto.sdk.ide.YoctoGeneralException;
 import org.yocto.sdk.ide.YoctoSDKProjectNature;
+import org.yocto.sdk.ide.YoctoSDKUtils;
+import org.yocto.sdk.ide.YoctoUIElement;
+import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 
 
 @SuppressWarnings("restriction")
@@ -49,8 +53,9 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		String artifactExtension = args[2].getSimpleValue();
 		String isCProjectValue = args[3].getSimpleValue();
 		boolean isCProject = Boolean.valueOf(isCProjectValue).booleanValue();
-				
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
+		YoctoSDKUtils.SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
 
 		try {
 			if (!project.exists()) {
@@ -83,7 +88,12 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
-				YoctoSDKProjectNature.configureAutotools(project);
+				if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
+					String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
+					throw new YoctoGeneralException(strErrorMsg);
+				}
+
+				YoctoSDKProjectNature.configureAutotools(project, elem);
 
 				info.setValid(true);
 				ManagedBuildManager.saveBuildInfo(project, true);
@@ -94,11 +104,15 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
 				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
-				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);				
-				YoctoSDKProjectNature.configureAutotools(project);
+				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
+				if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
+					String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
+					throw new YoctoGeneralException(strErrorMsg);
+				}
+
+				YoctoSDKProjectNature.configureAutotools(project, elem);
 				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 				//restoreAutoBuild(workspace);
-				
 				IDiscoveredPathManager manager = MakeCorePlugin.getDefault().getDiscoveryManager();
 				IDiscoveredPathInfo pathInfo = manager.getDiscoveredInfo(project);
 				if (pathInfo instanceof IPerProjectDiscoveredPathInfo) {
@@ -109,10 +123,18 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				    manager.removeDiscoveredInfo(project);    
 				}
 			}
-		} catch (CoreException e) {
+		}
+		catch (CoreException e)
+		{
 			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage(), e); //$NON-NLS-1$
-		} catch (BuildException e) {
-			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage(), e); //$NON-NLS-1$
+		} 
+		catch (BuildException e)
+		{
+			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage()); //$NON-NLS-1$
+		}
+		catch (YoctoGeneralException e)
+		{
+			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage()); 
 		}
 	}
 

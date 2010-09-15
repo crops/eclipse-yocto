@@ -45,7 +45,15 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileService.java	(revision 1137)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/TCFFileService.java	(working copy)
-@@ -18,6 +18,7 @@
+@@ -11,6 +11,7 @@
+  *     Uwe Stieber (Wind River) - [271224] NPE in TCFFileService#download
+  *     Uwe Stieber (Wind River) - [271227] Fix compiler warnings in org.eclipse.tm.tcf.rse
+  *     Uwe Stieber (Wind River) - [274277] The TCF file service subsystem implementation is not updating the progress monitor
++ *     Intel Corporation - Make recursive copy/delete available (delete/copy a folder contains files)
+  *******************************************************************************/
+ package org.eclipse.tm.internal.tcf.rse.files;
+ 
+@@ -18,6 +19,7 @@
  import java.io.BufferedOutputStream;
  import java.io.File;
  import java.io.FileInputStream;
@@ -53,7 +61,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
  import java.io.FileOutputStream;
  import java.io.IOException;
  import java.io.InputStream;
-@@ -131,22 +132,127 @@
+@@ -131,22 +133,125 @@
          return s;
      }
  
@@ -126,7 +134,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
 -        final String tgt = toRemotePath(tgtParent, tgtName);
 +        
 +        if (monitor != null)
-+            monitor.beginTask("Copying remote files!", 2);
++            monitor.beginTask("Copying remote files!", 1);
 +        
 +        try {
 +
@@ -149,13 +157,12 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
 +            }
 +        }
 +        catch (Exception e) {
-+            e.printStackTrace();
 +            // TODO Auto-generated catch block
 +            if (e instanceof SystemMessageException)
 +                throw (SystemMessageException)e;
 +            else if (e instanceof InterruptedException)
 +            {
-+                System.out.println("User cancelled the copy operatioin!");
++                System.out.println("User cancelled the copy operation!");
 +            }
 +            throw new SystemOperationFailedException(Activator.PLUGIN_ID, e);
 +            
@@ -168,7 +175,6 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
 +
 +    public void copy(final String srcFile, final String tgtFile, IProgressMonitor monitor)
 +            throws SystemMessageException {
-+        System.out.printf("copy file %s to target %s", srcFile, tgtFile);
          new TCFRSETask<Boolean>() {
              public void run() {
                  IFileSystem fs = connector.getFileSystemService();
@@ -185,7 +191,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/files/
      }
  
      public void copyBatch(String[] srcParents,
-@@ -226,13 +332,81 @@
+@@ -226,13 +331,81 @@
          }.getS(monitor, "Delete"); //$NON-NLS-1$
      }
  
@@ -274,7 +280,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorResources.java	(revision 0)
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,28 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse;
 +
 +import org.eclipse.osgi.util.NLS;
@@ -297,7 +313,18 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSe
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/ITCFSessionProvider.java	(revision 0)
-@@ -0,0 +1,18 @@
+@@ -0,0 +1,29 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
++
 +package org.eclipse.tm.internal.tcf.rse;
 +
 +import org.eclipse.rse.services.files.RemoteFileException;
@@ -346,15 +373,20 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(revision 1137)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(working copy)
-@@ -13,6 +13,7 @@
-  *******************************************************************************/
+@@ -10,9 +10,11 @@
+  *     Martin Oberhuber (Wind River) - [269682] Get port from RSE Property
+  *     Uwe Stieber      (Wind River) - [271227] Fix compiler warnings in org.eclipse.tm.tcf.rse
+  *     Anna Dushistova  (MontaVista) - [285373] TCFConnectorService should send CommunicationsEvent.BEFORE_CONNECT and CommunicationsEvent.BEFORE_DISCONNECT
+- *******************************************************************************/
++ *     Intel Corporation - Make TCF being authenticated connection and attached streaming subscription/unsubscription method
++ ******************************************************************************/
  package org.eclipse.tm.internal.tcf.rse;
  
 +import java.io.IOException;
  import java.util.ArrayList;
  import java.util.HashMap;
  import java.util.List;
-@@ -20,19 +21,34 @@
+@@ -20,19 +22,34 @@
  
  import org.eclipse.core.runtime.IProgressMonitor;
  import org.eclipse.rse.core.model.IHost;
@@ -391,7 +423,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
  
      private IChannel channel;
      private Throwable channel_error;
-@@ -40,12 +56,62 @@
+@@ -40,12 +57,62 @@
  
      private boolean poll_timer_started;
  
@@ -456,7 +488,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          assert !Protocol.isDispatchThread();
          final Exception[] res = new Exception[1];
          // Fire comm event to signal state about to change
-@@ -54,39 +120,55 @@
+@@ -54,39 +121,55 @@
          synchronized (res) {
              Protocol.invokeLater(new Runnable() {
                  public void run() {
@@ -525,7 +557,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
              }
          });
          return res[0];
-@@ -108,7 +190,8 @@
+@@ -108,7 +191,8 @@
          if (wait_list.isEmpty()) return;
          Runnable[] r = wait_list.toArray(new Runnable[wait_list.size()]);
          wait_list.clear();
@@ -535,7 +567,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
      }
  
      private boolean connectTCFChannel(Exception[] res, IProgressMonitor monitor) {
-@@ -117,9 +200,12 @@
+@@ -117,9 +201,12 @@
              case IChannel.STATE_OPEN:
              case IChannel.STATE_CLOSED:
                  synchronized (res) {
@@ -551,7 +583,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      res.notify();
                      return true;
                  }
-@@ -137,7 +223,7 @@
+@@ -137,7 +224,7 @@
              String host = getHostName().toLowerCase();
              int port = getConnectPort();
              if (port <= 0) {
@@ -560,7 +592,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                  port = TCFConnectorServiceManager.TCF_PORT;
              }
              IPeer peer = null;
-@@ -146,8 +232,8 @@
+@@ -146,8 +233,8 @@
              for (IPeer p : locator.getPeers().values()) {
                  Map<String, String> attrs = p.getAttributes();
                  if ("TCP".equals(attrs.get(IPeer.ATTR_TRANSPORT_NAME)) && //$NON-NLS-1$
@@ -571,7 +603,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      peer = p;
                      break;
                  }
-@@ -171,17 +257,18 @@
+@@ -171,17 +258,18 @@
  
                  public void congestionLevel(int level) {
                  }
@@ -591,7 +623,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      channel = null;
                      channel_error = null;
                  }
-@@ -192,7 +279,8 @@
+@@ -192,7 +280,8 @@
          return false;
      }
  
@@ -601,7 +633,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          if (channel == null || channel.getState() == IChannel.STATE_CLOSED) {
              synchronized (res) {
                  res[0] = null;
-@@ -212,9 +300,12 @@
+@@ -212,9 +301,12 @@
      }
  
      public <V extends IService> V getService(Class<V> service_interface) {
@@ -616,7 +648,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          return m;
      }
  
-@@ -225,4 +316,100 @@
+@@ -225,4 +317,100 @@
      public IFileSystem getFileSystemService() {
          return getService(IFileSystem.class);
      }
@@ -721,7 +753,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellServiceResources.java	(revision 0)
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,35 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import org.eclipse.osgi.util.NLS;
@@ -751,7 +793,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalShell.java	(revision 0)
-@@ -0,0 +1,434 @@
+@@ -0,0 +1,444 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import java.io.BufferedWriter;
@@ -1190,7 +1242,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFLoginProperties.java	(revision 0)
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,33 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import org.eclipse.osgi.util.NLS;
@@ -1218,7 +1280,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFServiceCommandShell.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFServiceCommandShell.java	(revision 0)
-@@ -0,0 +1,188 @@
+@@ -0,0 +1,198 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +import java.util.ArrayList;
 +import java.util.StringTokenizer;
@@ -1411,7 +1483,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalInputStream.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalInputStream.java	(revision 0)
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,138 @@
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import java.io.IOException;
@@ -1540,12 +1612,8 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 +            public void run() {
 +                streams.disconnect(is_id, new IStreams.DoneDisconnect() {
 +                    public void doneDisconnect(IToken token, Exception error) {
-+                        if (error != null)
-+                            error(error);
-+                        else {
-+                            connected = false;
-+                            done(this);
-+                        }
++                        connected = false;
++                        done(this);
 +                    }
 +                });
 +            }
@@ -1558,7 +1626,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalOutputStream.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFTerminalOutputStream.java	(revision 0)
-@@ -0,0 +1,100 @@
+@@ -0,0 +1,110 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import java.io.IOException;
@@ -1671,7 +1749,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellSubSystemConfiguration.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/shells/TCFShellSubSystemConfiguration.java	(revision 0)
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,70 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.shells;
 +
 +import org.eclipse.rse.core.model.IHost;
@@ -1753,7 +1841,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceSubSystemConfiguration.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceSubSystemConfiguration.java	(revision 0)
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,64 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.terminals;
 +
 +import org.eclipse.rse.core.model.IHost;
@@ -1812,7 +1910,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalServiceResources.java	(revision 0)
-@@ -0,0 +1,26 @@
+@@ -0,0 +1,36 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.terminals;
 +
 +import org.eclipse.osgi.util.NLS;
@@ -1843,7 +1951,17 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/termin
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/terminals/TCFTerminalService.java	(revision 0)
-@@ -0,0 +1,47 @@
+@@ -0,0 +1,57 @@
++/*******************************************************************************
++ * Copyright (c) 2010 Intel Corporation. and others.
++ * All rights reserved. This program and the accompanying materials
++ * are made available under the terms of the Eclipse Public License v1.0
++ * which accompanies this distribution, and is available at
++ * http://www.eclipse.org/legal/epl-v10.html
++ *
++ * Contributors:
++ *    Intel Corporation - initial API and implementation
++ ******************************************************************************/
 +package org.eclipse.tm.internal.tcf.rse.terminals;
 +
 +import org.eclipse.core.runtime.IProgressMonitor;

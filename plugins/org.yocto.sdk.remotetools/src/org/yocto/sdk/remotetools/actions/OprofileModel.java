@@ -16,12 +16,15 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
+import org.yocto.sdk.remotetools.CommonHelper;
+import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.RSEHelper;
 
 public class OprofileModel extends BaseModel {
 	
-	final private String REMOTE_EXEC="/tmp/yocto_tool.sh";
-	final private String LOCAL_SCRIPT="resources/yocto_tool.sh";
+	static final private String REMOTE_EXEC="/tmp/yocto_tool.sh";
+	static final private String LOCAL_SCRIPT="resources/yocto_tool.sh";
+	static final private String LOCAL_EXEC="oprofile-viewer";
 	
 	public OprofileModel(IHost host) {
 		super(host);
@@ -167,8 +170,8 @@ public class OprofileModel extends BaseModel {
 			
 			Process p=Runtime.getRuntime().exec(
 					(searchPath!=null) ? 
-						new String[] {"oprofile-viewer","-h",target.getRemoteHostName(),"-s",searchPath} : 
-						new String[] {"oprofile-viewer","-h",target.getRemoteHostName()},
+						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName(),"-s",searchPath} : 
+						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName()},
 					null,
 					null);
 			
@@ -197,6 +200,15 @@ public class OprofileModel extends BaseModel {
 		}finally {
 			monitor.done();
 		}
+	}
+	
+	static public boolean checkAvail() {
+		boolean ret=CommonHelper.isExecAvail(LOCAL_EXEC);
+		
+		if(ret==false) {
+			CommonHelper.showErrorDialog("Oprofile", null,Messages.ErrorOprofileViewer);
+		}
+		return ret;
 	}
 
 }

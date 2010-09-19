@@ -10,7 +10,10 @@ public class Messages extends NLS {
 	public static String ErrorConnectSubsystem;
 	public static String ErrorNoHost;
 	public static String ErrorNoRemoteService;
-
+	
+	public static String ErrorOprofileViewer;
+	public static String ErrorLttvGui;
+	
 	public static String InfoDownload;
 	public static String InfoUpload;
 	

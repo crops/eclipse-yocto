@@ -12,6 +12,11 @@ import org.eclipse.ui.progress.IProgressService;
 public class OprofileHandler extends AbstractHandler {
 	
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
+		if(OprofileModel.checkAvail()!=true) {
+			return null;
+		}
+		
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 
 		SimpleSettingDialog setting=new SimpleSettingDialog(

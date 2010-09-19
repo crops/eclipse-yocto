@@ -12,6 +12,11 @@ import org.eclipse.ui.progress.IProgressService;
 public class UstHandler extends AbstractHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
+		if(UstModel.checkAvail()!=true) {
+			return null;
+		}
+		
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 
 		UstSettingDialog setting=new UstSettingDialog(
@@ -32,5 +37,4 @@ public class UstHandler extends AbstractHandler {
 		}
 		return null;
 	}
-
 }

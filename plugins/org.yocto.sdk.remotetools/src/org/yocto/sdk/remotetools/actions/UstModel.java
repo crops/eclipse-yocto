@@ -8,16 +8,19 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
+import org.yocto.sdk.remotetools.CommonHelper;
+import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.RSEHelper;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
 
 public class UstModel extends BaseModel {
 	
-	final private String REMOTE_EXEC="/tmp/yocto_ust.sh";
-	final private String LOCAL_SCRIPT="resources/yocto_ust.sh";
+	static final private String REMOTE_EXEC="/tmp/yocto_ust.sh";
+	static final private String LOCAL_SCRIPT="resources/yocto_ust.sh";
 	
-	final private String LOCAL_FILE_SUFFIX=".local.tar";
-	final private String REMOTE_FILE_SUFFIX=".tar";
+	static final private String LOCAL_FILE_SUFFIX=".local.tar";
+	static final private String REMOTE_FILE_SUFFIX=".tar";
+	static final private String LOCAL_EXEC="lttv-gui";
 		
 	private String argument;
 	private String application;
@@ -104,7 +107,7 @@ public class UstModel extends BaseModel {
 	}
 	
 	private String[] generateViewerParam() throws Exception {
-		String viewerParam="lttv-gui";
+		String viewerParam=new String(LOCAL_EXEC);
 		int i;
 		
 		ProcessBuilder pb = new ProcessBuilder("tar", "fx", localfile);
@@ -162,6 +165,15 @@ public class UstModel extends BaseModel {
 		}finally {
 			monitor.done();
 		}
+	}
+	
+	static public boolean checkAvail() {
+		boolean ret=CommonHelper.isExecAvail(LOCAL_EXEC);
+		
+		if(ret==false) {
+			CommonHelper.showErrorDialog("User Mode Lttng", null,Messages.ErrorLttvGui);
+		}
+		return ret;
 	}
 
 }

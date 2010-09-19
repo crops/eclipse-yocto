@@ -44,11 +44,6 @@ public class RemoteInputStream extends InputStream /* implements IRemoteStream*/
 	RemoteInputStream(IStreams stream, String id) {
 		this(stream,id,0x1000);
 	}
-	/*
-	public void dispose() {
-		connected=false;
-	}
-	*/
 
 	@Override
     public synchronized int read() throws IOException {

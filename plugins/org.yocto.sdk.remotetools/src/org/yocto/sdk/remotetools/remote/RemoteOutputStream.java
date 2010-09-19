@@ -19,11 +19,7 @@ public class RemoteOutputStream extends OutputStream /* implements IRemoteStream
 		this.id=id;
 		//RemoteStreamManager.add(id, this);
 	}
-	/*
-	public void dispose() {
-		connected=false;
-	}
-	*/
+	
 	@Override
     public synchronized void write(int b) throws IOException {
         final byte[] buf = new byte[1];

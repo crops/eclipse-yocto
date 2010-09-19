@@ -7,7 +7,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
 
-import org.yocto.sdk.remotetools.remote.RemoteApplication;
 import org.yocto.sdk.remotetools.remote.RemoteTarget;
 
 abstract public class BaseModel implements IRunnableWithProgress {

@@ -1,5 +1,8 @@
 package org.yocto.sdk.ide;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -27,7 +30,6 @@ import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 public class YoctoSDKProjectNature implements IProjectNature {
 	public static final  String YoctoSDK_NATURE_ID = YoctoSDKPlugin.getUniqueIdentifier() + ".YoctoSDKNature";
 
-	private static final String DEFAULT_GDB_SURFIX = "-gdb";
 	private static final String DEFAULT_USR_BIN = "/usr/bin/";
 	private static final String DEFAULT_ENV_FILE_PREFIX = "environment-setup-";
 	private static final String DEFAULT_TMP_PREFIX = "/tmp/";
@@ -87,7 +89,9 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			ILaunchConfigurationType debug_configType = 
 				lManager.getLaunchConfigurationType("org.eclipse.rse.remotecdt.RemoteApplicationLaunch");
 			String sPath = envMap.get("PATH");
-			createRemoteDebugLauncher(project, debug_configType, elem.getStrTarget(), sPath);
+			String sDebugName = envMap.get("GDB");
+			String sSysroot = envMap.get("POKY_TARGET_SYSROOT");
+			createRemoteDebugLauncher(project, debug_configType, elem.getStrTarget(), sPath, sDebugName, sSysroot);
 
 			ArrayList<String> listValue = new ArrayList<String>();
 			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
@@ -140,7 +144,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 
 	protected static void createRemoteDebugLauncher(IProject project, 
 			ILaunchConfigurationType configType,  String sTargetTriplet,
-			String strPath) {
+			String strPath, String sDebugName, String sSysroot) {
 		try {
 
 			String sDebugSubDir = DEFAULT_USR_BIN + sTargetTriplet;
@@ -150,7 +154,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			{
 				String sTemp = token.nextToken();
 				if (sTemp.endsWith(sDebugSubDir)) {
-					strDebugger = sTemp + "/" + sTargetTriplet + DEFAULT_GDB_SURFIX;
+					strDebugger = sTemp + "/" + sDebugName;
 					break;
 				}
 			}
@@ -159,7 +163,13 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			//If get default Debugger successfully, go ahead!
 
 			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, project.getName()+"_gdb_"+sTargetTriplet);
-			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.AUTO_SOLIB", true);
+			String sDebugInitFile = sSysroot + "/.gdbinit";
+			FileWriter out = new FileWriter(new File(sDebugInitFile));
+			out.write("set sysroot " + sSysroot);
+			out.flush();
+			out.close();			
+			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.GDB_INIT", sDebugInitFile);
+			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.AUTO_SOLIB", false);
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.DEBUG_NAME", strDebugger);
 			String projectName = project.getName();
 			String project_src = "src/"+projectName;
@@ -167,8 +177,16 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			w_copy.setAttribute("org.eclipse.cdt.launch.PROGRAM_NAME", project_src);
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.protocol", "mi");
 			w_copy.doSave();
-		} catch (CoreException e) {
 		}
+		catch (CoreException e)
+		{
+		}
+		catch (IOException e)
+		{
+			System.out.println("Failed to generate debug init file!");
+			System.out.println(e.getMessage());
+		}
+		
 
 	}
 

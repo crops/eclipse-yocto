@@ -2,7 +2,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.c
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/terminals.c	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/terminals.c	(revision 0)
-@@ -0,0 +1,872 @@
+@@ -0,0 +1,860 @@
 +/*******************************************************************************
 + * Copyright (c) 2008 Wind River Systems, Inc. and others.
 + * All rights reserved. This program and the accompanying materials
@@ -15,19 +15,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.c
 + *
 + * Contributors:
 + *     Wind River Systems - initial API and implementation
-+ *******************************************************************************/
-+/*******************************************************************************
-+ * Copyright (c) 2010 Intel Corporation.
-+ * All rights reserved. This program and the accompanying materials
-+ * are made available under the terms of the Eclipse Public License v1.0
-+ * and Eclipse Distribution License v1.0 which accompany this distribution.
-+ * The Eclipse Public License is available at
-+ * http://www.eclipse.org/legal/epl-v10.html
-+ * and the Eclipse Distribution License is available at
-+ * http://www.eclipse.org/org/documents/edl-v10.php.
-+ *
-+ * Contributors:
-+ *     Intel  - initial API and implementation
++ *     Intel - implemented terminals service
 + *******************************************************************************/
 +
 +/*
@@ -879,7 +867,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/main/services-ext.h
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/main/services-ext.h	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/main/services-ext.h	(revision 0)
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,26 @@
 +/*******************************************************************************
 + * Copyright (c) 2007, 2010 Wind River Systems, Inc. and others.
 + * All rights reserved. This program and the accompanying materials
@@ -892,19 +880,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/main/services-ext.h
 + *
 + * Contributors:
 + *     Wind River Systems - initial API and implementation
-+ *******************************************************************************/
-+/*******************************************************************************
-+ * Copyright (c) 2010 Intel Corporation.
-+ * All rights reserved. This program and the accompanying materials
-+ * are made available under the terms of the Eclipse Public License v1.0
-+ * and Eclipse Distribution License v1.0 which accompany this distribution.
-+ * The Eclipse Public License is available at
-+ * http://www.eclipse.org/legal/epl-v10.html
-+ * and the Eclipse Distribution License is available at
-+ * http://www.eclipse.org/org/documents/edl-v10.php.
-+ *
-+ * Contributors:
-+ *     Intel  - initial API and implementation
++ *     Intel - implemented terminals service
 + *******************************************************************************/
 +
 +/*
@@ -922,7 +898,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.h
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/terminals.h	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/terminals.h	(revision 0)
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,28 @@
 +/*******************************************************************************
 + * Copyright (c) 2008 Wind River Systems, Inc. and others.
 + * All rights reserved. This program and the accompanying materials
@@ -935,19 +911,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/terminals.h
 + *
 + * Contributors:
 + *     Wind River Systems - initial API and implementation
-+ *******************************************************************************/
-+/*******************************************************************************
-+ * Copyright (c) 2010 Intel Corporation.
-+ * All rights reserved. This program and the accompanying materials
-+ * are made available under the terms of the Eclipse Public License v1.0
-+ * and Eclipse Distribution License v1.0 which accompany this distribution.
-+ * The Eclipse Public License is available at
-+ * http://www.eclipse.org/legal/epl-v10.html
-+ * and the Eclipse Distribution License is available at
-+ * http://www.eclipse.org/org/documents/edl-v10.php.
-+ *
-+ * Contributors:
-+ *     Intel  - initial API and implementation
++ *     Intel - implemented terminals service
 + *******************************************************************************/
 +
 +/*
@@ -967,7 +931,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/config.h
 ===================================================================
 --- org.eclipse.tm.tcf.terminals.agent/config.h	(revision 0)
 +++ org.eclipse.tm.tcf.terminals.agent/config.h	(revision 0)
-@@ -0,0 +1,63 @@
+@@ -0,0 +1,64 @@
 +/*******************************************************************************
 + * Copyright (c) 2008 Wind River Systems, Inc. and others.
 + * All rights reserved. This program and the accompanying materials
@@ -980,6 +944,7 @@ Index: org.eclipse.tm.tcf.terminals.agent/config.h
 + *
 + * Contributors:
 + *     Wind River Systems - initial API and implementation
++ *     Intel - implemented terminals service
 + *******************************************************************************/
 +
 +/*

@@ -155,15 +155,15 @@ public class OprofileModel extends BaseModel {
 	public void process(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
 		
-		monitor.beginTask("Running oprofile", 100);		
-		
 		try {
 			try {
-		
+			monitor.beginTask("Starting oprofile", 100);	
 			//start oprofile-server
-			startServer(new SubProgressMonitor(monitor,30));
+			monitor.subTask("Starting oprofile-server");
+			startServer(new SubProgressMonitor(monitor,80));
 			
 			//start local oprofile-viewer
+			monitor.subTask("oprofile-viewer is running locally");
 			String searchPath=getSearchPath();
 			
 			Process p=Runtime.getRuntime().exec(
@@ -174,7 +174,6 @@ public class OprofileModel extends BaseModel {
 					null);
 			
 			//wait for oprofile-viewer to finish
-			monitor.worked(40);
 			while (!monitor.isCanceled()) {
 				try {
 					p.exitValue();
@@ -189,6 +188,7 @@ public class OprofileModel extends BaseModel {
 				throw e;
 			}finally {
 				//stop oprofile-server
+				monitor.subTask("Stopping oprofile-viewer");
 				stopServer(new SubProgressMonitor(monitor,30));
 			}
 		}catch (InterruptedException e) {

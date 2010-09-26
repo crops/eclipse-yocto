@@ -113,11 +113,13 @@ public class PowertopModel extends BaseModel {
 	public void process(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
 		
-		monitor.beginTask("Running ust", 100);		
+		monitor.beginTask("Running powertop", 100);		
 		try {
 			//running powertop
+			monitor.subTask("Generating powertop data file remotely");
 			generateData(new SubProgressMonitor(monitor,30));
 			//download datafile
+			monitor.subTask("Downloading powertop data file");
 			getDataFile(new SubProgressMonitor(monitor,30));
 			//show it in the powertop view
 			display.syncExec(new Runnable() {

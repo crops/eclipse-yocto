@@ -137,9 +137,13 @@ public class UstModel extends BaseModel {
 		monitor.beginTask("Running ust", 100);		
 		try {
 			//running usttrace
+			monitor.subTask("Generating user space lttng data file remotely");
 			datafile=generateData(new SubProgressMonitor(monitor,30));
+			
 			//download datafile to local
+			monitor.subTask("Downloading user space lttng data file");
 			getDataFile(new SubProgressMonitor(monitor,30),datafile);
+			
 			//extract datafile, prepare cmd array
 			String []cmdarray=generateViewerParam();
 			if(cmdarray==null) {
@@ -147,6 +151,7 @@ public class UstModel extends BaseModel {
 			}
 			monitor.worked(30);
 			
+			monitor.subTask("lttv-gui is running locally");
 			Process p=Runtime.getRuntime().exec(cmdarray,null,null);
 			while (!monitor.isCanceled()) {
 				try {

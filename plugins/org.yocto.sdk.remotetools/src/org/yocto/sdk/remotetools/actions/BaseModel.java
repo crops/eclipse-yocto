@@ -53,6 +53,7 @@ abstract public class BaseModel implements IRunnableWithProgress {
     InterruptedException {
 	
 		try {
+			monitor.beginTask("", 100);
 			init(new SubProgressMonitor(monitor,5));
 			if(monitor.isCanceled())
 				throw new InterruptedException("User canncelled");

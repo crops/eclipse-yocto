@@ -41,14 +41,9 @@ public class RemoteTarget {
 	private IStreams.StreamsListener streamListener = new IStreams.StreamsListener() {
         public void created(String stream_type, String stream_id,
                 String context_id) {
-            System.out.printf("new stream id: %s , type: %s is created\n",
-                    stream_id, stream_type);
         }
 
         public void disposed(String stream_type, String stream_id) {
-            System.out.printf("stream id: %s type: %s is disposed\n",
-                    stream_id, stream_type);
-            //RemoteStreamManager.dispose(stream_id);
         }
     };
 	

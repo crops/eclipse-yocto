@@ -26,7 +26,7 @@ public class PowertopHandler extends AbstractHandler {
 			}catch (Exception e) {
 				e.printStackTrace();
 				MessageDialog.openError(window.getShell(),
-						"Ust",
+						"Powertop",
 						e.getMessage());
 			}
 		}

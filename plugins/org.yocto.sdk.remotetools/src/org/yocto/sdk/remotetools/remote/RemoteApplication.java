@@ -38,10 +38,8 @@ public class RemoteApplication {
 	{
 		public void exited(String process_id, int exit_code)
 		{
-			System.out.printf("Application %s[%s] exited with code %d\n",file,process_id,exit_code);
 			if(!context.getID().equals(process_id))
 				return;
-			System.out.printf("Application %s[%s] exited with code %d\n",file,process_id,exit_code);
 			process.removeListener(listener);
 			synchronized (RemoteApplication.this.res) {
 				RemoteApplication.this.exit_code=exit_code;
@@ -109,7 +107,6 @@ public class RemoteApplication {
 							synchronized (res) {
 								RemoteApplication.this.context=process;
 								RemoteApplication.this.status=STATE_RUNNING;
-								System.out.printf("Application %s[%s] begin to run\n",file,process.getID());
 							}
 							done(this);
 						}

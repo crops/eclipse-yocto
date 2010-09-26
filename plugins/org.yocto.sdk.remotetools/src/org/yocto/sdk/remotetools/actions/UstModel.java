@@ -78,7 +78,6 @@ public class UstModel extends BaseModel {
 			monitor.worked(1);
 			BufferedReader in=new BufferedReader(new InputStreamReader(app.getInputStream()));
 			remoteDataFile=in.readLine();
-			System.out.println(remoteDataFile);
 			exit_code=app.waitFor(monitor);
 			app.terminate();
 			if(exit_code!=0) {

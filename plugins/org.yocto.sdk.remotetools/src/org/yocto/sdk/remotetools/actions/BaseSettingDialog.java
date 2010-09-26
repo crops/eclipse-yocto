@@ -57,7 +57,6 @@ public class BaseSettingDialog extends Dialog {
 	
 	protected BaseSettingDialog(Shell parentShell,String title, String connection) {
 		super(parentShell);
-		System.out.println("BaseSettingDialog " + title + " " + connection);
 		this.title=title;
 		this.curConn=connection;
 	}

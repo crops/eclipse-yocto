@@ -416,7 +416,7 @@ public class YoctoUISetting {
 					targetCombo.select(i);
 					return;
 				}
-				targetCombo.select(0);
+				targetCombo.select(-1);
 			}
 		}
 	}

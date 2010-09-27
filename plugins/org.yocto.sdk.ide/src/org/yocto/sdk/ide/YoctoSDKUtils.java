@@ -81,12 +81,7 @@ public class YoctoSDKUtils {
 					return SDKCheckResults.QEMU_ROOTFS_NONEXIST;
 			}
 		}
-		else if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.DEVICE_MODE)
-		{
-			if (elem.getStrDeviceIP().isEmpty())
-				return SDKCheckResults.POKY_DEVICE_EMPTY;
-		}
-
+	
 		return SDKCheckResults.SDK_PASS;
 	}
 
@@ -200,8 +195,6 @@ public class YoctoSDKUtils {
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		env.addVariable(PreferenceConstants.QEMU_ROOTFS, elem.getStrQemuRootFSLoc(),
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		env.addVariable(PreferenceConstants.IP_ADDR, elem.getStrDeviceIP(),
-				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 
 		if (envMap == null)
 		{
@@ -227,7 +220,6 @@ public class YoctoSDKUtils {
 		elem.setStrTarget(getEnvValue(project, PreferenceConstants.TOOLCHAIN_TRIPLET));
 		elem.setStrQemuKernelLoc(getEnvValue(project, PreferenceConstants.QEMU_KERNEL));
 		elem.setStrQemuRootFSLoc(getEnvValue(project, PreferenceConstants.QEMU_ROOTFS));
-		elem.setStrDeviceIP(getEnvValue(project, PreferenceConstants.IP_ADDR));
 		String sTemp = getEnvValue(project, PreferenceConstants.TARGET_ARCH_INDEX);
 		if (!sTemp.isEmpty())
 			elem.setIntTargetIndex(Integer.valueOf(sTemp).intValue());
@@ -255,7 +247,6 @@ public class YoctoSDKUtils {
 			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
 		else
 			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
-		store.setValue(PreferenceConstants.IP_ADDR, elem.getStrDeviceIP());
 		store.setValue(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc());
 		store.setValue(PreferenceConstants.QEMU_ROOTFS, elem.getStrQemuRootFSLoc());
 		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
@@ -279,7 +270,6 @@ public class YoctoSDKUtils {
 		elem.setStrToolChainRoot(store.getString(PreferenceConstants.TOOLCHAIN_ROOT));
 		elem.setStrTarget(store.getString(PreferenceConstants.TOOLCHAIN_TRIPLET));
 		elem.setIntTargetIndex(store.getInt(PreferenceConstants.TARGET_ARCH_INDEX));
-		elem.setStrDeviceIP(store.getString(PreferenceConstants.IP_ADDR));
 		elem.setStrQemuKernelLoc(store.getString(PreferenceConstants.QEMU_KERNEL));
 		elem.setStrQemuRootFSLoc(store.getString(PreferenceConstants.QEMU_ROOTFS));
 

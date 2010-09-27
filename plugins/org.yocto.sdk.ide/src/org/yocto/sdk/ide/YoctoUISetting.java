@@ -49,7 +49,6 @@ public class YoctoUISetting {
 
 	private Text textKernelLoc;
 	private Text textRootFSLoc;
-	private Text textIP;
 	private Text textRootLoc;
 	private Combo targetArchCombo;
 
@@ -132,13 +131,37 @@ public class YoctoUISetting {
 		return button;
 	}		
 
+	private void createQemuSetup(final Group targetGroup) throws YoctoGeneralException
+	{
+		Label kernel_label;
+		Label rootfs_label;
+		
+		//QEMU Setup
+		kernel_label= new Label(targetGroup, SWT.NONE);
+		kernel_label.setText("Kernel: ");
+		kernel_label.setAlignment(SWT.RIGHT);
+
+		Composite textContainer = new Composite(targetGroup, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		textKernelLoc= (Text)addTextControl(textContainer, PreferenceConstants.QEMU_KERNEL, yoctoUIElement.getStrQemuKernelLoc());
+		btnKernelLoc = addFileSelectButton(textContainer, textKernelLoc, PreferenceConstants.QEMU_KERNEL);
+
+		rootfs_label= new Label(targetGroup, SWT.NONE);
+		rootfs_label.setText("Root Filesystem: ");
+		rootfs_label.setAlignment(SWT.RIGHT);
+
+		textContainer = new Composite(targetGroup, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		textRootFSLoc= (Text)addTextControl(textContainer, PreferenceConstants.QEMU_ROOTFS, yoctoUIElement.getStrQemuRootFSLoc());
+		btnRootFSLoc = addFileSelectButton(textContainer, textRootFSLoc, PreferenceConstants.QEMU_ROOTFS);
+		
+	}
 	public void createComposite(Composite composite) throws YoctoGeneralException
 	{
 		Label root_label;
-		Label kernel_label;
-		Label rootfs_label;
-		Label ip_label; 
-
+		
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
 		composite.setLayout(layout);
@@ -198,39 +221,17 @@ public class YoctoUISetting {
 
 		if (yoctoUIElement.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE) {
 			btnQemu = (Button)addRadioButton(targetGroup, "QEMU", PreferenceConstants.TARGET_MODE + "_1", true);
+			createQemuSetup(targetGroup);
+			
 			btnDevice = (Button)addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_MODE + "_2", false);
 		}
 		else {
 			btnQemu = (Button)addRadioButton(targetGroup, "QEMU", PreferenceConstants.TARGET_MODE + "_1", false);
+			createQemuSetup(targetGroup);			
+
 			btnDevice = (Button)addRadioButton(targetGroup, "External HW", PreferenceConstants.TARGET_MODE + "_2", true);
 		}
-
-		//QEMU Setup
-		kernel_label= new Label(targetGroup, SWT.NONE);
-		kernel_label.setText("Kernel: ");
-		kernel_label.setAlignment(SWT.RIGHT);
-
-		textContainer = new Composite(targetGroup, SWT.NONE);
-		textContainer.setLayout(new GridLayout(2, false));
-		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-		textKernelLoc= (Text)addTextControl(textContainer, PreferenceConstants.QEMU_KERNEL, yoctoUIElement.getStrQemuKernelLoc());
-		btnKernelLoc = addFileSelectButton(textContainer, textKernelLoc, PreferenceConstants.QEMU_KERNEL);
-
-		rootfs_label= new Label(targetGroup, SWT.NONE);
-		rootfs_label.setText("Root Filesystem: ");
-		rootfs_label.setAlignment(SWT.RIGHT);
-
-		textContainer = new Composite(targetGroup, SWT.NONE);
-		textContainer.setLayout(new GridLayout(2, false));
-		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-		textRootFSLoc= (Text)addTextControl(textContainer, PreferenceConstants.QEMU_ROOTFS, yoctoUIElement.getStrQemuRootFSLoc());
-		btnRootFSLoc = addFileSelectButton(textContainer, textRootFSLoc, PreferenceConstants.QEMU_ROOTFS);
-
-		ip_label= new Label(targetGroup, SWT.NONE);
-		ip_label.setText("IP Address: ");
-		ip_label.setAlignment(SWT.RIGHT);
-		textIP= (Text)addTextControl(targetGroup, PreferenceConstants.IP_ADDR, yoctoUIElement.getStrDeviceIP());
-
+		
 		updateQemuControlState();
 
 		//we add the listener at the end for avoiding the useless event trigger when control
@@ -242,8 +243,6 @@ public class YoctoUISetting {
 		textRootLoc.addModifyListener(fModifyListener);
 		textKernelLoc.addModifyListener(fModifyListener);
 		textRootFSLoc.addModifyListener(fModifyListener);
-		textIP.addModifyListener(fModifyListener);
-
 	}
 
 	//Load all Control values into the YoctoUIElement
@@ -268,7 +267,6 @@ public class YoctoUISetting {
 		elem.setStrTarget(targetArchCombo.getText());
 		elem.setStrQemuKernelLoc(textKernelLoc.getText());
 		elem.setStrQemuRootFSLoc(textRootFSLoc.getText());
-		elem.setStrDeviceIP(textIP.getText());
 		return elem;
 	}
 
@@ -317,7 +315,6 @@ public class YoctoUISetting {
 		textRootFSLoc.setEnabled(bQemuMode);
 		btnKernelLoc.setEnabled(bQemuMode);
 		btnRootFSLoc.setEnabled(bQemuMode);
-		textIP.setEnabled(!bQemuMode);
 	}
 
 	private void updateSDKControlState()

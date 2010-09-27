@@ -90,9 +90,10 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
+				YoctoSDKProjectNature.configureAutotools(project);
 				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
-				YoctoSDKProjectNature.configureAutotools(project);
+				
 				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 				//restoreAutoBuild(workspace);
 				IDiscoveredPathManager manager = MakeCorePlugin.getDefault().getDiscoveryManager();
@@ -116,6 +117,11 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		}
 		catch (YoctoGeneralException e)
 		{
+			try {
+				project.delete(true, monitor);
+			} catch (CoreException err) {
+				throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage() + " " + err.getMessage()); 
+			}
 			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage()); 
 		}
 	}

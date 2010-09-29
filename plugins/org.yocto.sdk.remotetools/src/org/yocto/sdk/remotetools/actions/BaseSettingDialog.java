@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 PalmSource, Inc. and others.
+ * Copyright (c) 2006, 2010 PalmSource, Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@
  * Anna Dushistova       (MontaVista) - [181517][usability] Specify commands to be run before remote application launch
  * Anna Dushistova       (MontaVista) - [223728] [remotecdt] connection combo is not populated until RSE is activated
  * Anna Dushistova       (MontaVista) - [267951] [remotecdt] Support systemTypes without files subsystem
+ * Lianhao Lu			 (Intel)      - Modified for internal use
  *******************************************************************************/
 
 package org.yocto.sdk.remotetools.actions;

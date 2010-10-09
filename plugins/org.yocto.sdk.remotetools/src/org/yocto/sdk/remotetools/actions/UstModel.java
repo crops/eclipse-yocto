@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.yocto.sdk.remotetools.CommonHelper;
+import org.yocto.sdk.remotetools.LocalJob;
 import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.RSEHelper;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
@@ -64,7 +65,8 @@ public class UstModel extends BaseModel {
 			throws InvocationTargetException, InterruptedException {
 		try {
 			new File(localfile).delete();
-			new File(localfile.substring(0,localfile.length()-LOCAL_FILE_SUFFIX.length())).delete();
+			//NOT delete the directory since lttv-gui is running asynchronously
+			//new File(localfile.substring(0,localfile.length()-LOCAL_FILE_SUFFIX.length())).delete();
 		}catch (Exception e) {
 			
 		}
@@ -161,17 +163,9 @@ public class UstModel extends BaseModel {
 			monitor.worked(30);
 			
 			monitor.subTask("lttv-gui is running locally");
-			Process p=Runtime.getRuntime().exec(cmdarray,null,null);
-			while (!monitor.isCanceled()) {
-				try {
-					p.exitValue();
-					break;
-				}catch (IllegalThreadStateException e) {
-				}
-				Thread.sleep(500);				
-			}
-			p.destroy();
-			
+			//start lttv-gui asynchronously
+			new LocalJob("lttv-gui",cmdarray,null,null).schedule();
+						
 		}catch (InterruptedException e) {
 			throw e;
 		}catch (Exception e){

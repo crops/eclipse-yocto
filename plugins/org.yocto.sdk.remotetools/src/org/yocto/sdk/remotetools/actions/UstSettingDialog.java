@@ -97,7 +97,7 @@ public class UstSettingDialog extends BaseSettingDialog {
 		projComp.setLayoutData(gd);
 		
 		Label label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Application_Text);
+		label.setText(Messages.Usttrace_Application_Text);
 		gd = new GridData();
 		gd.horizontalSpan = 4;
 		label.setLayoutData(gd);
@@ -115,7 +115,7 @@ public class UstSettingDialog extends BaseSettingDialog {
 		appText.setLayoutData(gd);
 		
 		label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Argument_Text);
+		label.setText(Messages.Usttrace_Argument_Text);
 		gd = new GridData();
 		gd.horizontalSpan = 4;
 		label.setLayoutData(gd);

@@ -30,8 +30,8 @@ public class Messages extends NLS {
 	public static String BaseSettingDialog_Connection;
 	public static String BaseSettingDialog_New;
 	public static String BaseSettingDialog_Properties;
-	public static String Argument_Text;
-	public static String Application_Text;
+	public static String Usttrace_Argument_Text;
+	public static String Usttrace_Application_Text;
 	public static String Powertop_Time_Text;
 	public static String Powertop_ShowPid_Text;
 	public static String TerminalViewer_text;

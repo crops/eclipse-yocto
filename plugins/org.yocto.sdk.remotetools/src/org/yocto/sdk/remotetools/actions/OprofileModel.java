@@ -25,6 +25,7 @@ import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
 import org.yocto.sdk.remotetools.CommonHelper;
+import org.yocto.sdk.remotetools.LocalJob;
 import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.RSEHelper;
 
@@ -165,6 +166,8 @@ public class OprofileModel extends BaseModel {
 	public void process(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
 		
+		boolean stopServer=true;
+		
 		try {
 			try {
 			monitor.beginTask("Starting oprofile", 100);	
@@ -176,30 +179,23 @@ public class OprofileModel extends BaseModel {
 			monitor.subTask("oprofile-viewer is running locally");
 			String searchPath=getSearchPath();
 			
-			Process p=Runtime.getRuntime().exec(
+			new LocalJob("oprofile-viewer",
 					(searchPath!=null) ? 
 						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName(),"-s",searchPath} : 
 						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName()},
 					null,
-					null);
-			
-			//wait for oprofile-viewer to finish
-			while (!monitor.isCanceled()) {
-				try {
-					p.exitValue();
-					break;
-				}catch (IllegalThreadStateException e) {
-				}
-				Thread.sleep(500);				
-			}
-			p.destroy();
+					null).schedule();
+			//we can't stop server because the oprofile-viewer is running asynchronously
+			stopServer=false;
 			
 			}catch (InterruptedException e) {
 				throw e;
 			}finally {
 				//stop oprofile-server
-				monitor.subTask("Stopping oprofile-viewer");
-				stopServer(new SubProgressMonitor(monitor,30));
+				if(stopServer) {
+					monitor.subTask("Stopping oprofile-viewer");
+					stopServer(new SubProgressMonitor(monitor,30));
+				}
 			}
 		}catch (InterruptedException e) {
 			throw e;

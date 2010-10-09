@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools;
 
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -45,6 +47,12 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		
+		//cancel all jobs before plugin stop
+		IJobManager jobMan = Job.getJobManager();
+		jobMan.cancel(LocalJob.LOCAL_JOB_FAMILY);
+		jobMan.join(LocalJob.LOCAL_JOB_FAMILY, null);
+
 		plugin = null;
 		super.stop(context);
 	}

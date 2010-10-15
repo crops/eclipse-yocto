@@ -66,17 +66,17 @@
 	<target name="preSetup">
 		<delete dir="${buildDirectory}/plugins"/>
 		<exec dir="${buildDirectory}" executable="svn" failonerror="true">
-		    <arg value="co"/>
+		    <arg value="export"/>
 		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0/plugins/org.eclipse.tm.tcf"/>
 		    <arg value="plugins/org.eclipse.tm.tcf"/>
 	  	</exec>
 		<exec dir="${buildDirectory}" executable="svn" failonerror="true">
-		    <arg value="co"/>
+		    <arg value="export"/>
 		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0/plugins/org.eclipse.tm.tcf.core"/>
 		    <arg value="plugins/org.eclipse.tm.tcf.core"/>
 	  	</exec>
 		<exec dir="${buildDirectory}" executable="svn" failonerror="true">
-		    <arg value="co"/>
+		    <arg value="export"/>
 		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0/plugins/org.eclipse.tm.tcf.rse"/>
 		    <arg value="plugins/org.eclipse.tm.tcf.rse"/>
 		</exec>

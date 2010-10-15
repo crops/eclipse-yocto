@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Remotetools
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.yocto.sdk.remotetools; singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.yocto.sdk.remotetools.Activator
@@ -20,3 +20,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.core.resources,
  org.eclipse.debug.internal.ui,
  org.eclipse.ui.forms.widgets
+Bundle-Vendor: %Bundle-Vendor

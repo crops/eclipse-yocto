@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.IWorkbenchWindow;
 
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
@@ -35,9 +36,10 @@ public class OprofileModel extends BaseModel {
 	static final private String LOCAL_SCRIPT="resources/yocto_tool.sh";
 	static final private String LOCAL_EXEC="oprofile-viewer";
 	
-	public OprofileModel(IHost host) {
+	private IWorkbenchWindow window;
+	public OprofileModel(IHost host, IWorkbenchWindow window) {
 		super(host);
-		
+		this.window=window;
 	}
 	@Override
 	public void preProcess(IProgressMonitor monitor)
@@ -184,7 +186,8 @@ public class OprofileModel extends BaseModel {
 						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName(),"-s",searchPath} : 
 						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName()},
 					null,
-					null).schedule();
+					null,
+					window).schedule();
 			//we can't stop server because the oprofile-viewer is running asynchronously
 			stopServer=false;
 			

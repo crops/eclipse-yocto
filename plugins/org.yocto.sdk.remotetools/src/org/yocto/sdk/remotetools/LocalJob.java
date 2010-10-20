@@ -18,6 +18,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWTException;
 
 public class LocalJob extends Job {
 	
@@ -25,12 +28,18 @@ public class LocalJob extends Job {
 	private String[] cmdarray;
 	private String[] envp;
 	private File dir;
+	private int exitValue;
+	private Exception exception;
+	private IWorkbenchWindow window;
 	
-	public LocalJob(String name, String[] cmdarray, String[] envp, File dir) {
+	public LocalJob(String name, String[] cmdarray, String[] envp, File dir, IWorkbenchWindow window) {
 		super(name);
 		this.cmdarray=cmdarray;
 		this.envp=envp;
 		this.dir=dir;
+		this.window=window;
+		this.exitValue=0;
+		this.exception=null;
 	}
 
 	@Override
@@ -49,7 +58,7 @@ public class LocalJob extends Job {
 					cancel=true;
 				
 				try {
-					p.exitValue();
+					exitValue=p.exitValue();
 					break;
 				}catch (IllegalThreadStateException e) {
 				}
@@ -58,12 +67,30 @@ public class LocalJob extends Job {
 			}
 			
 		}catch (IOException e) {
-			
+			exception=e;	
 		}catch (InterruptedException e){
 			cancel=true;
 		}finally {
 			if(p!=null)
 				p.destroy();
+		}
+		try {
+			if(exitValue!=0 || exception!=null) {
+				window.getWorkbench().getDisplay().syncExec(new Runnable() {
+					public void run() {
+						MessageDialog.openError(window.getShell(),
+								Messages.LocalJob_Title,
+								Messages.ErrorLocalJob + ": " + getName() + 
+								(exitValue!=0 ? "\n\tExit value: " + new Integer(exitValue).toString() : new String("")) + 
+								(exception!=null ? "\n\t" + exception.getMessage() : new String (""))
+								);
+					}
+				});
+			}
+		}catch (SWTException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
 		}
 		return (cancel!=true) ? Status.OK_STATUS : Status.CANCEL_STATUS;
 	}

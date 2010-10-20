@@ -35,7 +35,7 @@ public class UstHandler extends AbstractHandler {
 		
 		if(setting.open()==BaseSettingDialog.OK) {
 			IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-			UstModel op=new UstModel(setting.getHost(),setting.getApplication(),setting.getArgument());
+			UstModel op=new UstModel(setting.getHost(),setting.getApplication(),setting.getArgument(),window);
 			try {
 				progressService.busyCursorWhile(op);
 			}catch (Exception e) {

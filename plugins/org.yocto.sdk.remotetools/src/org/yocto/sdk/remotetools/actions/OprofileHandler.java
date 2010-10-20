@@ -37,7 +37,7 @@ public class OprofileHandler extends AbstractHandler {
 		
 		if(setting.open()==BaseSettingDialog.OK) {
 			IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-			OprofileModel op=new OprofileModel(setting.getHost());
+			OprofileModel op=new OprofileModel(setting.getHost(),window);
 			try {
 				progressService.busyCursorWhile(op);
 			}catch (Exception e) {

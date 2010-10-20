@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.LocalJob;
 import org.yocto.sdk.remotetools.Messages;
@@ -38,10 +39,13 @@ public class UstModel extends BaseModel {
 	
 	private String localfile;
 	
-	public UstModel(IHost host, String app,String arg) {
+	private IWorkbenchWindow window;
+	
+	public UstModel(IHost host, String app,String arg, IWorkbenchWindow window) {
 		super(host);
 		application=app;
 		argument=arg;
+		this.window=window;
 	}
 
 	@Override
@@ -164,7 +168,7 @@ public class UstModel extends BaseModel {
 			
 			monitor.subTask("lttv-gui is running locally");
 			//start lttv-gui asynchronously
-			new LocalJob("lttv-gui",cmdarray,null,null).schedule();
+			new LocalJob("lttv-gui",cmdarray,null,null,window).schedule();
 						
 		}catch (InterruptedException e) {
 			throw e;

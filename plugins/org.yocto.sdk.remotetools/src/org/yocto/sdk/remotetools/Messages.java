@@ -36,6 +36,9 @@ public class Messages extends NLS {
 	public static String Powertop_ShowPid_Text;
 	public static String TerminalViewer_text;
 	
+	public static String LocalJob_Title;
+	public static String ErrorLocalJob;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

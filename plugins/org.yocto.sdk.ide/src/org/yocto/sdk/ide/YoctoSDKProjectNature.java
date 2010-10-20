@@ -76,7 +76,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	}
 
 
-	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem){
+	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem) throws YoctoGeneralException{
 		String sFileName;
 		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
 		
@@ -97,10 +97,12 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			ILaunchConfigurationType configType = 
 				lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
 			ILaunchConfigurationType debug_configType = 
-				lManager.getLaunchConfigurationType("org.eclipse.rse.remotecdt.RemoteApplicationLaunch");
+				lManager.getLaunchConfigurationType("org.eclipse.rse.remotecdt.RemoteApplicationLaunch");			
 			String sPath = envMap.get("PATH");
 			String sDebugName = envMap.get("GDB");
 			String sSysroot = envMap.get("POKY_TARGET_SYSROOT");
+			if (configType == null || debug_configType == null)
+				throw new YoctoGeneralException("Failed to get program or remote debug launcher!");
 			createRemoteDebugLauncher(project, debug_configType, elem.getStrTarget(), sPath, sDebugName, sSysroot);
 
 			ArrayList<String> listValue = new ArrayList<String>();
@@ -113,8 +115,6 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			e.printStackTrace();
 		}	
 	}
-
-
 
 	public static void configureAutotoolsOptions(IProject project) {
 		IManagedBuildInfo info = ManagedBuildManager.getBuildInfo(project);

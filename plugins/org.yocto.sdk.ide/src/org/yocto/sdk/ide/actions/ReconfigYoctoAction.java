@@ -22,6 +22,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.InvokeAction;
 import org.eclipse.swt.widgets.Shell;
 
+import org.yocto.sdk.ide.YoctoGeneralException;
 import org.yocto.sdk.ide.YoctoSDKUtils;
 import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKProjectNature;
@@ -52,9 +53,9 @@ public class ReconfigYoctoAction extends InvokeAction {
 		optionDialog.open();
 		elem = optionDialog.getElem();
 		if (elem.getStrToolChainRoot() != null) {			
-			YoctoSDKProjectNature.setEnvironmentVariables(project, elem);
-			YoctoSDKProjectNature.configureAutotoolsOptions(project);
 			try {
+				YoctoSDKProjectNature.setEnvironmentVariables(project, elem);
+				YoctoSDKProjectNature.configureAutotoolsOptions(project);
 				IConsole console = CCorePlugin.getDefault().getConsole("org.yocto.sdk.ide.YoctoConsole");
 				console.start(project);
 				ConsoleOutputStream consoleOutStream;
@@ -69,6 +70,10 @@ public class ReconfigYoctoAction extends InvokeAction {
 				System.out.println(e.getMessage());
 			}
 			catch (IOException e)
+			{
+				System.out.println(e.getMessage());
+			}
+			catch (YoctoGeneralException e)
 			{
 				System.out.println(e.getMessage());
 			}

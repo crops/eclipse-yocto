@@ -28,7 +28,7 @@
    </license>
 
    <url>
-      <update label="%updateSiteName" url="http://sdk.yocto.org/release"/>
+      <update label="%updateSiteName" url="http://yoctoproject.org/downloads/eclipse-plugin/"/>
    </url>
 
    <includes

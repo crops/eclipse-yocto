@@ -214,6 +214,11 @@ public class OprofileModel extends BaseModel {
 		
 		if(ret==false) {
 			CommonHelper.showErrorDialog("Oprofile", null,Messages.ErrorOprofileViewer);
+		}else {
+			ret=CommonHelper.isExecAvail("opreport");
+			if(ret==false) {
+				CommonHelper.showErrorDialog("Oprofile", null,Messages.ErrorOprofile);
+			}
 		}
 		return ret;
 	}

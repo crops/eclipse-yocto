@@ -55,6 +55,8 @@ public class YoctoUIElement {
 		this.strToolChainRoot = strToolChainRoot;
 	}
 	public int getIntTargetIndex() {
+		if (this.strTargetsArray.length == 1)
+			return 0;
 		return intTargetIndex;
 	}
 	public void setIntTargetIndex(int intTargetIndex) {

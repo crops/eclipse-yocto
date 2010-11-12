@@ -427,6 +427,8 @@ public class YoctoUISetting {
 					targetCombo.select(i);
 					return;
 				}
+				if (elem.getStrTargetsArray().length == 1)
+					targetCombo.select(0);
 				targetCombo.select(-1);
 			}
 		}

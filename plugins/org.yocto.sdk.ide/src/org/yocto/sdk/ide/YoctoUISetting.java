@@ -55,11 +55,11 @@ public class YoctoUISetting {
 	private Button btnDevice;
 
 	private Button btnKernelLoc;
-	private Button btnRootFSLoc;
+	private Button btnSysrootLoc;
 	private Button btnToolChainLoc;
 
 	private Text textKernelLoc;
-	private Text textRootFSLoc;
+	private Text textSysrootLoc;
 	private Text textRootLoc;
 	private Combo targetArchCombo;
 
@@ -130,7 +130,7 @@ public class YoctoUISetting {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				String dirName;
-				if (key.equals(PreferenceConstants.TOOLCHAIN_ROOT)|| key.equals(PreferenceConstants.QEMU_ROOTFS))
+				if (key.equals(PreferenceConstants.TOOLCHAIN_ROOT)|| key.equals(PreferenceConstants.SYSROOT))
 					dirName = new DirectoryDialog(parent.getShell()).open();
 				else
 					dirName = new FileDialog(parent.getShell()).open();
@@ -157,7 +157,7 @@ public class YoctoUISetting {
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		textKernelLoc= (Text)addTextControl(textContainer, PreferenceConstants.QEMU_KERNEL, yoctoUIElement.getStrQemuKernelLoc());
 		btnKernelLoc = addFileSelectButton(textContainer, textKernelLoc, PreferenceConstants.QEMU_KERNEL);
-
+/*
 		rootfs_label= new Label(targetGroup, SWT.NONE);
 		rootfs_label.setText("Root Filesystem: ");
 		rootfs_label.setAlignment(SWT.RIGHT);
@@ -167,11 +167,12 @@ public class YoctoUISetting {
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		textRootFSLoc= (Text)addTextControl(textContainer, PreferenceConstants.QEMU_ROOTFS, yoctoUIElement.getStrQemuRootFSLoc());
 		btnRootFSLoc = addFileSelectButton(textContainer, textRootFSLoc, PreferenceConstants.QEMU_ROOTFS);
+		*/
 		
 	}
 	public void createComposite(Composite composite) throws YoctoGeneralException
 	{
-		Label root_label;
+		Label root_label, sysroot_label;
 		
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
@@ -203,6 +204,16 @@ public class YoctoUISetting {
 		textRootLoc = (Text)addTextControl(textContainer,
 				PreferenceConstants.TOOLCHAIN_ROOT, yoctoUIElement.getStrToolChainRoot());
 		btnToolChainLoc = addFileSelectButton(textContainer, textRootLoc, PreferenceConstants.TOOLCHAIN_ROOT);
+		
+		sysroot_label= new Label(crossCompilerGroup, SWT.NONE);
+		sysroot_label.setText("Sysroot: ");
+		sysroot_label.setAlignment(SWT.RIGHT);
+
+		textContainer = new Composite(crossCompilerGroup, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		textSysrootLoc= (Text)addTextControl(textContainer, PreferenceConstants.SYSROOT, yoctoUIElement.getStrSysrootLoc());
+		btnSysrootLoc = addFileSelectButton(textContainer, textSysrootLoc, PreferenceConstants.SYSROOT);
 
 		updateSDKControlState();
 		Label targetArchLabel= new Label(crossCompilerGroup, SWT.NONE);
@@ -253,7 +264,7 @@ public class YoctoUISetting {
 		btnDevice.addSelectionListener(fSelectionListener);
 		textRootLoc.addModifyListener(fModifyListener);
 		textKernelLoc.addModifyListener(fModifyListener);
-		textRootFSLoc.addModifyListener(fModifyListener);
+		textSysrootLoc.addModifyListener(fModifyListener);
 	}
 
 	//Load all Control values into the YoctoUIElement
@@ -277,7 +288,7 @@ public class YoctoUISetting {
 		elem.setStrTargetsArray(targetArchCombo.getItems());
 		elem.setStrTarget(targetArchCombo.getText());
 		elem.setStrQemuKernelLoc(textKernelLoc.getText());
-		elem.setStrQemuRootFSLoc(textRootFSLoc.getText());
+		elem.setStrSysrootLoc(textSysrootLoc.getText());
 		return elem;
 	}
 
@@ -323,9 +334,9 @@ public class YoctoUISetting {
 		boolean bQemuMode = btnQemu.getSelection();
 
 		textKernelLoc.setEnabled(bQemuMode);
-		textRootFSLoc.setEnabled(bQemuMode);
+		//textRootFSLoc.setEnabled(bQemuMode);
 		btnKernelLoc.setEnabled(bQemuMode);
-		btnRootFSLoc.setEnabled(bQemuMode);
+		//btnRootFSLoc.setEnabled(bQemuMode);
 	}
 
 	private void updateSDKControlState()

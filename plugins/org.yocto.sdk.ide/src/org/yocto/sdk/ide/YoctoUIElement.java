@@ -26,7 +26,7 @@ public class YoctoUIElement {
 	private String[] strTargetsArray;
 	private DeviceMode enumDeviceMode;
 	private String strQemuKernelLoc;
-	private String strQemuRootFSLoc;
+	private String strSysrootLoc;
 	private PokyMode enumPokyMode;
 	private String strToolChainRoot;
 	private int intTargetIndex;	
@@ -37,7 +37,7 @@ public class YoctoUIElement {
 		this.enumPokyMode = PokyMode.POKY_SDK_MODE;
 		this.strToolChainRoot = "";
 		this.strQemuKernelLoc = "";
-		this.strQemuRootFSLoc = "";
+		this.strSysrootLoc = "";
 		this.intTargetIndex = -1;
 		this.strTarget = "";
 	}
@@ -86,10 +86,10 @@ public class YoctoUIElement {
 	public void setStrQemuKernelLoc(String strQemuKernelLoc) {
 		this.strQemuKernelLoc = strQemuKernelLoc;
 	}
-	public String getStrQemuRootFSLoc() {
-		return strQemuRootFSLoc;
+	public String getStrSysrootLoc() {
+		return strSysrootLoc;
 	}
-	public void setStrQemuRootFSLoc(String strQemuRootFSLoc) {
-		this.strQemuRootFSLoc = strQemuRootFSLoc;
+	public void setStrSysrootLoc(String strSysrootLoc) {
+		this.strSysrootLoc = strSysrootLoc;
 	}
 }

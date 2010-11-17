@@ -36,10 +36,10 @@ public class YoctoSDKUtils {
 		TOOLCHAIN_LOCATION_NONEXIST,
 		SDK_TARGET_EMPTY,
 		QEMU_KERNEL_EMPTY,
-		QEMU_ROOTFS_EMPTY,
+		SYSROOT_EMPTY,
 		QEMU_KERNEL_NONEXIST,
-		QEMU_ROOTFS_NONEXIST,
-		SDK_SYSROOT_NON_EXIST,
+		SYSROOT_NONEXIST,
+		//SDK_SYSROOT_NON_EXIST,
 		ENV_SETUP_SCRIPT_NONEXIST
 	};
 
@@ -54,10 +54,10 @@ public class YoctoSDKUtils {
 	private static final String SDK_TARGET_EMPTY      = "Poky.SDK.Target.Empty";
 	private static final String TOOLCHAIN_LOCATION_NONEXIST = "Poky.SDK.Location.Nonexist";
 	private static final String QEMU_KERNEL_EMPTY 	  = "Poky.Qemu.Kernel.Empty";
-	private static final String QEMU_ROOTFS_EMPTY = "Poky.Qemu.Rootfs.Empty";
+	private static final String SYSROOT_EMPTY = "Poky.Sysroot.Empty";
 	private static final String QEMU_KERNEL_NONEXIST = "Poky.Qemu.Kernel.Nonexist";
-	private static final String QEMU_ROOTFS_NONEXIST = "Poky.Qemu.RootFS.Nonexist";
-	private static final String SDK_SYSROOT_NON_EXIST = "Poky.SDK.Sysroot.Nonexist";
+	private static final String SYSROOT_NONEXIST = "Poky.Sysroot.Nonexist";
+	//private static final String SDK_SYSROOT_NON_EXIST = "Poky.SDK.Sysroot.Nonexist";
 	private static final String ENV_SETUP_SCRIPT_NONEXIST = "Poky.Env.Script.Nonexist";
 
 
@@ -71,6 +71,13 @@ public class YoctoSDKUtils {
 				return SDKCheckResults.TOOLCHAIN_LOCATION_NONEXIST;
 		}
 
+		if (elem.getStrSysrootLoc().isEmpty())
+			return SDKCheckResults.SYSROOT_EMPTY;
+		else {
+			File fSysroot = new File(elem.getStrSysrootLoc());
+			if (!fSysroot.exists())
+				return SDKCheckResults.SYSROOT_NONEXIST;
+		}
 		if (elem.getIntTargetIndex() < 0 || elem.getStrTarget().isEmpty())
 			return SDKCheckResults.SDK_TARGET_EMPTY;
 
@@ -82,13 +89,6 @@ public class YoctoSDKUtils {
 				File fQemuKernel = new File(elem.getStrQemuKernelLoc());
 				if (!fQemuKernel.exists())
 					return SDKCheckResults.QEMU_KERNEL_NONEXIST;
-			}
-			if (elem.getStrQemuRootFSLoc().isEmpty())
-				return SDKCheckResults.QEMU_ROOTFS_EMPTY;
-			else {
-				File fQemuRootFS = new File(elem.getStrQemuRootFSLoc());
-				if (!fQemuRootFS.exists())
-					return SDKCheckResults.QEMU_ROOTFS_NONEXIST;
 			}
 		}
 	
@@ -130,18 +130,18 @@ public class YoctoSDKUtils {
 		case QEMU_KERNEL_EMPTY:
 			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(QEMU_KERNEL_EMPTY);
 			break;
-		case QEMU_ROOTFS_EMPTY:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(QEMU_ROOTFS_EMPTY);
+		case SYSROOT_EMPTY:
+			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SYSROOT_EMPTY);
 			break;
 		case QEMU_KERNEL_NONEXIST:
 			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(QEMU_KERNEL_NONEXIST);
 			break;
-		case QEMU_ROOTFS_NONEXIST:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(QEMU_ROOTFS_NONEXIST);
+		case SYSROOT_NONEXIST:
+			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SYSROOT_NONEXIST);
 			break;
-		case SDK_SYSROOT_NON_EXIST:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SDK_SYSROOT_NON_EXIST);
-			break;
+		//case SDK_SYSROOT_NON_EXIST:
+		//	strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SDK_SYSROOT_NON_EXIST);
+		//	break;
 		case ENV_SETUP_SCRIPT_NONEXIST:
 			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(ENV_SETUP_SCRIPT_NONEXIST);
 			break;
@@ -203,7 +203,7 @@ public class YoctoSDKUtils {
 
 		env.addVariable(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc(),
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-		env.addVariable(PreferenceConstants.QEMU_ROOTFS, elem.getStrQemuRootFSLoc(),
+		env.addVariable(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc(),
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 
 		if (envMap == null)
@@ -229,7 +229,7 @@ public class YoctoSDKUtils {
 		elem.setStrToolChainRoot(getEnvValue(project, PreferenceConstants.TOOLCHAIN_ROOT));
 		elem.setStrTarget(getEnvValue(project, PreferenceConstants.TOOLCHAIN_TRIPLET));
 		elem.setStrQemuKernelLoc(getEnvValue(project, PreferenceConstants.QEMU_KERNEL));
-		elem.setStrQemuRootFSLoc(getEnvValue(project, PreferenceConstants.QEMU_ROOTFS));
+		elem.setStrSysrootLoc(getEnvValue(project, PreferenceConstants.SYSROOT));
 		String sTemp = getEnvValue(project, PreferenceConstants.TARGET_ARCH_INDEX);
 		if (!sTemp.isEmpty())
 			elem.setIntTargetIndex(Integer.valueOf(sTemp).intValue());
@@ -258,7 +258,7 @@ public class YoctoSDKUtils {
 		else
 			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
 		store.setValue(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc());
-		store.setValue(PreferenceConstants.QEMU_ROOTFS, elem.getStrQemuRootFSLoc());
+		store.setValue(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc());
 		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
 			store.setValue(PreferenceConstants.TARGET_MODE, IPreferenceStore.TRUE);
 		else
@@ -281,7 +281,7 @@ public class YoctoSDKUtils {
 		elem.setStrTarget(store.getString(PreferenceConstants.TOOLCHAIN_TRIPLET));
 		elem.setIntTargetIndex(store.getInt(PreferenceConstants.TARGET_ARCH_INDEX));
 		elem.setStrQemuKernelLoc(store.getString(PreferenceConstants.QEMU_KERNEL));
-		elem.setStrQemuRootFSLoc(store.getString(PreferenceConstants.QEMU_ROOTFS));
+		elem.setStrSysrootLoc(store.getString(PreferenceConstants.SYSROOT));
 
 		if (store.getString(PreferenceConstants.TARGET_MODE).equals(IPreferenceStore.TRUE))
 			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.QEMU_MODE);
@@ -291,6 +291,21 @@ public class YoctoSDKUtils {
 		return elem;
 	}
 
+	public static String qemuTargetTranslate(String strTargetArch) 
+	{
+		String qemu_target = "";
+		if (strTargetArch.indexOf("i586") != -1)
+			qemu_target = "qemux86";
+		else if (strTargetArch.indexOf("x86_64") != -1)
+			qemu_target = "qemux86-64";
+		else if (strTargetArch.indexOf("arm") != -1)
+			qemu_target = "qemuarm";
+		else if (strTargetArch.indexOf("mips") != -1)
+			qemu_target = "qemumips";
+		else if (strTargetArch.indexOf("ppc") != -1)
+			qemu_target = "qemuppc";
+		return qemu_target;
+	}
 	public static String splitString(String strValue, String strDelim)
 	{
 		int iBeginIndex = strValue.indexOf(strDelim);

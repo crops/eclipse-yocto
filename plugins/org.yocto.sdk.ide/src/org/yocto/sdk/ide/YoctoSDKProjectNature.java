@@ -52,6 +52,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 
 	private static final String DEFAULT_CONFIGURE_STR = "configure";
 	private static final String DEFAULT_AUTOGEN_STR = "autogen";
+	private static final String DEFAULT_SYSROOT_PREFIX = " --sysroot=";
+	
 
 	private IProject proj;
 
@@ -119,9 +121,12 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	public static void configureAutotoolsOptions(IProject project) {
 		IManagedBuildInfo info = ManagedBuildManager.getBuildInfo(project);
 		IConfiguration icfg = info.getDefaultConfiguration();
+		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
+		String sysroot_str = elem.getStrSysrootLoc();
 		String id = icfg.getId();
 		String command_prefix = "CFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CFLAGS") 
-		+ "\" CXXFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CXXFLAGS") + "\"";
+		+ DEFAULT_SYSROOT_PREFIX + sysroot_str + "\" CXXFLAGS=\" -g -O0 "
+		+ YoctoSDKUtils.getEnvValue(project, "CXXFLAGS")+ DEFAULT_SYSROOT_PREFIX + sysroot_str + "\"";
 		String autogen_setting = command_prefix+" autogen.sh";
 		String configure_setting = command_prefix + " configure";
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);
@@ -211,8 +216,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);		
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 
-			String argument = "-e \"source " + sScriptFile + ";poky-qemu " +
-			elem.getStrQemuKernelLoc() + " " + elem.getStrQemuRootFSLoc() + ";bash\"";
+			String argument = "-e \"source " + sScriptFile + ";poky-qemu " + YoctoSDKUtils.qemuTargetTranslate(elem.getStrTarget()) + " "+
+			elem.getStrQemuKernelLoc() + " " + elem.getStrSysrootLoc() + ";bash\"";
 
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
 			w_copy.doSave();

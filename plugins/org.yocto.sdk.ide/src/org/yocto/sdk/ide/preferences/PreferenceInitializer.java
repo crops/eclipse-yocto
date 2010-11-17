@@ -32,7 +32,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PreferenceConstants.TARGET_ARCH_INDEX, -1);
 		store.setDefault(PreferenceConstants.IP_ADDR, "");
 		store.setDefault(PreferenceConstants.QEMU_KERNEL, "");
-		store.setDefault(PreferenceConstants.QEMU_ROOTFS, "");
+		store.setDefault(PreferenceConstants.SYSROOT, "");
 		store.setDefault(PreferenceConstants.TOOLCHAIN_TRIPLET, "");
 	}
 

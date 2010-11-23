@@ -117,6 +117,18 @@
             location="templates/projecttemplates/HelloWorldCPPAutotoolsProject/template.xml"
             projectType="org.yocto.sdk.ide.projectType">
       </template>
+      <template
+            filterPattern=".*gcc"
+            id="org.yocto.sdk.ide.template.helloWorldCClutterProject"
+            location="templates/projecttemplates/HelloWorldCClutterProject/template.xml"
+            projectType="org.yocto.sdk.ide.projectType">
+      </template>
+      <template
+            filterPattern=".*g\+\+"
+            id="org.yocto.sdk.ide.template.helloWorldCPPClutterProject"
+            location="templates/projecttemplates/HelloWorldCPPClutterProject/template.xml"
+            projectType="org.yocto.sdk.ide.projectType">
+      </template>
    </extension>
    <extension
          point="org.eclipse.cdt.core.templateProcessTypes">

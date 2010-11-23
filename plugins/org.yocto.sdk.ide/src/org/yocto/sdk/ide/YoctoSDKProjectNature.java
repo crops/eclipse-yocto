@@ -121,7 +121,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	public static void configureAutotoolsOptions(IProject project) {
 		IManagedBuildInfo info = ManagedBuildManager.getBuildInfo(project);
 		IConfiguration icfg = info.getDefaultConfiguration();
-		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
+		YoctoUIElement elem = YoctoSDKUtils.getElemFromProjectEnv(project);
 		String sysroot_str = elem.getStrSysrootLoc();
 		String id = icfg.getId();
 		String command_prefix = "CFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CFLAGS") 

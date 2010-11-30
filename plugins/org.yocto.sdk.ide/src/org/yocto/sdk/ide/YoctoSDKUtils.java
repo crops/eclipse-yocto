@@ -216,7 +216,13 @@ public class YoctoSDKUtils {
 		{					
 			String sKey = (String)iter.next();
 			String sValue = (String)envMap.get(sKey);
-			env.addVariable(sKey, sValue, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			//Change cetain env vars based on user target sysroot setup
+			if (sKey.matches("PKG_CONFIG_SYSROOT_DIR") || sKey.matches("POKY_TARGET_SYSROOT"))
+				env.addVariable(sKey, elem.getStrSysrootLoc(), IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			else if (sKey.matches("PKG_CONFIG_PATH"))
+				env.addVariable(sKey, elem.getStrSysrootLoc()+"/usr/lib/pkgconfig", IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			else
+				env.addVariable(sKey, sValue, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		}
 		return;
 

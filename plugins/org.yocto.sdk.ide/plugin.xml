@@ -129,6 +129,12 @@
             location="templates/projecttemplates/HelloWorldCPPClutterProject/template.xml"
             projectType="org.yocto.sdk.ide.projectType">
       </template>
+      <template
+            filterPattern=".*gcc"
+            id="org.yocto.sdk.ide.template.helloWorldCGTKProject"
+            location="templates/projecttemplates/HelloWorldCGTKProject/template.xml"
+            projectType="org.yocto.sdk.ide.projectType">
+      </template>
    </extension>
    <extension
          point="org.eclipse.cdt.core.templateProcessTypes">

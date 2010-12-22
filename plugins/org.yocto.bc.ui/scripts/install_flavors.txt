@@ -1,0 +1,6 @@
+# this file describes all options when new a Yocto project.
+# the format is pipe delimited
+# Flavor Label (shows in UI)| description text| image URL| script URL
+Create from git resource|Poky Linux provides a consistent and stable build environment.|icons/poky_128.png|scripts/poky_install.sh
+Create from existing build tree|Poky Linux provides a consistent and stable build environment.|icons/poky_128.png|scripts/poky_install.sh
+# BeagleBoard Linux|Beagleboard Linux is a customization of OpenEmbedded|icons/beagle_128.png|scripts/beagle_install.sh

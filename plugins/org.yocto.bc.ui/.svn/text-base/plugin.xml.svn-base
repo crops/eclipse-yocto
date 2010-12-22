@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+<extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="BitBake Commander"
+            id="com.buglabs.bc.ui">
+      </category>
+      <wizard
+            category="com.buglabs.bc.ui"
+            class="com.buglabs.bc.ui.wizards.install.InstallWizard"
+            icon="icons/icon16_OE.gif"
+            id="com.buglabs.bc.ui.wizards.install.InstallWizard"
+            name="New OpenEmbedded Project"
+            project="true"/>
+   </extension>
+   <extension
+         id="com.buglabs.bc.ui.builder.BitbakeBuilder"
+         name="Bitbake Commander Project Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="com.buglabs.bc.ui.builder.BitbakeBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         id="com.buglabs.bc.ui.builder.BitbakeCommanderNature"
+         name="Bitbake Commander Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.buglabs.bc.ui.builder.BitbakeCommanderNature">
+         </run>
+      </runtime>
+      <builder
+            id="com.buglabs.bc.ui.builder.BitbakeBuilder">
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="com.buglabs.bc.ui.contribution2"
+            nameFilter="*.bb"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="com.buglabs.bc.ui.actions.BitbakeBuildRecipeAction"
+               enablesFor="+"
+               icon="icons/binary.gif"
+               id="com.buglabs.bc.ui.BuildPackagePopupAction"
+               label="Build"
+               menubarPath="com.buglabs.bc.ui.menu1/group1"
+               tooltip="Build a package">
+         </action>
+   		<action
+               class="com.buglabs.bc.ui.actions.BitbakeCleanRecipeAction"
+               enablesFor="+"
+               icon="icons/trash.gif"
+               id="com.buglabs.bc.ui.CleanPackagePopupAction"
+               label="Clean"
+               menubarPath="com.buglabs.bc.ui.menu1/group1"
+               tooltip="Clean a package">
+         </action>
+         <action
+               class="com.buglabs.bc.ui.actions.BitbakeImportAction"
+               enablesFor="+"
+               icon="icons/import_wiz.gif"
+               id="com.buglabs.bc.ui.BitbakeImportPopupAction"
+               label="Import"
+               menubarPath="com.buglabs.bc.ui.menu1/group1"
+               tooltip="Import package sources as Eclipse project.">
+         </action>
+         <menu
+               id="com.buglabs.bc.ui.menu1"
+               label="BitBake"
+               path="additions">
+            <separator
+                  name="bc.separator1">
+            </separator>
+         </menu>
+         <action
+               class="com.buglabs.bc.ui.actions.BitbakeRebuildRecipeAction"
+               enablesFor="+"
+               icon="icons/refresh.gif"
+               id="com.buglabs.bc.ui.BuildPackagePopupAction"
+               label="Rebuild"
+               menubarPath="com.buglabs.bc.ui.menu1/group1"
+               tooltip="Rebuild a package">
+         </action>
+     </objectContribution>
+   </extension>
+   <extension
+         id="xmlProblem"
+         name="XML Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.buglabs.bc.ui.editors.bitbake.BitBakeFileEditor"
+            contributorClass="com.buglabs.bc.ui.editors.bitbake.RecipeEditorActionContributor"
+            default="true"
+            extensions="bb,inc,bbclass,conf"
+            icon="icons/topic.gif"
+            id="com.buglabs.bc.ui.editors.BitBakeFileEditor"
+            name="BitBake Recipe Editor">
+      </editor>
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Recipe Editor"
+            extensions="rec"
+            icon="icons/topic.gif"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            class="org.recipeeditor.RecipeEditor"
+            id="com.buglabs.bc.ui.editors.RecipeEditor">
+      </editor>
+   </extension>
+   -->
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="BitBake Commander"
+            id="com.buglabs.bc.ui">
+      </category>
+      <wizard
+            name="BitBake Recipe"
+            icon="icons/new_cheatsheet_wiz.gif"
+            category="com.buglabs.bc.ui"
+            class="com.buglabs.bc.ui.wizards.NewBitBakeFileRecipeWizard"
+            id="com.buglabs.bc.ui.wizards.NewRecipeWizard">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.buglabs.bc.ui.perspectives.BitbakeCommanderPerspective"
+            icon="icons/icon16_OE.gif"
+            id="com.buglabs.bc.ui.perspectives.BitbakeCommanderPerspective"
+            name="BitBake Commander">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.ide.filesystemSupport">
+      <filesystemContributor
+            class="com.buglabs.bc.ui.filesystem.OEFileSystemContributor"
+            label="OpenEmbeddedFS"
+            scheme="OEFS">
+      </filesystemContributor>
+   </extension>
+   <extension
+         point="org.eclipse.core.filesystem.filesystems">
+      <filesystem
+            scheme="OEFS">
+         <run
+               class="com.buglabs.bc.ui.filesystem.OEFileSystem">
+         </run>
+      </filesystem>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="com.buglabs.bc.ui"
+            name="Bitbake Commander">
+      </category>
+      <view
+            category="com.buglabs.bc.ui"
+            class="com.buglabs.bc.ui.views.RecipeView"
+            icon="icons/cheatsheet_obj.gif"
+            id="com.buglabs.bc.ui.views.RecipeView"
+            name="Recipes">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="com.buglabs.bc.ui.actionSet"
+            label="BitBake UI Action Set"
+            visible="true">
+         <action
+               class="com.buglabs.bc.ui.actions.LaunchNewRecipeWizardAction"
+               icon="icons/new_cheatsheet_wiz.gif"
+               id="com.buglabs.bc.ui.actions.NewRecipeAction"
+               label="&amp;New Recipe"
+               toolbarPath="bbuiGroup"
+               tooltip="New BitBake Recipe">
+         </action>
+           <action
+               class="com.buglabs.bc.ui.actions.LaunchVariableWizardAction"
+               icon="icons/watchlist_view.gif"
+               id="com.buglabs.bc.ui.actions.LaunchVariableWizardAction"
+               label="&amp;BitBake Variable Wizard"
+               toolbarPath="bbuiGroup2"
+               tooltip="BitBake Variables">
+         </action>
+         <action
+               class="com.buglabs.bc.ui.actions.LaunchNewBitBakeProjectWizardAction"
+               icon="icons/cf_obj.gif"
+               id="com.buglabs.bc.ui.wizards.project.NewProjectWizard"
+               label="New Project"
+               toolbarPath="bbuiGroup"
+               tooltip="New BitBake Commander Project">
+         </action>
+      </actionSet>
+      <actionSet
+            id="com.buglabs.bc.ui.actionSet1"
+            label="Command Action Set"
+            visible="true">
+          <action
+               class="com.buglabs.bc.ui.actions.BitbakeBuildRecipeAction"
+               enablesFor="+"
+               icon="icons/binary.gif"
+               id="com.buglabs.bc.ui.BuildPackage"
+               label="Build Package"
+               toolbarPath="bbcGroup"
+               tooltip="Build Package">
+         </action>
+           <action
+               class="com.buglabs.bc.ui.actions.BitbakeCleanRecipeAction"
+               enablesFor="+"
+               icon="icons/trash.gif"
+               id="com.buglabs.bc.ui.CleanPackage"
+               label="Clean Package"
+               toolbarPath="bbcGroup"
+               tooltip="Clean Package">
+         </action>
+           <action
+                 class="com.buglabs.bc.ui.actions.BitbakeImportAction"
+                 enablesFor="+"
+                 icon="icons/import_wiz.gif"
+                 id="com.buglabs.bc.ui.ImportPackage"
+                 label="Import Package"
+                 toolbarPath="bbcGroup"
+                 tooltip="Imports the Package as a Workspace Project">
+           </action>
+           <action
+                 class="com.buglabs.bc.ui.actions.BitbakeRebuildRecipeAction"
+                 enablesFor="+"
+                 icon="icons/refresh.gif"
+                 id="com.buglabs.bc.ui.RebuildPackage"
+                 label="Rebuild Package"
+                 toolbarPath="bbcGroup"
+                 tooltip="Rebuild Package">
+           </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <category
+            id="com.buglabs.bc.ui.importWizards.sampleCategory"
+            name="BitBake Commander">
+      </category>
+      <wizard
+            category="com.buglabs.bc.ui.importWizards.sampleCategory"
+            class="com.buglabs.bc.ui.wizards.importProject.ImportOEProjectWizard"
+            icon="icons/icon16_OE.gif"
+            id="com.buglabs.bc.ui.importWizards.ImportWizard"
+            name="Import OpenEmbedded Project">
+         <description>
+            Import an existing install of OpenEmbedded into your workspace.
+         </description>
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            adaptable="true"
+            class="com.buglabs.bc.ui.decorators.ReadOnly"
+            id="com.buglabs.bc.ui.decorators.ReadOnly"
+            label="Read-only Decorator"
+            lightweight="true"
+            state="true">
+         <enablement>
+            <and>
+               <objectClass
+                     name="org.eclipse.core.resources.IResource">
+               </objectClass>
+               <or>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFolder">
+                  </objectClass>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFile">
+                  </objectClass>
+               </or>
+            </and>
+         </enablement>
+      </decorator>
+      <decorator
+            adaptable="true"
+            icon="icons/oe_decorator.gif"
+            id="com.buglabs.bc.ui.decorator.project"
+            label="BBC Project Decorator"
+            lightweight="true"
+            location="TOP_RIGHT"
+            class="com.buglabs.bc.ui.decorators.ProjectDecorator"
+            state="true">
+         <enablement>
+            <or>
+               <objectClass
+                     name="org.eclipse.core.resources.IProject">
+               </objectClass>
+            </or>
+         </enablement>
+      </decorator>
+   </extension>
+
+</plugin>

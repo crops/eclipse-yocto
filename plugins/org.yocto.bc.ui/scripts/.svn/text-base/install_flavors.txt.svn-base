@@ -1,0 +1,7 @@
+# this file describes all flavors of OE that can be installed.
+# the format is pipe delimited
+# Flavor Label (shows in UI)| description text| image URL| script URL
+OpenEmbedded - Development Branch|The main development branch of OpenEmbedded|icons/OE_logo_128.png|scripts/oe_dev_install.sh
+Bug Labs Linux R1.4|BUG Linux provides developer tools for modular hardware|icons/BUG_logo_128.png|scripts/bug_install.sh
+Poky Linux - Development Branch|Poky Linux provides a consistent and stable build environment.|icons/poky_128.png|scripts/poky_install.sh
+# BeagleBoard Linux|Beagleboard Linux is a customization of OpenEmbedded|icons/beagle_128.png|scripts/beagle_install.sh

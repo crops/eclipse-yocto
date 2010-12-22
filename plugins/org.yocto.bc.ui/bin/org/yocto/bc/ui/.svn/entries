@@ -1,0 +1,92 @@
+10
+
+dir
+12256
+svn://svn.buglabs.net/ote/tags/releases/0.6.8/com.buglabs.bc.ui/src/com/buglabs/bc/ui
+svn://svn.buglabs.net
+
+
+
+2009-04-09T12:43:08.707372Z
+8777
+kgilmer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+35ad6e01-222d-0410-b96a-b41bba574936
+
+actions
+dir
+
+model
+dir
+
+popup
+dir
+
+wizards
+dir
+
+filesystem
+dir
+
+decorators
+dir
+
+builder
+dir
+
+editors
+dir
+
+perspectives
+dir
+
+Activator.java
+file
+
+
+
+
+2010-12-15T19:59:33.512320Z
+662c7807bdbb943d736ff51b6e7df3ad
+2009-02-16T04:34:41.421056Z
+8205
+kgilmer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5875
+
+views
+dir
+

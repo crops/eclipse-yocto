@@ -26,12 +26,13 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
-		store.setDefault(PreferenceConstants.TOOLCHAIN_ROOT, "/opt/poky");
+		store.setDefault(PreferenceConstants.TOOLCHAIN_ROOT, "");
 		store.setDefault(PreferenceConstants.SDK_MODE, true);
 		store.setDefault(PreferenceConstants.TARGET_MODE, false);
 		store.setDefault(PreferenceConstants.TARGET_ARCH_INDEX, -1);
 		store.setDefault(PreferenceConstants.IP_ADDR, "");
 		store.setDefault(PreferenceConstants.QEMU_KERNEL, "");
+		store.setDefault(PreferenceConstants.QEMU_OPTION, "");
 		store.setDefault(PreferenceConstants.SYSROOT, "");
 		store.setDefault(PreferenceConstants.TOOLCHAIN_TRIPLET, "");
 	}

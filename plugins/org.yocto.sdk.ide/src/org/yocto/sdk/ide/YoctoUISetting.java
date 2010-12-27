@@ -59,6 +59,7 @@ public class YoctoUISetting {
 	private Button btnToolChainLoc;
 
 	private Text textKernelLoc;
+	private Text textQemuOption;
 	private Text textSysrootLoc;
 	private Text textRootLoc;
 	private Combo targetArchCombo;
@@ -145,18 +146,30 @@ public class YoctoUISetting {
 	private void createQemuSetup(final Group targetGroup) throws YoctoGeneralException
 	{
 		Label kernel_label;
-		Label rootfs_label;
+		Label option_label;
+		
 		
 		//QEMU Setup
 		kernel_label= new Label(targetGroup, SWT.NONE);
 		kernel_label.setText("Kernel: ");
 		kernel_label.setAlignment(SWT.RIGHT);
-
+		
 		Composite textContainer = new Composite(targetGroup, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		textKernelLoc= (Text)addTextControl(textContainer, PreferenceConstants.QEMU_KERNEL, yoctoUIElement.getStrQemuKernelLoc());
 		btnKernelLoc = addFileSelectButton(textContainer, textKernelLoc, PreferenceConstants.QEMU_KERNEL);
+
+
+		option_label = new Label(targetGroup, SWT.NONE);
+		option_label.setText("Custom Option: ");
+		option_label.setAlignment(SWT.RIGHT);
+		
+		textContainer = new Composite(targetGroup, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		textQemuOption = (Text)addTextControl(textContainer, PreferenceConstants.QEMU_OPTION, yoctoUIElement.getStrQemuOption());
+		
 /*
 		rootfs_label= new Label(targetGroup, SWT.NONE);
 		rootfs_label.setText("Root Filesystem: ");
@@ -264,6 +277,7 @@ public class YoctoUISetting {
 		btnDevice.addSelectionListener(fSelectionListener);
 		textRootLoc.addModifyListener(fModifyListener);
 		textKernelLoc.addModifyListener(fModifyListener);
+		textQemuOption.addModifyListener(fModifyListener);
 		textSysrootLoc.addModifyListener(fModifyListener);
 	}
 
@@ -288,6 +302,7 @@ public class YoctoUISetting {
 		elem.setStrTargetsArray(targetArchCombo.getItems());
 		elem.setStrTarget(targetArchCombo.getText());
 		elem.setStrQemuKernelLoc(textKernelLoc.getText());
+		elem.setStrQemuOption(textQemuOption.getText());
 		elem.setStrSysrootLoc(textSysrootLoc.getText());
 		return elem;
 	}
@@ -337,6 +352,7 @@ public class YoctoUISetting {
 		//textRootFSLoc.setEnabled(bQemuMode);
 		btnKernelLoc.setEnabled(bQemuMode);
 		//btnRootFSLoc.setEnabled(bQemuMode);
+		textQemuOption.setEnabled(bQemuMode);
 	}
 
 	private void updateSDKControlState()
@@ -344,11 +360,9 @@ public class YoctoUISetting {
 		if (btnSDKRoot.getSelection())
 		{
 			textRootLoc.setText("/opt/poky");
-			textRootLoc.setEnabled(false);
-			btnToolChainLoc.setEnabled(false);
 		}
 		else {
-			if (!yoctoUIElement.getStrToolChainRoot().equals("/opt/poky"))
+			if (!yoctoUIElement.getStrToolChainRoot().startsWith("/opt/poky"))
 			{
 				textRootLoc.setText(yoctoUIElement.getStrToolChainRoot());
 			}

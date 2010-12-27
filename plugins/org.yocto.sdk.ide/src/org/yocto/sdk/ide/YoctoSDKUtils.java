@@ -203,6 +203,8 @@ public class YoctoSDKUtils {
 
 		env.addVariable(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc(),
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+		env.addVariable(PreferenceConstants.QEMU_OPTION, elem.getStrQemuOption(),
+				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		env.addVariable(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc(),
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 
@@ -236,6 +238,7 @@ public class YoctoSDKUtils {
 		elem.setStrTarget(getEnvValue(project, PreferenceConstants.TOOLCHAIN_TRIPLET));
 		elem.setStrQemuKernelLoc(getEnvValue(project, PreferenceConstants.QEMU_KERNEL));
 		elem.setStrSysrootLoc(getEnvValue(project, PreferenceConstants.SYSROOT));
+		elem.setStrQemuOption(getEnvValue(project, PreferenceConstants.QEMU_OPTION));
 		String sTemp = getEnvValue(project, PreferenceConstants.TARGET_ARCH_INDEX);
 		if (!sTemp.isEmpty())
 			elem.setIntTargetIndex(Integer.valueOf(sTemp).intValue());
@@ -264,6 +267,7 @@ public class YoctoSDKUtils {
 		else
 			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
 		store.setValue(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc());
+		store.setValue(PreferenceConstants.QEMU_OPTION, elem.getStrQemuOption());
 		store.setValue(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc());
 		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
 			store.setValue(PreferenceConstants.TARGET_MODE, IPreferenceStore.TRUE);
@@ -287,6 +291,7 @@ public class YoctoSDKUtils {
 		elem.setStrTarget(store.getString(PreferenceConstants.TOOLCHAIN_TRIPLET));
 		elem.setIntTargetIndex(store.getInt(PreferenceConstants.TARGET_ARCH_INDEX));
 		elem.setStrQemuKernelLoc(store.getString(PreferenceConstants.QEMU_KERNEL));
+		elem.setStrQemuOption(store.getString(PreferenceConstants.QEMU_OPTION));
 		elem.setStrSysrootLoc(store.getString(PreferenceConstants.SYSROOT));
 
 		if (store.getString(PreferenceConstants.TARGET_MODE).equals(IPreferenceStore.TRUE))

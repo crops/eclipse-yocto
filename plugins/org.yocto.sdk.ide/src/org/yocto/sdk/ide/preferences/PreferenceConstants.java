@@ -27,6 +27,8 @@ public class PreferenceConstants {
 	
 	public static final String QEMU_KERNEL = "QemuKernel";
 	
+	public static final String QEMU_OPTION = "QemuOption";
+	
 	public static final String SYSROOT = "Sysroot";
 		
 	public static final String IP_ADDR = "IPAddr";

@@ -217,7 +217,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 
 			String argument = "-e \"source " + sScriptFile + ";poky-qemu " + YoctoSDKUtils.qemuTargetTranslate(elem.getStrTarget()) + " "+
-			elem.getStrQemuKernelLoc() + " " + elem.getStrSysrootLoc() + ";bash\"";
+			elem.getStrQemuKernelLoc() + " " + elem.getStrSysrootLoc() + " " + "\"<" + elem.getStrQemuOption() + ">\"" + ";bash\"";
 
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
 			w_copy.doSave();

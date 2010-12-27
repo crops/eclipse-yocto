@@ -359,7 +359,6 @@ public class YoctoUISetting {
 	{
 		if (btnSDKRoot.getSelection())
 		{
-			textRootLoc.setText("/opt/poky");
 		}
 		else {
 			if (!yoctoUIElement.getStrToolChainRoot().startsWith("/opt/poky"))

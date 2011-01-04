@@ -32,19 +32,13 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleView;
-//import org.eclipse.cdt.core.CommandLauncher;
-//import org.eclipse.cdt.core.ConsoleOutputStream;
-//import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
-//import org.eclipse.cdt.core.resources.IConsole;
-//import org.eclipse.cdt.core.CCorePlugin;
 
 import org.yocto.bc.bitbake.ICommandResponseHandler;
 import org.yocto.bc.bitbake.ShellSession;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.wizards.FiniteStateWizard;
-//import org.yocto.bc.ui.wizards.install.InstallJob.UICommandResponseHandler;
-//import org.yocto.bc.ui.wizards.install.BitbakePage.ConsoleWriter;
+
 import org.yocto.bc.ui.wizards.newproject.BBConfigurationInitializeOperation;
 import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
 
@@ -52,6 +46,10 @@ import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
  * A wizard for installing a fresh copy of an OE system.
  * 
  * @author kgilmer
+ * 
+ * A Wizard for creating a fresh Yocto bitbake project and new poky build tree from git
+ * 
+ * @modified jzhang
  * 
  */
 public class InstallWizard extends FiniteStateWizard implements
@@ -66,10 +64,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String PROJECT_NAME = "Project Name";
 	protected static final String DEFAULT_INIT_SCRIPT = "poky-init-build-env";
 	protected static final String DEFAULT_INSTALL_DIR = "~/yocto";
-	// protected static final String INSTALL_SCRIPT = "INSTALL_SCRIPT";
-	// protected static final String INSTALL_DIRECTORY = "Install Directory";
-	// protected static final String INSTALL_SCRIPT_FILE =
-	// "scripts/poky_install.sh";
+	
 	private Map model;
 	private MessageConsole myConsole;
 
@@ -77,16 +72,10 @@ public class InstallWizard extends FiniteStateWizard implements
 		this.model = new Hashtable();
 		model.put(INSTALL_DIRECTORY, DEFAULT_INSTALL_DIR);
 		model.put(INIT_SCRIPT, DEFAULT_INIT_SCRIPT);
-		// try {
-		// model.put(INSTALL_SCRIPT,
-		// InstallScriptHelper.loadFile("scripts/poky_install.sh"));
-		// } catch (IOException e) {
-		// TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+		
 		setWindowTitle("Yocto BitBake Commander");
 		setNeedsProgressMonitor(false);
-		// setDefaultPageImageDescriptor(Activator.getImageDescriptor("icons/OE_logo_96.png"));
+		
 		myConsole = findConsole("Yocto Console");
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
@@ -134,15 +123,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	 */
 	@Override
 	public void addPages() {
-		// flavorPage = new FlavorPage(model);
-		// bitbakePage = new BitbakePage(model);
-		// bbcProjectPage = new BBCProjectPage(model);
-		// addPage(new WelcomePage(model));
-		// JZaddPage(new FlavorPage(model));
 		addPage(new OptionsPage(model));
-		// addPage(new ProgressPage(model));
-		// addPage(bbcProjectPage);
-		// addPage(new BitbakePage(model));
 	}
 
 	@Override
@@ -154,7 +135,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	public boolean performFinish() {
 		BCCommandResponseHandler cmdOut = new BCCommandResponseHandler(
 				myConsole);
-		// Map options = (Map)model.get(OptionsPage.OPTION_MAP);
+		
 		WizardPage page = (WizardPage) getPage("Options");
 		page.setPageComplete(true);
 		Map options = (Map) model;
@@ -163,11 +144,6 @@ public class InstallWizard extends FiniteStateWizard implements
 			install_dir = (String) options.get(INSTALL_DIRECTORY);
 			System.out.println(install_dir);
 		}
-		//String install_dir_cmd = "mkdir "+install_dir;
-		//cmdOut.printCmd(install_dir_cmd);
-		//executeCommand(cmdOut, install_dir_cmd);
-		//if (cmdOut.hasError())
-		//return true;
 
 		String git_clone_cmd = "git clone git://git.pokylinux.org/poky.git "
 				+ install_dir;
@@ -189,7 +165,8 @@ public class InstallWizard extends FiniteStateWizard implements
 				ConsoleWriter cw = new ConsoleWriter();
 				this.getContainer().run(false, false,
 						new BBConfigurationInitializeOperation(pinfo, cw));
-				cmdOut.printCmd(cw.getContents());
+				
+				myConsole.newMessageStream().println(cw.getContents());
 			} catch (Exception e) {
 				Activator
 						.getDefault()
@@ -203,7 +180,7 @@ public class InstallWizard extends FiniteStateWizard implements
 			}
 
 			model.put(InstallWizard.KEY_PINFO, pinfo);
-			// ProjectInfo pinfo = (ProjectInfo) model.get(KEY_PINFO);
+			
 			Activator.putProjInfo(pinfo.getRootPath(), pinfo);
 			try {
 				getContainer().run(false, false,
@@ -230,31 +207,11 @@ public class InstallWizard extends FiniteStateWizard implements
 			ShellSession shell = new ShellSession(ShellSession.SHELL_TYPE_BASH,
 					null, null, null);
 
-			// Map options = (Map)model.get(OptionsPage.OPTION_MAP);
-			// Map options = (Map)model;
-
 			shell.execute(cmd, cmdOut);
-			// shell.execute("bash ~/workspace/plugins/org.yocto.bc.ui/scripts/poky_install.sh ~/poky-test",
-			// cmdOut);
-			// shell.execute("bash /scripts/poky_install.sh ~/poky-test",
-			// cmdOut);
-			/*
-			 * while ((line = reader.readLine()) != null && !errorOccurred) {
-			 * line = line.trim(); if (line.length() > 0 &&
-			 * !line.startsWith("#")) { line = substitute(line, vars);
-			 * cmdOut.printCmd(line); shell.execute(line, cmdOut); } else if
-			 * (line.startsWith("#")) {
-			 * cmdOut.printDialog(line.substring(1).trim()); } }
-			 * 
-			 * if (errorOccurred) { return new Status(IStatus.ERROR,
-			 * Activator.PLUGIN_ID, "Failed to install OpenEmbedded"); }
-			 */
+			
 		} catch (IOException e) {
 			e.printStackTrace();
-			// return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-			// "Failed to install OpenEmbedded", e);
 		}
-		// return Status.OK_STATUS;
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -329,7 +286,7 @@ public class InstallWizard extends FiniteStateWizard implements
 		@Override
 		public void write(char[] cbuf, int off, int len) throws IOException {
 			// txtConsole.getText().concat(new String(cbuf));
-			sb.append(new String(cbuf));
+			sb.append(cbuf);
 		}
 
 		@Override

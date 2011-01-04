@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 
 public abstract class FiniteStateWizard extends Wizard {
     private boolean finishable = false;
-    private boolean canFinish;
+    private boolean canFinish = false;
 
     public FiniteStateWizard() {                
     }

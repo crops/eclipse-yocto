@@ -66,6 +66,7 @@ public class BBCProjectPage extends FiniteStateWizardPage {
 
 	public BBCProjectPage(Map model) {
 		super(PAGE_TITLE, model);
+		setTitle("Create new yocto bitbake project");
 		setMessage("Enter information to create a BitBake Commander project.");
 	}
 
@@ -206,7 +207,7 @@ public class BBCProjectPage extends FiniteStateWizardPage {
 		}
 
 		if (txtProjectLocation.getText().trim().length() == 0) {
-			setErrorMessage("Set directory to an OpenEmbedded or Poky project root (OEROOT)");
+			setErrorMessage("Set directory that contains Poky tree");
 			return false;
 		}
 
@@ -228,7 +229,8 @@ public class BBCProjectPage extends FiniteStateWizardPage {
 		}
 
 		setErrorMessage(null);
-
+		setMessage("All the entries are valid, press \"Finish\" to create the new yocto bitbake project,"+
+		"this will take a while. Please don't interrupt till there's output in the Yocto Console window...");
 		return true;
 	}
 }

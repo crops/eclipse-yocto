@@ -57,7 +57,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 
 	protected OptionsPage(Map model) {
 		super("Options", model);
-		setTitle("Create new yocto bitbake project");
+		//setTitle("Create new yocto bitbake project");
 		setMessage("Enter these parameters to create new yocto bitbake project");
 	}
 
@@ -168,7 +168,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 		}
 		
 		setErrorMessage(null);
-		setMessage("All the entries are valid, press \"Finish\" button will start creating the new yocto bitbake project,"+
+		setMessage("All the entries are valid, press \"Finish\" to start the process, "+
 				"this will take a while. Please don't interrupt till there's output in the Yocto Console window...");
 		return true;
 	}

@@ -21,7 +21,7 @@ public class BitbakeCommanderNature implements IProjectNature {
 	/**
 	 * ID of this project nature
 	 */
-	public static final String NATURE_ID = "com.buglabs.bc.ui.builder.BitbakeCommanderNature";
+	public static final String NATURE_ID = "org.yocto.bc.ui.builder.BitbakeCommanderNature";
 
 	private IProject project;
 

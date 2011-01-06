@@ -72,6 +72,7 @@ public class ImportYoctoProjectWizard extends FiniteStateWizard  implements IImp
 			//setPageComplete(valid);
 			return false;
 		} 
+		
 		//valid = true;
 		projectModel.put(ImportYoctoProjectWizard.KEY_PINFO, pinfo);
 		//setPageComplete(valid);

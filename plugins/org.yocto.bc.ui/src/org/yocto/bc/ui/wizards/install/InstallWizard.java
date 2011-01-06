@@ -148,8 +148,7 @@ public class InstallWizard extends FiniteStateWizard implements
 		String git_clone_cmd = "git clone git://git.pokylinux.org/poky.git "
 				+ install_dir;
 		cmdOut.printCmd(git_clone_cmd);
-		executeCommand(cmdOut, git_clone_cmd);
-		System.out.println("after executeCommand");
+		//executeCommand(cmdOut, git_clone_cmd);
 
 		if (!cmdOut.hasError()) {
 			
@@ -160,7 +159,7 @@ public class InstallWizard extends FiniteStateWizard implements
 			pinfo.setInitScriptPath(initPath);
 			pinfo.setLocation(install_dir);
 			pinfo.setName(prjName);
-
+			
 			try {
 				ConsoleWriter cw = new ConsoleWriter();
 				this.getContainer().run(false, false,
@@ -177,8 +176,9 @@ public class InstallWizard extends FiniteStateWizard implements
 						.getCurrentPage()
 						.setDescription(
 								"Failed to create project: " + e.getMessage());
+				return false;
 			}
-
+			
 			model.put(InstallWizard.KEY_PINFO, pinfo);
 			
 			Activator.putProjInfo(pinfo.getRootPath(), pinfo);
@@ -197,8 +197,10 @@ public class InstallWizard extends FiniteStateWizard implements
 								"Failed to create project: " + e.getMessage());
 				return false;
 			}
+			return true;
 		}
-		return true;
+		
+		return false;
 	}
 
 	private void executeCommand(BCCommandResponseHandler cmdOut, String cmd) {

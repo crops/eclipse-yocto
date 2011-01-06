@@ -149,49 +149,33 @@ synchronized
 	synchronized 
 	public void execute(String command, String terminator, ICommandResponseHandler handler) throws IOException {
 		interrupt = false;
-		System.out.println("aaaaaaaaaaaaa");
 		InputStream errIs = process.getErrorStream();
-		System.out.println("bbbbbbbbbbbbbbbbbbbb");
 		if (errIs.available() > 0) {
-			System.out.println("ccccccccccccccc");
 			clearErrorStream(errIs);
-			System.out.println("ddddddddddddddddddd");
 		}
-		System.out.println("eeeeeeeeeeeeeeee");
 		sendToProcessAndTerminate(command);
-		System.out.println("fffffffffffffffffff");
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		String std = null;
-		//try {
-			System.out.println("gggggggggggggggggg");
-		//process.waitFor();
-		System.out.println("hhhhhhhhhhhhhhh");
+
 		do {		
-			
-			std = br.readLine();
-			System.out.println("iiiiiiiiiiiiiiiiii");
-			System.out.println("std is: "+std);
-			if (std != null && !std.equals(terminator)) {
-				System.out.println("jjjjjjjjjjjjjjjjj");
-				out.write(std);
-				handler.response(std, false);
-				System.out.println("kkkkkkkkkkkkkkk");
-			} 
 			if (errIs.available() > 0) {
-				System.out.println("Error happend!");
 				byte[] msg = new byte[errIs.available()];
 
 				errIs.read(msg, 0, msg.length);
 				out.write(new String(msg));
 				handler.response(new String(msg), true);
-				System.out.println("lllllllllllllllll");
 			} 
 			
+			std = br.readLine();
 			
-		} while (/*std != null && */!std.equals(terminator) && !interrupt);
+			if (std != null && !std.equals(terminator)) {
+				out.write(std);
+				handler.response(std, false);
+			} 
+			
+		} while (std != null && !std.equals(terminator) && !interrupt);
 		
-		//} catch (InterruptedException e) {
 		if (interrupt) {
 			process.destroy();
 			initializeShell();

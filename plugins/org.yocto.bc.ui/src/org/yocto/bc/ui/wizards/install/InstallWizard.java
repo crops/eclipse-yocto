@@ -148,7 +148,7 @@ public class InstallWizard extends FiniteStateWizard implements
 		String git_clone_cmd = "git clone git://git.pokylinux.org/poky.git "
 				+ install_dir;
 		cmdOut.printCmd(git_clone_cmd);
-		//executeCommand(cmdOut, git_clone_cmd);
+		executeCommand(cmdOut, git_clone_cmd);
 
 		if (!cmdOut.hasError()) {
 			

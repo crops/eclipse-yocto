@@ -59,7 +59,7 @@ public class RecipeView extends ViewPart {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
 		}
 	}
-	public static final String ID_VIEW = "com.buglabs.bc.ui.views.RecipeView";
+	public static final String ID_VIEW = "org.yocto.bc.ui.views.RecipeView";
 private TableViewer viewer;
 	
 	/*	private Action action1;

@@ -26,13 +26,13 @@ public class BitbakeCommanderPerspective implements IPerspectiveFactory {
 	}
 
 	private void addActionSets() {
-		factory.addActionSet("com.buglabs.bc.ui.actionSet");
+		factory.addActionSet("org.yocto.bc.ui.actionSet");
 		factory.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET); // NON-NLS-1
 	}
 
 	private void addNewWizardShortcuts() {
-		factory.addNewWizardShortcut("com.buglabs.bc.ui.wizards.NewRecipeWizard");// NON-NLS-1
-		factory.addNewWizardShortcut("com.buglabs.bc.ui.wizards.newproject.NewBBCProjectWizard");// NON-NLS-1
+		factory.addNewWizardShortcut("org.yocto.bc.ui.wizards.NewRecipeWizard");// NON-NLS-1
+		factory.addNewWizardShortcut("org.yocto.bc.ui.wizards.newproject.NewBBCProjectWizard");// NON-NLS-1
 		factory.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");// NON-NLS-1
 	}
 

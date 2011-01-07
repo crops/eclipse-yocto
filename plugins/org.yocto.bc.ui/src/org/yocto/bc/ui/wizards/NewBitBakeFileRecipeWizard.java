@@ -177,7 +177,7 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 	}
 
 	private void throwCoreException(String message) throws CoreException {
-		IStatus status = new Status(IStatus.ERROR, "com.buglabs.bc.ui", IStatus.OK, message, null);
+		IStatus status = new Status(IStatus.ERROR, "org.yocto.bc.ui", IStatus.OK, message, null);
 		throw new CoreException(status);
 	}
 }

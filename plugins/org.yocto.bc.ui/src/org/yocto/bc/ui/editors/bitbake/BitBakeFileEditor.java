@@ -32,7 +32,7 @@ import org.yocto.bc.ui.Activator;
  */
 public class BitBakeFileEditor extends AbstractDecoratedTextEditor {
 
-	public static final String EDITOR_ID = "com.buglabs.bc.ui.editors.BitBakeFileEditor";
+	public static final String EDITOR_ID = "org.yocto.bc.ui.editors.BitBakeFileEditor";
 	static final String CONTENT_ASSIST= "ContentAssist";
 	private BitBakeSourceViewerConfiguration viewerConfiguration;
 	private String targetFilePath;

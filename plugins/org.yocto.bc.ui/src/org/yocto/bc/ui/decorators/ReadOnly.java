@@ -68,7 +68,7 @@ public class ReadOnly implements ILightweightLabelDecorator {
 		ResourceAttributes attrs = resource.getResourceAttributes();
 		if (attrs.isReadOnly()){
 			URL url = Platform.find(
-					Platform.getBundle("com.buglabs.bc.ui"), new Path(iconPath)); //NON-NLS-1
+					Platform.getBundle("org.yocto.bc.ui"), new Path(iconPath)); //NON-NLS-1
 
 			if (url == null)
 				return;

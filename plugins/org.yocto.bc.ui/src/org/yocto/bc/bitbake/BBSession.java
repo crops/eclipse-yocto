@@ -239,7 +239,7 @@ public class BBSession implements IModelElement, Map {
 			return;
 		}
 		
-		properties = parseBBEnvironment(shell.execute("bitbake -e | grep -E \"DL_DIR=|TMPDIR=\""));
+		properties = parseBBEnvironment(shell.execute("bitbake -e"));
 		initialized = true;
 	}
 

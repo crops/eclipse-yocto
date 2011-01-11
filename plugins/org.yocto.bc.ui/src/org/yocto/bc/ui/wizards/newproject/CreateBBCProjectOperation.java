@@ -70,8 +70,7 @@ public class CreateBBCProjectOperation extends WorkspaceModifyOperation {
 		
 		try {
 			System.out.println("Calling creageProjeDesc");
-			//desc.setLocationURI(new URI(OEFS_SCHEME + projInfo2.getRootPath()));
-			desc.setLocationURI(new URI("file://" + projInfo2.getRootPath()));
+			desc.setLocationURI(new URI(OEFS_SCHEME + projInfo2.getRootPath()));
 		} catch (URISyntaxException e) {
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to load filesystem.", e));
 		}

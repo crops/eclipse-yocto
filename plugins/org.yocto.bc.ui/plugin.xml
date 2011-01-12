@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+<extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Yocto BitBake Commander"
+            id="org.yocto.bc.ui">
+      </category>
+      <wizard
+            category="org.yocto.bc.ui"
+            class="org.yocto.bc.ui.wizards.install.InstallWizard"
+            icon="icons/icon16_OE.gif"
+            id="org.yocto.bc.ui.wizards.install.InstallWizard"
+            name="New Yocto Project"
+            project="true"/>
+   </extension>
+   <extension
+         id="org.yocto.bc.ui.builder.BitbakeBuilder"
+         name="Yocto Bitbake Commander Project Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="org.yocto.bc.ui.builder.BitbakeBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         id="org.yocto.bc.ui.builder.BitbakeCommanderNature"
+         name="Yocto Bitbake Commander Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.yocto.bc.ui.builder.BitbakeCommanderNature">
+         </run>
+      </runtime>
+      <builder
+            id="org.yocto.bc.ui.builder.BitbakeBuilder">
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="org.yocto.bc.ui.contribution2"
+            nameFilter="*.bb"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="org.yocto.bc.ui.actions.BitbakeBuildRecipeAction"
+               enablesFor="+"
+               icon="icons/binary.gif"
+               id="org.yocto.bc.ui.BuildPackagePopupAction"
+               label="Build"
+               menubarPath="org.yocto.bc.ui.menu1/group1"
+               tooltip="Build a package">
+         </action>
+   		<action
+               class="org.yocto.bc.ui.actions.BitbakeCleanRecipeAction"
+               enablesFor="+"
+               icon="icons/trash.gif"
+               id="org.yocto.bc.ui.CleanPackagePopupAction"
+               label="Clean"
+               menubarPath="org.yocto.bc.ui.menu1/group1"
+               tooltip="Clean a package">
+         </action>
+         <action
+               class="org.yocto.bc.ui.actions.BitbakeImportAction"
+               enablesFor="+"
+               icon="icons/import_wiz.gif"
+               id="org.yocto.bc.ui.BitbakeImportPopupAction"
+               label="Import"
+               menubarPath="org.yocto.bc.ui.menu1/group1"
+               tooltip="Import package sources as Eclipse project.">
+         </action>
+         <menu
+               id="org.yocto.bc.ui.menu1"
+               label="BitBake"
+               path="additions">
+            <separator
+                  name="bc.separator1">
+            </separator>
+         </menu>
+         <action
+               class="org.yocto.bc.ui.actions.BitbakeRebuildRecipeAction"
+               enablesFor="+"
+               icon="icons/refresh.gif"
+               id="org.yocto.bc.ui.BuildPackagePopupAction"
+               label="Rebuild"
+               menubarPath="org.yocto.bc.ui.menu1/group1"
+               tooltip="Rebuild a package">
+         </action>
+     </objectContribution>
+   </extension>
+   <extension
+         id="xmlProblem"
+         name="XML Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.yocto.bc.ui.editors.bitbake.BitBakeFileEditor"
+            contributorClass="org.yocto.bc.ui.editors.bitbake.RecipeEditorActionContributor"
+            default="true"
+            extensions="bb,inc,bbclass,conf"
+            icon="icons/topic.gif"
+            id="org.yocto.bc.ui.editors.BitBakeFileEditor"
+            name="Yocto BitBake Recipe Editor">
+      </editor>
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Recipe Editor"
+            extensions="rec"
+            icon="icons/topic.gif"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            class="org.recipeeditor.RecipeEditor"
+            id="com.buglabs.bc.ui.editors.RecipeEditor">
+      </editor>
+   </extension>
+   -->
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Yocto BitBake Commander"
+            id="org.yocto.bc.ui">
+      </category>
+      <wizard
+            name="BitBake Recipe"
+            icon="icons/new_cheatsheet_wiz.gif"
+            category="org.yocto.bc.ui"
+            class="org.yocto.bc.ui.wizards.NewBitBakeFileRecipeWizard"
+            id="org.yocto.bc.ui.wizards.NewRecipeWizard">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.yocto.bc.ui.perspectives.BitbakeCommanderPerspective"
+            icon="icons/icon16_OE.gif"
+            id="org.yocto.bc.ui.perspectives.BitbakeCommanderPerspective"
+            name="BitBake Commander">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.ide.filesystemSupport">
+      <filesystemContributor
+            class="org.yocto.bc.ui.filesystem.OEFileSystemContributor"
+            label="OpenEmbeddedFS"
+            scheme="OEFS">
+      </filesystemContributor>
+   </extension>
+   <extension
+         point="org.eclipse.core.filesystem.filesystems">
+      <filesystem
+            scheme="OEFS">
+         <run
+               class="org.yocto.bc.ui.filesystem.OEFileSystem">
+         </run>
+      </filesystem>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="org.yocto.bc.ui"
+            name="Yocto Bitbake Commander">
+      </category>
+      <view
+            category="org.yocto.bc.ui"
+            class="org.yocto.bc.ui.views.RecipeView"
+            icon="icons/cheatsheet_obj.gif"
+            id="org.yocto.bc.ui.views.RecipeView"
+            name="Recipes">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.yocto.bc.ui.actionSet"
+            label="BitBake UI Action Set"
+            visible="true">
+         <action
+               class="org.yocto.bc.ui.actions.LaunchNewRecipeWizardAction"
+               icon="icons/new_cheatsheet_wiz.gif"
+               id="org.yocto.bc.ui.actions.NewRecipeAction"
+               label="&amp;New Recipe"
+               toolbarPath="bbuiGroup"
+               tooltip="New BitBake Recipe">
+         </action>
+           <action
+               class="org.yocto.bc.ui.actions.LaunchVariableWizardAction"
+               icon="icons/watchlist_view.gif"
+               id="org.yocto.bc.ui.actions.LaunchVariableWizardAction"
+               label="&amp;BitBake Variable Wizard"
+               toolbarPath="bbuiGroup2"
+               tooltip="BitBake Variables">
+         </action>
+         <action
+               class="org.yocto.bc.ui.actions.LaunchNewBitBakeProjectWizardAction"
+               icon="icons/cf_obj.gif"
+               id="org.yocto.bc.ui.wizards.project.NewProjectWizard"
+               label="New Project"
+               toolbarPath="bbuiGroup"
+               tooltip="New BitBake Commander Project">
+         </action>
+      </actionSet>
+      <actionSet
+            id="org.yocto.bc.ui.actionSet1"
+            label="Command Action Set"
+            visible="true">
+          <action
+               class="org.yocto.bc.ui.actions.BitbakeBuildRecipeAction"
+               enablesFor="+"
+               icon="icons/binary.gif"
+               id="org.yocto.bc.ui.BuildPackage"
+               label="Build Package"
+               toolbarPath="bbcGroup"
+               tooltip="Build Package">
+         </action>
+           <action
+               class="org.yocto.bc.ui.actions.BitbakeCleanRecipeAction"
+               enablesFor="+"
+               icon="icons/trash.gif"
+               id="org.yocto.bc.ui.CleanPackage"
+               label="Clean Package"
+               toolbarPath="bbcGroup"
+               tooltip="Clean Package">
+         </action>
+           <action
+                 class="org.yocto.bc.ui.actions.BitbakeImportAction"
+                 enablesFor="+"
+                 icon="icons/import_wiz.gif"
+                 id="org.yocto.bc.ui.ImportPackage"
+                 label="Import Package"
+                 toolbarPath="bbcGroup"
+                 tooltip="Imports the Package as a Workspace Project">
+           </action>
+           <action
+                 class="org.yocto.bc.ui.actions.BitbakeRebuildRecipeAction"
+                 enablesFor="+"
+                 icon="icons/refresh.gif"
+                 id="org.yocto.bc.ui.RebuildPackage"
+                 label="Rebuild Package"
+                 toolbarPath="bbcGroup"
+                 tooltip="Rebuild Package">
+           </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <category
+            id="org.yocto.bc.ui.importWizards.sampleCategory"
+            name="Yocto BitBake Commander">
+      </category>
+      <wizard
+            category="org.yocto.bc.ui.importWizards.sampleCategory"
+            class="org.yocto.bc.ui.wizards.importProject.ImportYoctoProjectWizard"
+            icon="icons/icon16_OE.gif"
+            id="org.yocto.bc.ui.importWizards.ImportWizard"
+            name="Import Yocto Project">
+         <description>
+            Import an existing install of Yocto Project into your workspace.
+         </description>
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            adaptable="true"
+            class="org.yocto.bc.ui.decorators.ReadOnly"
+            id="org.yocto.bc.ui.decorators.ReadOnly"
+            label="Read-only Decorator"
+            lightweight="true"
+            state="true">
+         <enablement>
+            <and>
+               <objectClass
+                     name="org.eclipse.core.resources.IResource">
+               </objectClass>
+               <or>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFolder">
+                  </objectClass>
+                  <objectClass
+                        name="org.eclipse.core.resources.IFile">
+                  </objectClass>
+               </or>
+            </and>
+         </enablement>
+      </decorator>
+      <decorator
+            adaptable="true"
+            icon="icons/oe_decorator.gif"
+            id="org.yocto.bc.ui.decorator.project"
+            label="BBC Project Decorator"
+            lightweight="true"
+            location="TOP_RIGHT"
+            class="org.yocto.bc.ui.decorators.ProjectDecorator"
+            state="true">
+         <enablement>
+            <or>
+               <objectClass
+                     name="org.eclipse.core.resources.IProject">
+               </objectClass>
+            </or>
+         </enablement>
+      </decorator>
+   </extension>
+
+</plugin>

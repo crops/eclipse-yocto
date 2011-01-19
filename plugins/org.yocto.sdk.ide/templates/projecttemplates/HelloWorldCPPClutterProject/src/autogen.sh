@@ -2,7 +2,7 @@
 [ -e config.cache ] && rm -f config.cache
 
 libtoolize --automake
-aclocal
+aclocal ${POKY_ACLOCAL_OPTS}
 autoconf
 autoheader
 automake -a

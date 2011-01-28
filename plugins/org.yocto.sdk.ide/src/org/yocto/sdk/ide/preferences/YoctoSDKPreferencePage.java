@@ -64,7 +64,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			Dialog.applyDialogFont(result);
 			return result;
 		} catch (YoctoGeneralException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Have you ever set Yocto Reference before?");
 			System.out.println(e.getMessage());
 			return result;
 		}
@@ -138,7 +138,6 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		try {
 			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
 		} catch (YoctoGeneralException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Have you ever set Yocto Reference before?");
 			System.out.println(e.getMessage());
 		}

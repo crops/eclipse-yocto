@@ -456,6 +456,28 @@ public class YoctoUISetting {
 				targetCombo.select(-1);
 			}
 		}
+		//prompt user,if he use tree mode, maybe he hasn't bitbake meta-ide-support yet.
+		else if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_TREE_MODE)
+		{
+			if (elem.getStrToolChainRoot().isEmpty())
+				return;
+			else {
+				File fToolChain = new File(elem.getStrToolChainRoot());
+				if (!fToolChain.exists())
+					return;
+			}
+			//Only prompt when user thought a correct folder is set, yet still no env file			
+			String strErrorMessage = YoctoSDKUtils.getErrorMessage(SDKCheckResults.ENV_SETUP_SCRIPT_NONEXIST, SDKCheckRequestFrom.Other);
+			Display display = Display.getCurrent();
+			Shell shell = new Shell(display);
+			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+			msgBox.setText("Yocto Configuration Error");
+			msgBox.setMessage(strErrorMessage);
+			msgBox.open();
+			if (shell != null)
+				shell.dispose();			
+		}
+
 	}
 
 }

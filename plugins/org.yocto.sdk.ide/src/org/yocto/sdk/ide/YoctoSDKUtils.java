@@ -46,7 +46,8 @@ public class YoctoSDKUtils {
 	public static enum SDKCheckRequestFrom {
 		Wizard,
 		Menu,
-		Preferences
+		Preferences,
+		Other
 	};
 
 	private static final String POKY_DEVICE_EMPTY = "Poky.SDK.Device.Empty";
@@ -79,7 +80,13 @@ public class YoctoSDKUtils {
 				return SDKCheckResults.SYSROOT_NONEXIST;
 		}
 		if (elem.getIntTargetIndex() < 0 || elem.getStrTarget().isEmpty())
-			return SDKCheckResults.SDK_TARGET_EMPTY;
+		{
+			//if this is poky tree mode, prompt user whether bitbake meta-ide-support is executed?
+			if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_TREE_MODE)
+				return SDKCheckResults.ENV_SETUP_SCRIPT_NONEXIST;
+			else
+				return SDKCheckResults.SDK_TARGET_EMPTY;
+		}
 
 		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
 		{

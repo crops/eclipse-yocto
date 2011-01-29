@@ -210,7 +210,7 @@ public class YoctoUISetting {
 		}
 
 		root_label = new Label(crossCompilerGroup, SWT.NONE);
-		root_label.setText("Poky Root Location: ");
+		root_label.setText("Toolchain Root Location: ");
 		Composite textContainer = new Composite(crossCompilerGroup, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -219,7 +219,7 @@ public class YoctoUISetting {
 		btnToolChainLoc = addFileSelectButton(textContainer, textRootLoc, PreferenceConstants.TOOLCHAIN_ROOT);
 		
 		sysroot_label= new Label(crossCompilerGroup, SWT.NONE);
-		sysroot_label.setText("Sysroot: ");
+		sysroot_label.setText("Sysroot Location: ");
 		sysroot_label.setAlignment(SWT.RIGHT);
 
 		textContainer = new Composite(crossCompilerGroup, SWT.NONE);

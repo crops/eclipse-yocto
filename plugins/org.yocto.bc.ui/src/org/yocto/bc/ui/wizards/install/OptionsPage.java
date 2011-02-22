@@ -54,6 +54,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 	private Text txtInit;
 	private ValidationListener validationListener;
 	private Text txtProjectName;
+	private Button gitButton;
 
 	protected OptionsPage(Map model) {
 		super("Options", model);
@@ -109,6 +110,22 @@ public class OptionsPage extends FiniteStateWizardPage {
 			}
 		});
 
+		Label lblGit = new Label(projectNameComp, SWT.None);
+		lblGit.setText("Clone from &Git Repository?");
+
+		Composite gitComposite = new Composite(projectNameComp, SWT.NONE);
+		gd = new GridData(GridData.VERTICAL_ALIGN_END
+				| GridData.FILL_HORIZONTAL);
+		gd.horizontalIndent = 0;
+		gitComposite.setLayoutData(gd);
+		gl = new GridLayout(1, false);
+		gl.marginWidth = 0;
+		gitComposite.setLayout(gl);
+
+		gitButton = new Button(gitComposite, SWT.CHECK);
+		gitButton.setEnabled(true);
+		gitButton.setSelection(false);
+
 		setControl(top);
 	}
 
@@ -132,8 +149,9 @@ public class OptionsPage extends FiniteStateWizardPage {
 	@Override
 	
 	protected void updateModel() {
-		model.put(InstallWizard.INSTALL_DIRECTORY, txtProjectLocation.getText()+"/"+txtProjectName.getText());
+		model.put(InstallWizard.INSTALL_DIRECTORY, txtProjectLocation.getText()+File.separator+txtProjectName.getText());
 		model.put(InstallWizard.PROJECT_NAME, txtProjectName.getText());
+		model.put(InstallWizard.GIT_CLONE, new Boolean(gitButton.getSelection()));
 	}
 
 	private boolean isValidProjectName(String projectName) {
@@ -165,6 +183,14 @@ public class OptionsPage extends FiniteStateWizardPage {
 		if (!checkProject_dir.isDirectory()) {
 			setErrorMessage("The project location directory " + txtProjectLocation.getText() + " is not valid");
 			return false;
+		}
+		
+		if(!gitButton.getSelection()) {
+			File git_dir=new File(txtProjectLocation.getText()+File.separator+txtProjectName.getText());
+			if(!git_dir.isDirectory()) {
+				setErrorMessage("Non existing directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + ". Maybe git clone is needed.");
+				return false;
+			}
 		}
 		
 		setErrorMessage(null);

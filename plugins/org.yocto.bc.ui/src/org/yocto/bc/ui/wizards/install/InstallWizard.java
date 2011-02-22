@@ -65,6 +65,8 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String DEFAULT_INIT_SCRIPT = "poky-init-build-env";
 	protected static final String DEFAULT_INSTALL_DIR = "~/yocto";
 	
+	protected static final String GIT_CLONE = "Git Clone";
+
 	private Map model;
 	private MessageConsole myConsole;
 
@@ -145,11 +147,13 @@ public class InstallWizard extends FiniteStateWizard implements
 			System.out.println(install_dir);
 		}
 
-		String git_clone_cmd = "git clone git://git.pokylinux.org/poky.git "
+		if (((Boolean)options.get(GIT_CLONE)).booleanValue()) {
+			String git_clone_cmd = "git clone git://git.pokylinux.org/poky.git "
 				+ install_dir;
-		cmdOut.printCmd(git_clone_cmd);
-		executeCommand(cmdOut, git_clone_cmd);
-
+			cmdOut.printCmd(git_clone_cmd);
+			executeCommand(cmdOut, git_clone_cmd);
+		}
+	
 		if (!cmdOut.hasError()) {
 			
 			String initPath = install_dir + "/"

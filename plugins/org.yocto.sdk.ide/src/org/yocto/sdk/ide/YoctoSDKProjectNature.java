@@ -53,7 +53,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	private static final String DEFAULT_CONFIGURE_STR = "configure";
 	private static final String DEFAULT_AUTOGEN_STR = "autogen";
 	private static final String DEFAULT_SYSROOT_PREFIX = " --sysroot=";
-	
+	private static final String DEFAULT_LIBTOOL_SYSROOT_PREFIX = " --with-libtool-sysroot=";
 
 	private IProject proj;
 
@@ -127,8 +127,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String command_prefix = "CFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CFLAGS") 
 		+ DEFAULT_SYSROOT_PREFIX + sysroot_str + "\" CXXFLAGS=\" -g -O0 "
 		+ YoctoSDKUtils.getEnvValue(project, "CXXFLAGS")+ DEFAULT_SYSROOT_PREFIX + sysroot_str + "\"";
-		String autogen_setting = command_prefix+" autogen.sh";
-		String configure_setting = command_prefix + " configure";
+		String autogen_setting = command_prefix+" autogen.sh" + DEFAULT_LIBTOOL_SYSROOT_PREFIX + sysroot_str;
+		String configure_setting = command_prefix + " configure" + DEFAULT_LIBTOOL_SYSROOT_PREFIX + sysroot_str;
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);
 		String strConfigure = YoctoSDKUtils.getEnvValue(project, "CONFIGURE_FLAGS");
 

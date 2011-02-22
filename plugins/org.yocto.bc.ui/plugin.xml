@@ -39,6 +39,7 @@
             id="org.yocto.bc.ui.builder.BitbakeBuilder">
       </builder>
    </extension>
+   <!--
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
@@ -92,6 +93,7 @@
          </action>
      </objectContribution>
    </extension>
+   -->
    <extension
          id="xmlProblem"
          name="XML Problem"
@@ -115,19 +117,6 @@
             name="Yocto BitBake Recipe Editor">
       </editor>
    </extension>
-   <!--
-   <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            name="Recipe Editor"
-            extensions="rec"
-            icon="icons/topic.gif"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            class="org.recipeeditor.RecipeEditor"
-            id="com.buglabs.bc.ui.editors.RecipeEditor">
-      </editor>
-   </extension>
-   -->
    <extension
          point="org.eclipse.ui.newWizards">
       <category
@@ -168,6 +157,7 @@
          </run>
       </filesystem>
    </extension>
+   <!--
    <extension
          point="org.eclipse.ui.views">
       <category
@@ -182,6 +172,7 @@
             name="Recipes">
       </view>
    </extension>
+   -->
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
@@ -213,6 +204,7 @@
                tooltip="New BitBake Commander Project">
          </action>
       </actionSet>
+      <!--
       <actionSet
             id="org.yocto.bc.ui.actionSet1"
             label="Command Action Set"
@@ -254,7 +246,9 @@
                  tooltip="Rebuild Package">
            </action>
       </actionSet>
+      -->
    </extension>
+   <!--
    <extension
          point="org.eclipse.ui.importWizards">
       <category
@@ -272,6 +266,7 @@
          </description>
       </wizard>
    </extension>
+   -->
    <extension
          point="org.eclipse.ui.decorators">
       <decorator

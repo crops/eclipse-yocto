@@ -64,7 +64,8 @@ public class BitBakeSourceViewerConfiguration extends TextSourceViewerConfigurat
 
 	public ITextHover getTextHover(ISourceViewer sv, String contentType) {
 		if (textHover == null) {
-			textHover = new BBVariableTextHover(session, targetFilePath);
+			//llu, disable text hover temporarily.
+			//textHover = new BBVariableTextHover(session, targetFilePath);
 		}
 		
 		return textHover;

@@ -32,7 +32,7 @@ public class BitbakeCommanderPerspective implements IPerspectiveFactory {
 
 	private void addNewWizardShortcuts() {
 		factory.addNewWizardShortcut("org.yocto.bc.ui.wizards.NewRecipeWizard");// NON-NLS-1
-		factory.addNewWizardShortcut("org.yocto.bc.ui.wizards.newproject.NewBBCProjectWizard");// NON-NLS-1
+		//factory.addNewWizardShortcut("org.yocto.bc.ui.wizards.newproject.NewBBCProjectWizard");// NON-NLS-1
 		factory.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");// NON-NLS-1
 	}
 
@@ -51,11 +51,13 @@ public class BitbakeCommanderPerspective implements IPerspectiveFactory {
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
 		bottom.addView("org.eclipse.team.ui.GenericHistoryView"); // NON-NLS-1
 		bottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
-
+		
 		IFolderLayout topLeft = factory.createFolder("topLeft", // NON-NLS-1
 				IPageLayout.LEFT, 0.25f, factory.getEditorArea());
 		topLeft.addView(IPageLayout.ID_RES_NAV);
-		topLeft.addView(RecipeView.ID_VIEW); // NON-NLS-1
+		//llu detach RecipeView
+		//topLeft.addView(RecipeView.ID_VIEW); // NON-NLS-1
+		
 	}
 
 	private void addViewShortcuts() {

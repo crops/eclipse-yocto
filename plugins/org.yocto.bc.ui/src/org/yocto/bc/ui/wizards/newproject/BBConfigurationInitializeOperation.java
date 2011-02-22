@@ -43,11 +43,13 @@ public class BBConfigurationInitializeOperation implements IRunnableWithProgress
 			System.out.println("pinfo.getRootPath() is: " + pinfo.getRootPath());
 			System.out.println("projInfo.getInitScriptPath() is: " + pinfo.getInitScriptPath());
 			ProjectInfoHelper.store(pinfo.getRootPath(), pinfo);
+			/* llu detach BBSession
 			session = Activator.getBBSession(pinfo.getRootPath(), writer);
 
 			if (!session.isInitialized()) {
 				session.initialize();
 			}
+			*/
 
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);

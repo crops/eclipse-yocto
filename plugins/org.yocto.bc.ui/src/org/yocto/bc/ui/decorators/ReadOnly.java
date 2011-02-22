@@ -66,15 +66,17 @@ public class ReadOnly implements ILightweightLabelDecorator {
 		 */
 		IResource resource = (IResource) element;
 		ResourceAttributes attrs = resource.getResourceAttributes();
-		if (attrs.isReadOnly()){
-			URL url = Platform.find(
-					Platform.getBundle("org.yocto.bc.ui"), new Path(iconPath)); //NON-NLS-1
-
-			if (url == null)
-				return;
-			descriptor = ImageDescriptor.createFromURL(url);			
-			quadrant = IDecoration.TOP_RIGHT;
-			decoration.addOverlay(descriptor,quadrant);
+		if(attrs!=null) {
+			if (attrs.isReadOnly()){
+				URL url = Platform.find(
+						Platform.getBundle("org.yocto.bc.ui"), new Path(iconPath)); //NON-NLS-1
+	
+				if (url == null)
+					return;
+				descriptor = ImageDescriptor.createFromURL(url);			
+				quadrant = IDecoration.TOP_RIGHT;
+				decoration.addOverlay(descriptor,quadrant);
+			}
 		}
 	}
 

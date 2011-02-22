@@ -39,9 +39,6 @@ public class BBConfigurationInitializeOperation implements IRunnableWithProgress
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		BBSession session;
 		try {
-			System.out.println("before ProjectInfoHelper.store");
-			System.out.println("pinfo.getRootPath() is: " + pinfo.getRootPath());
-			System.out.println("projInfo.getInitScriptPath() is: " + pinfo.getInitScriptPath());
 			ProjectInfoHelper.store(pinfo.getRootPath(), pinfo);
 			/* llu detach BBSession
 			session = Activator.getBBSession(pinfo.getRootPath(), writer);

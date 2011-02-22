@@ -86,7 +86,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 		txtProjectName.addModifyListener(validationListener);
 
 		Label lblProjectLocation = new Label(projectNameComp, SWT.None);
-		lblProjectLocation.setText("&Location:");
+		lblProjectLocation.setText("&Project Location:");
 
 		Composite locComposite = new Composite(projectNameComp, SWT.NONE);
 		GridData gd = new GridData(GridData.VERTICAL_ALIGN_END
@@ -110,8 +110,8 @@ public class OptionsPage extends FiniteStateWizardPage {
 			}
 		});
 
-		Label lblGit = new Label(projectNameComp, SWT.None);
-		lblGit.setText("Clone from &Git Repository?");
+		//Label lblGit = new Label(projectNameComp, SWT.None);
+		//lblGit.setText("Clone from &Git Repository?");
 
 		Composite gitComposite = new Composite(projectNameComp, SWT.NONE);
 		gd = new GridData(GridData.VERTICAL_ALIGN_END
@@ -123,8 +123,9 @@ public class OptionsPage extends FiniteStateWizardPage {
 		gitComposite.setLayout(gl);
 
 		gitButton = new Button(gitComposite, SWT.CHECK);
+		gitButton.setText("Clone from Yocto &Git Repository");
 		gitButton.setEnabled(true);
-		gitButton.setSelection(false);
+		gitButton.addSelectionListener(validationListener);
 
 		setControl(top);
 	}
@@ -188,7 +189,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 		if(!gitButton.getSelection()) {
 			File git_dir=new File(txtProjectLocation.getText()+File.separator+txtProjectName.getText());
 			if(!git_dir.isDirectory()) {
-				setErrorMessage("Non existing directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + ". Maybe git clone is needed.");
+				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " does not exist, please select git clone.");
 				return false;
 			}
 		}

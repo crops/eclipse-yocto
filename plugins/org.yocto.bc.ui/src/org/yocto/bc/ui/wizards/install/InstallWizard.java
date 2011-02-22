@@ -144,7 +144,6 @@ public class InstallWizard extends FiniteStateWizard implements
 		String install_dir = "";
 		if (options.containsKey(INSTALL_DIRECTORY)) {
 			install_dir = (String) options.get(INSTALL_DIRECTORY);
-			System.out.println(install_dir);
 		}
 
 		if (((Boolean)options.get(GIT_CLONE)).booleanValue()) {

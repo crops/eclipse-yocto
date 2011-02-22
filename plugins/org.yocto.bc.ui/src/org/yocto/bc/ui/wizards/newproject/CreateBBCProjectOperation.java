@@ -69,7 +69,6 @@ public class CreateBBCProjectOperation extends WorkspaceModifyOperation {
 		IProjectDescription desc = workspace.newProjectDescription(projInfo2.getProjectName());
 		
 		try {
-			System.out.println("Calling creageProjeDesc");
 			//llu detach OEFS filesystem
 			//desc.setLocationURI(new URI(OEFS_SCHEME + projInfo2.getRootPath()));
 			desc.setLocationURI(new URI("file://" + projInfo2.getRootPath()));
@@ -82,10 +81,6 @@ public class CreateBBCProjectOperation extends WorkspaceModifyOperation {
 
 	@Override
 	protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
-		System.out.println("Init: " + projInfo.getInitScriptPath());
-		System.out.println("Proj: " + projInfo.getProjectName());
-		System.out.println("Root: " + projInfo.getRootPath());
-		
 		IProjectDescription desc = createProjectDescription(ResourcesPlugin.getWorkspace(), projInfo);
 		
 		IWorkspaceRoot wsroot = ResourcesPlugin.getWorkspace().getRoot();

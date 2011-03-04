@@ -32,6 +32,15 @@
       </builder>
    </extension>
    <extension
+         id="YoctoSDKEmptyNature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.yocto.sdk.ide.YoctoSDKEmptyProjectNature">
+         </run>
+      </runtime>
+   </extension>
+   <extension
          point="org.eclipse.ui.commands">
       <category
             id="org.yocto.sdk.ide.category.invokeYoctoTools"
@@ -156,6 +165,10 @@
          <simple
                external="true"
                name="isCProject">
+         </simple>
+         <simple
+               external="true"
+               name="isEmptyProject">
          </simple>
       </processType>
    </extension>

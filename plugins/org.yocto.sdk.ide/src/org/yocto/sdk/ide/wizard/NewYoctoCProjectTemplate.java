@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.linuxtools.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.AutotoolsConfigurationManager;
 import org.yocto.sdk.ide.YoctoGeneralException;
+import org.yocto.sdk.ide.YoctoSDKEmptyProjectNature;
 import org.yocto.sdk.ide.YoctoSDKProjectNature;
 
 
@@ -59,7 +60,9 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		String location = args[1].getSimpleValue();
 		String artifactExtension = args[2].getSimpleValue();
 		String isCProjectValue = args[3].getSimpleValue();
+		String isEmptyProjetValue = args[4].getSimpleValue();
 		boolean isCProject = Boolean.valueOf(isCProjectValue).booleanValue();
+		boolean isEmptryProject = Boolean.valueOf(isEmptyProjetValue).booleanValue();
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		try {
 			if (!project.exists()) {
@@ -90,6 +93,9 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 					AutotoolsConfigurationManager.getInstance().getConfiguration(project, cfg.getName(), true);
 				}
 				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
+				if(isEmptryProject) {
+					YoctoSDKEmptyProjectNature.addYoctoSDKEmptyNature(project, monitor);
+				}
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
 				YoctoSDKProjectNature.configureAutotools(project);
 				info.setValid(true);
@@ -100,9 +106,12 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
-				YoctoSDKProjectNature.configureAutotools(project);
 				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
+				if(isEmptryProject) {
+					YoctoSDKEmptyProjectNature.addYoctoSDKEmptyNature(project, monitor);
+				}
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
+				YoctoSDKProjectNature.configureAutotools(project);
 				
 				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
 				//restoreAutoBuild(workspace);

@@ -25,6 +25,9 @@ import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 
@@ -390,5 +393,24 @@ public class YoctoSDKUtils {
 		}
 
 	}
+
+	public static void addNature(IProject project, String natureId, IProgressMonitor monitor) throws CoreException
+	{
+		IProjectDescription description = project.getDescription();
+		String[] natures = description.getNatureIds();
+
+		for (int i = 0; i < natures.length; ++i) {
+			if (natureId.equals(natures[i]))
+				return;
+		}
+
+		String[] newNatures = new String[natures.length + 1];
+	    System.arraycopy(natures, 0, newNatures, 0, natures.length);
+	    newNatures[natures.length] = natureId;
+	    description.setNatureIds(newNatures);
+	    project.setDescription(description, monitor);
+
+	}
+
 
 }

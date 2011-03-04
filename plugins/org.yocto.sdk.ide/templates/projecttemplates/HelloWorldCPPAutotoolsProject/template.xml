@@ -54,6 +54,7 @@
 		<simple name="name" value="$(projectName)" /> 
 		<simple name="artifactExtension" value="exe" /> 
 		<simple name="isCProject" value="false" /> 
+		<simple name="isEmptyProject" value="false" />
 	</process>
 
 	<process type="org.eclipse.cdt.core.CreateSourceFolder">

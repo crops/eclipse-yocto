@@ -23,14 +23,12 @@ import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.linuxtools.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.AutotoolsConfigurationManager;
 import org.eclipse.linuxtools.internal.cdt.autotools.core.configure.IAConfiguration;
 import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
@@ -72,9 +70,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	}
 
 	public static void addYoctoSDKNature(IProject project, IProgressMonitor monitor) throws CoreException {
-		@SuppressWarnings("unused")
-		ICommand[] command = project.getDescription().getBuildSpec();
-		AutotoolsNewProjectNature.addNature(project, YoctoSDK_NATURE_ID, monitor);
+		YoctoSDKUtils.addNature(project, YoctoSDK_NATURE_ID, monitor);
 	}
 
 
@@ -187,14 +183,18 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.AUTO_SOLIB", false);
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.DEBUG_NAME", strDebugger);
 			String projectName = project.getName();
-			String project_src = "src/"+projectName;
 			w_copy.setAttribute("org.eclipse.cdt.launch.PROJECT_ATTR", projectName);
-			w_copy.setAttribute("org.eclipse.cdt.launch.PROGRAM_NAME", project_src);
+			if(!project.hasNature(YoctoSDKEmptyProjectNature.YoctoSDK_EMPTY_NATURE_ID))
+			{
+				String project_src = "src/"+projectName;
+				w_copy.setAttribute("org.eclipse.cdt.launch.PROGRAM_NAME", project_src);
+			}
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.protocol", "mi");
 			w_copy.doSave();
 		}
 		catch (CoreException e)
 		{
+			System.out.println(e.getMessage());
 		}
 		catch (IOException e)
 		{

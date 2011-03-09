@@ -99,9 +99,10 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			String sPath = envMap.get("PATH");
 			String sDebugName = envMap.get("GDB");
 			String sSysroot = envMap.get("POKY_TARGET_SYSROOT");
+			String sysroot_str = elem.getStrSysrootLoc();
 			if (configType == null || debug_configType == null)
 				throw new YoctoGeneralException("Failed to get program or remote debug launcher!");
-			createRemoteDebugLauncher(project, debug_configType, elem.getStrTarget(), sPath, sDebugName, sSysroot);
+			createRemoteDebugLauncher(project, debug_configType, elem.getStrTarget(), sPath, sDebugName, sysroot_str);
 
 			ArrayList<String> listValue = new ArrayList<String>();
 			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
@@ -120,9 +121,15 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		YoctoUIElement elem = YoctoSDKUtils.getElemFromProjectEnv(project);
 		String sysroot_str = elem.getStrSysrootLoc();
 		String id = icfg.getId();
-		String command_prefix = "CFLAGS=\" -g -O0 " + YoctoSDKUtils.getEnvValue(project, "CFLAGS") 
-		+ DEFAULT_SYSROOT_PREFIX + sysroot_str + "\" CXXFLAGS=\" -g -O0 "
-		+ YoctoSDKUtils.getEnvValue(project, "CXXFLAGS")+ DEFAULT_SYSROOT_PREFIX + sysroot_str + "\"";
+		String CFLAGS_str = YoctoSDKUtils.getEnvValue(project, "CFLAGS");
+		String CXXFLAGS_str = YoctoSDKUtils.getEnvValue(project, "CXXFLAGS");
+		int CFLAGS_idx = CFLAGS_str.lastIndexOf(DEFAULT_SYSROOT_PREFIX);
+		int CXXFLAGS_idx = CXXFLAGS_str.lastIndexOf(DEFAULT_SYSROOT_PREFIX);
+		String CFLAGS_value = CFLAGS_str.substring(0, CFLAGS_idx) + DEFAULT_SYSROOT_PREFIX + sysroot_str;
+		String CXXFLAGS_value = CXXFLAGS_str.substring(0, CXXFLAGS_idx) + DEFAULT_SYSROOT_PREFIX + sysroot_str;
+
+		String command_prefix = "CFLAGS=\" -g -O0 " + CFLAGS_value + "\" CXXFLAGS=\" -g -O0 "
+		+ CXXFLAGS_value + "\" LDFLAGS=\"" + DEFAULT_SYSROOT_PREFIX + sysroot_str + "\"";
 		String autogen_setting = command_prefix+" autogen.sh" + DEFAULT_LIBTOOL_SYSROOT_PREFIX + sysroot_str;
 		String configure_setting = command_prefix + " configure" + DEFAULT_LIBTOOL_SYSROOT_PREFIX + sysroot_str;
 		IAConfiguration cfg = AutotoolsConfigurationManager.getInstance().getConfiguration(project, id);

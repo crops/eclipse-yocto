@@ -50,7 +50,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 
 	private static final String DEFAULT_CONFIGURE_STR = "configure";
 	private static final String DEFAULT_AUTOGEN_STR = "autogen";
-	private static final String DEFAULT_SYSROOT_PREFIX = " --sysroot=";
+	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
 	private static final String DEFAULT_LIBTOOL_SYSROOT_PREFIX = " --with-libtool-sysroot=";
 
 	private IProject proj;
@@ -125,9 +125,12 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String CXXFLAGS_str = YoctoSDKUtils.getEnvValue(project, "CXXFLAGS");
 		int CFLAGS_idx = CFLAGS_str.lastIndexOf(DEFAULT_SYSROOT_PREFIX);
 		int CXXFLAGS_idx = CXXFLAGS_str.lastIndexOf(DEFAULT_SYSROOT_PREFIX);
-		String CFLAGS_value = CFLAGS_str.substring(0, CFLAGS_idx) + DEFAULT_SYSROOT_PREFIX + sysroot_str;
-		String CXXFLAGS_value = CXXFLAGS_str.substring(0, CXXFLAGS_idx) + DEFAULT_SYSROOT_PREFIX + sysroot_str;
-
+		String CFLAGS_value = "";
+		String CXXFLAGS_value = "";
+		if (CFLAGS_idx >= 0)
+			CFLAGS_value = CFLAGS_str.substring(0, CFLAGS_idx) + DEFAULT_SYSROOT_PREFIX + sysroot_str;
+		if (CXXFLAGS_idx >= 0 )
+			CXXFLAGS_value = CXXFLAGS_str.substring(0, CXXFLAGS_idx) + DEFAULT_SYSROOT_PREFIX + sysroot_str;
 		String command_prefix = "CFLAGS=\" -g -O0 " + CFLAGS_value + "\" CXXFLAGS=\" -g -O0 "
 		+ CXXFLAGS_value + "\" LDFLAGS=\"" + DEFAULT_SYSROOT_PREFIX + sysroot_str + "\"";
 		String autogen_setting = command_prefix+" autogen.sh" + DEFAULT_LIBTOOL_SYSROOT_PREFIX + sysroot_str;

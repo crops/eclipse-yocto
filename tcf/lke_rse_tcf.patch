@@ -385,7 +385,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
 ===================================================================
 --- plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(revision 1190)
 +++ plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFConnectorService.java	(working copy)
-@@ -10,9 +10,11 @@
+@@ -10,29 +10,49 @@
   *     Martin Oberhuber (Wind River) - [269682] Get port from RSE Property
   *     Uwe Stieber      (Wind River) - [271227] Fix compiler warnings in org.eclipse.tm.tcf.rse
   *     Anna Dushistova  (MontaVista) - [285373] TCFConnectorService should send CommunicationsEvent.BEFORE_CONNECT and CommunicationsEvent.BEFORE_DISCONNECT
@@ -398,7 +398,10 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
  import java.util.ArrayList;
  import java.util.HashMap;
  import java.util.List;
-@@ -20,19 +22,34 @@
+ import java.util.Map;
++import java.util.concurrent.ExecutionException;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.TimeoutException;
  
  import org.eclipse.core.runtime.IProgressMonitor;
  import org.eclipse.rse.core.model.IHost;
@@ -435,7 +438,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
  
      private IChannel channel;
      private Throwable channel_error;
-@@ -40,12 +57,62 @@
+@@ -40,12 +60,62 @@
  
      private boolean poll_timer_started;
  
@@ -500,7 +503,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          assert !Protocol.isDispatchThread();
          final Exception[] res = new Exception[1];
          // Fire comm event to signal state about to change
-@@ -54,39 +121,55 @@
+@@ -54,39 +124,55 @@
          synchronized (res) {
              Protocol.invokeLater(new Runnable() {
                  public void run() {
@@ -569,7 +572,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
              }
          });
          return res[0];
-@@ -108,7 +191,8 @@
+@@ -108,7 +194,8 @@
          if (wait_list.isEmpty()) return;
          Runnable[] r = wait_list.toArray(new Runnable[wait_list.size()]);
          wait_list.clear();
@@ -579,7 +582,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
      }
  
      private boolean connectTCFChannel(Exception[] res, IProgressMonitor monitor) {
-@@ -117,9 +201,12 @@
+@@ -117,9 +204,12 @@
              case IChannel.STATE_OPEN:
              case IChannel.STATE_CLOSED:
                  synchronized (res) {
@@ -595,7 +598,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      res.notify();
                      return true;
                  }
-@@ -137,7 +224,7 @@
+@@ -137,7 +227,7 @@
              String host = getHostName().toLowerCase();
              int port = getConnectPort();
              if (port <= 0) {
@@ -604,7 +607,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                  port = TCFConnectorServiceManager.TCF_PORT;
              }
              IPeer peer = null;
-@@ -146,8 +233,8 @@
+@@ -146,8 +236,8 @@
              for (IPeer p : locator.getPeers().values()) {
                  Map<String, String> attrs = p.getAttributes();
                  if ("TCP".equals(attrs.get(IPeer.ATTR_TRANSPORT_NAME)) && //$NON-NLS-1$
@@ -615,7 +618,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      peer = p;
                      break;
                  }
-@@ -171,17 +258,18 @@
+@@ -171,17 +261,18 @@
  
                  public void congestionLevel(int level) {
                  }
@@ -635,7 +638,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
                      channel = null;
                      channel_error = null;
                  }
-@@ -192,7 +280,8 @@
+@@ -192,7 +283,8 @@
          return false;
      }
  
@@ -645,7 +648,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          if (channel == null || channel.getState() == IChannel.STATE_CLOSED) {
              synchronized (res) {
                  res[0] = null;
-@@ -212,9 +301,12 @@
+@@ -212,9 +304,12 @@
      }
  
      public <V extends IService> V getService(Class<V> service_interface) {
@@ -660,7 +663,7 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
          return m;
      }
  
-@@ -225,4 +317,100 @@
+@@ -225,4 +320,111 @@
      public IFileSystem getFileSystemService() {
          return getService(IFileSystem.class);
      }
@@ -702,22 +705,33 @@ Index: plugins/org.eclipse.tm.tcf.rse/src/org/eclipse/tm/internal/tcf/rse/TCFCon
 +        if (bSubscribed) {
 +            System.out
 +                    .println("Unsubscribe streams before disconnecting TCP channel.");
-+            new TCFTask<Object>() {
-+                public void run() {
-+                    IStreams streams = getService(IStreams.class);
-+                    streams.unsubscribe(ITerminalsService.NAME, streamListener,
-+                            new IStreams.DoneUnsubscribe() {
-+                                public void doneUnsubscribe(IToken token,
-+                                        Exception error) {
-+                                    // TODO Auto-generated method stub
-+                                    System.out.printf(
-+                                            "stream type %s unsubscribed\n",
-+                                            ITerminalsService.NAME);
-+                                    done(this);
-+                                }
-+                            });
-+                }
-+            }.getIO();
++            try {
++                new TCFTask<Object>() {
++                    public void run() {
++                        IStreams streams = getService(IStreams.class);
++                        streams.unsubscribe(ITerminalsService.NAME, streamListener,
++                                new IStreams.DoneUnsubscribe() {
++                                    public void doneUnsubscribe(IToken token,
++                                            Exception error) {
++                                        // TODO Auto-generated method stub
++                                        System.out.printf(
++                                                "stream type %s unsubscribed\n",
++                                                ITerminalsService.NAME);
++                                        done(this);
++                                    }
++                                });
++                    }
++                }.get(1, TimeUnit.SECONDS);
++            }
++            catch (InterruptedException e) {
++                new IOException("Meet " + e.getMessage() + " when Unsubsribe streams");
++            }
++            catch (ExecutionException e) {
++                new IOException("Meet " + e.getMessage() + " when Unsubsribe streams");
++            }
++            catch (TimeoutException e) {
++                new IOException("Meet " + e.getMessage() + " when Unsubsribe streams");
++            }
 +            bSubscribed = false;
 +        }
 +

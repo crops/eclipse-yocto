@@ -180,7 +180,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 				return;
 			//If get default Debugger successfully, go ahead!
 
-			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, project.getName()+"_gdb_"+sTargetTriplet);
+			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, project.getName()+"_gdb_"+sTargetTriplet);
 			String sDebugInitFile = project.getLocation().toString() + "/.gdbinit";
 			FileWriter out = new FileWriter(new File(sDebugInitFile));
 			out.write("set sysroot " + sSysroot);

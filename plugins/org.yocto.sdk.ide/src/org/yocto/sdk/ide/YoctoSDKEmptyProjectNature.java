@@ -10,25 +10,22 @@ public class YoctoSDKEmptyProjectNature implements IProjectNature {
 	public static final  String YoctoSDK_EMPTY_NATURE_ID = YoctoSDKPlugin.getUniqueIdentifier() + ".YoctoSDKEmptyNature";
 
 	private IProject proj;
-	@Override
+
 	public void configure() throws CoreException {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void deconfigure() throws CoreException {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public IProject getProject() {
 		// TODO Auto-generated method stub
 		return proj;
 	}
 
-	@Override
 	public void setProject(IProject project) {
 		// TODO Auto-generated method stub
 		this.proj = project;

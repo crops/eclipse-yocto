@@ -201,12 +201,12 @@ public class YoctoUISetting {
 
 		if (yoctoUIElement.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
 
-			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "SDK Root Mode", PreferenceConstants.SDK_MODE + "_1", true);
-			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Poky Tree Mode", PreferenceConstants.SDK_MODE + "_2", false);
+			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "Standalone pre-built toolchain", PreferenceConstants.SDK_MODE + "_1", true);
+			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Build system derived toolchain", PreferenceConstants.SDK_MODE + "_2", false);
 		}
 		else {
-			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "SDK Root Mode", PreferenceConstants.SDK_MODE + "_1", false);
-			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Poky Tree Mode", PreferenceConstants.SDK_MODE + "_2", true);
+			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "Standalone pre-built toolchain", PreferenceConstants.SDK_MODE + "_1", false);
+			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Build system derived toolchain", PreferenceConstants.SDK_MODE + "_2", true);
 		}
 
 		root_label = new Label(crossCompilerGroup, SWT.NONE);

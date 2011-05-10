@@ -34,7 +34,7 @@ import org.yocto.sdk.remotetools.RSEHelper;
 
 abstract public class TerminalHandler extends AbstractHandler {
 	
-	protected SimpleSettingDialog setting;
+	protected BaseSettingDialog setting;
 	
 	protected String changeTerm="export TERM=vt100;";
 	
@@ -54,6 +54,10 @@ abstract public class TerminalHandler extends AbstractHandler {
         return terminalShell;
     }
 
+	protected void preProcess() {
+		
+	}
+	
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
 		initialize(event);
@@ -61,7 +65,7 @@ abstract public class TerminalHandler extends AbstractHandler {
 		if(setting.open()==BaseSettingDialog.OK) {
 			IHost currentHost = setting.getHost();
 			ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(currentHost);
-			
+			preProcess();
 			if (terminalSubSystem != null) {
 				TerminalsUI terminalsUI = TerminalsUI.getInstance();
 				TerminalViewer viewer = terminalsUI.activateTerminalsView();

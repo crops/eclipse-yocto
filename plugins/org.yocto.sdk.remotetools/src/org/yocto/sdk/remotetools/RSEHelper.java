@@ -113,6 +113,32 @@ public class RSEHelper {
 		return (IHost[]) filConnections.toArray(new IHost[filConnections.size()]);
 	}
 	
+	public static void deleteRemoteFile(IHost connection, String remoteExePath,
+			IProgressMonitor monitor) throws Exception {
+		
+		assert(connection!=null);
+		monitor.beginTask(Messages.InfoUpload, 100);
+		
+		IFileService fileService;
+		try {
+			fileService = (IFileService) getConnectedRemoteFileService(
+							connection,
+							new SubProgressMonitor(monitor, 5));
+	
+			Path remotePath = new Path(remoteExePath);
+			if(fileService.getFile(remotePath.removeLastSegments(1).toString(), 
+					remotePath.lastSegment(), 
+					new SubProgressMonitor(monitor, 5)).exists()) {
+				fileService.delete(remotePath.removeLastSegments(1).toString(), 
+						remotePath.lastSegment(), 
+						new SubProgressMonitor(monitor, 10));
+			}
+		} finally {
+			monitor.done();
+		}
+		return;
+	}
+	
 	public static void putRemoteFile(IHost connection, String localExePath, String remoteExePath,
 			IProgressMonitor monitor) throws Exception {
 		

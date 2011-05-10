@@ -36,6 +36,7 @@ public class Messages extends NLS {
 	public static String Powertop_Time_Text;
 	public static String Powertop_ShowPid_Text;
 	public static String TerminalViewer_text;
+	public static String Systemtap_KO_Text;
 	
 	public static String LocalJob_Title;
 	public static String ErrorLocalJob;

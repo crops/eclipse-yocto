@@ -238,7 +238,7 @@ public class YoctoSDKUtils {
 		}
 		//add ACLOCAL OPTS for libtool 2.4 support
 		env.addVariable("POKY_ACLOCAL_OPTS",
-				"-I " + env.getVariable("POKY_NATIVE_SYSROOT", ccdesc).getValue() + "/usr/share/aclocal", 
+				"-I " + env.getVariable("OECORE_NATIVE_SYSROOT", ccdesc).getValue() + "/usr/share/aclocal", 
 				IEnvironmentVariable.ENVVAR_REPLACE,
 				delimiter,
 				ccdesc);

@@ -62,7 +62,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String INIT_SCRIPT = "Init Script";
 
 	protected static final String PROJECT_NAME = "Project Name";
-	protected static final String DEFAULT_INIT_SCRIPT = "poky-init-build-env";
+	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
 	protected static final String DEFAULT_INSTALL_DIR = "~/yocto";
 	
 	protected static final String GIT_CLONE = "Git Clone";

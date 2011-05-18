@@ -180,18 +180,29 @@ public class OptionsPage extends FiniteStateWizardPage {
 			return false;
 		}
 		
-		File checkProject_dir = new File(txtProjectLocation.getText());
+		String projectLoc = txtProjectLocation.getText();
+		File checkProject_dir = new File(projectLoc);
 		if (!checkProject_dir.isDirectory()) {
 			setErrorMessage("The project location directory " + txtProjectLocation.getText() + " is not valid");
 			return false;
 		}
 		
+		String projectPath = projectLoc + File.separator+txtProjectName.getText();
 		if(!gitButton.getSelection()) {
-			File git_dir=new File(txtProjectLocation.getText()+File.separator+txtProjectName.getText());
+			File git_dir=new File(projectPath);
 			if(!git_dir.isDirectory()) {
 				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " does not exist, please select git clone.");
 				return false;
 			}
+		}
+		
+		// Check whether the project directory contains build dir, if so prompt user to move out
+		String build_dir = projectPath+File.separator+"build";
+		File checkBuild_dir = new File(build_dir);
+		if (checkBuild_dir.isDirectory()) {
+			setErrorMessage("Project path "+projectPath+ " contains build sub-directory, which Eclipse IProject tree view won't be able to handle due to its size." +
+					"Please move it outside the project directory through \"oe-init-build-env build_path\" if you still want to create a bitbake commander project!");
+			return false;
 		}
 		
 		setErrorMessage(null);

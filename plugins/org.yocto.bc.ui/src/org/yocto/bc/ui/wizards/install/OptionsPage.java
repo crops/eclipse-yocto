@@ -2,6 +2,7 @@ package org.yocto.bc.ui.wizards.install;
 
 import java.io.IOException;
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -9,9 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -204,7 +207,18 @@ public class OptionsPage extends FiniteStateWizardPage {
 					"Please move it outside the project directory through \"oe-init-build-env build_path\" if you still want to create a bitbake commander project!");
 			return false;
 		}
+		try {
+			URI location = new URI("file://" + txtProjectLocation.getText()+File.separator+txtProjectName.getText());
 		
+			IStatus status = ResourcesPlugin.getWorkspace().validateProjectLocationURI(proj, location);
+			if (!status.isOK()) {
+				setErrorMessage(status.getMessage());
+				return false;
+			}
+		} catch (Exception e) {
+			setErrorMessage("Run into error while trying to validate entries!");
+			return false;
+		}
 		setErrorMessage(null);
 		setMessage("All the entries are valid, press \"Finish\" to start the process, "+
 				"this will take a while. Please don't interrupt till there's output in the Yocto Console window...");

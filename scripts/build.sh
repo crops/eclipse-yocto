@@ -8,8 +8,9 @@ help ()
   echo "Options:"
   echo "<branch name> - git branch name to build upon"
   echo "<release name> - release name in the final output name"
+  echo "[tag name] - git tag name to build upon. defaults to master if not set"
   echo ""
-  echo "Example: $0 master r0";
+  echo "Example: $0 master r0 M1.1_rc1";
   exit 1;
 }
 
@@ -64,11 +65,21 @@ check_env ()
   fi 
 }
 
-[ $# -ne 2 ] && help
+if [[ $# -ne 2  && $# -ne 3 ]]; then 
+   help
+fi
 
 #milestone
 BRANCH=$1
 RELEASE=$2
+
+if [ "x" = "x${3}" ] 
+then
+    TAG="HEAD"
+else
+    TAG=$3
+fi
+
 TOP=`pwd`
 
 check_env
@@ -94,6 +105,7 @@ GIT_DIR=${BUILD_SRC}
 git clone ${GIT_URL} ${GIT_DIR} || fail $? "git clone ${GIT_URL}" 
 cd ${GIT_DIR}
 git checkout origin/${BRANCH} || fail $? "git checkout origin/${BRANCH}"
+git checkout ${TAG} || fail $? "git checkout ${TAG}"
 cd ${TOP}
 
 #build 

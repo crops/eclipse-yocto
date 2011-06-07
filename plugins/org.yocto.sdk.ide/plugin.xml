@@ -42,12 +42,7 @@
    </extension>
    <extension
          point="org.eclipse.ui.commands">
-      <category
-            id="org.yocto.sdk.ide.category.invokeYoctoTools"
-            name="%category.name.0">
-      </category>
       <command
-            categoryId="org.yocto.sdk.ide.category.invokeYoctoTools"
             id="org.yocto.sdk.ide.command.reconfigYocto"
             name="%command.name">
       </command>
@@ -62,24 +57,13 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="menu:invokeYoctoTools">
+            locationURI="menu:project">
          <command
                commandId="org.yocto.sdk.ide.command.reconfigYocto"
                id="reconfigure"
                label="%command.label.0"
                mnemonic="%command.mnemonic"
                style="push">
-         </command>
-      </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="menu:project?after=additions">
-         <menu
-               id="invokeYoctoTools"
-               label="%menu.label.0"
-               mnemonic="%menu.mnemonic">
             <visibleWhen
                   checkEnabled="false">
                <and>
@@ -97,7 +81,7 @@
                   </iterate>
                </and>
             </visibleWhen>
-         </menu>
+         </command>
       </menuContribution>
    </extension>
    <extension

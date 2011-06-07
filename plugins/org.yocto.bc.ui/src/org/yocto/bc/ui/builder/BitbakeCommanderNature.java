@@ -1,4 +1,4 @@
-	/*****************************************************************************
+/*****************************************************************************
  * Copyright (c) 2009 Ken Gilmer
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,14 +7,22 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Jessica Zhang - extend to support HOB build
  *******************************************************************************/
 package org.yocto.bc.ui.builder;
+
+import java.util.ArrayList;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+
 
 public class BitbakeCommanderNature implements IProjectNature {
 
@@ -22,9 +30,30 @@ public class BitbakeCommanderNature implements IProjectNature {
 	 * ID of this project nature
 	 */
 	public static final String NATURE_ID = "org.yocto.bc.ui.builder.BitbakeCommanderNature";
-
+	public static final String BUILD_DIR_KEY = "org.yocto.bc.ui.builder.BitbakeCommander.BuildDir";
 	private IProject project;
 
+	public static void launchHob(IProject project, String buildDir) {
+		try {
+			ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
+			ILaunchConfigurationType configType = 
+				lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
+			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, "hob");
+			ArrayList<String> listValue = new ArrayList<String>();
+			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
+			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);		
+			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
+
+			String init_script = project.getLocation().toString() + "/oe-init-build-env ";
+			String argument = "-e \"source " + init_script + buildDir + ";bitbake -u hob";// + ";bash\"";
+
+			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
+			w_copy.launch(ILaunchManager.RUN_MODE, null);
+			
+		} catch (CoreException e) {
+			System.out.println(e.getMessage());
+		}
+	}
 	/*
 	 * (non-Javadoc)
 	 * 

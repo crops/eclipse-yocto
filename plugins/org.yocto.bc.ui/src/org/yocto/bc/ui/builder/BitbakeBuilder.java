@@ -92,6 +92,7 @@ public class BitbakeBuilder extends IncrementalProjectBuilder {
 	}
 */
 	public static final String BUILDER_ID = "org.yocto.bc.ui.builder.BitbakeBuilder";
+	public static final String HOB_BUILD_ID = "org.yocto.bc.ui.builder.HOB";
 																 
 	private static final String MARKER_TYPE = "org.yocto.bc.ui.xmlProblem";
 

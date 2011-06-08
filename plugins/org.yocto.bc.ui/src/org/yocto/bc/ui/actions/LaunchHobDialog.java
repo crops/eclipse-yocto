@@ -170,6 +170,17 @@ public class LaunchHobDialog extends Dialog {
 	private boolean validateInput() {
 		boolean valid = false;
 		String build_dir = build_dir_combo.getText().toString();
+		if ((build_dir == null) || build_dir.isEmpty()) {
+			Display display = Display.getCurrent();
+			Shell shell = new Shell(display);
+			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+			msgBox.setText("Yocto Configuration Error");
+			msgBox.setMessage("The specified build directory is empty!");
+			msgBox.open();
+			if (shell != null)
+				shell.dispose();
+			return valid;
+		}
 		String project_path = project.getLocation().toString();
 		if (build_dir.startsWith(project_path)) {
 			Display display = Display.getCurrent();
@@ -258,12 +269,12 @@ public class LaunchHobDialog extends Dialog {
 		try {
 			String[] items = build_dir_combo.getItems();
 			HashSet values = new HashSet();
-			Map<String, HashSet> args = new HashMap<String, HashSet>();
+			Map<String, String> args = new HashMap<String, String>();
 			values.add(build_dir);
 			for (int i = 0; i < items.length; i++) {
 				values.add(items[i]);
 			}
-			args.put(BitbakeCommanderNature.BUILD_DIR_KEY, values);
+			args.put(BitbakeCommanderNature.BUILD_DIR_KEY, values.toString());
 			IProjectDescription desc = project.getDescription();
 			ICommand[] buildSpec = desc.getBuildSpec();
 			boolean found = false;

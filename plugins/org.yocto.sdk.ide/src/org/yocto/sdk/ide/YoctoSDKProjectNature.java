@@ -191,8 +191,11 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			out.flush();
 			out.close();			
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.GDB_INIT", sDebugInitFile);
+			w_copy.setAttribute("org.eclipse.cdt.dsf.gdb.GDB_INIT", sDebugInitFile);
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.AUTO_SOLIB", false);
+			w_copy.setAttribute("org.eclipse.cdt.dsf.gdb.AUTO_SOLIB", false);		
 			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.DEBUG_NAME", strDebugger);
+			w_copy.setAttribute("org.eclipse.cdt.dsf.gdb.DEBUG_NAME", strDebugger);
 			String projectName = project.getName();
 			w_copy.setAttribute("org.eclipse.cdt.launch.PROJECT_ATTR", projectName);
 			if(!project.hasNature(YoctoSDKEmptyProjectNature.YoctoSDK_EMPTY_NATURE_ID))

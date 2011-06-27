@@ -95,7 +95,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			ILaunchConfigurationType configType = 
 				lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
 			ILaunchConfigurationType debug_configType = 
-				lManager.getLaunchConfigurationType("org.eclipse.rse.remotecdt.RemoteApplicationLaunch");			
+				lManager.getLaunchConfigurationType("org.eclipse.cdt.launch.remoteApplicationLaunchType");
+			
 			String sPath = envMap.get("PATH");
 			String sDebugName = envMap.get("GDB");
 			String sSysroot = envMap.get("POKY_TARGET_SYSROOT");

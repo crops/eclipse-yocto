@@ -21,7 +21,6 @@ import org.eclipse.cdt.managedbuilder.core.BuildListComparator;
 import org.eclipse.cdt.managedbuilder.core.IProjectType;
 import org.eclipse.cdt.managedbuilder.core.IToolChain;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
-import org.eclipse.cdt.managedbuilder.ui.properties.Messages;
 import org.eclipse.cdt.managedbuilder.ui.wizards.AbstractCWizard;
 import org.eclipse.cdt.managedbuilder.ui.wizards.MBSWizardHandler;
 import org.eclipse.cdt.ui.newui.CDTPrefUtil;
@@ -31,13 +30,13 @@ import org.eclipse.linuxtools.internal.cdt.autotools.ui.wizards.AutotoolsBuildWi
 
 @SuppressWarnings("restriction")
 public class YoctoBuildWizard extends AbstractCWizard {
-	public static final String OTHERS_LABEL = Messages.getString("CNewWizard.0");
+	public static final String OTHERS_LABEL = "Others";
 	public static final String Yocto_PROJECTTYPE_ID = "org.yocto.sdk.ide.projectType";
 	
 	/**
 	 * @since 5.1
 	 */
-	public static final String EMPTY_PROJECT = Messages.getString("AbstractCWizard.0");
+	public static final String EMPTY_PROJECT = "Empty Project";
 
 	@Override
 	public EntryDescriptor[] createItems(boolean supportedOnly, IWizard wizard) {

@@ -229,7 +229,7 @@ public class YoctoSDKUtils {
 			String sKey = (String)iter.next();
 			String sValue = (String)envMap.get(sKey);
 			//Change certain env vars based on user target sysroot setup
-			if (sKey.matches("PKG_CONFIG_SYSROOT_DIR") || sKey.matches("POKY_TARGET_SYSROOT"))
+			if (sKey.matches("PKG_CONFIG_SYSROOT_DIR") || sKey.matches("OECORE_TARGET_SYSROOT"))
 				env.addVariable(sKey, elem.getStrSysrootLoc(), IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 			else if (sKey.matches("PKG_CONFIG_PATH"))
 				env.addVariable(sKey, elem.getStrSysrootLoc()+"/usr/lib/pkgconfig", IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
@@ -237,7 +237,7 @@ public class YoctoSDKUtils {
 				env.addVariable(sKey, sValue, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		}
 		//add ACLOCAL OPTS for libtool 2.4 support
-		env.addVariable("POKY_ACLOCAL_OPTS",
+		env.addVariable("OECORE_ACLOCAL_OPTS",
 				"-I " + env.getVariable("OECORE_NATIVE_SYSROOT", ccdesc).getValue() + "/usr/share/aclocal", 
 				IEnvironmentVariable.ENVVAR_REPLACE,
 				delimiter,

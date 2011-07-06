@@ -160,7 +160,7 @@
          point="org.eclipse.cdt.ui.CDTWizard">
       <wizard
             class="org.yocto.sdk.ide.wizard.YoctoBuildWizard"
-            name="Yocto SDK Wizard">
+            name="Yocto ADT Wizard">
       </wizard>
    </extension>
    <extension

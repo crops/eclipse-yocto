@@ -67,17 +67,23 @@
 		<delete dir="${buildDirectory}/plugins"/>
 		<exec dir="${buildDirectory}" executable="svn" failonerror="true">
 		    <arg value="export"/>
-		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0/plugins/org.eclipse.tm.tcf"/>
+			<arg value="-r"/>
+			<arg value="1855"/>
+		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk/plugins/org.eclipse.tm.tcf"/>
 		    <arg value="plugins/org.eclipse.tm.tcf"/>
 	  	</exec>
 		<exec dir="${buildDirectory}" executable="svn" failonerror="true">
 		    <arg value="export"/>
-		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0/plugins/org.eclipse.tm.tcf.core"/>
+			<arg value="-r"/>
+			<arg value="1855"/>
+		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk/plugins/org.eclipse.tm.tcf.core"/>
 		    <arg value="plugins/org.eclipse.tm.tcf.core"/>
 	  	</exec>
 		<exec dir="${buildDirectory}" executable="svn" failonerror="true">
 		    <arg value="export"/>
-		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/tags/0.3.0/plugins/org.eclipse.tm.tcf.rse"/>
+			<arg value="-r"/>
+			<arg value="1855"/>
+		    <arg value="http://dev.eclipse.org/svnroot/dsdp/org.eclipse.tm.tcf/trunk/plugins/org.eclipse.tm.tcf.rse"/>
 		    <arg value="plugins/org.eclipse.tm.tcf.rse"/>
 		</exec>
 		<copy todir="${buildDirectory}/plugins" failonerror="true">
@@ -96,8 +102,6 @@
 	<!-- ===================================================================== -->
 	<target name="postSetup">
 		<antcall target="getBaseComponents" />
-		<patch dir="${buildDirectory}/plugins" patchfile="${otherSrcDirectory}/tcf/terminals_plugin.patch" strip="1"/>
-		<patch dir="${buildDirectory}/plugins" patchfile="${otherSrcDirectory}/tcf/lke_rse_tcf.patch" strip="1"/>
 	</target>
 
 	<!-- ===================================================================== -->

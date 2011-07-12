@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.yocto.sdk_1.0.0.qualifier.jar" id="org.yocto.sdk" version="1.0.0.qualifier">
+   <feature url="features/org.yocto.sdk_1.1.0.qualifier.jar" id="org.yocto.sdk" version="1.1.0.qualifier">
       <category name="Yocto SDK"/>
    </feature>
    <category-def name="Yocto SDK" label="Development tools &amp; SDKs for Yocto Linux"/>

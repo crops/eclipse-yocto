@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description name="Yocto SDK update site" url="http://sdk.yocto.org/releases/1.0.0">
+   <description name="Yocto SDK update site" url="http://yoctoproject.org/downloads/eclipse-plugin/">
       Yocto SDK update site
    </description>
    <feature url="features/org.yocto.sdk_@genVerion@.jar" id="org.yocto.sdk" version="@genVerion@">

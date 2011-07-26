@@ -23,7 +23,7 @@ public class ProjectDecorator implements ILightweightLabelDecorator {
 		IProject p = (IProject) element;
 		
 		try {
-			if (p.hasNature(BitbakeCommanderNature.NATURE_ID)) {
+			if (p.isOpen() && p.hasNature(BitbakeCommanderNature.NATURE_ID)) {
 				decoration.addOverlay(image, IDecoration.TOP_RIGHT);
 			}
 		} catch (CoreException e) {			

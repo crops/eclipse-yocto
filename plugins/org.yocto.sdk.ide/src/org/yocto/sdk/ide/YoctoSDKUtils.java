@@ -42,7 +42,7 @@ public class YoctoSDKUtils {
 		SYSROOT_EMPTY,
 		QEMU_KERNEL_NONEXIST,
 		SYSROOT_NONEXIST,
-		//SDK_SYSROOT_NON_EXIST,
+		WRONG_ADT_VERSION,
 		ENV_SETUP_SCRIPT_NONEXIST
 	};
 
@@ -61,8 +61,9 @@ public class YoctoSDKUtils {
 	private static final String SYSROOT_EMPTY = "Poky.Sysroot.Empty";
 	private static final String QEMU_KERNEL_NONEXIST = "Poky.Qemu.Kernel.Nonexist";
 	private static final String SYSROOT_NONEXIST = "Poky.Sysroot.Nonexist";
-	//private static final String SDK_SYSROOT_NON_EXIST = "Poky.SDK.Sysroot.Nonexist";
+	private static final String WRONG_ADT_VERSION = "Poky.ADT.Sysroot.Wrongversion";
 	private static final String ENV_SETUP_SCRIPT_NONEXIST = "Poky.Env.Script.Nonexist";
+	private static final String[] saValidVer = {"1.0+", "1.1"};
 
 
 	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {
@@ -90,6 +91,71 @@ public class YoctoSDKUtils {
 			else
 				return SDKCheckResults.SDK_TARGET_EMPTY;
 		}
+		else
+		{
+			String sFileName;
+			if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+				sFileName = elem.getStrToolChainRoot()+"/" + YoctoSDKProjectNature.DEFAULT_ENV_FILE_PREFIX+elem.getStrTarget();
+			}
+			else {
+				//POKY TREE Mode
+				sFileName = elem.getStrToolChainRoot() + YoctoSDKProjectNature.DEFAULT_TMP_PREFIX + YoctoSDKProjectNature.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
+			}
+			try
+			{
+
+				File file = new File(sFileName);
+				boolean bVersion = false;
+
+				if (file.exists()) {
+					BufferedReader input = new BufferedReader(new FileReader(file));
+
+					try
+					{
+						String line = null;
+
+						while ((line = input.readLine()) != null)
+						{							
+							if (line.startsWith("export "+ YoctoSDKProjectNature.DISTRO_VERSION))
+							{
+								int beginIndex = 2;
+								String sVersion = "";
+								for (;;) 
+								{
+									char cValue = line.charAt(line.indexOf('=') + beginIndex++);
+									if ((cValue != '.') && (!Character.isDigit(cValue)) && (cValue != '+'))
+										break;
+									else
+										sVersion += String.valueOf(cValue);
+								}
+								for (int i = 0; i < saValidVer.length; i++)
+								{
+									if (sVersion.equals(saValidVer[i]))
+									{
+										bVersion = true;
+										break;
+									}
+										
+								}
+								break;
+							}
+						}
+
+					}
+					finally {
+						input.close();
+					}
+					if (!bVersion)
+						return SDKCheckResults.WRONG_ADT_VERSION;
+
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+
+			}
+		}
 
 		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
 		{
@@ -101,7 +167,7 @@ public class YoctoSDKUtils {
 					return SDKCheckResults.QEMU_KERNEL_NONEXIST;
 			}
 		}
-	
+
 		return SDKCheckResults.SDK_PASS;
 	}
 
@@ -149,9 +215,9 @@ public class YoctoSDKUtils {
 		case SYSROOT_NONEXIST:
 			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SYSROOT_NONEXIST);
 			break;
-		//case SDK_SYSROOT_NON_EXIST:
-		//	strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SDK_SYSROOT_NON_EXIST);
-		//	break;
+		case WRONG_ADT_VERSION:
+			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(WRONG_ADT_VERSION);
+			break;
 		case ENV_SETUP_SCRIPT_NONEXIST:
 			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(ENV_SETUP_SCRIPT_NONEXIST);
 			break;
@@ -238,7 +304,7 @@ public class YoctoSDKUtils {
 		}
 		//add ACLOCAL OPTS for libtool 2.4 support
 		env.addVariable("OECORE_ACLOCAL_OPTS",
-				"-I " + env.getVariable("OECORE_NATIVE_SYSROOT", ccdesc).getValue() + "/usr/share/aclocal", 
+				"-I " + env.getVariable(YoctoSDKProjectNature.NATIVE_SYSROOT, ccdesc).getValue() + "/usr/share/aclocal", 
 				IEnvironmentVariable.ENVVAR_REPLACE,
 				delimiter,
 				ccdesc);

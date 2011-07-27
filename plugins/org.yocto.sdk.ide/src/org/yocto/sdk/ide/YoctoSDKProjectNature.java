@@ -39,8 +39,10 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	public static final  String YoctoSDK_NATURE_ID = YoctoSDKPlugin.getUniqueIdentifier() + ".YoctoSDKNature";
 
 	private static final String DEFAULT_USR_BIN = "/usr/bin/";
-	private static final String DEFAULT_ENV_FILE_PREFIX = "environment-setup-";
-	private static final String DEFAULT_TMP_PREFIX = "/tmp/";
+	public static final String DEFAULT_ENV_FILE_PREFIX = "environment-setup-";
+	public static final String DEFAULT_TMP_PREFIX = "/tmp/";
+	public static final String NATIVE_SYSROOT = "OECORE_NATIVE_SYSROOT";
+	public static final String DISTRO_VERSION = "POKY_DISTRO_VERSION";
 
 	private static final String DEFAULT_HOST_STR = "host";
 	private static final String DEFAULT_TARGET_STR = "target";

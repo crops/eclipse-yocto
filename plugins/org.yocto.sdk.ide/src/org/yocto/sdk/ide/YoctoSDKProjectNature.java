@@ -99,7 +99,6 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			
 			String sPath = envMap.get("PATH");
 			String sDebugName = envMap.get("GDB");
-			String sSysroot = envMap.get("POKY_TARGET_SYSROOT");
 			String sysroot_str = elem.getStrSysrootLoc();
 			if (configType == null || debug_configType == null)
 				throw new YoctoGeneralException("Failed to get program or remote debug launcher!");

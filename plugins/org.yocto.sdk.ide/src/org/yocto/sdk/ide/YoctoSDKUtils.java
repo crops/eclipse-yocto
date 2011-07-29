@@ -64,7 +64,7 @@ public class YoctoSDKUtils {
 	private static final String WRONG_ADT_VERSION = "Poky.ADT.Sysroot.Wrongversion";
 	private static final String ENV_SETUP_SCRIPT_NONEXIST = "Poky.Env.Script.Nonexist";
 	private static final String[] saValidVer = {"1.0+", "1.1"};
-
+	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
 
 	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {
 
@@ -294,6 +294,14 @@ public class YoctoSDKUtils {
 		{					
 			String sKey = (String)iter.next();
 			String sValue = (String)envMap.get(sKey);
+			//replace --sysroot
+
+			int SYSROOT_idx = sValue.lastIndexOf(DEFAULT_SYSROOT_PREFIX);
+			if (SYSROOT_idx >=0 )
+			{
+				sValue = sValue.substring(0, SYSROOT_idx) + DEFAULT_SYSROOT_PREFIX + elem.getStrSysrootLoc();
+			}			
+			
 			//Change certain env vars based on user target sysroot setup
 			if (sKey.matches("PKG_CONFIG_SYSROOT_DIR") || sKey.matches("OECORE_TARGET_SYSROOT"))
 				env.addVariable(sKey, elem.getStrSysrootLoc(), IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);

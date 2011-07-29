@@ -116,7 +116,7 @@ public class YoctoSDKUtils {
 
 						while ((line = input.readLine()) != null)
 						{							
-							if (line.startsWith("export "+ YoctoSDKProjectNature.DISTRO_VERSION))
+							if (line.startsWith("export "+ YoctoSDKProjectNature.SDK_VERSION))
 							{
 								int beginIndex = 2;
 								String sVersion = "";

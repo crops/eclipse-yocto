@@ -2,6 +2,7 @@
 
 #include <clutter/clutter.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #define SCN_WIDTH  800

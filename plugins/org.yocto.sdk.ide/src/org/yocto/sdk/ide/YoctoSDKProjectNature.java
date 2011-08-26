@@ -15,9 +15,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
+import org.eclipse.cdt.debug.core.ICDTLaunchConfigurationConstants;
+import org.eclipse.cdt.debug.mi.core.IMILaunchConfigurationConstants;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
@@ -26,6 +30,7 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
@@ -103,7 +108,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 			String sysroot_str = elem.getStrSysrootLoc();
 			if (configType == null || debug_configType == null)
 				throw new YoctoGeneralException("Failed to get program or remote debug launcher!");
-			createRemoteDebugLauncher(project, debug_configType, elem.getStrTarget(), sPath, sDebugName, sysroot_str);
+			createRemoteDebugLauncher(project, lManager, debug_configType, elem.getStrTarget(), sPath, sDebugName, sysroot_str);
 
 			ArrayList<String> listValue = new ArrayList<String>();
 			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
@@ -160,8 +165,8 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	}
 
 	protected static void createRemoteDebugLauncher(IProject project, 
-			ILaunchConfigurationType configType,  String sTargetTriplet,
-			String strPath, String sDebugName, String sSysroot) {
+			ILaunchManager lManager, ILaunchConfigurationType configType,  
+			String sTargetTriplet,	String strPath, String sDebugName, String sSysroot) {
 		try {
 
 			String sDebugSubDir = DEFAULT_USR_BIN + sTargetTriplet;
@@ -179,26 +184,43 @@ public class YoctoSDKProjectNature implements IProjectNature {
 				return;
 			//If get default Debugger successfully, go ahead!
 
-			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, project.getName()+"_gdb_"+sTargetTriplet);
+			//create the gdbinit file
 			String sDebugInitFile = project.getLocation().toString() + "/.gdbinit";
 			FileWriter out = new FileWriter(new File(sDebugInitFile));
 			out.write("set sysroot " + sSysroot);
 			out.flush();
-			out.close();			
-			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.GDB_INIT", sDebugInitFile);
-			w_copy.setAttribute("org.eclipse.cdt.dsf.gdb.GDB_INIT", sDebugInitFile);
-			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.AUTO_SOLIB", false);
-			w_copy.setAttribute("org.eclipse.cdt.dsf.gdb.AUTO_SOLIB", false);		
-			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.DEBUG_NAME", strDebugger);
-			w_copy.setAttribute("org.eclipse.cdt.dsf.gdb.DEBUG_NAME", strDebugger);
+			out.close();
+			
+			//set the launch configuration
 			String projectName = project.getName();
-			w_copy.setAttribute("org.eclipse.cdt.launch.PROJECT_ATTR", projectName);
+			String configName = projectName+"_gdb_"+sTargetTriplet;
+			int i;
+			ILaunchConfiguration[] configs=lManager.getLaunchConfigurations(configType);
+			for(i=0; i<configs.length; i++)
+			{	//delete the old configuration
+				ILaunchConfiguration config=configs[i];
+				if(config.getName().equals(configName)) {
+					config.delete();
+					break;
+				}
+			}
+			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(project, configName);
+			Set<String> modes=new HashSet<String>();
+			modes.add("debug");
+			w_copy.setPreferredLaunchDelegate(modes, "org.eclipse.rse.remotecdt.launch");
+			w_copy.setAttribute(IMILaunchConfigurationConstants.ATTR_GDB_INIT, sDebugInitFile);
+			w_copy.setAttribute(IMILaunchConfigurationConstants.ATTR_DEBUGGER_AUTO_SOLIB, false);	
+			w_copy.setAttribute(IMILaunchConfigurationConstants.ATTR_DEBUG_NAME, strDebugger);
+			w_copy.setAttribute(IMILaunchConfigurationConstants.ATTR_DEBUGGER_PROTOCOL, "mi");
+			//TWEAK avoid loading default values in org.eclipse.cdt.launch.remote.tabs.RemoteCDebuggerTab
+			w_copy.setAttribute("org.eclipse.cdt.launch.remote.RemoteCDSFDebuggerTab.DEFAULTS_SET",true);
+			w_copy.setAttribute(ICDTLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
 			if(!project.hasNature(YoctoSDKEmptyProjectNature.YoctoSDK_EMPTY_NATURE_ID))
 			{
 				String project_src = "src/"+projectName;
-				w_copy.setAttribute("org.eclipse.cdt.launch.PROGRAM_NAME", project_src);
+				w_copy.setAttribute(ICDTLaunchConfigurationConstants.ATTR_PROGRAM_NAME, project_src);
 			}
-			w_copy.setAttribute("org.eclipse.cdt.debug.mi.core.protocol", "mi");
+
 			w_copy.doSave();
 		}
 		catch (CoreException e)

@@ -17,7 +17,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 public class LatencytopHandler extends TerminalHandler {
 	
-	private static String initCmd="cd; sudo latencytop\r";
+	private static String initCmd="export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin; cd; sudo latencytop\r";
 	
 	protected String getInitCmd() {
 		return initCmd;

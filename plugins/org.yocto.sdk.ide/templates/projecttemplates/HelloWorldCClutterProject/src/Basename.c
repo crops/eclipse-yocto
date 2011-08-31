@@ -195,5 +195,5 @@ int main (int argc, char **argv)
                       G_CALLBACK (key_pressed_cb), arrActors);
     clutter_main ();
 
-    return EXIT_SUCCESS;
+    return 0;
 }

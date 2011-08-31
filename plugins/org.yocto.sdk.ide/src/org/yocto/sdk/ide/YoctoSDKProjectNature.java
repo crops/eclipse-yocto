@@ -47,7 +47,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	public static final String DEFAULT_ENV_FILE_PREFIX = "environment-setup-";
 	public static final String DEFAULT_TMP_PREFIX = "/tmp/";
 	public static final String NATIVE_SYSROOT = "OECORE_NATIVE_SYSROOT";
-	public static final String SDK_VERSION = "POKY_SDK_VERSION";
+	public static final String SDK_VERSION = "OECORE_SDK_VERSION";
 
 	private static final String DEFAULT_HOST_STR = "host";
 	private static final String DEFAULT_TARGET_STR = "target";

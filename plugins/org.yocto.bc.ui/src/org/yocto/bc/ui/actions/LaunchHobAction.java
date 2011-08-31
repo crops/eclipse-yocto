@@ -10,19 +10,13 @@
  *******************************************************************************/
 package org.yocto.bc.ui.actions;
 
-import java.io.IOException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.ConsoleOutputStream;
-import org.eclipse.cdt.core.resources.IConsole;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -30,12 +24,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.yocto.bc.ui.Activator;
-import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.builder.BitbakeCommanderNature;
 
 
-@SuppressWarnings("restriction")
 public class LaunchHobAction  {
     private static final String DIALOG_TITLE  = "Launch HOB";
 	

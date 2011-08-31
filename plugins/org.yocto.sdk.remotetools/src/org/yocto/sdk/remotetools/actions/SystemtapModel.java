@@ -10,40 +10,15 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.rse.core.model.IHost;
-import org.eclipse.rse.internal.terminals.ui.TerminalServiceHelper;
-import org.eclipse.rse.internal.terminals.ui.views.RSETerminalConnector;
-import org.eclipse.rse.internal.terminals.ui.views.TerminalViewTab;
-import org.eclipse.rse.internal.terminals.ui.views.TerminalViewer;
-import org.eclipse.rse.internal.terminals.ui.views.TerminalsUI;
-import org.eclipse.rse.services.terminals.ITerminalShell;
-import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
-import org.eclipse.rse.subsystems.terminals.core.elements.TerminalElement;
 
-import org.eclipse.rse.ui.SystemBasePlugin;
-import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.tm.internal.terminal.control.ITerminalViewControl;
-import org.eclipse.tm.internal.terminal.provisional.api.ITerminalConnector;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+
 import org.yocto.sdk.remotetools.RSEHelper;
-import org.yocto.sdk.remotetools.remote.RemoteApplication;
-import org.yocto.sdk.remotetools.views.BaseFileView;
 
 public class SystemtapModel extends BaseModel {
 	final private String REMOTE_KO_FILE_LOC="/tmp/";

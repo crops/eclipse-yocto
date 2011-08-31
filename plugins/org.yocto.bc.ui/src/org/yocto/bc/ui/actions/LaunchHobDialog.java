@@ -16,6 +16,8 @@ import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.io.File;
+import java.io.IOException;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -182,19 +184,40 @@ public class LaunchHobDialog extends Dialog {
 			return valid;
 		}
 		String project_path = project.getLocation().toString();
-		if (build_dir.startsWith(project_path)) {
-			Display display = Display.getCurrent();
-			Shell shell = new Shell(display);
-			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			msgBox.setText("Yocto Configuration Error");
-			msgBox.setMessage("The specified build directory is a sub-dir of project path: " + project_path);
-			msgBox.open();
-			if (shell != null)
-				shell.dispose();
-		} else
-			valid = true;
+		File project_dir_file = new File(project_path);
+		File build_dir_file = new File(build_dir);
+		try {
+			if (isSubDirectory(project_dir_file, build_dir_file)) {
+				Display display = Display.getCurrent();
+				Shell shell = new Shell(display);
+				MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+				msgBox.setText("Yocto Configuration Error");
+				msgBox.setMessage("The specified build directory is a sub-dir of project path: " + project_path);
+				msgBox.open();
+				if (shell != null)
+					shell.dispose();
+			} else
+				valid = true;
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
 		return valid;
 	}
+	
+	private boolean isSubDirectory(File baseDir, File subDir) throws IOException {
+		baseDir = baseDir.getCanonicalFile();
+		subDir = subDir.getCanonicalFile();
+
+		File parentFile = subDir;
+		while (parentFile != null) {
+			if (baseDir.equals(parentFile)) {
+				return true;
+			}
+			parentFile = parentFile.getParentFile();
+		}
+		return false;
+	}
+	
 	private void controlChanged(Widget widget) {
 
 		if (widget == buildButton)

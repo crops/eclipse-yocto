@@ -13,16 +13,12 @@ package org.yocto.bc.ui.actions;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandlerListener;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.commands.IHandler;
 
-
-@SuppressWarnings("restriction")
 public class LaunchHobHandler implements IHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		LaunchHobAction a = new LaunchHobAction();
-		Object o = event.getApplicationContext();
 		a.run(null);
 		return null;
 	}

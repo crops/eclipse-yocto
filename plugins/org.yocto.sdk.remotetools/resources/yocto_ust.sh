@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#set PATH to include sbin dirs
+export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
+
 DATESTRING="$(date +%Y%m%d%H%M%S%N)"
 TEMPFILE="/tmp/yocto-ust-tmp-$DATESTRING"
 

@@ -70,6 +70,9 @@ restart ()
   start
 }
 
+#set PATH to include sbin dirs
+export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
+
 #get command
 case $1 in 
 start) CMD=$1; shift 1

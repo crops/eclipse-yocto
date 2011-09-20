@@ -45,7 +45,7 @@ public class BitbakeCommanderNature implements IProjectNature {
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 
 			String init_script = project.getLocation().toString() + "/oe-init-build-env ";
-			String argument = "-e \"source " + init_script + buildDir + ";bitbake -u hob";// + ";bash\"";
+			String argument = "-e \"source " + init_script + buildDir + ";hob";// + ";bash\"";
 
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
 			w_copy.launch(ILaunchManager.RUN_MODE, null);

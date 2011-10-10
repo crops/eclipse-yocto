@@ -78,7 +78,7 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
                id="runYoctoTools"
-               label="YoctoTools">    
+               label="YoctoProjectTools">    
          </menu>
       </menuContribution>
       <menuContribution

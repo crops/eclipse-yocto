@@ -83,10 +83,10 @@ public class InstallWizard extends FiniteStateWizard implements
 		model.put(INSTALL_DIRECTORY, DEFAULT_INSTALL_DIR);
 		model.put(INIT_SCRIPT, DEFAULT_INIT_SCRIPT);
 		
-		setWindowTitle("Yocto BitBake Commander");
+		setWindowTitle("Yocto Project BitBake Commander");
 		setNeedsProgressMonitor(true);
 		
-		myConsole = findConsole("Yocto Console");
+		myConsole = findConsole("Yocto Project Console");
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
 		IWorkbenchPage page = win.getActivePage();

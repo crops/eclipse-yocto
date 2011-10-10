@@ -57,7 +57,7 @@ public class BBCProjectPage extends FiniteStateWizardPage {
 			}
 		}
 	}
-	public static final String PAGE_TITLE = "BitBake Commander Project";
+	public static final String PAGE_TITLE = "Yocto Project BitBake Commander Project";
 	private Text txtProjectLocation;
 
 	private Text txtInit;
@@ -66,7 +66,7 @@ public class BBCProjectPage extends FiniteStateWizardPage {
 
 	public BBCProjectPage(Map model) {
 		super(PAGE_TITLE, model);
-		setTitle("Create new yocto bitbake project");
+		setTitle("Create new Yocto Project BitBake Commander project");
 		setMessage("Enter information to create a BitBake Commander project.");
 	}
 
@@ -218,7 +218,7 @@ public class BBCProjectPage extends FiniteStateWizardPage {
 		}
 		
 		if (txtInit.getText().length() == 0) {
-			setErrorMessage("Set configuration file before bitbake is launched.");
+			setErrorMessage("Set configuration file before BitBake is launched.");
 			return false;
 		}
 		

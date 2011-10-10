@@ -323,7 +323,7 @@ public class YoctoUISetting {
 				Display display = Display.getCurrent();
 				Shell shell = new Shell(display);
 				MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-				msgBox.setText("Yocto Configuration Error");
+				msgBox.setText("Yocto Project Configuration Error");
 				msgBox.setMessage(strErrorMessage);
 				msgBox.open();
 				if (shell != null)
@@ -471,7 +471,7 @@ public class YoctoUISetting {
 			Display display = Display.getCurrent();
 			Shell shell = new Shell(display);
 			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			msgBox.setText("Yocto Configuration Error");
+			msgBox.setText("Yocto Project Configuration Error");
 			msgBox.setMessage(strErrorMessage);
 			msgBox.open();
 			if (shell != null)

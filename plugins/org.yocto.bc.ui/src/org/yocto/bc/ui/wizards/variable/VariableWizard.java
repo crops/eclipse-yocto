@@ -18,7 +18,7 @@ public class VariableWizard extends FiniteStateWizard {
 
 	public VariableWizard(Map model) {
 		this.model = model;
-		setWindowTitle("BitBake Commander");
+		setWindowTitle("Yocto Project BitBake Commander");
 	}
 
 	public VariableWizard(IStructuredSelection selection) {

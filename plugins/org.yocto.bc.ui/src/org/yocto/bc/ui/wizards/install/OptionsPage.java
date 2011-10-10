@@ -62,7 +62,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 	protected OptionsPage(Map model) {
 		super("Options", model);
 		//setTitle("Create new yocto bitbake project");
-		setMessage("Enter these parameters to create new yocto bitbake project");
+		setMessage("Enter these parameters to create new Yocto Project BitBake commander project");
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 		gitComposite.setLayout(gl);
 
 		gitButton = new Button(gitComposite, SWT.CHECK);
-		gitButton.setText("Clone from Yocto &Git Repository");
+		gitButton.setText("Clone from Yocto Project &Git Repository");
 		gitButton.setEnabled(true);
 		gitButton.addSelectionListener(validationListener);
 

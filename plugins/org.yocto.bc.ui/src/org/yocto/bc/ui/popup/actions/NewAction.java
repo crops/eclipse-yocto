@@ -30,7 +30,7 @@ public class NewAction implements IObjectActionDelegate {
 		Shell shell = new Shell();
 		MessageDialog.openInformation(
 			shell,
-			"BitBake Commander UI Plug-in",
+			"Yocto Project BitBake Commander UI Plug-in",
 			"New Action was executed.");
 	}
 

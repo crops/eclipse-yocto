@@ -37,8 +37,8 @@ public class VariablePage extends FiniteStateWizardPage {
 	private TableColumn c2;
 
 	protected VariablePage(Map model) {
-		super("BitBake Commander", model);
-		setTitle("BitBake Variable Viewer");
+		super("Yocto Project BitBake Commander", model);
+		setTitle("Yocto Project BitBake Variable Viewer");
 		setDescription("Sort and fitler global BitBake variables by name or value.");
 	}
 

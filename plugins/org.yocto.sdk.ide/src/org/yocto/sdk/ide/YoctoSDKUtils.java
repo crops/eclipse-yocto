@@ -63,7 +63,7 @@ public class YoctoSDKUtils {
 	private static final String SYSROOT_NONEXIST = "Poky.Sysroot.Nonexist";
 	private static final String WRONG_ADT_VERSION = "Poky.ADT.Sysroot.Wrongversion";
 	private static final String ENV_SETUP_SCRIPT_NONEXIST = "Poky.Env.Script.Nonexist";
-	private static final String[] saValidVer = {"1.0+", "1.1"};
+	private static final String[] saValidVer = {"1.0+", "1.1", "1.1+"};
 	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
 
 	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {

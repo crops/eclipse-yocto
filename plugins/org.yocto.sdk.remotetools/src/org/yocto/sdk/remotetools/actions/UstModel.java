@@ -15,10 +15,21 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.rse.core.model.IHost;
+import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFile;
 import org.eclipse.ui.IWorkbenchWindow;
+
 import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.LocalJob;
 import org.yocto.sdk.remotetools.Messages;
@@ -33,18 +44,21 @@ public class UstModel extends BaseModel {
 	static final private String LOCAL_FILE_SUFFIX=".local.tar";
 	static final private String REMOTE_FILE_SUFFIX=".tar";
 	static final private String LOCAL_EXEC="lttv-gui";
+	public static final String TRACE_FOLDER_NAME = "Traces";
 		
 	private String argument;
 	private String application;
+	private String prj_name;
 	
 	private String localfile;
 	
 	private IWorkbenchWindow window;
 	
-	public UstModel(IHost host, String app,String arg, IWorkbenchWindow window) {
+	public UstModel(IHost host, String app,String arg, String project, IWorkbenchWindow window) {
 		super(host);
 		application=app;
 		argument=arg;
+		prj_name = project;
 		this.window=window;
 	}
 
@@ -120,6 +134,26 @@ public class UstModel extends BaseModel {
 				datafile, 
 				monitor);
 	}
+
+	private void importToProject(IProgressMonitor monitor) throws Exception {
+		ProcessBuilder pb = new ProcessBuilder("tar", "fx", localfile);
+		pb.directory(new File("/tmp"));
+		Process p=pb.start();
+		if(p.waitFor()!=0)
+			throw new Exception("extract ust data files failed");
+		
+		String traceName = localfile.substring(0,localfile.length()-LOCAL_FILE_SUFFIX.length());
+		
+		IWorkspaceRoot wsroot = ResourcesPlugin.getWorkspace().getRoot();
+		IPath full_path = wsroot.getFullPath();
+		IProject project = wsroot.getProject(prj_name);
+		IFolder traceFolder = project.getFolder(TRACE_FOLDER_NAME);
+		if (!traceFolder.exists()) {
+			throw new Exception("Can't find file trace folder in selected project.");
+		}
+		
+		traceFolder.createLink(new Path(traceName), IResource.REPLACE, monitor);
+	}
 	
 	private String[] generateViewerParam() throws Exception {
 		String viewerParam=new String(LOCAL_EXEC);
@@ -159,7 +193,10 @@ public class UstModel extends BaseModel {
 			monitor.subTask("Downloading user space lttng data file");
 			getDataFile(new SubProgressMonitor(monitor,30),datafile);
 			
+			//extract datafile and import to lttng project
+			importToProject(new SubProgressMonitor(monitor,30));
 			//extract datafile, prepare cmd array
+			/* JZ - we're using Eclipse built-in Lttng-viewer now
 			String []cmdarray=generateViewerParam();
 			if(cmdarray==null) {
 				throw new Exception("Ust: empty ust data");
@@ -169,7 +206,7 @@ public class UstModel extends BaseModel {
 			monitor.subTask("lttv-gui is running locally");
 			//start lttv-gui asynchronously
 			new LocalJob("lttv-gui",cmdarray,null,null,window).schedule();
-						
+			*/			
 		}catch (InterruptedException e) {
 			throw e;
 		}catch (Exception e){

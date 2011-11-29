@@ -1,6 +1,6 @@
 #setup eclipse building environment for Indigo.
 #comment out the following 2 lines if you don't want to use the http proxy for update site
-#PROXY=proxy-shz.intel.com
+#PROXY=proxy.jf.intel.com
 #PORT=911
 
 err_exit() 
@@ -147,6 +147,15 @@ if [ ! -f eclipse/plugins/org.eclipse.cdt_${CDTFEAT}.${CDTVER}.jar ]; then
   update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.feature.group ${CDTFEAT}
   update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
   update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.launch.remote.feature.group 
+fi
+
+#TMF
+TMFREL="0.4.0"
+TMFDATE="201111050234"
+if [ ! -f eclipse/plugins/org.eclipse.linuxtools.tmf.core_${TMFREL}.${TMFDATE}.jar ]; then
+  echo "Install TMF..."
+  UPDATE_SITE="http://download.eclipse.org/technology/linuxtools/update"
+  update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}
 fi
 
 #AUTOTOOL

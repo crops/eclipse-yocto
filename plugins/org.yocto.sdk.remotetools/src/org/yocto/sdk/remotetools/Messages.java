@@ -24,6 +24,7 @@ public class Messages extends NLS {
 	public static String ErrorOprofileViewer;
 	public static String ErrorOprofile;
 	public static String ErrorLttvGui;
+	public static String ErrorUstProject;
 	
 	public static String InfoDownload;
 	public static String InfoUpload;

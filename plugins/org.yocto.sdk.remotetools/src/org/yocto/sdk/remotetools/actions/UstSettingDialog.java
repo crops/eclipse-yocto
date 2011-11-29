@@ -16,6 +16,7 @@ import org.yocto.sdk.remotetools.RSEHelper;
 import org.yocto.sdk.remotetools.SWTFactory;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.rse.core.IRSESystemType;
 import org.eclipse.rse.core.RSECorePlugin;
 import org.eclipse.rse.core.model.IHost;
@@ -33,7 +34,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.linuxtools.tmf.*;
+import org.eclipse.linuxtools.tmf.TmfProjectNature;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.IProject;
@@ -156,6 +157,7 @@ public class UstSettingDialog extends BaseSettingDialog {
 	
 	protected void updateCurProject() {
 		IProject currentProjectSelected = getCurrentProject();
+		
 		if (currentProjectSelected != null)
 			curProject = currentProjectSelected.getName();
 		/*
@@ -169,6 +171,8 @@ public class UstSettingDialog extends BaseSettingDialog {
 	}
 	
 	protected IProject getCurrentProject() {
+		if (projectCombo.getItemCount() == 0)
+			return null;
 		int currentSelection = projectCombo.getSelectionIndex();
 		String importProject = currentSelection >= 0 ? projectCombo
 				.getItem(currentSelection) : null;
@@ -201,7 +205,7 @@ public class UstSettingDialog extends BaseSettingDialog {
 		
 		if(index>=0) {
 			projectCombo.select(index);
-		}else if (projects.length > 0) {
+		}else if (projectCombo.getItemCount()> 0) {
 			projectCombo.select(projectCombo.getItemCount() - 1);
 		}
 	

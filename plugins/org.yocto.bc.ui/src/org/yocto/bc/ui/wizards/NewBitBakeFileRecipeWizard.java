@@ -7,13 +7,16 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Jessica Zhang (Intel) - Extend to support auto-fill base on src_uri value
  *******************************************************************************/
 package org.yocto.bc.ui.wizards;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -55,24 +58,37 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 		addPage(page);
 	}
 
-	private void doFinish(String containerName, String fileName, String description, String license, String homepage, String author, String srcuri, IProgressMonitor monitor) throws CoreException {
-
+	/*private void doFinish(String containerName, 
+						String fileName, 
+						String description, 
+						String license, 
+						String homepage, 
+						String author, 
+						String srcuri, 
+						String section, 
+						String checksum,
+						String md5sum,
+						String sha256sum,
+						IProgressMonitor monitor) throws CoreException {*/
+	private void doFinish(BitbakeRecipeUIElement element, IProgressMonitor monitor) throws CoreException {
+		String fileName = element.getFile();
 		monitor.beginTask("Creating " + fileName, 2);
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IResource resource = root.findMember(new Path(containerName));
+		IResource resource = root.findMember(new Path(element.getContainer()));
 		if (!resource.exists() || !(resource instanceof IContainer)) {
-			throwCoreException("Container \"" + containerName + "\" does not exist.");
+			throwCoreException("Container \"" + element.getContainer() + "\" does not exist.");
 		}
 		IContainer container = (IContainer) resource;
 		
 		// If the extension wasn't specified, assume .bb
-		if (!fileName.endsWith(BBLanguageHelper.BITBAKE_RECIPE_FILE_EXTENSION) || !fileName.endsWith(".inc") || !fileName.endsWith(".conf")) {
+		if (!fileName.endsWith(".bb") && !fileName.endsWith(".inc") && !fileName.endsWith(".conf")) {
 			fileName = fileName + ".bb";
 		}
 		
 		final IFile file = container.getFile(new Path(fileName));
 		try {
-			InputStream stream = openContentStream(fileName, description, license, homepage, author, srcuri);
+			//InputStream stream = openContentStream(fileName, description, license, homepage, author, srcuri, section, checksum, md5sum, sha256sum);
+			InputStream stream = openContentStream(element);
 			if (file.exists()) {
 				file.setContents(stream, true, true, monitor);
 			} else {
@@ -116,28 +132,62 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 	 * @param newPage 
 	 */
 
-	private InputStream openContentStream(String fileName, String description, String license, String homepage, String author, String srcuri) {
+	/*private InputStream openContentStream(String fileName, 
+										String description, 
+										String license, 
+										String homepage, 
+										String author, 
+										String srcuri, 
+										String section, 
+										String checksum,
+										String md5sum,
+										String sha256sum) {*/
+	private InputStream openContentStream(BitbakeRecipeUIElement element) {
 		
 		StringBuffer sb = new StringBuffer();
 		
-		sb.append("DESCRIPTION = \"" + description + "\"\n");
+		sb.append("DESCRIPTION = \"" + element.getDescription() + "\"\n");
 		
-		if (author.length() > 0) {
-			sb.append("AUTHOR = \"" + author + "\"\n");
+		if (element.getAuthor().length() > 0) {
+			sb.append("AUTHOR = \"" + element.getAuthor() + "\"\n");
 		}
 
-		if (homepage.length() > 0) {
-			sb.append("HOMEPAGE = \"" + homepage + "\"\n");
+		if (element.getHomePage().length() > 0) {
+			sb.append("HOMEPAGE = \"" + element.getHomePage() + "\"\n");
 		}
 		
-		if (license.length() > 0) {
-			sb.append("LICENSE = \"" + license + "\"\n");
+		if (element.getSection().length() > 0) {
+			sb.append("SECTION = \"" + element.getSection() + "\"\n");
+		}
+		
+		if (element.getLicense().length() > 0) {
+			sb.append("LICENSE = \"" + element.getLicense() + "\"\n");
 		}
 
-		if (srcuri.length() > 0) {
-			sb.append("SRC_URI = \"" + srcuri + "\"\n");
+		if (element.getChecksum().length() > 0) {
+			sb.append("LIC_FILES_CHKSUM = \"" + element.getChecksum() + "\"\n");
 		}
 		
+		if (element.getSrcuri().length() > 0) {
+			sb.append("SRC_URI = \"" + element.getSrcuri() + "\"\n");
+		}
+		
+		if (element.getMd5sum().length() > 0) {
+			sb.append("SRC_URI[md5sum] = \"" + element.getMd5sum() + "\"\n");
+		}
+	
+		if (element.getsha256sum().length() > 0) {
+			sb.append("SRC_URI[sha256sum] = \"" + element.getsha256sum() + "\"\n");
+		}
+		
+		ArrayList<String> inheritance = element.getInheritance();
+		if (!inheritance.isEmpty()) {
+			Object ia[] = inheritance.toArray();
+			String inheritance_str = "inherit ";
+			for(int i=0; i<ia.length; i++)
+				inheritance_str += ((String) ia[i]) + " ";
+			sb.append(inheritance_str); 
+		}
 		sb.append("\n");
 
 		return new ByteArrayInputStream(sb.toString().getBytes());
@@ -145,19 +195,33 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		final String containerName = page.getContainerName();
+		final BitbakeRecipeUIElement element = page.getUIElement();
+		/*final String containerName = page.getContainerName();
 		final String fileName = page.getFileName();
 		final String description = page.getDescriptionText();
 		final String license = page.getLicenseText();
 		final String homepage = page.getHomepageText();
 		final String author = page.getAuthorText();
 		final String srcuri = page.getSrcuriText();
+		final String section = page.getSectionText();
+		final String checksum = page.getChecksumText();
+		final String md5sum = page.getmd5sumText();
+		final String sha256sum = page.getsha256sumText();*/
 		
 		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
-					doFinish(containerName, fileName, description, license, homepage, author, srcuri, monitor);
-				} catch (CoreException e) {
+					doFinish(element, monitor);
+					File working_dir = new File(element.getMetaDir());
+					
+					String rm_cmd = "rm -rf temp";
+					final Process process = Runtime.getRuntime().exec(rm_cmd, null, working_dir);
+					int returnCode = process.waitFor();
+					if (returnCode != 0) {
+						throw new Exception("Failed to clean up the temp dir");
+					}
+					//doFinish(containerName, fileName, description, license, homepage, author, srcuri, section, checksum, md5sum, sha256sum, monitor);
+				} catch (Exception e) {
 					throw new InvocationTargetException(e);
 				} finally {
 					monitor.done();

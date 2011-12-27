@@ -35,10 +35,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
-//import org.yocto.sdk.ide.preferences.PreferenceConstants;
-
-//import org.yocto.sdk.ide.YoctoSDKProjectNature;
-//import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckResults;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -118,33 +114,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 				handleBrowse(container, containerText);
 			}
 		});
-/*
-		label = new Label(container, SWT.NULL);
-		gd = new GridData();
-		gd.horizontalSpan = 3;
-		label.setLayoutData(gd);
 		
-		label = new Label(container, SWT.NULL);
-		label.setText("&Meta Directory:");
-
-		metaDirText = new Text(container, SWT.BORDER | SWT.SINGLE);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		metaDirText.setLayoutData(gd);
-		metaDirText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				dialogChanged();
-			}
-		});
-		
-		Button buttonBrowse2 = new Button(container, SWT.PUSH);
-		buttonBrowse2.setText("Browse...");
-		buttonBrowse2.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				handleBrowse(container, metaDirText);
-			}
-		});
-*/
 		label = new Label(container, SWT.NULL);
 		gd = new GridData();
 		gd.horizontalSpan = 3;
@@ -171,7 +141,6 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 			}
 		});
 
-		// label = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
 		createField(container, "&Recipe Name:", (fileText = new Text(container, SWT.BORDER | SWT.SINGLE)));
 		createField(container, "SRC_URI[&md5sum]:", (md5sumText = new Text(container, SWT.BORDER | SWT.SINGLE)));
 		createField(container, "SRC_URI[&sha256sum]:", (sha256sumText = new Text(container, SWT.BORDER | SWT.SINGLE)));
@@ -247,51 +216,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		
 		updateStatus(null);
 	}
-/*
-	public String getAuthorText() {
-		return authorText.getText();
-	}
 
-	public String getContainerName() {
-		return containerText.getText();
-	}
-
-	public String getDescriptionText() {
-		return descriptionText.getText();
-	}
-
-	public String getFileName() {
-		return fileText.getText();
-	}
-
-	public String getHomepageText() {
-		return homepageText.getText();
-	}
-
-	public String getLicenseText() {
-		return licenseText.getText();
-	}
-
-	public String getSrcuriText() {
-		return srcuriText.getText();
-	}
-
-	public String getChecksumText() {
-		return checksumText.getText();
-	}
-	
-	public String getSectionText() {
-		return sectionText.getText();
-	}
-	
-	public String getmd5sumText() {
-		return md5sumText.getText();
-	}
-	
-	public String getsha256sumText() {
-		return sha256sumText.getText();
-	}
-	*/
 	public BitbakeRecipeUIElement getUIElement() {
 		element.setAuthor(authorText.getText());
 		element.setChecksum(checksumText.getText());
@@ -318,26 +243,22 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 				text.setText(((Path) result[0]).toString());
 			}
 		}
-		/*
-		String dirName;
-		dirName = new DirectoryDialog(parent.getShell()).open();
-		if (dirName != null) {
-			text.setText(dirName);
-		}*/
 	}
 	
 	private void handlePopulate() {
 		String src_uri = srcuriText.getText();
-		//String recipe_dir = containerText.getText();
+		if ((src_uri.startsWith("http://") || src_uri.startsWith("ftp://")) 
+			&& (src_uri.endsWith("tar.gz") || src_uri.endsWith("tar.bz2"))) {
 		
-		HashMap<String, String> mirror_map = createMirrorLookupTable();
+			HashMap<String, String> mirror_map = createMirrorLookupTable();
 		
-		populateRecipeName(src_uri);
-		populateSrcuriChecksum(src_uri);
-		String extractDir = extractPackage(src_uri);
-		populateLicensefileChecksum(extractDir);
-		updateSrcuri(mirror_map, src_uri);
-		populateInheritance(extractDir);
+			populateRecipeName(src_uri);
+			populateSrcuriChecksum(src_uri);
+			String extractDir = extractPackage(src_uri);
+			populateLicensefileChecksum(extractDir);
+			updateSrcuri(mirror_map, src_uri);
+			populateInheritance(extractDir);
+		}
 		
 	}
 	
@@ -346,13 +267,23 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 			File working_dir = new File(metaDirLoc+"/temp");
 			int idx = src_uri.lastIndexOf("/");
 			String tar_file = src_uri.substring(idx+1);
+			int tar_file_surfix_idx = tar_file.lastIndexOf(".tar");
+			String tar_file_surfix = tar_file.substring(tar_file_surfix_idx);
 			String tar_file_path = metaDirLoc+"/temp/"+tar_file;
-			String tar_cmd = "tar -zxvf "+ tar_file_path;
+			
+			String tar_cmd = "";
+			int tar_idx = 0;
+			if (tar_file_surfix.matches(".tar.gz")) {
+				tar_cmd = "tar -zxvf "+ tar_file_path;
+				tar_idx = tar_file_path.lastIndexOf(".tar.gz");
+			} else if (tar_file_surfix.matches(".tar.bz2")) {
+				tar_idx = tar_file_path.lastIndexOf(".tar.bz2");
+				tar_cmd = "tar -xvf " + tar_file_path;
+			}
 			final Process process = Runtime.getRuntime().exec(tar_cmd, null, working_dir);
 			int returnCode = process.waitFor();
 			if (returnCode == 0) {
-				idx = tar_file_path.lastIndexOf(".tar.gz");
-				return tar_file_path.substring(0, idx);
+				return tar_file_path.substring(0, tar_idx);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -535,7 +466,11 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		String[] tokens = src_uri.split(delims);
 		if (tokens.length > 0) {
 			String tar_file = tokens[tokens.length - 1];
-			int surfix_idx = tar_file.lastIndexOf(".tar.gz");
+			int surfix_idx = 0;
+			if (tar_file.endsWith(".tar.gz"))
+				surfix_idx = tar_file.lastIndexOf(".tar.gz");
+			else
+				surfix_idx = tar_file.lastIndexOf(".tar.bz2");
 			int sept_idx = tar_file.lastIndexOf("-");
 			recipe_file = tar_file.substring(0, sept_idx)+"_"+tar_file.substring(sept_idx+1, surfix_idx)+".bb";
 		}

@@ -58,18 +58,6 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 		addPage(page);
 	}
 
-	/*private void doFinish(String containerName, 
-						String fileName, 
-						String description, 
-						String license, 
-						String homepage, 
-						String author, 
-						String srcuri, 
-						String section, 
-						String checksum,
-						String md5sum,
-						String sha256sum,
-						IProgressMonitor monitor) throws CoreException {*/
 	private void doFinish(BitbakeRecipeUIElement element, IProgressMonitor monitor) throws CoreException {
 		String fileName = element.getFile();
 		monitor.beginTask("Creating " + fileName, 2);
@@ -87,7 +75,6 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 		
 		final IFile file = container.getFile(new Path(fileName));
 		try {
-			//InputStream stream = openContentStream(fileName, description, license, homepage, author, srcuri, section, checksum, md5sum, sha256sum);
 			InputStream stream = openContentStream(element);
 			if (file.exists()) {
 				file.setContents(stream, true, true, monitor);
@@ -132,16 +119,6 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 	 * @param newPage 
 	 */
 
-	/*private InputStream openContentStream(String fileName, 
-										String description, 
-										String license, 
-										String homepage, 
-										String author, 
-										String srcuri, 
-										String section, 
-										String checksum,
-										String md5sum,
-										String sha256sum) {*/
 	private InputStream openContentStream(BitbakeRecipeUIElement element) {
 		
 		StringBuffer sb = new StringBuffer();
@@ -196,31 +173,22 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 	@Override
 	public boolean performFinish() {
 		final BitbakeRecipeUIElement element = page.getUIElement();
-		/*final String containerName = page.getContainerName();
-		final String fileName = page.getFileName();
-		final String description = page.getDescriptionText();
-		final String license = page.getLicenseText();
-		final String homepage = page.getHomepageText();
-		final String author = page.getAuthorText();
-		final String srcuri = page.getSrcuriText();
-		final String section = page.getSectionText();
-		final String checksum = page.getChecksumText();
-		final String md5sum = page.getmd5sumText();
-		final String sha256sum = page.getsha256sumText();*/
 		
 		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					doFinish(element, monitor);
-					File working_dir = new File(element.getMetaDir());
+					File temp_dir = new File(element.getMetaDir() + "/temp");
+					if (temp_dir.exists()) {
+						File working_dir = new File(element.getMetaDir());
 					
-					String rm_cmd = "rm -rf temp";
-					final Process process = Runtime.getRuntime().exec(rm_cmd, null, working_dir);
-					int returnCode = process.waitFor();
-					if (returnCode != 0) {
-						throw new Exception("Failed to clean up the temp dir");
+						String rm_cmd = "rm -rf temp";
+						final Process process = Runtime.getRuntime().exec(rm_cmd, null, working_dir);
+						int returnCode = process.waitFor();
+						if (returnCode != 0) {
+							throw new Exception("Failed to clean up the temp dir");
+						}
 					}
-					//doFinish(containerName, fileName, description, license, homepage, author, srcuri, section, checksum, md5sum, sha256sum, monitor);
 				} catch (Exception e) {
 					throw new InvocationTargetException(e);
 				} finally {

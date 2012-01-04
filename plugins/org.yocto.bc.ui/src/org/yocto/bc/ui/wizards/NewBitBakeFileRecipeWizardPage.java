@@ -258,6 +258,15 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 			populateLicensefileChecksum(extractDir);
 			updateSrcuri(mirror_map, src_uri);
 			populateInheritance(extractDir);
+		} else if (src_uri.startsWith("file://")) {
+			String path_str = src_uri.substring(7);
+			File package_dir = new File(path_str);
+			if (package_dir.isDirectory()) {
+				String package_name = path_str.substring(path_str.lastIndexOf("/")+1);
+				fileText.setText(package_name+".bb");
+				populateLicensefileChecksum(path_str);
+				populateInheritance(path_str);
+			}
 		}
 		
 	}

@@ -25,9 +25,9 @@ public class UstHandler extends AbstractHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
-		if(UstModel.checkAvail()!=true) {
-			return null;
-		}
+		//if(UstModel.checkAvail()!=true) {
+		//	return null;
+		//}
 		
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 

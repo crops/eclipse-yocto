@@ -40,13 +40,11 @@ public class BBConfigurationInitializeOperation implements IRunnableWithProgress
 		BBSession session;
 		try {
 			ProjectInfoHelper.store(pinfo.getRootPath(), pinfo);
-			/* llu detach BBSession
 			session = Activator.getBBSession(pinfo.getRootPath(), writer);
 
 			if (!session.isInitialized()) {
 				session.initialize();
 			}
-			*/
 
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);

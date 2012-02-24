@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Lianhao Lu (Intel) - add more bitbake keywords and functions
  *******************************************************************************/
 package org.yocto.bc.bitbake;
 
@@ -21,16 +22,16 @@ import java.util.TreeMap;
  */
 public class BBLanguageHelper {
 	
-	public static final String[] BITBAKE_KEYWORDS = new String[] { "inherit", "require", "export", "addtask", "python", "include"};
+	public static final String[] BITBAKE_KEYWORDS = new String[] { "inherit", "require", "export", "addtask", "python", "include", "fakeroot", "addhandler", "def"};
 	public static final String[] SHELL_KEYWORDS = new String[] { "while", "do", "if", "fi", "ln", "export", "install", "oe_libinstall", "for", "in", "done", "echo", "then", "cat", "rm", "rmdir", "mkdir", "printf", "exit", "test", "cd", "cp"};
-	public static final String[] BITBAKE_STANDARD_FUNCTIONS = new String[] { "stage", "configure", "compile", "install" };
+	public static final String[] BITBAKE_STANDARD_FUNCTIONS = new String[] { "fetch", "unpack", "patch", "configure", "compile", "install", "populate_sysroot", "package"};
 	public static final String BITBAKE_RECIPE_FILE_EXTENSION = "bb";
 
 	/**
 	 * @return A map of names and descriptions of commonly used BitBake variables.
 	 */
-	public static Map getCommonBitbakeVariables() {
-		Map m = new TreeMap(new Comparator() {
+	public static Map<String, String> getCommonBitbakeVariables() {
+		Map<String, String> m = new TreeMap<String, String>(new Comparator<Object>() {
 
 			public int compare(Object o1, Object o2) {
 

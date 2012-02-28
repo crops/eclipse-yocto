@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Lianhao Lu (Intel) - remove compile warnings
  *******************************************************************************/
 package org.yocto.bc.ui.editors.bitbake;
 
@@ -29,7 +30,7 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.ide.IDE.SharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.yocto.bc.bitbake.BBLanguageHelper;
@@ -53,7 +54,7 @@ class RecipeCompletionProcessor implements IContentAssistProcessor {
 		//TemplateContext keywordContext = new DocumentTemplateContext(fKeywordContextType, document, offset, 0);
 		TemplateContext functionContext = new DocumentTemplateContext(fFunctionContextType, document, offset, 0);
 		
-		List proposals = new ArrayList();
+		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 		
 		getVariableTemplateProposals(templateContext, region, proposals);
 		// getKeywordTemplateProposals(keywordContext, region, proposals);
@@ -72,8 +73,8 @@ class RecipeCompletionProcessor implements IContentAssistProcessor {
 		return new Template(name, description, CONTEXT_ID, name + " = \"${" + name.toLowerCase() + "}\"", false);
 	}
 
-	private void getAddTaskTemplateProposals(TemplateContext templateContext, Region region, List p) {
-			p.add(new TemplateProposal(new Template("addtask", "addtask statement", CONTEXT_ID, "addtask ${task_name} after ${do_previous_task} before ${do_next_task}", false),templateContext, region, PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_BKMRK_TSK)));
+	private void getAddTaskTemplateProposals(TemplateContext templateContext, Region region, List<ICompletionProposal> p) {
+			p.add(new TemplateProposal(new Template("addtask", "addtask statement", CONTEXT_ID, "addtask ${task_name} after ${do_previous_task} before ${do_next_task}", false),templateContext, region, PlatformUI.getWorkbench().getSharedImages().getImage(SharedImages.IMG_OBJS_BKMRK_TSK)));
 	}
 
 
@@ -93,7 +94,7 @@ class RecipeCompletionProcessor implements IContentAssistProcessor {
 		return null;
 	}
 
-	private void getFunctionTemplateProposals(TemplateContext templateContext, Region region, List p) {
+	private void getFunctionTemplateProposals(TemplateContext templateContext, Region region, List<ICompletionProposal> p) {
 		String [] keywords = BBLanguageHelper.BITBAKE_STANDARD_FUNCTIONS;
 		Image img = Activator.getDefault().getImageRegistry().get(Activator.IMAGE_FUNCTION);
 		Arrays.sort(keywords);
@@ -102,8 +103,8 @@ class RecipeCompletionProcessor implements IContentAssistProcessor {
 			p.add(new TemplateProposal(new Template(keywords[i], keywords[i] + " function", CONTEXT_ID, "do_" + keywords[i] + "() {\n\n}", false), templateContext, region, img));
 		}
 	}
-
-	private void getKeywordTemplateProposals(TemplateContext templateContext, Region region, List p) {
+	/*
+	private void getKeywordTemplateProposals(TemplateContext templateContext, Region region, List<TemplateProposal> p) {
 		String [] keywords = BBLanguageHelper.BITBAKE_KEYWORDS;
 		
 		Arrays.sort(keywords);
@@ -112,11 +113,12 @@ class RecipeCompletionProcessor implements IContentAssistProcessor {
 			p.add(new TemplateProposal(new Template(keywords[i], keywords[i] + " keyword", CONTEXT_ID, keywords[i] + " ", false),templateContext, region, null));
 		}
 	}
+	*/
 
-	private void getVariableTemplateProposals(TemplateContext templateContext, Region region, List p) {
-		Map n = BBLanguageHelper.getCommonBitbakeVariables();
+	private void getVariableTemplateProposals(TemplateContext templateContext, Region region, List<ICompletionProposal> p) {
+		Map<String, String> n = BBLanguageHelper.getCommonBitbakeVariables();
 		Image img = Activator.getDefault().getImageRegistry().get(Activator.IMAGE_VARIABLE);
-		for (Iterator i = n.keySet().iterator(); i.hasNext();) {
+		for (Iterator<String> i = n.keySet().iterator(); i.hasNext();) {
 			String name = (String) i.next();
 			String description = (String) n.get(name);
 			p.add(new TemplateProposal(generateVariableTemplate(name, description), templateContext, region, img));	

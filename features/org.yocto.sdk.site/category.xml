@@ -3,5 +3,8 @@
    <feature url="features/org.yocto.sdk_1.1.0.qualifier.jar" id="org.yocto.sdk" version="1.1.0.qualifier">
       <category name="Yocto SDK"/>
    </feature>
+   <feature url="features/org.yocto.sdk.source_1.1.0.qualifier.jar" id="org.yocto.sdk.source" version="1.1.0.qualifier">
+      <category name="Yocto SDK"/>
+   </feature>
    <category-def name="Yocto SDK" label="Development tools &amp; SDKs for Yocto Linux"/>
 </site>

@@ -62,15 +62,12 @@ public class BitBakeFileEditor extends AbstractDecoratedTextEditor {
 			targetFilePath = ((FileEditorInput)input).getFile().getLocationURI().getPath();
 			viewerConfiguration.setTargetFilePath(targetFilePath);
 			
-			//llu detach BBSession
-			/*
 			try {
 				viewerConfiguration.setBBSession(Activator.getBBSession(p.getLocationURI().getPath()));
 			} catch (IOException e) {
 				e.printStackTrace();
 				throw new PartInitException(Status.CANCEL_STATUS);
 			}
-			*/
 		}
 		super.init(site, input);
 	}

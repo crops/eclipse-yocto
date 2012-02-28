@@ -60,8 +60,7 @@ public class LaunchVariableWizardAction implements IWorkbenchWindowActionDelegat
 			
 			if (element instanceof IResource) {
 				IProject p = ((IResource)element).getProject();
-				//llu detach BBSession
-				/*
+
 				try {
 					if (p.hasNature(BitbakeCommanderNature.NATURE_ID)) {
 						session = Activator.getBBSession(((IResource)element).getProject().getLocationURI().getPath());
@@ -71,7 +70,6 @@ public class LaunchVariableWizardAction implements IWorkbenchWindowActionDelegat
 				} catch (CoreException e) {
 					e.printStackTrace();
 				}
-				*/
 			}
 		}
 	

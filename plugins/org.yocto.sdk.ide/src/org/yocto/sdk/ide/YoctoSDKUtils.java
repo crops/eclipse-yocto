@@ -13,7 +13,11 @@ package org.yocto.sdk.ide;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -43,7 +47,9 @@ public class YoctoSDKUtils {
 		QEMU_KERNEL_NONEXIST,
 		SYSROOT_NONEXIST,
 		WRONG_ADT_VERSION,
-		ENV_SETUP_SCRIPT_NONEXIST
+		ENV_SETUP_SCRIPT_NONEXIST,
+		TOOLCHAIN_NO_SYSROOT,
+		TOOLCHAIN_HOST_MISMATCH
 	};
 
 	public static enum SDKCheckRequestFrom {
@@ -63,11 +69,14 @@ public class YoctoSDKUtils {
 	private static final String SYSROOT_NONEXIST = "Poky.Sysroot.Nonexist";
 	private static final String WRONG_ADT_VERSION = "Poky.ADT.Sysroot.Wrongversion";
 	private static final String ENV_SETUP_SCRIPT_NONEXIST = "Poky.Env.Script.Nonexist";
-	private static final String[] saValidVer = {"1.0+", "1.1", "1.1+"};
+	private static final String TOOLCHAIN_NO_SYSROOT = "Poky.Toolchain.No.Sysroot";
+	private static final String TOOLCHAIN_HOST_MISMATCH = "Poky.Toolchain.Host.Mismatch";
+	private static final String[] saValidVer = {"1.0+", "1.1", "1.1+", "1.2", "1.2+"};
 	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
+	private static final String SYSROOTS_DIR = "sysroots";
 
-	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {
-
+	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {		
+		
 		if (elem.getStrToolChainRoot().isEmpty())
 			return SDKCheckResults.TOOLCHAIN_LOCATION_EMPTY;
 		else {
@@ -82,6 +91,20 @@ public class YoctoSDKUtils {
 			File fSysroot = new File(elem.getStrSysrootLoc());
 			if (!fSysroot.exists())
 				return SDKCheckResults.SYSROOT_NONEXIST;
+		}
+		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+			//Check for SDK compatible with the host arch
+			String platform = getPlatformArch();
+			String sysroot_dir_str = elem.getStrToolChainRoot() + "/" + SYSROOTS_DIR;
+			File sysroot_dir = new File(sysroot_dir_str);
+			if (!sysroot_dir.exists())
+				return SDKCheckResults.TOOLCHAIN_NO_SYSROOT;
+			String toolchain_host_arch = findHostArch(sysroot_dir);
+			
+			if (!toolchain_host_arch.equalsIgnoreCase(platform)) {
+				if (!platform.matches("i\\d86") || !toolchain_host_arch.matches("i\\d86"))
+					return SDKCheckResults.TOOLCHAIN_HOST_MISMATCH;
+			}
 		}
 		if (elem.getIntTargetIndex() < 0 || elem.getStrTarget().isEmpty())
 		{
@@ -220,6 +243,12 @@ public class YoctoSDKUtils {
 			break;
 		case ENV_SETUP_SCRIPT_NONEXIST:
 			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(ENV_SETUP_SCRIPT_NONEXIST);
+			break;
+		case TOOLCHAIN_NO_SYSROOT:
+			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(TOOLCHAIN_NO_SYSROOT);
+			break;
+		case TOOLCHAIN_HOST_MISMATCH:
+			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(TOOLCHAIN_HOST_MISMATCH);
 			break;
 		default:
 			break;
@@ -486,5 +515,52 @@ public class YoctoSDKUtils {
 
 	}
 
+	public static String getPlatformArch() 
+	{
+		String value = null;
+		try
+        {            
+            Runtime rt = Runtime.getRuntime();
+            Process proc = rt.exec("uname -m");
+            InputStream stdin = proc.getInputStream();
+            InputStreamReader isr = new InputStreamReader(stdin);
+            BufferedReader br = new BufferedReader(isr);
+            String line = null;
+            
+            while ( (line = br.readLine()) != null) {
+                value = line;
+            }
+            int exitVal = proc.waitFor();
+            
+        } catch (Throwable t)
+          {
+            t.printStackTrace();
+          }
+		return value;
+	}
+	
+	static private String findHostArch(File sysroot_dir) {
+		FilenameFilter nativeFilter = new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				if (name.endsWith("-pokysdk-linux")) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};
 
+		File copyFile = null;
+		File[] files = sysroot_dir.listFiles(nativeFilter);
+		String arch = null;
+		for (File file : files) {
+			if (file.isDirectory()) {
+				String path = file.getName();
+				arch = path.substring(0, path.indexOf("-pokysdk-linux"));
+			} else 
+				continue;
+        }
+		return arch;
+	}
 }
+

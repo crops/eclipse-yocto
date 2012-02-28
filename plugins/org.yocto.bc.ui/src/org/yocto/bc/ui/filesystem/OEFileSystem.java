@@ -52,9 +52,7 @@ public class OEFileSystem extends FileSystem {
 			BBSession config = null;
 			try {
 				config = Activator.getBBSession(uri.getPath());
-				if (!config.isInitialized()) {
-					config.initialize();
-				}
+				config.initialize();
 			} catch (Exception e) {
 				e.printStackTrace();
 				return new OEIgnoreFile(new File(uri.getPath()));

@@ -24,9 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.MessageConsole;
@@ -41,7 +44,7 @@ import org.yocto.bc.ui.model.ProjectInfo;
  * @author kgilmer
  *
  */
-public class BBSession implements IModelElement, Map {
+public class BBSession implements IBBSessionListener, IModelElement, Map {
 	public static final int TYPE_VARIABLE_ASSIGNMENT = 1;
 	public static final int TYPE_UNKNOWN = 2;
 	public static final int TYPE_STATEMENT = 3;
@@ -50,14 +53,20 @@ public class BBSession implements IModelElement, Map {
 	protected final ProjectInfo pinfo;
 	protected final ShellSession shell;
 	protected Map properties = null;
+	protected List <String> depends = null;
 	protected boolean initialized = false;
 	private MessageConsole sessionConsole;
+	private final ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
+	private final Lock rlock = rwlock.readLock();
+	private final Lock wlock = rwlock.writeLock();
+	protected String parsingCmd;
 	
 	public BBSession(ShellSession ssession, String projectRoot) throws IOException {
 		shell = ssession;
 		this.pinfo = new ProjectInfo();
 		pinfo.setLocation(projectRoot);
 		pinfo.setInitScriptPath(ProjectInfoHelper.getInitScriptPath(projectRoot));
+		this.parsingCmd = "bitbake -e";
 	}
 	
 	private Collection adapttoIPath(List<File> asList, IProject project) {
@@ -102,20 +111,52 @@ public class BBSession implements IModelElement, Map {
 	}
 
 	public boolean containsKey(Object arg0) {
-		return properties.containsKey(arg0);
+		try {
+			checkValidAndLock(true);
+			return properties.containsKey(arg0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}finally {
+			rlock.unlock();
+		}
 	}
 
 	public boolean containsValue(Object arg0) {
-		return properties.containsValue(arg0);
+		try {
+			checkValidAndLock(true);
+			return properties.containsValue(arg0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}finally {
+			rlock.unlock();
+		}
 	}
 
 	public Set entrySet() {
-		return properties.entrySet();
+		try {
+			checkValidAndLock(true);
+			return properties.entrySet();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally {
+			rlock.unlock();
+		}
 	}
 
 	@Override
 	public boolean equals(Object arg0) {
-		return properties.equals(arg0);
+		try {
+			checkValidAndLock(true);
+			return properties.equals(arg0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}finally {
+			rlock.unlock();
+		}
 	}
 
 	public ShellSession getShell() {
@@ -177,7 +218,15 @@ public class BBSession implements IModelElement, Map {
 	}
 
 	public Object get(Object arg0) {
-		return properties.get(arg0);
+		try {
+			checkValidAndLock(true);
+			return properties.get(arg0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally {
+			rlock.unlock();
+		}
 	}
 
 	private List getBitBakeKeywords() {
@@ -219,28 +268,69 @@ public class BBSession implements IModelElement, Map {
 	}
 
 	public Collection getRecipeFiles(IProject project) {
-		if (!initialized) {
-			throw new RuntimeException(this.getClass().getName() + " is not initialized.");
+		try {
+			checkValidAndLock(true);
+			if (!initialized) {
+				throw new RuntimeException(this.getClass().getName() + " is not initialized.");
+			}
+			String bbfiles = (String) this.properties.get("BBFILES");
+			List paths = parseBBFiles(bbfiles);
+			return findRecipes(paths, project);
+		} catch (Exception e) {
+			return null;
 		}
-		String bbfiles = (String) this.properties.get("BBFILES");
-
-		List paths = parseBBFiles(bbfiles);
-
-		return findRecipes(paths, project);
+		finally {
+			rlock.unlock();
+		}
 	}
 
 	@Override
 	public int hashCode() {
-		return properties.hashCode();
+		try {
+			checkValidAndLock(true);
+			return properties.hashCode();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}finally {
+			rlock.unlock();
+		}
+	}
+
+	private void checkValidAndLock(boolean rdlck) throws Exception {
+		if(rdlck)
+			rlock.lock();
+		else
+			wlock.lock();
+		if(!initialized) {
+			//upgrade lock manually
+			if(rdlck) {
+				rlock.unlock();
+				wlock.lock();
+			}
+			try {
+				if(!initialized) { //recheck
+					properties = parseBBEnvironment(shell.execute(parsingCmd));
+					initialized = true;
+				}
+			} finally {
+				//downgrade lock
+				if(rdlck) {
+					rlock.lock();
+					wlock.unlock();
+				}
+			}
+		}
+		//not release lock
 	}
 
 	public void initialize() throws Exception {
-		if (initialized) {
-			return;
+		wlock.lock();
+		try {
+			checkValidAndLock(false);
+		}finally {
+			wlock.unlock();
 		}
-		
-		properties = parseBBEnvironment(shell.execute("bitbake -e"));
-		initialized = true;
 	}
 
 	private boolean isBlockEnd(String trimmed) {
@@ -254,15 +344,27 @@ public class BBSession implements IModelElement, Map {
 	}
 
 	public boolean isEmpty() {
-		return properties.isEmpty();
+		try {
+			checkValidAndLock(true);
+			return properties.isEmpty();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return true;
+		}finally {
+			rlock.unlock();
+		}
 	}
 	
-	public boolean isInitialized() {
-		return initialized;
-	}
-
 	public Set keySet() {
-		return properties.keySet();
+		try {
+			checkValidAndLock(true);
+			return properties.keySet();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally {
+			rlock.unlock();
+		}
 	}
 
 	protected void parse(String content, Map outMap) throws Exception {
@@ -331,8 +433,13 @@ public class BBSession implements IModelElement, Map {
 	
 	protected Map parseBBEnvironment(String bbOut) throws Exception {
 		Map env = new Hashtable();
+		this.depends = null;
 
 		parse(bbOut, env);
+		String included = (String) env.get("BBINCLUDED");
+		if(included != null) {
+			this.depends = parseBBFiles(included);
+		}
 
 		return env;
 	}
@@ -443,7 +550,15 @@ public class BBSession implements IModelElement, Map {
 	}
 
 	public int size() {
-		return properties.size();
+		try {
+			checkValidAndLock(true);
+			return properties.size();
+		}catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}finally {
+			rlock.unlock();
+		}
 	}
 
 	private String[] splitAssignment(String line, String seperator) throws Exception {
@@ -508,6 +623,37 @@ public class BBSession implements IModelElement, Map {
 	}
 
 	public Collection values() {
-		return properties.values();
+		try {
+			checkValidAndLock(true);
+			return properties.values();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally {
+			rlock.unlock();
+		}
+	}
+
+	public void notify(IResource[] added, IResource[] removed, IResource[] changed) {
+		wlock.lock();
+		try {
+			if (initialized && (removed != null || changed != null)) {
+				for(int i=0;removed != null && i<removed.length;i++) {
+					if (this.depends.contains(removed[i].getFullPath().toString())) {
+						initialized = false;
+						return;
+					}
+				}
+				for(int i=0;changed != null && i<changed.length;i++) {
+					if (this.depends.contains(changed[i].getFullPath().toString())) {
+						initialized = false;
+						return;
+					}
+				}
+			}
+		}
+		finally {
+			wlock.unlock();
+		}
 	}
 }

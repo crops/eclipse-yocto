@@ -25,21 +25,13 @@ public class BBRecipe extends BBSession {
 		super(session.shell, session.pinfo.getRootPath());
 		this.session = session;
 		this.filePath = filePath;
+		this.parsingCmd = "bitbake -e -b " + filePath;
 	}
 	
 	@Override
 	public void initialize() throws Exception {
-		if (initialized) {
-			return;
-		}
-
-		String ret = shell.execute("bitbake -e -b " + filePath);
-		properties = parseBBEnvironment(ret);
-		
-		if (ret == null || properties.size() == 0) {
+		if (this.size() == 0) {
 			throw new IOException("Failed to parse " + filePath);
 		}
-		
-		initialized = true;
 	}
 }

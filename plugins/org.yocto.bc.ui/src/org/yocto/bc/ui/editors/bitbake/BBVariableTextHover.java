@@ -105,7 +105,7 @@ class BBVariableTextHover implements ITextHover {
 		@Override
 		protected IStatus run(IProgressMonitor mon) {
 			try {
-				BBRecipe recipe = new BBRecipe(session, filePath);
+				BBRecipe recipe = Activator.getBBRecipe(session, filePath);
 				recipe.initialize();
 				envMap = recipe;
 			} catch (Exception e) {

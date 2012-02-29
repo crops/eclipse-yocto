@@ -34,4 +34,8 @@ public class BBRecipe extends BBSession {
 			throw new IOException("Failed to parse " + filePath);
 		}
 	}
+
+	protected String getDefaultDepends() {
+		return this.filePath;
+	}
 }

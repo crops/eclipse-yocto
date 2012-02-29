@@ -163,6 +163,10 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		return shell;
 	}
 
+	public String getProjInfoRoot() {
+		return pinfo.getRootPath();
+	}
+
 	/**
 	 * Recursively generate list of Recipe files from a root directory.
 	 * 
@@ -430,15 +434,24 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			}
 		}
 	}
+
+	protected String getDefaultDepends() {
+		return null;
+	}
 	
 	protected Map parseBBEnvironment(String bbOut) throws Exception {
 		Map env = new Hashtable();
 		this.depends = null;
 
 		parse(bbOut, env);
+
 		String included = (String) env.get("BBINCLUDED");
+		this.depends = new ArrayList<String>();
+		if(getDefaultDepends() != null) {
+			this.depends.add(getDefaultDepends());
+		}
 		if(included != null) {
-			this.depends = parseBBFiles(included);
+			this.depends.addAll(Arrays.asList(included.split(" ")));
 		}
 
 		return env;
@@ -634,18 +647,18 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	public void notify(IResource[] added, IResource[] removed, IResource[] changed) {
+	public void changeNotified(IResource[] added, IResource[] removed, IResource[] changed) {
 		wlock.lock();
 		try {
 			if (initialized && (removed != null || changed != null)) {
 				for(int i=0;removed != null && i<removed.length;i++) {
-					if (this.depends.contains(removed[i].getFullPath().toString())) {
+					if (this.depends.contains(removed[i].getLocation().toString())) {
 						initialized = false;
 						return;
 					}
 				}
 				for(int i=0;changed != null && i<changed.length;i++) {
-					if (this.depends.contains(changed[i].getFullPath().toString())) {
+					if (this.depends.contains(changed[i].getLocation().toString())) {
 						initialized = false;
 						return;
 					}

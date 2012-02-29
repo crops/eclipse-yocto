@@ -14,5 +14,5 @@ package org.yocto.bc.bitbake;
 import org.eclipse.core.resources.IResource;
 
 public interface IBBSessionListener {
-	public void notify(IResource[] added, IResource[] removed, IResource[] changed);
+	public void changeNotified(IResource[] added, IResource[] removed, IResource[] changed);
 }

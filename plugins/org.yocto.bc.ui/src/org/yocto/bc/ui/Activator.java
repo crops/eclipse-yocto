@@ -14,16 +14,23 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import org.yocto.bc.bitbake.BBRecipe;
 import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.bitbake.ProjectInfoHelper;
 import org.yocto.bc.bitbake.ShellSession;
@@ -42,6 +49,24 @@ public class Activator extends AbstractUIPlugin {
 	private static Map shellMap;
 	private static Map projInfoMap;
 	private static Hashtable bbSessionMap;
+	private static Hashtable bbRecipeMap;
+
+	private IResourceChangeListener listener = new BCResourceChangeListener();
+
+	public static BBRecipe getBBRecipe(BBSession session, String filePath) throws IOException {
+		if (bbRecipeMap == null) {
+			bbRecipeMap = new Hashtable();
+		}
+
+		String key = session.getProjInfoRoot() + filePath;
+		BBRecipe recipe = (BBRecipe) bbRecipeMap.get(key);
+		if (recipe == null) {
+			recipe = new BBRecipe(session,filePath);
+			bbRecipeMap.put(key, recipe);
+		}
+
+		return recipe;
+	}
 	
 	/**
 	 * Get or create a BitBake session passing in ProjectInfo
@@ -125,6 +150,25 @@ public class Activator extends AbstractUIPlugin {
 		return pi;
 	}
 
+	public static void notifyAllBBSession(IResource[] added, IResource[] removed, IResource[] changed) {
+		Iterator iter;
+		if(bbRecipeMap != null) {
+			iter = bbRecipeMap.values().iterator();
+			while(iter.hasNext()) {
+				BBRecipe p = (BBRecipe)iter.next();
+				p.changeNotified(added, removed, changed);
+			}
+		}
+
+		if(bbSessionMap != null) {
+			iter= bbSessionMap.values().iterator();
+			while(iter.hasNext()) {
+				BBSession p = (BBSession)iter.next();
+				p.changeNotified(added, removed, changed);
+			}
+		}
+	}
+
 	/**
 	 * @param absolutePath
 	 * @return a cached shell session for a given project root.
@@ -193,6 +237,8 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(
+			      listener, IResourceChangeEvent.POST_CHANGE);
 	}
 
 	/*
@@ -201,6 +247,8 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(
+			      listener);
 		plugin = null;
 		super.stop(context);
 	}

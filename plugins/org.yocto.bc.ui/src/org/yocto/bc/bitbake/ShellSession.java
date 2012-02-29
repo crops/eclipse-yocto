@@ -36,7 +36,7 @@ public class ShellSession {
 	/**
 	 * String used to isolate command execution
 	 */
-	public static final String TERMINATOR = "234o987dsfkcqiuwey18837032843259d";
+	public static final String TERMINATOR = "#234o987dsfkcqiuwey18837032843259d";
 	public static final String LT = System.getProperty("line.separator");
 	
 	public static String getFilePath(String file) throws IOException {
@@ -98,6 +98,11 @@ public class ShellSession {
 
 	synchronized 
 	public String execute(String command) throws IOException {
+		return execute(command, (int [])null);
+	}
+
+	synchronized 
+	public String execute(String command, int[] retCode) throws IOException {
 		String errorMessage = null;
 		interrupt = false;
 		out.write(command);
@@ -120,7 +125,7 @@ public class ShellSession {
 		StringBuffer sb = new StringBuffer();
 		String line = null;
 
-		while (((line = br.readLine()) != null) && !line.equals(TERMINATOR) && !interrupt) {
+		while (((line = br.readLine()) != null) && !line.endsWith(TERMINATOR) && !interrupt) {
 			sb.append(line);
 			sb.append(LT);
 			out.write(line);
@@ -131,6 +136,12 @@ public class ShellSession {
 			process.destroy();
 			initializeShell();
 			interrupt = false;
+		}else if (line != null && retCode != null) {
+			try {
+				retCode[0]=Integer.parseInt(line.substring(0,line.lastIndexOf(TERMINATOR)));
+			}catch (NumberFormatException e) {
+				throw new IOException("Can NOT get return code" + command + LT + line);
+			}
 		}
 		
 		if (errorMessage != null) {
@@ -169,12 +180,12 @@ synchronized
 			
 			std = br.readLine();
 			
-			if (std != null && !std.equals(terminator)) {
+			if (std != null && !std.endsWith(terminator)) {
 				out.write(std);
 				handler.response(std, false);
 			} 
 			
-		} while (std != null && !std.equals(terminator) && !interrupt);
+		} while (std != null && !std.endsWith(terminator) && !interrupt);
 		
 		if (interrupt) {
 			process.destroy();
@@ -206,7 +217,7 @@ synchronized
 		pos.write(command.getBytes());
 		pos.write(LT.getBytes());
 		pos.flush();
-		pos.write("echo ".getBytes());
+		pos.write("echo $?".getBytes());
 		pos.write(TERMINATOR.getBytes());
 		pos.write(LT.getBytes());
 		pos.flush();

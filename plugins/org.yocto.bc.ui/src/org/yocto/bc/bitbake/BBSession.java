@@ -30,9 +30,13 @@ import java.util.concurrent.locks.Lock;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 import org.yocto.bc.ui.model.IModelElement;
 import org.yocto.bc.ui.model.ProjectInfo;
@@ -243,8 +247,17 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	public MessageConsole getConsole() {
 		if (sessionConsole == null) {
 			String cName = ProjectInfoHelper.getProjectName(pinfo.getRootPath()) + " Console";
-			sessionConsole = new MessageConsole(cName, null);
-			ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { sessionConsole });
+			IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
+			IConsole[] existing = conMan.getConsoles();
+			for (int i = 0; i < existing.length; i++)
+				if (cName.equals(existing[i].getName())) {
+					sessionConsole = (MessageConsole) existing[i];
+					break;
+				}
+			if (sessionConsole == null) {
+				sessionConsole = new MessageConsole(cName, null);
+				conMan.addConsoles(new IConsole[] { sessionConsole });
+			}
 		}
 		
 		ConsolePlugin.getDefault().getConsoleManager().showConsoleView(sessionConsole);
@@ -300,6 +313,15 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			rlock.unlock();
 		}
 	}
+	
+	private int checkExecuteError(String result, int code) {
+		if (code != 0) {
+			MessageConsoleStream info = getConsole().newMessageStream();
+			info.setColor(JFaceResources.getColorRegistry().get(JFacePreferences.ERROR_COLOR));
+			info.println(result);
+		}
+		return code;
+	}
 
 	private void checkValidAndLock(boolean rdlck) throws Exception {
 		if(rdlck)
@@ -314,8 +336,12 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			}
 			try {
 				if(!initialized) { //recheck
-					properties = parseBBEnvironment(shell.execute(parsingCmd));
-					initialized = true;
+					int [] codes = {-1};
+					String result = shell.execute(parsingCmd, codes);
+					if(checkExecuteError(result, codes[0]) == 0) {
+						properties = parseBBEnvironment(result);
+						initialized = true;
+					}
 				}
 			} finally {
 				//downgrade lock

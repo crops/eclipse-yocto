@@ -31,7 +31,8 @@ public class BBRecipe extends BBSession {
 	@Override
 	public void initialize() throws Exception {
 		if (this.size() == 0) {
-			throw new IOException("Failed to parse " + filePath);
+			System.out.println("Failed to parse " + filePath);
+			//throw new IOException("Failed to parse " + filePath);
 		}
 	}
 

@@ -71,7 +71,7 @@ public class YoctoSDKUtils {
 	private static final String ENV_SETUP_SCRIPT_NONEXIST = "Poky.Env.Script.Nonexist";
 	private static final String TOOLCHAIN_NO_SYSROOT = "Poky.Toolchain.No.Sysroot";
 	private static final String TOOLCHAIN_HOST_MISMATCH = "Poky.Toolchain.Host.Mismatch";
-	private static final String[] saValidVer = {"1.0+", "1.1", "1.1+", "1.2", "1.2+"};
+	private static final String[] saInvalidVer = {"1.0", "0.9", "0.9+"};
 	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
 	private static final String SYSROOTS_DIR = "sysroots";
 
@@ -151,9 +151,9 @@ public class YoctoSDKUtils {
 									else
 										sVersion += String.valueOf(cValue);
 								}
-								for (int i = 0; i < saValidVer.length; i++)
+								for (int i = 0; i < saInvalidVer.length; i++)
 								{
-									if (sVersion.equals(saValidVer[i]))
+									if (!sVersion.equals(saInvalidVer[i]))
 									{
 										bVersion = true;
 										break;

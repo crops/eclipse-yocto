@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.yocto.bc.ui.editors.bitbake;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.TextAttribute;
@@ -50,21 +51,22 @@ public class BitBakeSourceViewerConfiguration extends TextSourceViewerConfigurat
 
 	private final ISharedTextColors fSharedColors;
 	private BBSession session;
-	private String targetFilePath;
-	private BBVariableTextHover textHover;
+	private IFile targetFile;
+	private BBVariableTextHover textHover = null;
 
 	public BitBakeSourceViewerConfiguration(ISharedTextColors sharedColors, IPreferenceStore store) {
 		super(store);
 		fSharedColors = sharedColors;		
 	}
 	
-	protected void setTargetFilePath(String targetFilePath) {
-		this.targetFilePath = targetFilePath;
+	protected void setTargetFile(IFile targetFile) {
+		this.targetFile = targetFile;
 	}
 
 	public ITextHover getTextHover(ISourceViewer sv, String contentType) {
-		if (textHover == null) {
-			textHover = new BBVariableTextHover(session, targetFilePath);
+		//only .bb file support Text Hover.
+		if (textHover == null && targetFile.getFileExtension().equals(BBLanguageHelper.BITBAKE_RECIPE_FILE_EXTENSION)) {
+			textHover = new BBVariableTextHover(session, targetFile.getLocationURI().getPath());
 		}
 		
 		return textHover;

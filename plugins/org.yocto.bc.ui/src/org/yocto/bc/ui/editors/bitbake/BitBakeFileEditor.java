@@ -13,6 +13,7 @@ package org.yocto.bc.ui.editors.bitbake;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IEditorInput;
@@ -35,7 +36,7 @@ public class BitBakeFileEditor extends AbstractDecoratedTextEditor {
 	public static final String EDITOR_ID = "org.yocto.bc.ui.editors.BitBakeFileEditor";
 	static final String CONTENT_ASSIST= "ContentAssist";
 	private BitBakeSourceViewerConfiguration viewerConfiguration;
-	private String targetFilePath;
+	private IFile targetFile;
 	
 	public BitBakeFileEditor() {
 		super();
@@ -59,8 +60,8 @@ public class BitBakeFileEditor extends AbstractDecoratedTextEditor {
 			
 		if (input instanceof FileEditorInput) {
 			IProject p = ((FileEditorInput)input).getFile().getProject();
-			targetFilePath = ((FileEditorInput)input).getFile().getLocationURI().getPath();
-			viewerConfiguration.setTargetFilePath(targetFilePath);
+			targetFile = ((FileEditorInput)input).getFile();
+			viewerConfiguration.setTargetFile(targetFile);
 			
 			try {
 				viewerConfiguration.setBBSession(Activator.getBBSession(p.getLocationURI().getPath()));

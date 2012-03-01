@@ -87,14 +87,22 @@
 		    <arg value="plugins/org.eclipse.tm.tcf.rse"/>
 		</exec>
 		<copy todir="${buildDirectory}/plugins" failonerror="true">
-		    <fileset dir="${otherSrcDirectory}/plugins"/>
+			<fileset dir="${otherSrcDirectory}/plugins"/>
 		</copy>
 		<delete dir="${buildDirectory}/features"/>
 		<copy todir="${buildDirectory}/features" failonerror="true" >
-                    <fileset dir="${otherSrcDirectory}/features"/>
-                </copy>
-                <copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
-                <copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/category.xml" todir="${buildDirectory}" />
+        	<fileset dir="${otherSrcDirectory}/features"/>
+		</copy>
+		<antcall target="prepareForP2" />
+	</target>
+
+	<target name="prepareForP2" if="p2.gathering">
+		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
+		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/category.xml" todir="${buildDirectory}" />
+		<xmlproperty file="${otherSrcDirectory}/features/org.yocto.sdk/feature.xml" />
+		<replace file="${buildDirectory}/category.xml">
+			<replacefilter token="@featureVerion@" value="${feature(version)}"/>
+		</replace>
 	</target>
 
 	<!-- ===================================================================== -->

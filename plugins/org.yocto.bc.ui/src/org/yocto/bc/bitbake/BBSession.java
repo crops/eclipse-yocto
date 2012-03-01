@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -59,7 +60,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	protected Map properties = null;
 	protected List <String> depends = null;
 	protected boolean initialized = false;
-	private MessageConsole sessionConsole;
+	protected MessageConsole sessionConsole;
 	private final ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 	private final Lock rlock = rwlock.readLock();
 	private final Lock wlock = rwlock.writeLock();
@@ -246,7 +247,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	 */
 	public MessageConsole getConsole() {
 		if (sessionConsole == null) {
-			String cName = ProjectInfoHelper.getProjectName(pinfo.getRootPath()) + " Console";
+			String cName = ProjectInfoHelper.getProjectName(pinfo.getRootPath()) + getDefaultDepends() + " Console";
 			IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
 			IConsole[] existing = conMan.getConsoles();
 			for (int i = 0; i < existing.length; i++)
@@ -313,12 +314,24 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			rlock.unlock();
 		}
 	}
-	
-	private int checkExecuteError(String result, int code) {
+
+	protected int checkExecuteError(String result, int code) {
+		return checkExecuteError(result,code, false);
+	}
+
+	protected int checkExecuteError(final String result, int code, boolean clear) {
 		if (code != 0) {
-			MessageConsoleStream info = getConsole().newMessageStream();
-			info.setColor(JFaceResources.getColorRegistry().get(JFacePreferences.ERROR_COLOR));
-			info.println(result);
+			MessageConsole  console = getConsole();
+			if(clear)
+				console.clearConsole();
+			final MessageConsoleStream info = console.newMessageStream();
+			//needs to be run in the ui thread otherwise swt throws invalid thread access 
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					info.setColor(JFaceResources.getColorRegistry().get(JFacePreferences.ERROR_COLOR));
+					info.println(result);
+				}
+			});
 		}
 		return code;
 	}
@@ -340,8 +353,10 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 					String result = shell.execute(parsingCmd, codes);
 					if(checkExecuteError(result, codes[0]) == 0) {
 						properties = parseBBEnvironment(result);
-						initialized = true;
+					} else {
+						properties = parseBBEnvironment("");
 					}
+					initialized = true;
 				}
 			} finally {
 				//downgrade lock
@@ -467,12 +482,11 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	
 	protected Map parseBBEnvironment(String bbOut) throws Exception {
 		Map env = new Hashtable();
-		this.depends = null;
+		this.depends = new ArrayList<String>();
 
 		parse(bbOut, env);
 
 		String included = (String) env.get("BBINCLUDED");
-		this.depends = new ArrayList<String>();
 		if(getDefaultDepends() != null) {
 			this.depends.add(getDefaultDepends());
 		}

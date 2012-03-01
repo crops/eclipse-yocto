@@ -12,6 +12,14 @@ package org.yocto.bc.bitbake;
 
 import java.io.IOException;
 
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
+
 /**
  * Represents the bitbake environment of a recipe package.
  * @author kgilmer
@@ -31,12 +39,22 @@ public class BBRecipe extends BBSession {
 	@Override
 	public void initialize() throws Exception {
 		if (this.size() == 0) {
-			System.out.println("Failed to parse " + filePath);
+			//System.out.println("Failed to parse " + filePath);
 			//throw new IOException("Failed to parse " + filePath);
 		}
 	}
 
 	protected String getDefaultDepends() {
 		return this.filePath;
+	}
+
+	protected int checkExecuteError(String result, int code) {
+		if (code != 0) {
+			super.checkExecuteError(result, code, true);
+		} else if(sessionConsole != null){
+			ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { sessionConsole });
+			sessionConsole = null;
+		}
+		return code;
 	}
 }

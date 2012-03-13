@@ -370,7 +370,6 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	}
 
 	public void initialize() throws Exception {
-		wlock.lock();
 		try {
 			checkValidAndLock(false);
 		}finally {

@@ -74,6 +74,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String DEFAULT_INSTALL_DIR = "~/yocto";
 	
 	protected static final String GIT_CLONE = "Git Clone";
+	public static final String VALIDATION_FILE = DEFAULT_INIT_SCRIPT;
 
 	private Map model;
 	private MessageConsole myConsole;

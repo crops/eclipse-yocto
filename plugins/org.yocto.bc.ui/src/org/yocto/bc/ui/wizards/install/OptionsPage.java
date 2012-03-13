@@ -191,22 +191,23 @@ public class OptionsPage extends FiniteStateWizardPage {
 		}
 		
 		String projectPath = projectLoc + File.separator+txtProjectName.getText();
+		File git_dir=new File(projectPath);
 		if(!gitButton.getSelection()) {
-			File git_dir=new File(projectPath);
-			if(!git_dir.isDirectory()) {
+			if(!git_dir.isDirectory() || !git_dir.exists()) {
 				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " does not exist, please select git clone.");
+				return false;
+			}else if(!new File(projectPath + File.separator + InstallWizard.VALIDATION_FILE).exists()) {
+				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " seems invalid, please use other directory or project name.");
+				return false;
+			}
+		}else {
+			// git check
+			if(git_dir.exists()) {
+				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " exists, please unselect git clone.");
 				return false;
 			}
 		}
 		
-		// Check whether the project directory contains build dir, if so prompt user to move out
-		String build_dir = projectPath+File.separator+"build";
-		File checkBuild_dir = new File(build_dir);
-		if (checkBuild_dir.isDirectory()) {
-			setErrorMessage("Project path "+projectPath+ " contains build sub-directory, which Eclipse IProject tree view won't be able to handle due to its size." +
-					"Please move it outside the project directory through \"oe-init-build-env build_path\" if you still want to create a bitbake commander project!");
-			return false;
-		}
 		try {
 			URI location = new URI("file://" + txtProjectLocation.getText()+File.separator+txtProjectName.getText());
 		

@@ -62,7 +62,7 @@ public class LaunchVariableWizardAction implements IWorkbenchWindowActionDelegat
 				IProject p = ((IResource)element).getProject();
 
 				try {
-					if (p.hasNature(BitbakeCommanderNature.NATURE_ID)) {
+					if (p.isOpen() && p.hasNature(BitbakeCommanderNature.NATURE_ID)) {
 						session = Activator.getBBSession(((IResource)element).getProject().getLocationURI().getPath());
 					}
 				} catch (IOException e) {

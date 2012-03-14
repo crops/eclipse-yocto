@@ -190,7 +190,7 @@ public class UstSettingDialog extends BaseSettingDialog {
 
         for (int i = 0; i < projects.length; ++i) {
         	try {
-        		if (projects[i].hasNature(TmfProjectNature.ID)) {
+        		if (projects[i].isOpen() && projects[i].hasNature(TmfProjectNature.ID)) {
         			String projName = projects[i].getName();
         			projectCombo.add(projName);
         			if (curProject != null) 

@@ -33,7 +33,7 @@ abstract public class BaseModel implements IRunnableWithProgress {
 		target=null;
 	}
 	
-	protected void init(IProgressMonitor monitor) throws InvocationTargetException {
+	protected void init(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		if(rseConnection==null) {
 			throw new InvocationTargetException(new Exception("NULL rse connection"),"NULL rse connection");
 		}
@@ -41,18 +41,26 @@ abstract public class BaseModel implements IRunnableWithProgress {
 		target=new RemoteTarget(rseConnection.getAliasName());
 		try {
 			target.connect(monitor);
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
+			throw e;
 		}catch (Exception e) {
 			throw new InvocationTargetException(e,e.getMessage());
 		}
 	}
 	
-	protected void uninit(IProgressMonitor monitor) throws InvocationTargetException {
+	protected void uninit(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		if(target!=null) {
 			try {
 				if (target.isConnected()) {
 					//always disconnect
 					target.disconnect(null);
 				}
+			}catch (InterruptedException e){
+				throw e;
+			}catch (InvocationTargetException e) {
+				throw e;
 			}catch (Exception e) {
 				throw new InvocationTargetException(e,e.getMessage());
 			}

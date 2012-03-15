@@ -57,6 +57,10 @@ public class PowertopModel extends BaseModel {
 					LOCAL_SCRIPT, 
 					REMOTE_EXEC,
 					monitor);
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
+			throw e;
 		}catch (Exception e) {
 			throw new InvocationTargetException(e,e.getMessage());
 		}
@@ -147,7 +151,9 @@ public class PowertopModel extends BaseModel {
 				}
 			});
 			
-		}catch (InterruptedException e) {
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
 			throw e;
 		}catch (Exception e){
 			throw new InvocationTargetException(e, e.getMessage());

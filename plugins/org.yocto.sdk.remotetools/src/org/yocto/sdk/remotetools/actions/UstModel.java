@@ -72,6 +72,10 @@ public class UstModel extends BaseModel {
 					LOCAL_SCRIPT, 
 					REMOTE_EXEC,
 					monitor);
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
+			throw e;
 		}catch (Exception e) {
 			throw new InvocationTargetException(e,e.getMessage());
 		}
@@ -207,7 +211,9 @@ public class UstModel extends BaseModel {
 			//start lttv-gui asynchronously
 			new LocalJob("lttv-gui",cmdarray,null,null,window).schedule();
 			*/			
-		}catch (InterruptedException e) {
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
 			throw e;
 		}catch (Exception e){
 			throw new InvocationTargetException(e, e.getMessage());

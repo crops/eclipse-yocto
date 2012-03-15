@@ -40,11 +40,13 @@ public class OprofileHandler extends AbstractHandler {
 			OprofileModel op=new OprofileModel(setting.getHost(),window);
 			try {
 				progressService.busyCursorWhile(op);
+			}catch (InterruptedException e) {
+				//user cancelled
 			}catch (Exception e) {
 				e.printStackTrace();
 				MessageDialog.openError(window.getShell(),
 						"Oprofile",
-						e.getMessage());
+						(e.getCause() != null) ? e.getCause().getMessage() : e.getMessage());
 			}
 		}
 		return null;

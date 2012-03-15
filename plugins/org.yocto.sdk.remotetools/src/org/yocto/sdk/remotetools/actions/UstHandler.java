@@ -45,11 +45,13 @@ public class UstHandler extends AbstractHandler {
 			UstModel op=new UstModel(setting.getHost(),setting.getApplication(),setting.getArgument(), project, window);
 			try {
 				progressService.busyCursorWhile(op);
+			}catch (InterruptedException e) {
+				//user cancelled
 			}catch (Exception e) {
 				e.printStackTrace();
 				MessageDialog.openError(window.getShell(),
 						"Ust",
-						e.getMessage());
+						(e.getCause() != null) ? e.getCause().getMessage() : e.getMessage());
 			}
 		}
 		return null;

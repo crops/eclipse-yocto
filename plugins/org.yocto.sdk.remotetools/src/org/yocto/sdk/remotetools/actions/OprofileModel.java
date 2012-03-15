@@ -51,6 +51,10 @@ public class OprofileModel extends BaseModel {
 					LOCAL_SCRIPT, 
 					REMOTE_EXEC,
 					monitor);
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
+			throw e;
 		}catch (Exception e) {
 			throw new InvocationTargetException(e,e.getMessage());
 		}
@@ -81,7 +85,7 @@ public class OprofileModel extends BaseModel {
 			exit_code=app.waitFor(monitor);
 			app.terminate();
 			if(exit_code!=0) {
-				throw new Exception("Starting oprofile-server failed with exit code " + new Integer(exit_code).toString());
+				throw new RuntimeException("Starting oprofile-server failed with exit code " + new Integer(exit_code).toString());
 			}
 		}finally {
 			monitor.done();
@@ -200,7 +204,9 @@ public class OprofileModel extends BaseModel {
 					stopServer(new SubProgressMonitor(monitor,30));
 				}
 			}
-		}catch (InterruptedException e) {
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
 			throw e;
 		}catch (Exception e){
 			throw new InvocationTargetException(e, e.getMessage());

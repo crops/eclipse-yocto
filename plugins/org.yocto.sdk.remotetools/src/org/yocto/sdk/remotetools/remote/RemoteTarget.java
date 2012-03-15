@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.remote;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +85,7 @@ public class RemoteTarget {
             case IChannel.STATE_CLOSED:
                 synchronized (res) {
                     if (channel_error instanceof Exception) res[0] = (Exception)channel_error;
-                    else if (channel_error != null) res[0] = new Exception(channel_error);
+                    else if (channel_error != null) res[0] = new IOException(channel_error);
                     else res[0] = null;
                     res.notify();
                     return true;
@@ -94,7 +95,7 @@ public class RemoteTarget {
         if(monitor!=null) {
 	        if (monitor.isCanceled()) {
 	            synchronized (res) {
-	                res[0] = new Exception("Canceled"); //$NON-NLS-1$
+	                res[0] = new InterruptedException("Canceled"); //$NON-NLS-1$
 	                if (channel != null) channel.terminate(res[0]);
 	                res.notify();
 	                return true;
@@ -105,7 +106,7 @@ public class RemoteTarget {
             String host = RSEHelper.getRemoteHostName(connection_name);
             if(host == null) {
             	synchronized(res) {
-            		res[0] = new Exception("Invalid connection name:"+ connection_name); //$NON-NLS-1$
+            		res[0] = new IllegalArgumentException("Invalid connection name:"+ connection_name); //$NON-NLS-1$
                     if (channel != null) channel.terminate(res[0]);
                     res.notify();
                     return true;
@@ -177,7 +178,7 @@ public class RemoteTarget {
         if(monitor!=null) {
 	        if (monitor.isCanceled()) {
 	            synchronized (res) {
-	                res[0] = new Exception("Canceled"); //$NON-NLS-1$
+	                res[0] = new InterruptedException("Canceled"); //$NON-NLS-1$
 	                res.notify();
 	                return true;
 	            }

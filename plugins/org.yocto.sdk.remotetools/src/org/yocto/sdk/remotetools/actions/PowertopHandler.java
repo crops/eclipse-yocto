@@ -33,11 +33,13 @@ public class PowertopHandler extends AbstractHandler {
 			PowertopModel op=new PowertopModel(setting.getHost(),setting.getTime(),setting.getShowPid(),window.getShell().getDisplay());
 			try {
 				progressService.busyCursorWhile(op);
+			}catch (InterruptedException e) {
+				//user cancelled
 			}catch (Exception e) {
 				e.printStackTrace();
 				MessageDialog.openError(window.getShell(),
 						"Powertop",
-						e.getMessage());
+						(e.getCause() != null) ? e.getCause().getMessage() : e.getMessage());
 			}
 		}
 		return null;

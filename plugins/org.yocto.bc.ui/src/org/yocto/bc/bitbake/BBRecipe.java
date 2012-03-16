@@ -47,14 +47,4 @@ public class BBRecipe extends BBSession {
 	protected String getDefaultDepends() {
 		return this.filePath;
 	}
-
-	protected int checkExecuteError(String result, int code) {
-		if (code != 0) {
-			super.checkExecuteError(result, code, true);
-		} else if(sessionConsole != null){
-			ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { sessionConsole });
-			sessionConsole = null;
-		}
-		return code;
-	}
 }

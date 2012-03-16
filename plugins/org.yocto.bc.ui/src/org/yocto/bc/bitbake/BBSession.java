@@ -30,6 +30,9 @@ import java.util.concurrent.locks.Lock;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.widgets.Display;
@@ -38,6 +41,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.yocto.bc.ui.model.IModelElement;
 import org.yocto.bc.ui.model.ProjectInfo;
@@ -247,7 +251,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	 */
 	public MessageConsole getConsole() {
 		if (sessionConsole == null) {
-			String cName = ProjectInfoHelper.getProjectName(pinfo.getRootPath()) + getDefaultDepends() + " Console";
+			String cName = ProjectInfoHelper.getProjectName(pinfo.getRootPath()) + " Console";
 			IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
 			IConsole[] existing = conMan.getConsoles();
 			for (int i = 0; i < existing.length; i++)
@@ -316,24 +320,36 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	}
 
 	protected int checkExecuteError(String result, int code) {
-		return checkExecuteError(result,code, false);
+		String recipe = getDefaultDepends();
+		String text = "Parsing " + ((recipe != null) ? ("recipe " + recipe) : "base configurations");
+		if (code != 0) {
+			text = text + " ERROR!\n" + result;
+		}else {
+				text = text + " SUCCESS.\n";
+		}
+		displayInConsole(text, code, false);
+		return code;
 	}
 
-	protected int checkExecuteError(final String result, int code, boolean clear) {
-		if (code != 0) {
-			MessageConsole  console = getConsole();
-			if(clear)
-				console.clearConsole();
-			final MessageConsoleStream info = console.newMessageStream();
-			//needs to be run in the ui thread otherwise swt throws invalid thread access 
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
+	protected void displayInConsole(final String result, final int code, boolean clear) {
+		MessageConsole  console = getConsole();
+		final MessageConsoleStream info = console.newMessageStream();
+		if(clear)
+			console.clearConsole();
+		new WorkbenchJob("Display parsing result") {
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if(code != 0) {
 					info.setColor(JFaceResources.getColorRegistry().get(JFacePreferences.ERROR_COLOR));
-					info.println(result);
 				}
-			});
-		}
-		return code;
+				try {
+					info.println(result);
+					info.close();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return Status.OK_STATUS;
+			}
+		}.schedule();
 	}
 
 	private void checkValidAndLock(boolean rdlck) throws Exception {

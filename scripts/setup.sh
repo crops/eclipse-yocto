@@ -20,7 +20,7 @@ case ${uname_s}${uname_m} in
   Linuxx86_64*) ep_arch=linux-gtk-x86_64 
                 cdt_arch=linux.x86_64
                 ;;
-  Linuxx86*) ep_arch=linux-gtk
+  Linuxi*86) ep_arch=linux-gtk
              cdt_arch=linux.x86
              ;;
   *)
@@ -142,7 +142,7 @@ CDTNAME=cdt-master-${CDTREL}-I${CDTVER}.zip
 CDTLOC=builds/${CDTREL}/I.I${CDTVER}/${CDTNAME}
 if [ ! -f eclipse/plugins/org.eclipse.cdt_${CDTFEAT}.${CDTVER}.jar ]; then
   echo "Install CDT..."
-  UPDATE_SITE="http://download.eclipse.org/tools/cdt/releases/indigo"
+  UPDATE_SITE="http://download.eclipse.org/releases/indigo"
   update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.platform.feature.group ${CDTFEAT}
   update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.feature.group ${CDTFEAT}
   update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}

@@ -70,7 +70,6 @@ public class MainPage extends WizardPage {
 		this.bspElem = element;
 	}
 
-	@Override
 	public void createControl(Composite parent) {
 		setErrorMessage(null);
 		Composite composite = new Composite(parent, SWT.NONE);

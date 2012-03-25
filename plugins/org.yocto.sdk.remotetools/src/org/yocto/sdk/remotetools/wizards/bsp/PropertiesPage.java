@@ -241,7 +241,7 @@ public class PropertiesPage extends WizardPage {
 		
 	}
 	
-	@Override
+
 	public void createControl(Composite parent) {
 		this.composite = new Composite(parent, SWT.NONE);
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);

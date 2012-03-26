@@ -91,7 +91,7 @@ update_feature_remote()
 #$1: remote_site_url
 #$2: featureId
 #$3: desired version (optional)
-  echo "installing $2 ${remote_ver} ..."
+  echo "installing $2 $3 ${remote_ver} ..."
   
   if [ "x${PROXY}" != "x" ]; then
      PROXY_PARAM="-Dhttp.proxySet=true -Dhttp.proxyHost=${PROXY} -Dhttp.proxyPort=${PORT}"
@@ -108,18 +108,18 @@ update_feature_remote()
   
   [ "x${remote_ver}" = "x" ] && err_exit 1 "unknown remote version"
   
-  if [ "x$3" != "x" ]; then
-    if [[ "${remote_ver}" < "$3" ]]; then
-      err_exit 1 "unsatified remote version ${remote_ver}, required $3"
-    fi
-  fi
+  #if [ "x$3" != "x" ]; then
+  #  if [[ "${remote_ver}" < "$3" ]]; then
+  #    err_exit 1 "unsatified remote version ${remote_ver}, required $3"
+  #  fi
+  #fi
   
   java ${PROXY_PARAM} -jar ${LAUNCHER} \
     -application org.eclipse.equinox.p2.director \
     -destination ${curdir}/eclipse \
     -profile SDKProfile \
     -repository $1 \
-    -installIU $2 || err_exit $? "installing $2 failed"
+    -installIU $2/$3 || err_exit $? "installing $2 failed"
 }
 
 #RSE SDK
@@ -137,33 +137,35 @@ fi
 # CDT Runtime
 CDTREL="8.0.0"
 CDTFEAT="8.0.0"
-CDTVER="201106081058"
+CDTVER="201109151620"
 CDTNAME=cdt-master-${CDTREL}-I${CDTVER}.zip
 CDTLOC=builds/${CDTREL}/I.I${CDTVER}/${CDTNAME}
 if [ ! -f eclipse/plugins/org.eclipse.cdt_${CDTFEAT}.${CDTVER}.jar ]; then
   echo "Install CDT..."
   UPDATE_SITE="http://download.eclipse.org/releases/indigo"
-  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.platform.feature.group ${CDTFEAT}
-  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.feature.group ${CDTFEAT}
-  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
+  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.platform.feature.group ${CDTFEAT}.${CDTVER}
+  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.feature.group ${CDTFEAT}.${CDTVER}
+  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}.${CDTVER}
   update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.launch.remote.feature.group 
 fi
 
 #TMF
 TMFREL="0.4.0"
-TMFDATE="201111050234"
+#TMFDATE="201111050234"
+TMFDATE="201202152032"
 if [ ! -f eclipse/plugins/org.eclipse.linuxtools.tmf.core_${TMFREL}.${TMFDATE}.jar ]; then
   echo "Install TMF..."
-  UPDATE_SITE="http://download.eclipse.org/technology/linuxtools/update"
-  update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}
+  UPDATE_SITE="http://download.eclipse.org/releases/indigo"
+  update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}.${TMFDATE}
 fi
 
 #AUTOTOOL
-ATVER="3.0.0"
-if [ ! -f eclipse/plugins/org.eclipse.linux.cdt.autotools_v${ATVER}.*.jar ]; then
+ATVER="3.0.1"
+ATDATE="201202152032"
+if [ ! -f eclipse/plugins/org.eclipse.linux.cdt.autotools_${ATVER}.*.jar ]; then
   echo "Install AutoTool..."
-  UPDATE_SITE="http://download.eclipse.org/technology/linuxtools/update"
-  update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.cdt.autotools.feature.group ${ATVER} 
+  UPDATE_SITE="http://download.eclipse.org/releases/indigo"
+  update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.cdt.autotools.feature.group ${ATVER}.${ATDATE} 
 fi
 
 echo "Your build environment is now created."

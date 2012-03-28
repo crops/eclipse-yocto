@@ -1,54 +1,34 @@
 package org.yocto.sdk.remotetools.wizards.bsp;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.HashSet;
 import java.util.Enumeration;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
-import org.eclipse.ui.PlatformUI;
 
 import org.yocto.sdk.remotetools.YoctoBspElement;
 import org.yocto.sdk.remotetools.YoctoJSONHelper;
@@ -74,12 +54,15 @@ public class PropertiesPage extends WizardPage {
 	private Hashtable<YoctoBspPropertyElement, Control> propertyControlMap;
 	HashSet<YoctoBspPropertyElement> properties;
 	private Composite composite;
-	private YoctoBspElement bspElem;
+	private YoctoBspElement bspElem = null;
+	private boolean karch_changed = false;
 	private Combo kcCombo;
 	private Combo kbCombo;
 	private Button newButton;
 	private Button existingButton;
 	private Button smpButton;
+	private Composite kcContainer = null;
+	private Composite scContainer = null;
 	
 	public PropertiesPage(YoctoBspElement element) {
 		super(PAGE_NAME, "yocto-bsp properties page", null);
@@ -97,48 +80,76 @@ public class PropertiesPage extends WizardPage {
 			setErrorMessage("There's no valid properties file created, please choose \"Back\" to reselect kernel architectur!");
 			return;
 		}
+		
+		if ((this.bspElem == null) || (!this.bspElem.getKarch().contentEquals(element.getKarch()))) {
+			karch_changed = true;
+		} else
+			karch_changed = false;
+		
 		this.bspElem = element;
 		GridLayout layout = new GridLayout(1, false);
-		this.composite.setLayout(layout);
+		//this.composite.setLayout(layout);
+		//this.composite.setLayout(new FillLayout(SWT.VERTICAL));
 		GridData gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.horizontalSpan = 1;
 		this.composite.setLayoutData(gd);
+		String[] values;
+		if (kcContainer == null) {
+			kcContainer = new Composite(this.composite, SWT.NONE);
+			layout = new GridLayout(3, false);
+			kcContainer.setLayout(layout);
+			gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
+			gd.horizontalSpan = 3;
+			kcContainer.setLayoutData(gd);
 		
-		Composite controlContainer = new Composite(this.composite, SWT.NONE);
-		layout = new GridLayout(3, false);
-		controlContainer.setLayout(layout);
-		gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.horizontalSpan = 3;
-		controlContainer.setLayoutData(gd);
-		
-		new Label (controlContainer, SWT.NONE).setText(KERNEL_CHOICE+":");						
-		kcCombo = new Combo(controlContainer, SWT.BORDER | SWT.READ_ONLY);
-		kcCombo.setLayout(new GridLayout(1, false));
-		kcCombo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-		String[] values = getValues(KERNEL_CHOICE);
-		if (values != null)
-			kcCombo.setItems(values);
+			new Label (kcContainer, SWT.NONE).setText(KERNEL_CHOICE+":");						
+			kcCombo = new Combo(kcContainer, SWT.BORDER | SWT.READ_ONLY);
+			kcCombo.setLayout(new GridLayout(1, false));
+			kcCombo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+			
+			smpButton = new Button(kcContainer, SWT.CHECK);
+			smpButton.setText("SMP Support");
+			smpButton.setSelection(true);
+			
+			Group kernelGroup= new Group(this.composite, SWT.NONE);
+			layout= new GridLayout(3, false);
+			kernelGroup.setLayout(layout);
+			gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
+			gd.horizontalSpan= 3;
+			kernelGroup.setLayoutData(gd);
+			kernelGroup.setText("Kernel Branch Settings:");
+			newButton = new Button(kernelGroup, SWT.RADIO);
+		    newButton.setText("New");
+		    newButton.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		    newButton.setSelection(true);
+		    
+		    existingButton = new Button(kernelGroup, SWT.RADIO);
+		    existingButton.setText("Existing");
+		    existingButton.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		    existingButton.setSelection(false);
+		    
+		    kbCombo = new Combo(kernelGroup, SWT.BORDER | SWT.READ_ONLY);
+			kbCombo.setLayout(new GridLayout(1, false));
+			kbCombo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		} else {
+			if (karch_changed) {
+				kbCombo.removeAll();
+				newButton.setSelection(true);
+				existingButton.setSelection(false);
+			}
+		}
+		if (karch_changed) {
+			values = getValues(KERNEL_CHOICE);
+			if (values != null)
+				kcCombo.setItems(values);
+		}
 		kcCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
 		
-		smpButton = new Button(controlContainer, SWT.CHECK);
-		smpButton.setText("SMP Support");
-		smpButton.setSelection(true);
 		
-		Group kernelGroup= new Group(this.composite, SWT.NONE);
-		layout= new GridLayout(3, false);
-		kernelGroup.setLayout(layout);
-		gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.horizontalSpan= 3;
-		kernelGroup.setLayoutData(gd);
-		kernelGroup.setText("Kernel Branch Settings:");
-		newButton = new Button(kernelGroup, SWT.RADIO);
-	    newButton.setText("New");
-	    newButton.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-	    newButton.setSelection(true);
 	    newButton.addSelectionListener(new SelectionListener() {
 	    	public void widgetDefaultSelected(SelectionEvent e) {}
 	    	
@@ -147,10 +158,7 @@ public class PropertiesPage extends WizardPage {
 			}
 		});
 	    
-	    existingButton = new Button(kernelGroup, SWT.RADIO);
-	    existingButton.setText("Existing");
-	    existingButton.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-	    existingButton.setSelection(false);
+	   
 	    existingButton.addSelectionListener(new SelectionListener() {
 	    	public void widgetDefaultSelected(SelectionEvent e) {}
 	    	
@@ -159,9 +167,7 @@ public class PropertiesPage extends WizardPage {
 			}
 		});
 	    
-	    kbCombo = new Combo(kernelGroup, SWT.BORDER | SWT.READ_ONLY);
-		kbCombo.setLayout(new GridLayout(1, false));
-		kbCombo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+	    
 		kbCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
@@ -169,9 +175,30 @@ public class PropertiesPage extends WizardPage {
 		});
 		
 		try {
+			if (karch_changed) {
 			properties = YoctoJSONHelper.getProperties();
 			
 			if (!properties.isEmpty()) {
+				if (scContainer != null)  {
+					scContainer.dispose();
+				}
+				scContainer = new Composite(this.composite, SWT.NONE);
+				scContainer.setLayout(new FillLayout(SWT.VERTICAL));
+				//this.composite.setLayout(new FillLayout(SWT.VERTICAL));
+				gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
+				gd.horizontalSpan = 1;
+				ScrolledComposite sc = new ScrolledComposite(scContainer, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+				sc.setExpandHorizontal(true);
+				sc.setExpandVertical(true);
+			      
+				Composite controlContainer = new Composite(sc, SWT.NONE);
+				layout = new GridLayout(2, false);
+				//ayout.marginBottom = 10;
+				controlContainer.setLayout(layout);
+				
+				gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
+				controlContainer.setLayoutData(gd);
+				sc.setContent(controlContainer);
 				if (!element.getQarch().isEmpty()) {
 					YoctoBspPropertyElement qarch_elem = new YoctoBspPropertyElement();
 					qarch_elem.setName(QARCH_NAME);
@@ -180,58 +207,67 @@ public class PropertiesPage extends WizardPage {
 				}
 				propertyControlMap = new Hashtable<YoctoBspPropertyElement, Control>();
 				Iterator<YoctoBspPropertyElement> it = properties.iterator();
+				
 			    while (it.hasNext()) {
 			        // Get property
 			        YoctoBspPropertyElement propElem = (YoctoBspPropertyElement)it.next();
 			        String type  = propElem.getType();
 			        String name = propElem.getName();
 			        if (type.contentEquals("edit")) {
-			        	controlContainer = new Composite(this.composite, SWT.NONE);
+			        	Composite textContainer = new Composite(controlContainer, SWT.NONE);
 			        	layout = new GridLayout(2, false);
-			        	controlContainer.setLayout(layout);
+			        	textContainer.setLayout(layout);
 			        	gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
 			        	gd.horizontalSpan = 2;
-			        	controlContainer.setLayoutData(gd);
+			        	textContainer.setLayoutData(gd);
 			        	
-			        	new Label (controlContainer, SWT.NONE).setText(name+":");
-			        	Text text = new Text(controlContainer, SWT.BORDER | SWT.SINGLE);
+			        	new Label (textContainer, SWT.NONE).setText(name+":");
+			        	Text text = new Text(textContainer, SWT.BORDER | SWT.SINGLE);
 			    		gd = new GridData(GridData.FILL_HORIZONTAL);
 			    		text.setLayoutData(gd);
 			    		propertyControlMap.put(propElem, (Control)text);
+			    		sc.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			    		controlContainer.layout();
 			        } else if (type.contentEquals("boolean")) {
-			        	controlContainer = new Composite(this.composite, SWT.NONE);
+			        	Composite booleanContainer = new Composite(controlContainer, SWT.NONE);
 			        	layout = new GridLayout(1, false);
-			        	controlContainer.setLayout(layout);
+			        	booleanContainer.setLayout(layout);
 			        	gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
 			        	gd.horizontalSpan = 1;
-			        	controlContainer.setLayoutData(gd);
+			        	booleanContainer.setLayoutData(gd);
 			        	
 			        	String default_value = propElem.getDefaultValue();
-			        	Button button = new Button(controlContainer, SWT.CHECK);
+			        	Button button = new Button(booleanContainer, SWT.CHECK);
 			    		button.setText(name);
 			    		if (default_value.equalsIgnoreCase("y")) {
 			    			button.setSelection(true);	
 			    		} else 
 			    			button.setSelection(false);
 			    		propertyControlMap.put(propElem, (Control)button);
+			    		sc.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			    		controlContainer.layout();
 			        } else if (type.contentEquals("choicelist")) {
-			        	controlContainer = new Composite(this.composite, SWT.NONE);
+			        	Composite choiceContainer = new Composite(controlContainer, SWT.NONE);
 			        	layout = new GridLayout(2, false);
-			        	controlContainer.setLayout(layout);
+			        	choiceContainer.setLayout(layout);
 			        	gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
 			        	gd.horizontalSpan = 2;
-			        	controlContainer.setLayoutData(gd);
+			        	choiceContainer.setLayoutData(gd);
 			        	
-			        	new Label (controlContainer, SWT.NONE).setText(name+":");
-			        	Combo combo = new Combo(controlContainer, SWT.BORDER | SWT.READ_ONLY);
+			        	new Label (choiceContainer, SWT.NONE).setText(name+":");
+			        	Combo combo = new Combo(choiceContainer, SWT.BORDER | SWT.READ_ONLY);
 			    		combo.setLayout(new GridLayout(1, false));
 			    		combo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 			    		values = getValues(name);
 			    		if (values != null)
 			    			combo.setItems(values);
 			    		propertyControlMap.put(propElem, (Control)combo);
+			    		sc.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			    		controlContainer.layout();
 			        }
 			    }
+			   // controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+			}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -316,7 +352,7 @@ public class PropertiesPage extends WizardPage {
 		}
 		if ((propertyControlMap != null)) { 
 			if (!propertyControlMap.isEmpty()) {
-				Enumeration keys = propertyControlMap.keys();
+				Enumeration<YoctoBspPropertyElement> keys = propertyControlMap.keys();
 				while( keys.hasMoreElements() ) {
 					YoctoBspPropertyElement key = (YoctoBspPropertyElement)keys.nextElement();
 					Control control = propertyControlMap.get(key);
@@ -369,9 +405,10 @@ public class PropertiesPage extends WizardPage {
 		 String kb_property;
 		 
 		 String kernel_choice = kcCombo.getText();
-		 if (kernel_choice == null)
+		 if ((kernel_choice == null) || (kernel_choice.isEmpty())) {
 			 setErrorMessage("Please selecte kernel_choice!");
-		 else {
+			 return;
+		 } else {
 			 kernel_choice = kernel_choice.replaceAll("-", "_");
 			 kernel_choice = kernel_choice.replace(".", "_");
 		 }
@@ -425,10 +462,13 @@ public class PropertiesPage extends WizardPage {
 			InputStreamReader isr = new InputStreamReader(stdin);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
+			String error_message = "";
 			
 			while ( (line = br.readLine()) != null) {
-				if (!line.startsWith("["))
+				if (!line.startsWith("[")) {
+					error_message = error_message + line;
 					continue;
+				}
 				String[] items = line.split(",");
 				
 				String value = items[0];
@@ -437,7 +477,10 @@ public class PropertiesPage extends WizardPage {
 				values.add(value);
 			}
 			int exitVal = proc.waitFor();
-			
+			if (exitVal != 0) {
+				MessageDialog.openError(getShell(),"Yocto-BSP", error_message);
+				return null;
+			} 
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}

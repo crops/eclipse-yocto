@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -98,16 +99,24 @@ public class YoctoBSPWizard extends Wizard {
 			InputStreamReader isr = new InputStreamReader(stdin);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
+			String error_message = "";
 			
 			while ( (line = br.readLine()) != null) {
+				error_message = error_message + line;
 			}
 			
 			int exitVal = proc.waitFor();
+			if (exitVal != 0) {
+				MessageDialog.openError(getShell(),"Yocto-BSP", error_message);
+				return false;
+			} else {
+				MessageDialog.openInformation(getShell(), "Yocto-BSP", error_message);
+				return true;
+			}
 		} catch (Throwable t) {
 			t.printStackTrace();
 			return false;
 		}
-		return true;
 	}
 	
 	public boolean canFinish() {

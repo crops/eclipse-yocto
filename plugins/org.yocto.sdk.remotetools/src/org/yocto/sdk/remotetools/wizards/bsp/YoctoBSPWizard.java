@@ -90,6 +90,8 @@ public class YoctoBSPWizard extends Wizard {
 		
 		if (!element.getBspOutLoc().isEmpty())
 			create_bsp_cmd = create_bsp_cmd + " -o " + element.getBspOutLoc();
+		else
+			create_bsp_cmd = create_bsp_cmd + " -o " + element.getMetadataLoc() + "/meta-" + element.getBspName();
 		create_bsp_cmd = create_bsp_cmd + " -i " + PROPERTY_VALUE_FILE;
 		
 		try {

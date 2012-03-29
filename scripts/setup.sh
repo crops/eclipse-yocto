@@ -1,7 +1,8 @@
+#!/bin/sh
+
 #setup eclipse building environment for Indigo.
-#comment out the following 2 lines if you don't want to use the http proxy for update site
-#PROXY=proxy.jf.intel.com
-#PORT=911
+#comment out the following line if you want to using your own http proxy setting for eclipse update site
+#PROXY=http://proxy.jf.intel.com:911
 
 err_exit() 
 {
@@ -29,13 +30,30 @@ case ${uname_s}${uname_m} in
     ;;
 esac
 
+#parsing proxy URLS
+url=${PROXY}
+if [ "x$url" != "x" ]; then
+    proto=`echo $url | grep :// | sed -e 's,^\(.*://\).*,\1,g'`
+    url=`echo $url | sed s,$proto,,g`
+    userpass=`echo $url | grep @ | cut -d@ -f1`
+    user=`echo $userpass | cut -d: -f1`
+    pass=`echo $userpass | grep : | cut -d: -f2`
+    url=`echo $url | sed s,$userpass@,,g`
+    host=`echo $url | cut -d: -f1`
+    port=`echo $url | cut -d: -f2 | sed -e 's,[^0-9],,g'`
+    [[ "x$host" == "x" ]] && err_exit 1 "Undefined proxy host"
+    PROXY_PARAM="-Dhttp.proxySet=true -Dhttp.proxyHost=$host"
+    [[ "x$port" != "x" ]] && PROXY_PARAM="${PROXY_PARAM} -Dhttp.proxyPort=$port"
+fi
+
+
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
-ep_ver=3.7
-ep_date="-201106131736"
+ep_ver=3.7.2
+ep_date="-201202080800"
 P2_disabled=false
 P2_no_dropins=false
-if [ ! -f eclipse/plugins/org.eclipse.swt_3.7.0.v3735b.jar ]; then
+if [ ! -f eclipse/plugins/org.eclipse.swt_3.7.2.v3740f.jar ]; then
   curdir2=`pwd`
   if [ ! -d eclipse -o -h eclipse ]; then
     if [ -d eclipse-${ep_ver}-${ep_arch} ]; then
@@ -66,7 +84,7 @@ if [ ! -f eclipse/startup.jar ]; then
     rm ../startup.jar
   fi
   LAUNCHER=`ls org.eclipse.equinox.launcher_*.jar | sort | tail -1`
-  if [ "${LAUNCHER}" != "" ]; then
+  if [ "x${LAUNCHER}" != "x" ]; then
     echo "eclipse LAUNCHER=${LAUNCHER}" 
     ln -s plugins/${LAUNCHER} ../startup.jar
   else
@@ -86,90 +104,119 @@ else
 fi
 
 LAUNCHER=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar | sort | tail -1`
-update_feature_remote()
+
+get_version()
 {
-#$1: remote_site_url
+#$1: repository_url
 #$2: featureId
-#$3: desired version (optional)
-  echo "installing $2 $3 ${remote_ver} ..."
-  
-  if [ "x${PROXY}" != "x" ]; then
-     PROXY_PARAM="-Dhttp.proxySet=true -Dhttp.proxyHost=${PROXY} -Dhttp.proxyPort=${PORT}"
-  fi
-  
-  local remote_ver=`java ${PROXY_PARAM} \
+#$3: 'all' or 'max' or 'min', 'max' if not specified
+  local remote_vers=`java ${PROXY_PARAM} \
     -jar ${LAUNCHER} \
     -application org.eclipse.equinox.p2.director \
     -destination ${curdir}/eclipse \
     -profile SDKProfile \
     -repository $1 \
-    -list \
-    | awk 'BEGIN { FS="=" } /'$2'/ { print $2 }'`
-  
-  [ "x${remote_ver}" = "x" ] && err_exit 1 "unknown remote version"
-  
-  #if [ "x$3" != "x" ]; then
-  #  if [[ "${remote_ver}" < "$3" ]]; then
-  #    err_exit 1 "unsatified remote version ${remote_ver}, required $3"
-  #  fi
-  #fi
-  
+    -list $2\
+    | awk 'BEGIN { FS="=" } { print $2 }'`
+
+  #find larget remote vers
+  local remote_ver=`echo ${remote_vers} | cut -d ' ' -f1`
+  case $3 in
+    all)
+      remote_ver=${remote_vers}
+      ;;
+    min)
+      for i in ${remote_vers}; do
+        [[ "${remote_ver}" > "$i" ]] && remote_ver="$i"
+      done
+      ;;
+    *)
+      for i in ${remote_vers}; do
+        [[ "${remote_ver}" < "$i" ]] && remote_ver="$i"
+      done
+      ;;
+  esac
+
+  echo ${remote_ver}
+}
+
+check_local_version()
+{
+# $1 unitId
+# $2 min version
+# $3 max version (optional)
+  version=`get_version file:///${curdir}/eclipse/p2/org.eclipse.equinox.p2.engine/profileRegistry/SDKProfile.profile $1`
+  [[ "$version" < "$2" ]] && return 1
+  if [ "x$3" != "x" ]; then
+    [[ "$version" > "$3" ]] && return -1
+  fi
+  return 0
+}
+
+update_feature_remote()
+{
+# install a feature of with version requirement [min, max)
+#$1: reporsitory url
+#$2: featureId
+#$3: min version
+#$4: max version(optional)
+  [[ $# -lt 3 ]] && err_exit 1 "update_feature_remote: invalid parameters, $*"
+  check_local_version $2 $3 $4 && echo "skip installed feature $2" && return 0
+  local installIU=""
+  if [ "x$4" != "x" ]; then
+      #has max version requirement
+      for i in `get_version $1 $2 'all'`; do
+        if [[ "$i" > "$3" ]] || [[ "$i" == "$3" ]] && [[ "$i" < "$4" ]]; then
+          [[ "$i" > "$installIU" ]] && installIU=$i
+        fi
+      done
+  else
+      #only has minimum version requirement
+      local max_remote_ver=`get_version $1 $2 'max'`
+      [[ "$max_remote_ver" > "$3" ]] || [[ "$max_remote_ver" == "$3" ]] && installIU=$max_remote_ver
+  fi
+
+  [[ "x$installIU" == "x" ]] && err_exit 1 "Can NOT find candidates of $2 version($3, $4) at $1!"
+  installIU="$2/$installIU"
+  echo "try to install $installIU ..."
   java ${PROXY_PARAM} -jar ${LAUNCHER} \
     -application org.eclipse.equinox.p2.director \
     -destination ${curdir}/eclipse \
     -profile SDKProfile \
     -repository $1 \
-    -installIU $2/$3 || err_exit $? "installing $2 failed"
+    -installIU ${installIU} || err_exit $? "installing ${installIU} failed"
 }
 
-#RSE SDK
-RSEREL="R-"
-RSEVER="3.3"
-RSEDATE="-201106080935"
-RSENAME=RSE-SDK-${RSEVER}.zip
-if [ ! -f eclipse/plugins/org.eclipse.rse.sdk_3.3.0.*.jar ]; then
-  echo "Getting RSE SDK..."
-  wget "http://download.eclipse.org/dsdp/tm/downloads/drops/${RSEREL}${RSEVER}${RSEDATE}/${RSENAME}"
-  unzip -o ${RSENAME} || err_exit $? "extracting RSE SDK failed"
-  rm ${RSENAME}
-fi
-
-# CDT Runtime
-CDTREL="8.0.0"
+#CDT related
 CDTFEAT="8.0.0"
-CDTVER="201109151620"
-CDTNAME=cdt-master-${CDTREL}-I${CDTVER}.zip
-CDTLOC=builds/${CDTREL}/I.I${CDTVER}/${CDTNAME}
-if [ ! -f eclipse/plugins/org.eclipse.cdt_${CDTFEAT}.${CDTVER}.jar ]; then
-  echo "Install CDT..."
-  UPDATE_SITE="http://download.eclipse.org/releases/indigo"
-  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.platform.feature.group ${CDTFEAT}.${CDTVER}
-  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.feature.group ${CDTFEAT}.${CDTVER}
-  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}.${CDTVER}
-  update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.launch.remote.feature.group 
-fi
+UPDATE_SITE="http://download.eclipse.org/releases/indigo"
+echo "Installing CDT..."
+update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
+CDTREMOTEVER="6.0.0"
+update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
 
-#TMF
-TMFREL="0.4.0"
-#TMFDATE="201111050234"
-TMFDATE="201202152032"
-if [ ! -f eclipse/plugins/org.eclipse.linuxtools.tmf.core_${TMFREL}.${TMFDATE}.jar ]; then
-  echo "Install TMF..."
-  UPDATE_SITE="http://download.eclipse.org/releases/indigo"
-  update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}.${TMFDATE}
-fi
+#RSE SDK
+RSEVER="3.3.0"
+UPDATE_SITE="http://download.eclipse.org/tm/updates/3.3"
+echo "Installing RSE SDK..."
+update_feature_remote ${UPDATE_SITE} org.eclipse.rse.sdk.feature.group ${RSEVER}
 
 #AUTOTOOL
 ATVER="3.0.1"
-ATDATE="201202152032"
-if [ ! -f eclipse/plugins/org.eclipse.linux.cdt.autotools_${ATVER}.*.jar ]; then
-  echo "Install AutoTool..."
-  UPDATE_SITE="http://download.eclipse.org/releases/indigo"
-  update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.cdt.autotools.feature.group ${ATVER}.${ATDATE} 
-fi
+UPDATE_SITE="http://download.eclipse.org/releases/indigo"
+echo "Install AutoTool..."
+update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.cdt.autotools.feature.group ${ATVER}
 
-echo "Your build environment is now created."
+#TMF
+TMFREL="0.4.0"
+TMFREL_MAX="0.5.0"
+TMFDATE="201202152032"
+UPDATE_SITE="http://download.eclipse.org/releases/indigo"
+echo "Install TMF..."
+update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}.${TMFDATE} ${TMFREL_MAX}
+
 echo ""
+echo "Your build environment is successfully created."
 echo "Run ECLIPSE_HOME=${curdir}/eclipse `dirname $0`/build.sh <branch name> <release name> to build"
 echo ""
 

@@ -73,6 +73,7 @@ public class YoctoSDKUtils {
 	private static final String TOOLCHAIN_HOST_MISMATCH = "Poky.Toolchain.Host.Mismatch";
 	private static final String[] saInvalidVer = {"1.0", "0.9", "0.9+"};
 	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
+	private static final String LIBTOOL_SYSROOT_PREFIX = "--with-libtool-sysroot=";
 	private static final String SYSROOTS_DIR = "sysroots";
 
 	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {		
@@ -312,7 +313,7 @@ public class YoctoSDKUtils {
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		env.addVariable(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc(),
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-
+		
 		if (envMap == null)
 		{
 			System.out.println("ENV var hasmap is NULL, Please check ENV script File!");
@@ -323,21 +324,54 @@ public class YoctoSDKUtils {
 		{					
 			String sKey = (String)iter.next();
 			String sValue = (String)envMap.get(sKey);
+			String targetFilePath;
+			File targetFile;
 			//replace --sysroot
-
-			int SYSROOT_idx = sValue.lastIndexOf(DEFAULT_SYSROOT_PREFIX);
-			if (SYSROOT_idx >=0 )
-			{
-				sValue = sValue.substring(0, SYSROOT_idx) + DEFAULT_SYSROOT_PREFIX + elem.getStrSysrootLoc();
-			}			
-			
-			//Change certain env vars based on user target sysroot setup
-			if (sKey.matches("PKG_CONFIG_SYSROOT_DIR") || sKey.matches("OECORE_TARGET_SYSROOT"))
-				env.addVariable(sKey, elem.getStrSysrootLoc(), IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			if (sKey.matches("CFLAGS") || sKey.matches("CXXFLAGS") || sKey.matches("CXXFLAGS") || sKey.matches("LDFLAGS") || 
+					sKey.matches("CPPFLAGS")) {
+				
+				int SYSROOT_idx = sValue.lastIndexOf(DEFAULT_SYSROOT_PREFIX);
+				if (SYSROOT_idx >=0 )
+					sValue = sValue.substring(0, SYSROOT_idx) + DEFAULT_SYSROOT_PREFIX + elem.getStrSysrootLoc();
+				else
+					sValue = " " + DEFAULT_SYSROOT_PREFIX + elem.getStrSysrootLoc();
+				targetFilePath = elem.getStrSysrootLoc() + "/" + elem.getStrTarget();
+				targetFile = new File(targetFilePath);
+				if (targetFile.exists())
+					sValue = sValue + "/" + elem.getStrTarget();
+			} else if (sKey.matches("CONFIGURE_FLAGS")) {			
+				int LIBTOOL_idx = sValue.lastIndexOf(LIBTOOL_SYSROOT_PREFIX);
+				if (LIBTOOL_idx >= 0)
+					sValue = sValue.substring(0, LIBTOOL_idx) + LIBTOOL_SYSROOT_PREFIX + elem.getStrSysrootLoc();
+				else
+					sValue = " " + LIBTOOL_SYSROOT_PREFIX + elem.getStrSysrootLoc();
+				targetFilePath = elem.getStrSysrootLoc() + "/" + elem.getStrTarget();
+				targetFile = new File(targetFilePath);
+				if (targetFile.exists())
+					sValue = sValue + "/" + elem.getStrTarget();		
+			} else if(sKey.matches("PKG_CONFIG_SYSROOT_DIR") || sKey.matches("OECORE_TARGET_SYSROOT")) {
+				sValue = elem.getStrSysrootLoc();
+				targetFilePath = elem.getStrSysrootLoc() + "/" + elem.getStrTarget();
+				targetFile = new File(targetFilePath);
+				if (targetFile.exists())
+					sValue = sValue + "/" + elem.getStrTarget();
+			} else if (sKey.matches("PKG_CONFIG_PATH")) {
+				sValue = elem.getStrSysrootLoc();
+				targetFilePath = elem.getStrSysrootLoc() + "/" + elem.getStrTarget();
+				targetFile = new File(targetFilePath);
+				if (targetFile.exists())
+					sValue = sValue + "/" + elem.getStrTarget();
+				sValue = sValue + "/usr/lib/pkgconfig";
+			} 
+			//	env.addVariable(sKey, elem.getStrSysrootLoc(), IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			/*
 			else if (sKey.matches("PKG_CONFIG_PATH"))
-				env.addVariable(sKey, elem.getStrSysrootLoc()+"/usr/lib/pkgconfig", IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
-			else
-				env.addVariable(sKey, sValue, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+				env.addVariable(sKey, elem.getStrSysrootLoc()+"/"+elem.getStrTarget()+"/usr/lib/pkgconfig", IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+				//env.addVariable(sKey, sValue, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			else if (sKey.matches("PKG_CONFIG_SYSROOT_DIR"))
+				env.addVariable(sKey, elem.getStrSysrootLoc()+"/"+elem.getStrTarget(), IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
+			*/
+			env.addVariable(sKey, sValue, IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		}
 		//add ACLOCAL OPTS for libtool 2.4 support
 		env.addVariable("OECORE_ACLOCAL_OPTS",

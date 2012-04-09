@@ -466,16 +466,6 @@ public class YoctoUISetting {
 				if (!fToolChain.exists())
 					return;
 			}
-			//Only prompt when user thought a correct folder is set, yet still no env file			
-			String strErrorMessage = YoctoSDKUtils.getErrorMessage(SDKCheckResults.ENV_SETUP_SCRIPT_NONEXIST, SDKCheckRequestFrom.Other);
-			Display display = Display.getCurrent();
-			Shell shell = new Shell(display);
-			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			msgBox.setText("Yocto Project Configuration Error");
-			msgBox.setMessage(strErrorMessage);
-			msgBox.open();
-			if (shell != null)
-				shell.dispose();			
 		}
 
 	}

@@ -139,5 +139,8 @@
         </complex-array>
 	</process>
 	
+	<process type="org.yocto.sdk.ide.NewYoctoProjectPostProcess">
+		<simple name="projectName" value="$(projectName)" /> 
+	</process>
 </template>
 

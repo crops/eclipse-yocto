@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012 Intel Corporation.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Intel - initial API and implementation
+ *******************************************************************************/
 package org.yocto.sdk.remotetools.wizards.bsp;
 
 import java.io.BufferedReader;
@@ -14,8 +24,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -44,13 +52,13 @@ import org.yocto.sdk.remotetools.YoctoBspPropertyElement;
 public class PropertiesPage extends WizardPage {
 	private static final String PAGE_NAME = "Properties";
 	private static final String VALUES_CMD_PREFIX = "yocto-bsp list ";
-	private static final String VALUES_CMD_SURFIX = " property ";
+	private static final String VALUES_CMD_SURFIX = " property  ";
 	private static final String KERNEL_CHOICE = "kernel_choice";
 	private static final String DEFAULT_KERNEL = "use_default_kernel";
-	private static final String SMP_PREFIX = "smp_";
-	private static final String EXISTING_KBRANCH_PREFIX = "existing_kbranch_";
-	private static final String NEW_KBRANCH_PREFIX = "new_kbranch_";
-	private static final String BASE_KBRANCH_PREFIX = "base_kbranch_";
+	private static final String SMP_NAME = "smp";
+	private static final String EXISTING_KBRANCH_NAME = "existing_kbranch";
+	private static final String NEED_NEW_KBRANCH_NAME = "need_new_kbranch";
+	private static final String NEW_KBRANCH_NAME = "new_kbranch";
 	private static final String QARCH_NAME = "qemuarch";
 	
 	private Hashtable<YoctoBspPropertyElement, Control> propertyControlMap;
@@ -284,12 +292,12 @@ public class PropertiesPage extends WizardPage {
 		default_element.setValue("n");
 		properties.add(default_element);
 	
-		kcSelection = kcSelection.replaceAll("-", "_");
-		kcSelection = kcSelection.replace(".", "_");
-		String smp_name = "";
-		smp_name = SMP_PREFIX + kcSelection;
+		//kcSelection = kcSelection.replaceAll("-", "_");
+		//kcSelection = kcSelection.replace(".", "_");
+		//String smp_name = "";
+		//smp_name = SMP_PREFIX + kcSelection;
 		YoctoBspPropertyElement smp_element = new YoctoBspPropertyElement();
-		smp_element.setName(smp_name);
+		smp_element.setName(SMP_NAME);
 		if (smpButton.getSelection())
 			smp_element.setValue("y");
 		else
@@ -298,19 +306,18 @@ public class PropertiesPage extends WizardPage {
 		
 		YoctoBspPropertyElement newkb_element = new YoctoBspPropertyElement();
 		YoctoBspPropertyElement kb_element = new YoctoBspPropertyElement();
-		String newkb_name  = "";
-		newkb_name = NEW_KBRANCH_PREFIX+kcSelection;
-		newkb_element.setName(newkb_name);
+		
+		newkb_element.setName(NEED_NEW_KBRANCH_NAME);
 		if (newButton.getSelection()) {
 			newkb_element.setValue("y");
 			properties.add(newkb_element);
-			kb_element.setName(BASE_KBRANCH_PREFIX+kcSelection);
+			kb_element.setName(NEW_KBRANCH_NAME);
 			kb_element.setValue(kbSelection);
 			properties.add(kb_element);
 		} else {
 			newkb_element.setValue("n");
 			properties.add(newkb_element);
-			kb_element.setName(EXISTING_KBRANCH_PREFIX+kcSelection);
+			kb_element.setName(EXISTING_KBRANCH_NAME);
 			kb_element.setValue(kbSelection);
 			properties.add(kb_element);
 		}
@@ -385,18 +392,19 @@ public class PropertiesPage extends WizardPage {
 		 if ((kernel_choice == null) || (kernel_choice.isEmpty())) {
 			 setErrorMessage("Please selecte kernel_choice!");
 			 return;
-		 } else {
+		 } /*else {
 			 kernel_choice = kernel_choice.replaceAll("-", "_");
 			 kernel_choice = kernel_choice.replace(".", "_");
-		 }
+		 }*/
 		 if (widget == kcCombo) {
 			 newButton.setSelection(true);
 			 existingButton.setSelection(false);
 			 kbCombo.removeAll();
 			 
-			 kb_property = BASE_KBRANCH_PREFIX+kernel_choice;
+			 kb_property = "\"" + kernel_choice + "\"."+NEW_KBRANCH_NAME;
 			 String[] values = getValues(kb_property);
-			 kbCombo.setItems(values);
+			 if (values != null)
+				 kbCombo.setItems(values);
 		 }
 		 if (widget == kbCombo) {
 			 setErrorMessage(null);
@@ -406,22 +414,25 @@ public class PropertiesPage extends WizardPage {
 			 boolean newBranch = newButton.getSelection();
 			 
 			 if (newBranch) {
-				 kb_property = BASE_KBRANCH_PREFIX+kernel_choice;
+				 kb_property = "\"" + kernel_choice + "\"."+NEW_KBRANCH_NAME;
 				 String[] values = getValues(kb_property);
-				 kbCombo.setItems(values);
+				 if (values != null)
+					 kbCombo.setItems(values);
 			 } else {
-				 kb_property = EXISTING_KBRANCH_PREFIX+kernel_choice;
+				 kb_property = "\"" + kernel_choice + "\"."+EXISTING_KBRANCH_NAME;
 				 String[] values = getValues(kb_property);
-				 kbCombo.setItems(values);
+				 if (values != null)
+					 kbCombo.setItems(values);
 			 }
 		 }
 		 if (widget == existingButton) {
 			 boolean existingBranch = existingButton.getSelection();
 			
 			 if (existingBranch) {
-				 kb_property = EXISTING_KBRANCH_PREFIX+kernel_choice;
+				 kb_property = "\"" + kernel_choice + "\"."+EXISTING_KBRANCH_NAME;
 				 String[] values = getValues(kb_property);
-				 kbCombo.setItems(values);
+				 if (values != null)
+					 kbCombo.setItems(values);
 			 }
 		 }
 		 canFlipToNextPage();
@@ -432,6 +443,13 @@ public class PropertiesPage extends WizardPage {
 		ArrayList<String> values = new ArrayList<String>();
 		
 		String values_cmd = bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
+		/*
+		int index1 = values_cmd.indexOf('\"');
+		if (index1 > 0)
+			values_cmd = values_cmd.substring(0, index1 -1) + '\\' + values_cmd.substring(index1);
+		int index2 = values_cmd.lastIndexOf('\"');
+		if (index2 > 0)
+			values_cmd = values_cmd.substring(0, index2 -1) + '\\' + values_cmd.substring(index2);*/
 		try {
 			Runtime rt = Runtime.getRuntime();
 			Process proc = rt.exec(values_cmd);

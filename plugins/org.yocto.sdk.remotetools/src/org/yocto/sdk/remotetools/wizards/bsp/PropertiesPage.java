@@ -392,10 +392,7 @@ public class PropertiesPage extends WizardPage {
 		 if ((kernel_choice == null) || (kernel_choice.isEmpty())) {
 			 setErrorMessage("Please selecte kernel_choice!");
 			 return;
-		 } /*else {
-			 kernel_choice = kernel_choice.replaceAll("-", "_");
-			 kernel_choice = kernel_choice.replace(".", "_");
-		 }*/
+		 }
 		 if (widget == kcCombo) {
 			 newButton.setSelection(true);
 			 existingButton.setSelection(false);
@@ -443,13 +440,6 @@ public class PropertiesPage extends WizardPage {
 		ArrayList<String> values = new ArrayList<String>();
 		
 		String values_cmd = bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
-		/*
-		int index1 = values_cmd.indexOf('\"');
-		if (index1 > 0)
-			values_cmd = values_cmd.substring(0, index1 -1) + '\\' + values_cmd.substring(index1);
-		int index2 = values_cmd.lastIndexOf('\"');
-		if (index2 > 0)
-			values_cmd = values_cmd.substring(0, index2 -1) + '\\' + values_cmd.substring(index2);*/
 		try {
 			Runtime rt = Runtime.getRuntime();
 			Process proc = rt.exec(values_cmd);

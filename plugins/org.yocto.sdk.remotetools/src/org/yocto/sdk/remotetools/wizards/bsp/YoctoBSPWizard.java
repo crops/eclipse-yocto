@@ -83,52 +83,53 @@ public class YoctoBSPWizard extends Wizard {
 		propertiesPage = new PropertiesPage(bspElem);
 		addPage(propertiesPage);
 	}
-/*
-	@Override
-	public Map getModel() {
-		return model;
-	}
-*/
+
 	@Override
 	public boolean performFinish() {
-		HashSet<YoctoBspPropertyElement> properties = propertiesPage.getProperties();
-		YoctoJSONHelper.createBspJSONFile(properties);
-		YoctoBspElement element = mainPage.bspElement();
-		
-		String create_bsp_cmd = element.getMetadataLoc() + CREATE_CMD + 
-								element.getBspName() + " " + element.getKarch();
-		
-		if (!element.getBspOutLoc().isEmpty())
-			create_bsp_cmd = create_bsp_cmd + " -o " + element.getBspOutLoc();
-		else
-			create_bsp_cmd = create_bsp_cmd + " -o " + element.getMetadataLoc() + "/meta-" + element.getBspName();
-		create_bsp_cmd = create_bsp_cmd + " -i " + PROPERTY_VALUE_FILE;
-		
-		try {
-			Runtime rt = Runtime.getRuntime();
-			Process proc = rt.exec(create_bsp_cmd);
-			InputStream stdin = proc.getInputStream();
-			InputStreamReader isr = new InputStreamReader(stdin);
-			BufferedReader br = new BufferedReader(isr);
-			String line = null;
-			String error_message = "";
+		if (propertiesPage.validatePage()) {
+			HashSet<YoctoBspPropertyElement> properties = propertiesPage.getProperties();
+			YoctoJSONHelper.createBspJSONFile(properties);
+			YoctoBspElement element = mainPage.bspElement();
 			
-			while ( (line = br.readLine()) != null) {
-				error_message = error_message + line;
-			}
+			String create_bsp_cmd = element.getMetadataLoc() + CREATE_CMD + 
+									element.getBspName() + " " + element.getKarch();
 			
-			int exitVal = proc.waitFor();
-			if (exitVal != 0) {
-				MessageDialog.openError(getShell(),"Yocto-BSP", error_message);
+			if (!element.getBspOutLoc().isEmpty())
+				create_bsp_cmd = create_bsp_cmd + " -o " + element.getBspOutLoc();
+			else
+				create_bsp_cmd = create_bsp_cmd + " -o " + element.getMetadataLoc() + "/meta-" + element.getBspName();
+			create_bsp_cmd = create_bsp_cmd + " -i " + PROPERTY_VALUE_FILE;
+			
+			try {
+				Runtime rt = Runtime.getRuntime();
+				Process proc = rt.exec(create_bsp_cmd);
+				InputStream stdin = proc.getInputStream();
+				InputStreamReader isr = new InputStreamReader(stdin);
+				BufferedReader br = new BufferedReader(isr);
+				String line = null;
+				String error_message = "";
+				
+				while ( (line = br.readLine()) != null) {
+					error_message = error_message + line;
+				}
+				
+				int exitVal = proc.waitFor();
+				if (exitVal != 0) {
+					MessageDialog.openError(getShell(),"Yocto-BSP", error_message);
+					return false;
+				} else {
+					MessageDialog.openInformation(getShell(), "Yocto-BSP", error_message);
+					return true;
+				}
+			} catch (Throwable t) {
+				t.printStackTrace();
 				return false;
-			} else {
-				MessageDialog.openInformation(getShell(), "Yocto-BSP", error_message);
-				return true;
 			}
-		} catch (Throwable t) {
-			t.printStackTrace();
+		} else {
+			MessageDialog.openError(getShell(), "Yocto-BSP", "Property settings contains error!");
 			return false;
 		}
+		
 	}
 	
 	public boolean canFinish() {

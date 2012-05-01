@@ -25,9 +25,9 @@ public class PerfHandler extends TerminalHandler {
 	
 	protected void initialize(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-
+		shell = window.getShell();
 		setting=new SimpleSettingDialog(
-				window.getShell(),
+				shell,
 				"Perf",
 				IBaseConstants.CONNECTION_NAME_LATENCYTOP
 				);

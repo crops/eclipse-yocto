@@ -52,9 +52,9 @@ public class SystemtapHandler extends TerminalHandler {
 	
 	protected void initialize(ExecutionEvent event) throws ExecutionException {
 		this.window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-
+		shell = window.getShell();
 		setting=new SystemtapSettingDialog(
-				window.getShell()
+				shell
 				);
 	}
 

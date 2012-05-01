@@ -14,7 +14,13 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.terminals.ui.TerminalServiceHelper;
 import org.eclipse.rse.internal.terminals.ui.views.RSETerminalConnector;
@@ -31,10 +37,13 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.tm.internal.terminal.control.ITerminalViewControl;
 import org.eclipse.tm.internal.terminal.provisional.api.ITerminalConnector;
 import org.yocto.sdk.remotetools.RSEHelper;
+import org.yocto.sdk.remotetools.CommonHelper;
 
 abstract public class TerminalHandler extends AbstractHandler {
 	
 	protected BaseSettingDialog setting;
+	
+	protected Shell shell;
 	
 	protected String changeTerm="export TERM=vt100;";
 	
@@ -64,14 +73,26 @@ abstract public class TerminalHandler extends AbstractHandler {
 		
 		if(setting.open()==BaseSettingDialog.OK) {
 			IHost currentHost = setting.getHost();
-			ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(currentHost);
+			final ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(currentHost);
 			preProcess();
 			if (terminalSubSystem != null) {
 				TerminalsUI terminalsUI = TerminalsUI.getInstance();
 				TerminalViewer viewer = terminalsUI.activateTerminalsView();
 				if (!terminalSubSystem.isConnected()) {
 					try {
-						terminalSubSystem.connect(new NullProgressMonitor(), false);
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+						dialog.run(true, true, new IRunnableWithProgress(){
+						    public void run(IProgressMonitor monitor) {
+						        monitor.beginTask("Connecting to remote target ...", 100);
+						        try {
+						        terminalSubSystem.connect(new NullProgressMonitor(), false);
+						        monitor.done();
+						        } catch (Exception e) {
+						        	CommonHelper.showErrorDialog("Connection failure", null, e.getMessage());
+						        	monitor.done();
+						        }
+						    }
+						});
 					} catch (OperationCanceledException e) {
 						// user canceled, return silently
 						return null;

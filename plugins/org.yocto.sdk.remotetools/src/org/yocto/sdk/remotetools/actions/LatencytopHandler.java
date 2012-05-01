@@ -25,9 +25,10 @@ public class LatencytopHandler extends TerminalHandler {
 	
 	protected void initialize(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+		shell = window.getShell();
 
 		setting=new SimpleSettingDialog(
-				window.getShell(),
+				shell,
 				"Latencytop",
 				IBaseConstants.CONNECTION_NAME_LATENCYTOP
 				);

@@ -18,6 +18,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.rse.core.model.IHost;
+import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
+import org.yocto.sdk.remotetools.RSEHelper;
 
 public class SystemtapHandler extends TerminalHandler {
 	//protected SystemtapSettingDialog setting;
@@ -28,22 +30,29 @@ public class SystemtapHandler extends TerminalHandler {
 	protected static String remote_KO_file_loc = "/tmp/";
 	protected static String stap_cmd = "staprun ";
 	
-	protected void preProcess() {
+	protected boolean preProcess(final ITerminalServiceSubSystem terminalSubSystem) {
 		IHost host = setting.getHost();
 		String KO_value = ((SystemtapSettingDialog)setting).getKernelModule();
 		Path KO_file_path = new Path(KO_value);
 		remote_KO_file=remote_KO_file_loc+KO_file_path.lastSegment();
 		
-		SystemtapModel op=new SystemtapModel(host,KO_value,window.getShell().getDisplay());
-		try {
-			op.preProcess(new NullProgressMonitor());
-			//progressService.busyCursorWhile(op);
-		}catch (Exception e) {
-			e.printStackTrace();
-			MessageDialog.openError(window.getShell(),
-					"Systemtap",
-					e.getMessage());
+		if (terminalSubSystem != null) {
+			if (super.preProcess(terminalSubSystem)) {
+		
+				SystemtapModel op=new SystemtapModel(host,KO_value,window.getShell().getDisplay());
+				try {
+					op.preProcess(new NullProgressMonitor());
+					return true;
+					//progressService.busyCursorWhile(op);
+				}catch (Exception e) {
+					e.printStackTrace();
+					MessageDialog.openError(window.getShell(),
+							"Systemtap",
+							e.getMessage());
+				}
+			}
 		}
+		return false;
 	}
 	
 	protected String getInitCmd() {

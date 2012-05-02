@@ -63,8 +63,33 @@ abstract public class TerminalHandler extends AbstractHandler {
         return terminalShell;
     }
 
-	protected void preProcess() {
-		
+	protected boolean preProcess(final ITerminalServiceSubSystem terminalSubSystem) {
+		if (!terminalSubSystem.isConnected()) {
+			try {
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+				dialog.run(true, true, new IRunnableWithProgress(){
+				    public void run(IProgressMonitor monitor) {
+				        monitor.beginTask("Connecting to remote target ...", 100);
+				        try {
+				        terminalSubSystem.connect(new NullProgressMonitor(), false);
+				        monitor.done();
+				        } catch (Exception e) {
+				        	CommonHelper.showErrorDialog("Connection failure", null, e.getMessage());
+				        	monitor.done();
+				        	
+				        }
+				    }
+				});
+			} catch (OperationCanceledException e) {
+				// user canceled, return silently
+				return false;
+			} catch (Exception e) {
+				SystemBasePlugin.logError(e.getLocalizedMessage(), e);
+				return false;
+			}
+		} else
+			return true;
+		return false;
 	}
 	
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -74,11 +99,12 @@ abstract public class TerminalHandler extends AbstractHandler {
 		if(setting.open()==BaseSettingDialog.OK) {
 			IHost currentHost = setting.getHost();
 			final ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(currentHost);
-			preProcess();
+			
 			if (terminalSubSystem != null) {
 				TerminalsUI terminalsUI = TerminalsUI.getInstance();
 				TerminalViewer viewer = terminalsUI.activateTerminalsView();
-				if (!terminalSubSystem.isConnected()) {
+				if (preProcess(terminalSubSystem)) {
+				/*if (!terminalSubSystem.isConnected()) {
 					try {
 						ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
 						dialog.run(true, true, new IRunnableWithProgress(){
@@ -100,7 +126,7 @@ abstract public class TerminalHandler extends AbstractHandler {
 						SystemBasePlugin.logError(e.getLocalizedMessage(), e);
 					}
 				}
-				if (terminalSubSystem.isConnected()) {
+				if (terminalSubSystem.isConnected()) {*/
 					CTabItem tab = viewer.getTabFolder().createTabItem(
 							terminalSubSystem.getHost(), changeTerm + getInitCmd());
 					//since RSETerminalConnector not exit the shell during the diconnection,

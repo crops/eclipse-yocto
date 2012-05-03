@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.yocto.sdk.remotetools.Activator;
+import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.SWTFactory;
 
@@ -116,22 +117,6 @@ public class SystemtapSettingDialog extends SimpleSettingDialog {
 	}		
 
 	@Override
-	protected boolean updateOkButton() {
-		boolean ret=super.updateOkButton();
-		if(ret==true) {
-			try {
-				kernelModuleText.getText();
-			}catch (Exception e) {
-				Button button=getButton(IDialogConstants.OK_ID);
-				if(button!=null)
-					button.setEnabled(false);
-				ret=false;
-			}
-		}
-		return ret;
-	}
-	
-	@Override
 	protected void okPressed() {
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
 	    // store the value of the generate sections checkbox
@@ -144,6 +129,10 @@ public class SystemtapSettingDialog extends SimpleSettingDialog {
 		}
 	
 		KO_value=kernelModuleText.getText();
+		if ((KO_value == null) || KO_value.isEmpty()) {
+			CommonHelper.showErrorDialog("SystemTap Error", null, "Missing kernel module!");
+			return;
+		}
 		super.okPressed();
 	}
 }

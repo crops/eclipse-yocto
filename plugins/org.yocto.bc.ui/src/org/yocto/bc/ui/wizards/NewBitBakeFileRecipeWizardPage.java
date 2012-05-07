@@ -209,6 +209,11 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 			updateStatus("Recipe must have a description");
 			return;
 		}
+		
+		if (licenseText.getText().length() == 0) {
+			updateStatus("Recipe must have a license");
+			return;
+		}
 
 		if (srcuriText.getText().length() == 0) {
 			updateStatus("SRC_URI can't be empty");

@@ -75,7 +75,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		this.pinfo = new ProjectInfo();
 		pinfo.setLocation(projectRoot);
 		pinfo.setInitScriptPath(ProjectInfoHelper.getInitScriptPath(projectRoot));
-		this.parsingCmd = "bitbake -e";
+		this.parsingCmd = "DISABLE_SANITY_CHECKS=1 bitbake -e";
 	}
 	
 	private Collection adapttoIPath(List<File> asList, IProject project) {

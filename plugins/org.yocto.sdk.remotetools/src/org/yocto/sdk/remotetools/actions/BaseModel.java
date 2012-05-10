@@ -17,12 +17,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
 
-import org.yocto.sdk.remotetools.remote.RemoteTarget;
-
 abstract public class BaseModel implements IRunnableWithProgress {
 	
 	protected IHost rseConnection;
-	protected RemoteTarget target;
 
 	abstract public void preProcess(IProgressMonitor monitor) throws InvocationTargetException,	InterruptedException;
 	abstract public void postProcess(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException;
@@ -30,41 +27,16 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	
 	public BaseModel(IHost rseConnection) {
 		this.rseConnection=rseConnection;
-		target=null;
 	}
 	
 	protected void init(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		if(rseConnection==null) {
 			throw new InvocationTargetException(new Exception("NULL rse connection"),"NULL rse connection");
 		}
-		
-		target=new RemoteTarget(rseConnection.getAliasName());
-		try {
-			target.connect(monitor);
-		}catch (InterruptedException e){
-			throw e;
-		}catch (InvocationTargetException e) {
-			throw e;
-		}catch (Exception e) {
-			throw new InvocationTargetException(e,e.getMessage());
-		}
 	}
 	
 	protected void uninit(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		if(target!=null) {
-			try {
-				if (target.isConnected()) {
-					//always disconnect
-					target.disconnect(null);
-				}
-			}catch (InterruptedException e){
-				throw e;
-			}catch (InvocationTargetException e) {
-				throw e;
-			}catch (Exception e) {
-				throw new InvocationTargetException(e,e.getMessage());
-			}
-		}
+
 	}
 	
 	public void run(IProgressMonitor monitor) throws InvocationTargetException,

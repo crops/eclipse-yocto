@@ -45,6 +45,7 @@ public class UstModel extends BaseModel {
 	static final private String REMOTE_FILE_SUFFIX=".tar";
 	static final private String LOCAL_EXEC="lttv-gui";
 	public static final String TRACE_FOLDER_NAME = "Traces";
+	static final private String DATAFILE_PREFIX = "ustfile:";
 		
 	private String argument;
 	private String application;
@@ -96,22 +97,29 @@ public class UstModel extends BaseModel {
 	
 	private String generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(target,null,REMOTE_EXEC);
-		String tempArgs=new String(REMOTE_EXEC+ " ");
+		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
+		String tempArgs=new String();
 		if(application!=null)
 			tempArgs=tempArgs.concat(application + " ");
 		if(argument!=null)
 			tempArgs=tempArgs.concat(argument);
-		String []args=tempArgs.split(" ");
 		String remoteDataFile=null;
 		
 		try {
+			String temp;
+			int idx;
 			monitor.beginTask("Starting usttrace", 2);
 			//starting usttrace
-			app.start(args,null);
+			app.start(null,tempArgs,monitor);
 			monitor.worked(1);
 			BufferedReader in=new BufferedReader(new InputStreamReader(app.getInputStream()));
-			remoteDataFile=in.readLine();
+			while((temp=in.readLine())!=null) {
+				idx=temp.indexOf(DATAFILE_PREFIX);
+				if(idx!=-1) {
+					remoteDataFile=temp.substring(idx + DATAFILE_PREFIX.length());
+					break;
+				}
+			}
 			exit_code=app.waitFor(monitor);
 			app.terminate();
 			if(exit_code!=0) {

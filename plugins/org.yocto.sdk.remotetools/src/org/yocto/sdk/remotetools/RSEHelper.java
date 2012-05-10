@@ -17,22 +17,29 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.rse.core.IRSESystemType;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.rse.core.IRSECoreStatusCodes;
 import org.eclipse.rse.core.RSECorePlugin;
 import org.eclipse.rse.core.model.IHost;
+import org.eclipse.rse.core.model.ISubSystemConfigurationCategories;
 import org.eclipse.rse.core.model.ISystemRegistry;
 import org.eclipse.rse.core.subsystems.ISubSystem;
+import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
 import org.eclipse.rse.services.IService;
 import org.eclipse.rse.services.files.IFileService;
+import org.eclipse.rse.services.shells.HostShellProcessAdapter;
+import org.eclipse.rse.services.shells.IHostShell;
+import org.eclipse.rse.services.shells.IShellService;
 import org.eclipse.rse.subsystems.files.core.servicesubsystem.IFileServiceSubSystem;
 import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
-import org.yocto.sdk.remotetools.actions.IBaseConstants;
 
 public class RSEHelper {
 	
@@ -88,24 +95,55 @@ public class RSEHelper {
 		}
 		return null;
 	}
+	
+	public static IService getConnectedShellService(
+			IHost currentConnection, IProgressMonitor monitor) throws Exception {
+		final ISubSystem subsystem = getShellSubsystem(currentConnection);
+
+		if (subsystem == null)
+			throw new Exception(Messages.ErrorNoSubsystem);
+
+		try {
+			subsystem.connect(monitor, false);
+		} catch (CoreException e) {
+			throw e;
+		} catch (OperationCanceledException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+
+		if (!subsystem.isConnected())
+			throw new Exception(Messages.ErrorConnectSubsystem);
+
+		return ((IShellServiceSubSystem) subsystem).getShellService();
+	}
+	
+	public static ISubSystem getShellSubsystem(IHost host) {
+		if (host == null)
+			return null;
+		ISubSystem[] subSystems = host.getSubSystems();
+		for (int i = 0; i < subSystems.length; i++) {
+			if (subSystems[i] instanceof IShellServiceSubSystem)
+				return subSystems[i];
+		}
+		return null;
+	}
 
 	public static IHost[] getSuitableConnections() {
 		
-		//we only get TCF connections with files&terminal subsystem
+		//we only get RSE connections with files&cmds subsystem
 		ArrayList <IHost> filConnections = new ArrayList <IHost>(Arrays.asList(RSECorePlugin.getTheSystemRegistry()
-				.getHostsBySubSystemConfigurationCategory("files"))); //$NON-NLS-1$
+				.getHostsBySubSystemConfigurationCategory(ISubSystemConfigurationCategories.SUBSYSTEM_CATEGORY_FILES))); //$NON-NLS-1$
 		
 		ArrayList <IHost> terminalConnections = new ArrayList <IHost>(Arrays.asList(RSECorePlugin.getTheSystemRegistry()
-				.getHostsBySubSystemConfigurationCategory("terminals")));//$NON-NLS-1$
+				.getHostsBySubSystemConfigurationCategory("terminal")));//$NON-NLS-1$
+		
+		ArrayList shellConnections = new ArrayList(Arrays.asList(RSECorePlugin.getTheSystemRegistry()
+				.getHostsBySubSystemConfigurationCategory("shells"))); //$NON-NLS-1$
 
 		Iterator <IHost>iter = filConnections.iterator();
 		while(iter.hasNext()){
 			IHost fileConnection = iter.next();
-			IRSESystemType sysType = fileConnection.getSystemType();
-			//remove none TCF terminal connection
-			if(sysType == null || 
-					!sysType.getId().equals(IBaseConstants.TCF_TYPE_ID) || 
-					!terminalConnections.contains(fileConnection)){
+			if(!terminalConnections.contains(fileConnection) && !shellConnections.contains(fileConnection)){
 				iter.remove();
 			}
 		}
@@ -201,11 +239,9 @@ public class RSEHelper {
 					new SubProgressMonitor(monitor, 80));
 			// Need to change the permissions to match the original file
 			// permissions because of a bug in upload
-			//RemoteApplication p = remoteShellExec(
-			//		config,
-			//		"", "chmod", "+x " + spaceEscapify(remotePath.toString()), new SubProgressMonitor(monitor, 5)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			//Thread.sleep(500);
-			//p.destroy();
+			remoteShellExec(
+					connection,
+					"", "chmod", "+x " + spaceEscapify(remotePath.toString()), new SubProgressMonitor(monitor, 5)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			
 		} finally {
 			monitor.done();
@@ -257,4 +293,85 @@ public class RSEHelper {
         }
         return null;
     }
+	
+	public static String spaceEscapify(String inputString) {
+		if (inputString == null)
+			return null;
+
+		return inputString.replaceAll(" ", "\\\\ "); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
+	private final static String CMD_DELIMITER = ";"; //$NON-NLS-1$
+	
+	public static Process remoteShellExec(IHost connection,
+			String prelaunchCmd, String remoteCommandPath, String arguments,
+			IProgressMonitor monitor) throws CoreException {
+		
+		monitor.beginTask(NLS.bind(Messages.RemoteShellExec_1,
+				remoteCommandPath, arguments), 10);
+		String realRemoteCommand = arguments == null ? spaceEscapify(remoteCommandPath)
+				: spaceEscapify(remoteCommandPath) + " " + arguments; //$NON-NLS-1$
+
+		String remoteCommand = realRemoteCommand + CMD_DELIMITER + EXIT_CMD;
+
+		if(prelaunchCmd != null) {
+			if (!prelaunchCmd.trim().equals("")) //$NON-NLS-1$
+				remoteCommand = prelaunchCmd + CMD_DELIMITER + remoteCommand;
+		}
+
+		IShellService shellService;
+		Process p = null;
+		try {
+			shellService = (IShellService) getConnectedShellService(
+							connection,
+							new SubProgressMonitor(monitor, 7));
+
+			// This is necessary because runCommand does not actually run the
+			// command right now.
+			String env[] = new String[0];
+			try {
+				IHostShell hostShell = shellService.launchShell(
+						"", env, new SubProgressMonitor(monitor, 3)); //$NON-NLS-1$
+				hostShell.writeToShell(remoteCommand);
+				p = new HostShellProcessAdapter(hostShell);
+			} catch (Exception e) {
+				if (p != null) {
+					p.destroy();
+				}
+				abort(Messages.RemoteShellExec_2, e,
+						IRSECoreStatusCodes.EXCEPTION_OCCURRED);
+			}
+		} catch (Exception e1) {
+			abort(e1.getMessage(), e1,
+					IRSECoreStatusCodes.EXCEPTION_OCCURRED);
+		}
+
+		monitor.done();
+		return p;
+	}
+	
+	/**
+	 * Throws a core exception with an error status object built from the given
+	 * message, lower level exception, and error code.
+	 * 
+	 * @param message
+	 *            the status message
+	 * @param exception
+	 *            lower level exception associated with the error, or
+	 *            <code>null</code> if none
+	 * @param code
+	 *            error code
+	 */
+	public static void abort(String message, Throwable exception, int code) throws CoreException {
+		IStatus status;
+		if (exception != null) {
+			MultiStatus multiStatus = new MultiStatus(Activator.PLUGIN_ID, code, message, exception);
+			multiStatus.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID, code, exception.getLocalizedMessage(), exception));
+			status= multiStatus;
+		} else {
+			status= new Status(IStatus.ERROR, Activator.PLUGIN_ID, code, message, null);
+		}
+		throw new CoreException(status);
+	}
 }

@@ -31,5 +31,5 @@ cd ..
 
 tar -cf  ${DATAFILE} ${BASENAME} &> /dev/null || exit $?
 
-echo $DATAFILE
+echo -e "ustfile:$DATAFILE\n"
 

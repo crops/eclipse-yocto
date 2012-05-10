@@ -10,70 +10,52 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.remote;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.tcf.protocol.IToken;
 import org.eclipse.tcf.services.IStreams;
 import org.eclipse.tcf.services.IProcesses;
 import org.eclipse.tcf.util.TCFTask;
+import org.eclipse.rse.core.model.IHost;
+import org.yocto.sdk.remotetools.RSEHelper;
 
 public class RemoteApplication {
-
+	
 	public static final int
     STATE_NULL = 0,
     STATE_RUNNING = 1,
     STATE_EXITED = 2;
 	
 	private String directory;
-	private String file;
+	private String command;
+	private String []environment;
+	private IHost target;
 	
-	private IProcesses process;
-	private IStreams stream;
 	private InputStream fInStream;
     private OutputStream fOutStream;
     private InputStream fErrStream;
-	private IProcesses.ProcessContext context;
+    private Process remoteShellProcess;
+	
 	private int exit_code=0;
 	private int status=STATE_NULL;
-	private IProcesses.ProcessesListener listener; 
-	private Exception res= new Exception();
 	
-	private class ProcListener implements IProcesses.ProcessesListener
-	{
-		public void exited(String process_id, int exit_code)
-		{
-			if(!context.getID().equals(process_id))
-				return;
-			process.removeListener(listener);
-			synchronized (RemoteApplication.this.res) {
-				RemoteApplication.this.exit_code=exit_code;
-				RemoteApplication.this.status=STATE_EXITED;
-				res.notifyAll();
-			}
-		}
-	};
+	private String RETURN_VALUE_TAG = "org.yocto.sdk.remotetools.RVTAG";
+	private String RETURN_VALUE_CMD = ";echo \"" + RETURN_VALUE_TAG + "$?\"";
 	
-	public RemoteApplication(RemoteTarget target,
+	public RemoteApplication(IHost target,
 			String directory,
-			String file) {
-		assert(target!=null && file!=null && !file.isEmpty());
-		process=target.getProcessesService();
-		stream=target.getStreamsService();
+			String command,
+			String[] environment) {
+		assert(target!=null);
+		this.target = target;
 		this.directory=directory;
-		this.file=file;
-	}
-	
-	private void reset() {
-		fInStream=null;
-		fOutStream=null;
-		fErrStream=null;
-		
-		context=null;
-		exit_code=0;
-		status=STATE_NULL;
+		this.command=command;
+		this.environment=environment;
 	}
 	
 	public int getStatus()
@@ -86,60 +68,14 @@ public class RemoteApplication {
 		return exit_code;
 	}
 	
-	public synchronized void start( final String[] command_line, 
-            final Map<String,String> environment) throws Exception
-	{
-		synchronized(res) {
-			if(status==STATE_RUNNING)
-				return;
-		}
-		try {
-			reset();
-			new TCFTask <Object>() {
-				public void run() {
-					listener = new ProcListener();
-					process.addListener(listener);
-					process.start(directory, 
-								file, 
-								command_line, 
-								environment, 
-								false, 
-								new IProcesses.DoneStart() {
-						public void doneStart(IToken token, Exception error, 
-								IProcesses.ProcessContext process) {
-							if (error != null) {
-	                            error(error);
-	                            return;
-	                        }
-							synchronized (res) {
-								RemoteApplication.this.context=process;
-								RemoteApplication.this.status=STATE_RUNNING;
-							}
-							done(this);
-						}
-					});
-				}
-			}.get();
-		}catch (Exception e) {
-			 e.printStackTrace();
-			 throw e;
-		}
+	private void reset() {
+		fInStream=null;
+		fOutStream=null;
+		fErrStream=null;
 		
-		
-		String in_id=(String)context.getProperties().get(IProcesses.PROP_STDOUT_ID);
-		if(in_id!=null && !in_id.isEmpty()) {
-			fInStream=new RemoteInputStream(stream,in_id);
-		}
-		String out_id=(String)context.getProperties().get(IProcesses.PROP_STDIN_ID);
-		if(out_id!=null && !out_id.isEmpty()) {
-			fOutStream=new RemoteOutputStream(stream,out_id);
-		}
-		String err_id=(String)context.getProperties().get(IProcesses.PROP_STDERR_ID);
-		if(err_id!=null && !err_id.isEmpty() && !err_id.equals(in_id)) {
-			fErrStream=new RemoteInputStream(stream,err_id);
-		}
-			
-		return;
+		remoteShellProcess=null;
+		exit_code=0;
+		status=STATE_NULL;
 	}
 	
 	public InputStream getInputStream() {
@@ -154,52 +90,66 @@ public class RemoteApplication {
         return fErrStream;
     }
     
-    public synchronized void terminate() throws Exception {
-    	
-    	if(fInStream!=null) { 
-			fInStream.close();
-			fInStream=null;
-		}
-		if(fOutStream!=null) {
-			fOutStream.close();
-			fOutStream=null;
-		}
-		if(fErrStream!=null) {
-			fErrStream.close();
-			fOutStream=null;
-		}
-		
-    	synchronized (res) {
-    		if(RemoteApplication.this.status!=STATE_RUNNING || 
-    				RemoteApplication.this.context==null)
-			{
+	public synchronized void start(String prelaunchCmd, String argument, IProgressMonitor monitor) throws Exception {
+		if(status==STATE_RUNNING)
 				return;
-			}
-    	}
-    	
-    	new TCFTask <Object> () {
-    		public void run () {
-				RemoteApplication.this.context.terminate(new IProcesses.DoneCommand() {
-					public void doneCommand(IToken token, Exception error) {
-						if(error!=null) error(error);
-						else done(this);
-					}
-				});
-    		}
-    	}.get();
-    }
-    
-    public int waitFor(IProgressMonitor monitor) throws InterruptedException {
-    	
-    	synchronized (res) {
-    		while (status==STATE_RUNNING) {
-    			if(monitor!=null) {
-	    			if(monitor.isCanceled())
+	
+		reset();
+		remoteShellProcess = RSEHelper.remoteShellExec(this.target, prelaunchCmd, this.command, argument==null?RETURN_VALUE_CMD:argument+RETURN_VALUE_CMD, monitor);
+		fInStream = remoteShellProcess.getInputStream();
+		fOutStream = remoteShellProcess.getOutputStream();
+		fErrStream = remoteShellProcess.getErrorStream();
+		status=STATE_RUNNING;
+	}
+	
+	 public synchronized void terminate() throws Exception {
+		 
+		 if(status != STATE_RUNNING || remoteShellProcess != null)
+			 return;
+		 
+		 remoteShellProcess.destroy();
+		 reset();
+	 }
+	 
+	 public int waitFor(IProgressMonitor monitor) throws InterruptedException {
+		 while(status==STATE_RUNNING) {
+			 if(monitor!=null) {
+	    			if(monitor.isCanceled()) {
 	    				throw new InterruptedException("User Cancelled");
-    			}
-    			res.wait(500);
-    		}
-    		return exit_code;
-    	}
-    }
+	    			}
+ 			 }
+			 
+			 try {
+				 remoteShellProcess.waitFor();
+			 }catch(InterruptedException e){
+				 //get the return value
+				 try {
+					 if(fInStream.available() != 0) {
+						 BufferedReader in=new BufferedReader(new InputStreamReader(fInStream));
+						 String thisline;
+						 int idx;
+						 while((thisline=in.readLine()) != null) {
+							    if(thisline.indexOf(RETURN_VALUE_CMD)==-1) {
+									idx=thisline.indexOf(RETURN_VALUE_TAG);
+									if(idx != -1) {
+										try {
+											exit_code=(new Integer(thisline.substring(idx+RETURN_VALUE_TAG.length()))).intValue();
+										}catch(NumberFormatException e2) {
+											//
+										}
+										break;
+									}
+							    }
+						 }
+					 }
+				 }catch(IOException e1) {
+					 //do nothing
+				 }
+			 }finally {
+				 status=STATE_EXITED;
+			 }
+		 }
+		 return exit_code;
+	 }
 }
+

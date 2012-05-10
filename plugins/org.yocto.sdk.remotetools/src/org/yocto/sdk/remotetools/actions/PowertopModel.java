@@ -79,7 +79,7 @@ public class PowertopModel extends BaseModel {
 	
 	private void generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(target,null,REMOTE_EXEC);
+		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
 		String currentDate=new SimpleDateFormat("yyyyMMddHHmmssSSS").format(Calendar.getInstance().getTime()).toString();
 		remotefile=new String(REMOTE_FILE_PREFIX + currentDate);
 		localfile=new String(remotefile + LOCAL_FILE_SUFFIX);
@@ -95,13 +95,14 @@ public class PowertopModel extends BaseModel {
 		param.add(time.toString());
 		if(showpid)
 			param.add("-p");
-		
-		String [] args=param.toArray(new String[param.size()]);
+		String args = "start -l " + remotefile + " powertop -d -t " + time.toString();
+		if(showpid)
+			args += " -p";
 		
 		try {
 			monitor.beginTask("Starting powertop", 2);
 			//starting oprofile-server
-			app.start(args,null);
+			app.start(null,args,monitor);
 			monitor.worked(1);
 			exit_code=app.waitFor(monitor);
 			app.terminate();

@@ -68,18 +68,13 @@ public class OprofileModel extends BaseModel {
 	
 	private void startServer(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(target,null,REMOTE_EXEC);
-		String[] args={
-				REMOTE_EXEC,
-				"start",
-				"-d",
-				"oprofile-server"
-		};
+		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
+		String args="start -d oprofile-server";
 		
 		try {
 			monitor.beginTask("Starting oprofile-server", 2);
 			//starting oprofile-server
-			app.start(args,null);
+			app.start(null,args,monitor);
 			monitor.worked(1);
 
 			exit_code=app.waitFor(monitor);
@@ -94,16 +89,11 @@ public class OprofileModel extends BaseModel {
 	
 	private void stopServer(IProgressMonitor monitor) throws Exception {
 		
-		RemoteApplication app=new RemoteApplication(target,null,REMOTE_EXEC);
-		String[] args={
-				REMOTE_EXEC,
-				"stop",
-				"-d",
-				"oprofile-server"
-		};
+		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
+		String args="stop -d oprofile-server";
 		try {
 			monitor.beginTask("Stopping oprofile-server", 2);
-			app.start(args,null);
+			app.start(null,args,monitor);
 			monitor.worked(1);
 			//no cancel for stop server
 			app.waitFor(null);
@@ -187,8 +177,8 @@ public class OprofileModel extends BaseModel {
 			
 			new LocalJob("oprofile-viewer",
 					(searchPath!=null) ? 
-						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName(),"-s",searchPath} : 
-						new String[] {LOCAL_EXEC,"-h",target.getRemoteHostName()},
+						new String[] {LOCAL_EXEC,"-h",rseConnection.getHostName(),"-s",searchPath} : 
+						new String[] {LOCAL_EXEC,"-h",rseConnection.getHostName()},
 					null,
 					null,
 					window).schedule();

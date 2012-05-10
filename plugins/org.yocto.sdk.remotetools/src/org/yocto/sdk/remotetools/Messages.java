@@ -42,6 +42,8 @@ public class Messages extends NLS {
 	
 	public static String LocalJob_Title;
 	public static String ErrorLocalJob;
+	public static String RemoteShellExec_1;
+	public static String RemoteShellExec_2;
 	
 	static {
 		// initialize resource bundle

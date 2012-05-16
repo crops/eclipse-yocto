@@ -50,6 +50,7 @@ public class MainPage extends WizardPage {
 	public static final String PAGE_NAME = "Main";
 	private static final String META_DATA_LOC = "MetadataLoc";
 	private static final String BSP_OUT_LOC = "BspOutLoc";
+	private static final String BUILD_DIR_LOC = "BuilddirLoc";
 	private static final String KARCH_CMD = "yocto-bsp list karch";
 	private static final String QARCH_CMD = "yocto-bsp list qemu property qemuarch";
 	private static final String BSP_SCRIPT = "yocto-bsp";
@@ -59,12 +60,15 @@ public class MainPage extends WizardPage {
 
 	private Button btnMetadataLoc;
 	private Button btnBspOutLoc;
+	private Button btnBuilddirLoc;
 	private Text textMetadataLoc;
 	private Text textBspName;
 	private Text textBspOutLoc;
+	private Text textBuilddirLoc;
 	private Combo karchCombo;
 	private Combo qarchCombo;
-	private Label metadata_label; 
+	private Label metadata_label;
+	private Label builddir_label;
 	private Label bspname_label;
 	private Label bspout_label;
 	private Label karch_label;
@@ -104,8 +108,15 @@ public class MainPage extends WizardPage {
 		});
 		btnMetadataLoc = addFileSelectButton(textContainer, textMetadataLoc);
 		
+		builddir_label = new Label(composite, SWT.NONE);
+		builddir_label.setText("Build location: ");
+		textContainer = new Composite(composite, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		textBuilddirLoc = (Text)addTextControl(textContainer, BUILD_DIR_LOC, "");
+		btnBuilddirLoc = addFileSelectButton(textContainer, textBuilddirLoc);
+		
 		bspname_label = new Label(composite, SWT.NONE);
-	
 		bspname_label.setText("BSP Name*: ");
 		textBspName = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -198,7 +209,8 @@ public class MainPage extends WizardPage {
 					 if (!bsp_script.exists() || !bsp_script.canExecute())
 						 status = new Status(IStatus.ERROR, "not_used", 0,
 								 "Make sure yocto-bsp exists under \"" + metadata_loc + "/scripts\" and is executable!", null);
-					 else {						
+					 else {		
+						 
 						 kernelArchesHandler();
 						 canFlipToNextPage();
 					 }
@@ -221,10 +233,42 @@ public class MainPage extends WizardPage {
 		 if (widget == qarchCombo) {
 			 canFlipToNextPage();
 		 }
+		 checkBuildDir();
 		 if (status.getSeverity() == IStatus.ERROR)
 			 setErrorMessage(status.getMessage());
 		 
 		 getWizard().getContainer().updateButtons();
+	}
+	
+	private void checkBuildDir() {
+		String metadata_dir = textMetadataLoc.getText();
+		String builddir_str = textBuilddirLoc.getText();
+	
+		File build_dir = null;
+		if ((builddir_str == null) || builddir_str.isEmpty()) 
+			builddir_str = metadata_dir + "/build";
+			
+		build_dir = new File(builddir_str);
+		
+		if (!build_dir.exists()) {
+			String create_builddir_cmd = metadata_dir + "/oe-init-build-env " + builddir_str;
+			try {
+				Runtime rt = Runtime.getRuntime();
+				//Process proc = rt.exec(create_builddir_cmd);
+				Process proc = rt.exec(new String[] {"sh", "-c", create_builddir_cmd});
+				InputStream stdin = proc.getInputStream();
+				InputStreamReader isr = new InputStreamReader(stdin);
+				BufferedReader br = new BufferedReader(isr);
+				String line = null;
+
+				while ( (line = br.readLine()) != null) {
+				}
+
+				int exitVal = proc.waitFor();
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}
 	}
 	
 	public YoctoBspElement bspElement() {
@@ -270,7 +314,7 @@ public class MainPage extends WizardPage {
 	}
 	
 	
-	private boolean validatePage() {
+	public boolean validatePage() {
 		String metadata_loc = textMetadataLoc.getText();
 		String bspname = textBspName.getText();
 		String karch = karchCombo.getText();
@@ -289,6 +333,8 @@ public class MainPage extends WizardPage {
 		bspElem.setBspName(bspname);
 		if (!textBspOutLoc.getText().isEmpty())
 			bspElem.setBspOutLoc(textBspOutLoc.getText());
+		if (!textBuilddirLoc.getText().isEmpty())
+			bspElem.setBuildLoc(textBuilddirLoc.getText());
 		bspElem.setMetadataLoc(metadata_loc);
 		bspElem.setKarch(karch);
 		bspElem.setQarch(qarch);

@@ -326,6 +326,9 @@ public class PropertiesPage extends WizardPage {
 	}
 	
 	public boolean validatePage() {
+		if (kcCombo == null)
+			return false; 
+		
 		if ((kcCombo != null) && (kbCombo != null)) {
 			String kcSelection = kcCombo.getText();
 			String kbSelection = kbCombo.getText();
@@ -398,7 +401,7 @@ public class PropertiesPage extends WizardPage {
 			 existingButton.setSelection(false);
 			 kbCombo.removeAll();
 			 
-			 kb_property = "\"" + kernel_choice + "\"."+NEW_KBRANCH_NAME;
+			 kb_property = "\\\"" + kernel_choice + "\\\"."+NEW_KBRANCH_NAME;
 			 String[] values = getValues(kb_property);
 			 if (values != null)
 				 kbCombo.setItems(values);
@@ -439,10 +442,18 @@ public class PropertiesPage extends WizardPage {
 	private String[] getValues(String property) {
 		ArrayList<String> values = new ArrayList<String>();
 		
-		String values_cmd = bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
+		String build_dir = "";
+		if ((bspElem.getBuildLoc() == null) || bspElem.getBuildLoc().isEmpty())
+			build_dir = bspElem.getMetadataLoc()+"/build";
+		else
+			build_dir = bspElem.getBuildLoc();
+		
+		String values_cmd = "export BUILDDIR=" + build_dir + ";"+bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
+	
 		try {
 			Runtime rt = Runtime.getRuntime();
-			Process proc = rt.exec(values_cmd);
+	
+			Process proc = rt.exec(new String[] {"sh", "-c", values_cmd});
 			InputStream stdin = proc.getInputStream();
 			InputStreamReader isr = new InputStreamReader(stdin);
 			BufferedReader br = new BufferedReader(isr);

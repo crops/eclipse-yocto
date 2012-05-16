@@ -133,6 +133,6 @@ public class YoctoBSPWizard extends Wizard {
 	}
 	
 	public boolean canFinish() {
-		return (propertiesPage.validatePage());
+		return (mainPage.validatePage() && propertiesPage.validatePage());
 	}
 }

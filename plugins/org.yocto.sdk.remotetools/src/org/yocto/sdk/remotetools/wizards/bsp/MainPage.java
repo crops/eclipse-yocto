@@ -210,9 +210,7 @@ public class MainPage extends WizardPage {
 						 status = new Status(IStatus.ERROR, "not_used", 0,
 								 "Make sure yocto-bsp exists under \"" + metadata_loc + "/scripts\" and is executable!", null);
 					 else {		
-						 
 						 kernelArchesHandler();
-						 canFlipToNextPage();
 					 }
 				 }
 			 }
@@ -228,16 +226,14 @@ public class MainPage extends WizardPage {
 				 qarch_label.setEnabled(false);
 				 qarchCombo.setEnabled(false);
 			 }		
-			 canFlipToNextPage();
 		 }
-		 if (widget == qarchCombo) {
-			 canFlipToNextPage();
-		 }
+		
 		 checkBuildDir();
 		 if (status.getSeverity() == IStatus.ERROR)
 			 setErrorMessage(status.getMessage());
 		 
 		 getWizard().getContainer().updateButtons();
+		 canFlipToNextPage();
 	}
 	
 	private void checkBuildDir() {

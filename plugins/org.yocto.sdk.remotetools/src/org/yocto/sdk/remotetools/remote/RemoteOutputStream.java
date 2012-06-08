@@ -14,9 +14,9 @@ package org.yocto.sdk.remotetools.remote;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.eclipse.tm.tcf.protocol.IToken;
-import org.eclipse.tm.tcf.services.IStreams;
-import org.eclipse.tm.tcf.util.TCFTask;
+import org.eclipse.tcf.protocol.IToken;
+import org.eclipse.tcf.services.IStreams;
+import org.eclipse.tcf.util.TCFTask;
 
 public class RemoteOutputStream extends OutputStream /* implements IRemoteStream */{
 

@@ -17,16 +17,16 @@ import java.util.Map;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.tm.tcf.protocol.IChannel;
-import org.eclipse.tm.tcf.protocol.IPeer;
-import org.eclipse.tm.tcf.core.AbstractPeer;
-import org.eclipse.tm.tcf.protocol.IService;
-import org.eclipse.tm.tcf.protocol.IToken;
-import org.eclipse.tm.tcf.protocol.Protocol;
-import org.eclipse.tm.tcf.services.IProcesses;
-import org.eclipse.tm.tcf.services.ILocator;
-import org.eclipse.tm.tcf.services.IStreams;
-import org.eclipse.tm.tcf.util.TCFTask;
+import org.eclipse.tcf.protocol.IChannel;
+import org.eclipse.tcf.protocol.IPeer;
+import org.eclipse.tcf.core.AbstractPeer;
+import org.eclipse.tcf.protocol.IService;
+import org.eclipse.tcf.protocol.IToken;
+import org.eclipse.tcf.protocol.Protocol;
+import org.eclipse.tcf.services.IProcesses;
+import org.eclipse.tcf.services.ILocator;
+import org.eclipse.tcf.services.IStreams;
+import org.eclipse.tcf.util.TCFTask;
 import org.yocto.sdk.remotetools.RSEHelper;
 
 public class RemoteTarget {

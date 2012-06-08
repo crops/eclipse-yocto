@@ -11,7 +11,7 @@
 package org.yocto.sdk.remotetools.actions;
 
 public interface IBaseConstants {
-	public static final String TCF_TYPE_ID="org.eclipse.tm.tcf.rse.systemType";//$NON-NLS-1$
+	public static final String TCF_TYPE_ID="org.eclipse.tcf.rse.systemType";//$NON-NLS-1$
 	
 	public static final String QUALIFIER="org.yocto.sdk.remotetools";//$NON-NLS-1$
 	

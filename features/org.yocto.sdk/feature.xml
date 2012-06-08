@@ -46,19 +46,19 @@
       <import plugin="org.eclipse.rse.subsystems.processes.core"/>
       <import plugin="org.eclipse.rse.processes.ui"/>
       <import plugin="org.eclipse.rse.subsystems.terminals.core"/>
-      <import plugin="org.eclipse.tm.tcf" version="0.3.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.tcf" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.ui" version="5.1.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.core" version="5.1.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources" version="3.5.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.debug.core" version="3.5.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.managedbuilder.core"/>
-      <import plugin="org.eclipse.linuxtools.cdt.autotools.core" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.linuxtools.cdt.autotools.ui" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.cdt.autotools.core" version="1.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.cdt.autotools.ui" version="1.0.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.managedbuilder.ui" version="5.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.expressions" version="3.4.100" match="greaterOrEqual"/>
       <import plugin="org.eclipse.rse.files.ui" version="3.1.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.rse.subsystems.shells.core" version="3.1.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.tm.tcf.core" version="0.3.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.tcf.core" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.launch.remote" version="2.2.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.tm.terminal" version="3.0.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.rse.terminals.ui" version="1.0.100" match="greaterOrEqual"/>
@@ -71,27 +71,6 @@
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.core.filesystem"/>
    </requires>
-
-   <plugin
-         id="org.eclipse.tm.tcf"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.tm.tcf.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.tm.tcf.rse"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
    <plugin
          id="org.yocto.sdk.ide"

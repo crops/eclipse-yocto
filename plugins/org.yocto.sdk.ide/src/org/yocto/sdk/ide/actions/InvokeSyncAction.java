@@ -26,9 +26,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.linuxtools.internal.cdt.autotools.core.AutotoolsNewMakeGenerator;
-import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.InvokeAction;
-import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.InvokeMessages;
+import org.eclipse.cdt.internal.autotools.core.AutotoolsNewMakeGenerator;
+import org.eclipse.cdt.internal.autotools.ui.actions.InvokeAction;
+import org.eclipse.cdt.internal.autotools.ui.actions.InvokeMessages;
 
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 

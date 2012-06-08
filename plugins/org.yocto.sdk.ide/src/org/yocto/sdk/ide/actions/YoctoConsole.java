@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.yocto.sdk.ide.actions;
 
-import org.eclipse.linuxtools.internal.cdt.autotools.ui.Console;
+import org.eclipse.cdt.internal.autotools.ui.Console;
 import org.yocto.sdk.ide.YoctoSDKMessages;
 
 @SuppressWarnings("restriction")

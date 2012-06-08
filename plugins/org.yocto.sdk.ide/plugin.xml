@@ -20,7 +20,7 @@
          name="%extension.name.0"
          point="org.eclipse.core.resources.natures">
       <requires-nature
-            id="org.eclipse.linuxtools.cdt.autotools.core.autotoolsNatureV2">
+            id="org.eclipse.cdt.autotools.core.autotoolsNatureV2">
       </requires-nature>
       <runtime>
          <run
@@ -28,7 +28,7 @@
          </run>
       </runtime>
       <builder
-            id="org.eclipse.linuxtools.cdt.autotools.core.genmakebuilderV2">
+            id="org.eclipse.cdt.autotools.core.genmakebuilderV2">
       </builder>
    </extension>
    <extension
@@ -176,7 +176,7 @@
             id="org.yocto.sdk.ide.projectType"
             isAbstract="true"
             name="%projectType.name.0"
-            superClass="org.eclipse.linuxtools.cdt.autotools.core.projectType">
+            superClass="org.eclipse.cdt.autotools.core.projectType">
       </projectType>
    </extension>
    <extension

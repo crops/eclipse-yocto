@@ -19,7 +19,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.linuxtools.internal.cdt.autotools.ui.actions.InvokeAction;
+import org.eclipse.cdt.internal.autotools.ui.actions.InvokeAction;
 import org.eclipse.swt.widgets.Shell;
 
 import org.yocto.sdk.ide.YoctoGeneralException;

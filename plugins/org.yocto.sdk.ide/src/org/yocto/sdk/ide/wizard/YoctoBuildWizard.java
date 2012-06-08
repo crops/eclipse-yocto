@@ -26,7 +26,7 @@ import org.eclipse.cdt.managedbuilder.ui.wizards.MBSWizardHandler;
 import org.eclipse.cdt.ui.newui.CDTPrefUtil;
 import org.eclipse.cdt.ui.wizards.EntryDescriptor;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.linuxtools.internal.cdt.autotools.ui.wizards.AutotoolsBuildWizardHandler;
+import org.eclipse.cdt.internal.autotools.ui.wizards.AutotoolsBuildWizardHandler;
 
 @SuppressWarnings("restriction")
 public class YoctoBuildWizard extends AbstractCWizard {

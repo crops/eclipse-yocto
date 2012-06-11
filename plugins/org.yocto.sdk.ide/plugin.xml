@@ -176,7 +176,7 @@
             id="org.yocto.sdk.ide.projectType"
             isAbstract="true"
             name="%projectType.name.0"
-            superClass="org.eclipse.cdt.autotools.core.projectType">
+            superClass="org.eclipse.linuxtools.cdt.autotools.core.projectType">
       </projectType>
    </extension>
    <extension

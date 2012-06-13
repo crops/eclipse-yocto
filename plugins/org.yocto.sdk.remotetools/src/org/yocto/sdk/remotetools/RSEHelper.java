@@ -10,7 +10,10 @@
  ********************************************************************************/
 package org.yocto.sdk.remotetools;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -234,8 +237,26 @@ public class RSEHelper {
 					new SubProgressMonitor(monitor, 5)).exists()) {
 			}
 			*/
+			/*
 			fileService.upload(inputStream, remotePath.removeLastSegments(1)
 					.toString(), remotePath.lastSegment(), true, null,
+					new SubProgressMonitor(monitor, 80));
+					*/
+			//TODO workaround for now
+			//in case the underlying scp file service doesn't support inputStream upload
+			BufferedInputStream bis = new BufferedInputStream(inputStream);
+			File tempFile = File.createTempFile("scp", "temp"); //$NON-NLS-1$ //$NON-NLS-2$
+			FileOutputStream os = new FileOutputStream(tempFile);
+			BufferedOutputStream bos = new BufferedOutputStream(os);
+			byte[] buffer = new byte[1024];
+			int readCount;
+			while( (readCount = bis.read(buffer)) > 0)
+			{
+				bos.write(buffer, 0, readCount);
+			}
+			bos.close();
+			fileService.upload(tempFile, remotePath.removeLastSegments(1)
+					.toString(), remotePath.lastSegment(), true, null, null,
 					new SubProgressMonitor(monitor, 80));
 			// Need to change the permissions to match the original file
 			// permissions because of a bug in upload

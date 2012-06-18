@@ -133,6 +133,11 @@ public class MainPage extends WizardPage {
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		textBspOutLoc = (Text)addTextControl(textContainer, BSP_OUT_LOC, "");
+		textBspOutLoc.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				controlChanged(e.widget);
+			}
+		});
 		btnBspOutLoc = addFileSelectButton(textContainer, textBspOutLoc);
 		karch_label= new Label(composite, SWT.NONE);
 		karch_label.setText("kernel Architecture*: ");

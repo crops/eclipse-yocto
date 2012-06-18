@@ -197,11 +197,10 @@ public class MainPage extends WizardPage {
 	private void controlChanged(Widget widget) {
 		 Status status = new Status(IStatus.OK, "not_used", 0, "", null);
 		 setErrorMessage(null);
-		 
+		 String metadata_loc = textMetadataLoc.getText();
 		 if (widget == textMetadataLoc) {
 			 resetKarchCombo();
-			 String metadata_loc = textMetadataLoc.getText();
-				
+
 			 if (metadata_loc.length() == 0) {
 				 status = new Status(IStatus.ERROR, "not_used", 0, "Meta data location can't be empty!", null);
 			 } else {
@@ -234,6 +233,26 @@ public class MainPage extends WizardPage {
 		 }
 		
 		 checkBuildDir();
+		 
+		 String build_dir = textBuilddirLoc.getText();
+		 String output_dir = textBspOutLoc.getText();
+		 String bsp_name = textBspName.getText();
+		 
+		 if (!output_dir.isEmpty() && output_dir.matches(build_dir)) {
+			 status = new Status(IStatus.ERROR, "not_used", 0,
+					 "You've set BSP output directory the same as build directory, please leave output directory empty for this scenario!", null);
+		 }
+		 
+		 if (build_dir.startsWith(metadata_loc) && output_dir.isEmpty() && !bsp_name.isEmpty()) {
+			 String bsp_dir_str = metadata_loc + "/meta-" + bsp_name;
+			 File bsp_dir = new File(bsp_dir_str);
+			 if (bsp_dir.exists()) {
+				 status = new Status(IStatus.ERROR, "not_used", 0,
+						 "Your BSP with name: " + bsp_name + " already exist under directory: " + bsp_dir_str + ", please change your bsp name!", null);
+			 }
+		 }
+		 validatePage();
+		 
 		 if (status.getSeverity() == IStatus.ERROR)
 			 setErrorMessage(status.getMessage());
 		 
@@ -334,8 +353,12 @@ public class MainPage extends WizardPage {
 		bspElem.setBspName(bspname);
 		if (!textBspOutLoc.getText().isEmpty())
 			bspElem.setBspOutLoc(textBspOutLoc.getText());
+		else
+			bspElem.setBspOutLoc("");
 		if (!textBuilddirLoc.getText().isEmpty())
 			bspElem.setBuildLoc(textBuilddirLoc.getText());
+		else
+			bspElem.setBuildLoc("");
 		bspElem.setMetadataLoc(metadata_loc);
 		bspElem.setKarch(karch);
 		bspElem.setQarch(qarch);

@@ -164,13 +164,6 @@
       </processType>
    </extension>
    <extension
-         point="org.eclipse.cdt.ui.CDTWizard">
-      <wizard
-            class="org.yocto.sdk.ide.wizard.YoctoBuildWizard"
-            name="Yocto Project ADT Wizard">
-      </wizard>
-   </extension>
-   <extension
          point="org.eclipse.cdt.managedbuilder.core.buildDefinitions">
       <projectType
             id="org.yocto.sdk.ide.projectType"

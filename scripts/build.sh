@@ -31,7 +31,7 @@ find_eclipse_base ()
 
 find_launcher ()
 {
-  local list=`ls ${ECLIPSE_BASE}/plugins/org.eclipse.equinox.launcher_*.jar`
+  local list="`ls ${ECLIPSE_BASE}/plugins/org.eclipse.equinox.launcher_*.jar`"
   for launcher in $list; do
     [ -f $launcher ] && LAUNCHER=${launcher}
   done
@@ -39,7 +39,7 @@ find_launcher ()
 
 find_buildfile ()
 {
-  local list=`ls ${ECLIPSE_BASE}/plugins/org.eclipse.pde.build_*/scripts/build.xml`
+  local list="`ls ${ECLIPSE_BASE}/plugins/org.eclipse.pde.build_*/scripts/build.xml`"
   for buildfile in $list; do
     [ -f $buildfile ] && BUILDFILE=${buildfile}
   done
@@ -65,7 +65,7 @@ check_env ()
   fi 
 }
 
-if [[ $# -ne 2  && $# -ne 3 ]]; then 
+if [ $# -ne 2 ] && [ $# -ne 3 ]; then 
    help
 fi
 

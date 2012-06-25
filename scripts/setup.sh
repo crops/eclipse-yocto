@@ -41,9 +41,9 @@ if [ "x$url" != "x" ]; then
     url=`echo $url | sed s,$userpass@,,g`
     host=`echo $url | cut -d: -f1`
     port=`echo $url | cut -d: -f2 | sed -e 's,[^0-9],,g'`
-    [[ "x$host" == "x" ]] && err_exit 1 "Undefined proxy host"
+    [ "x$host" = "x" ] && err_exit 1 "Undefined proxy host"
     PROXY_PARAM="-Dhttp.proxySet=true -Dhttp.proxyHost=$host"
-    [[ "x$port" != "x" ]] && PROXY_PARAM="${PROXY_PARAM} -Dhttp.proxyPort=$port"
+    [ "x$port" != "x" ] && PROXY_PARAM="${PROXY_PARAM} -Dhttp.proxyPort=$port"
 fi
 
 
@@ -83,7 +83,7 @@ if [ ! -f eclipse/startup.jar ]; then
   if [ -h ../startup.jar ]; then
     rm ../startup.jar
   fi
-  LAUNCHER=`ls org.eclipse.equinox.launcher_*.jar | sort | tail -1`
+  LAUNCHER="`ls org.eclipse.equinox.launcher_*.jar | sort | tail -1`"
   if [ "x${LAUNCHER}" != "x" ]; then
     echo "eclipse LAUNCHER=${LAUNCHER}" 
     ln -s plugins/${LAUNCHER} ../startup.jar
@@ -103,36 +103,36 @@ else
   DROPUP=../..
 fi
 
-LAUNCHER=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar | sort | tail -1`
+LAUNCHER="`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar | sort | tail -1`"
 
 get_version()
 {
 #$1: repository_url
 #$2: featureId
 #$3: 'all' or 'max' or 'min', 'max' if not specified
-  local remote_vers=`java ${PROXY_PARAM} \
+  local remote_vers="`java ${PROXY_PARAM} \
     -jar ${LAUNCHER} \
     -application org.eclipse.equinox.p2.director \
     -destination ${curdir}/eclipse \
     -profile SDKProfile \
     -repository $1 \
     -list $2\
-    | awk 'BEGIN { FS="=" } { print $2 }'`
+    | awk 'BEGIN { FS="=" } { print $2 }'`"
 
   #find larget remote vers
-  local remote_ver=`echo ${remote_vers} | cut -d ' ' -f1`
+  local remote_ver="`echo ${remote_vers} | cut -d ' ' -f1`"
   case $3 in
     all)
       remote_ver=${remote_vers}
       ;;
     min)
       for i in ${remote_vers}; do
-        [[ "${remote_ver}" > "$i" ]] && remote_ver="$i"
+        [ "${remote_ver}" \> "$i" ] && remote_ver="$i"
       done
       ;;
     *)
       for i in ${remote_vers}; do
-        [[ "${remote_ver}" < "$i" ]] && remote_ver="$i"
+        [ "${remote_ver}" \< "$i" ] && remote_ver="$i"
       done
       ;;
   esac
@@ -145,10 +145,10 @@ check_local_version()
 # $1 unitId
 # $2 min version
 # $3 max version (optional)
-  version=`get_version file:///${curdir}/eclipse/p2/org.eclipse.equinox.p2.engine/profileRegistry/SDKProfile.profile $1`
-  [[ "$version" < "$2" ]] && return 1
+  version="`get_version file:///${curdir}/eclipse/p2/org.eclipse.equinox.p2.engine/profileRegistry/SDKProfile.profile $1`"
+  [ "$version" \< "$2" ] && return 1
   if [ "x$3" != "x" ]; then
-    [[ "$version" > "$3" ]] && return -1
+    [ "$version" \> "$3" ] && return -1
   fi
   return 0
 }
@@ -160,23 +160,23 @@ update_feature_remote()
 #$2: featureId
 #$3: min version
 #$4: max version(optional)
-  [[ $# -lt 3 ]] && err_exit 1 "update_feature_remote: invalid parameters, $*"
+  [ $# -lt 3 ] && err_exit 1 "update_feature_remote: invalid parameters, $*"
   check_local_version $2 $3 $4 && echo "skip installed feature $2" && return 0
   local installIU=""
   if [ "x$4" != "x" ]; then
       #has max version requirement
-      for i in `get_version $1 $2 'all'`; do
-        if [[ "$i" > "$3" ]] || [[ "$i" == "$3" ]] && [[ "$i" < "$4" ]]; then
-          [[ "$i" > "$installIU" ]] && installIU=$i
+      for i in "`get_version $1 $2 'all'`"; do
+        if [ "$i" \> "$3" ] || [ "$i" = "$3" ] && [ "$i" \< "$4" ]; then
+          [ "$i" \> "$installIU" ] && installIU=$i
         fi
       done
   else
       #only has minimum version requirement
-      local max_remote_ver=`get_version $1 $2 'max'`
-      [[ "$max_remote_ver" > "$3" ]] || [[ "$max_remote_ver" == "$3" ]] && installIU=$max_remote_ver
+      local max_remote_ver="`get_version $1 $2 'max'`"
+      [ "$max_remote_ver" \> "$3" ] || [ "$max_remote_ver" = "$3" ] && installIU=$max_remote_ver
   fi
 
-  [[ "x$installIU" == "x" ]] && err_exit 1 "Can NOT find candidates of $2 version($3, $4) at $1!"
+  [ "x$installIU" = "x" ] && err_exit 1 "Can NOT find candidates of $2 version($3, $4) at $1!"
   installIU="$2/$installIU"
   echo "try to install $installIU ..."
   java ${PROXY_PARAM} -jar ${LAUNCHER} \

@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -225,8 +226,6 @@ public class Activator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public Activator() {
-		this.getImageRegistry().put(IMAGE_VARIABLE, Activator.getImageDescriptor("icons/variable.gif"));
-		this.getImageRegistry().put(IMAGE_FUNCTION, Activator.getImageDescriptor("icons/function.gif"));
 	}
 
 	/*
@@ -261,4 +260,9 @@ public class Activator extends AbstractUIPlugin {
 		shellMap.remove(path);
 		bbSessionMap.remove(path);
 	}
+
+	protected void initializeImageRegistry(ImageRegistry reg) {
+		reg.put(IMAGE_VARIABLE, Activator.getImageDescriptor("icons/variable.gif"));
+		reg.put(IMAGE_FUNCTION, Activator.getImageDescriptor("icons/function.gif"));
+    }
 }

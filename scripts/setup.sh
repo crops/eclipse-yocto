@@ -49,11 +49,11 @@ fi
 
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
-ep_ver=3.7.2
-ep_date="-201202080800"
+ep_ver="4.2"
+ep_date="-201206081400"
 P2_disabled=false
 P2_no_dropins=false
-if [ ! -f eclipse/plugins/org.eclipse.swt_3.7.2.v3740f.jar ]; then
+if [ ! -f eclipse/plugins/org.eclipse.swt_3.100.0.v4233d.jar ]; then
   curdir2=`pwd`
   if [ ! -d eclipse -o -h eclipse ]; then
     if [ -d eclipse-${ep_ver}-${ep_arch} ]; then
@@ -66,7 +66,7 @@ if [ ! -f eclipse/plugins/org.eclipse.swt_3.7.2.v3740f.jar ]; then
   fi
   # Eclipse SDK: Need the SDK so we can link into docs
   echo "Getting Eclipse SDK..."
-  wget "http://download.eclipse.org/eclipse/downloads/drops/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
+  wget "http://download.eclipse.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
   tar xfz eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz || err_exit $? "extracting Eclipse SDK failed"
   rm eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz
   cd "${curdir2}"
@@ -93,17 +93,7 @@ if [ ! -f eclipse/startup.jar ]; then
   cd ${curdir2}
 fi
 
-if ${P2_no_dropins} ; then
-  #P2 disabled?
-  DROPIN=.
-  DROPUP=.
-else
-  #P2 enabled
-  DROPIN=eclipse/dropins
-  DROPUP=../..
-fi
-
-LAUNCHER="`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar | sort | tail -1`"
+LAUNCHER="eclipse/startup.jar"
 
 get_version()
 {
@@ -187,33 +177,35 @@ update_feature_remote()
     -installIU ${installIU} || err_exit $? "installing ${installIU} failed"
 }
 
+#Eclipse Update Site
+MAIN_UPDATE_SITE="http://download.eclipse.org/releases/juno"
+UPDATE_SITE="${MAIN_UPDATE_SITE}"
+
 #CDT related
-CDTFEAT="8.0.0"
-UPDATE_SITE="http://download.eclipse.org/releases/indigo"
+CDTFEAT="8.1.0"
 echo "Installing CDT..."
 update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
 CDTREMOTEVER="6.0.0"
 update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
 
 #RSE SDK
-RSEVER="3.3.0"
-UPDATE_SITE="http://download.eclipse.org/tm/updates/3.3"
-echo "Installing RSE SDK..."
-update_feature_remote ${UPDATE_SITE} org.eclipse.rse.sdk.feature.group ${RSEVER}
+RSEVER="3.4.0"
+TCFVER="1.0.0"
+TMVER="3.3.0"
+echo "Installing RSE/TCF/TM related component..."
+update_feature_remote ${UPDATE_SITE} org.eclipse.rse.feature.group ${RSEVER}
+update_feature_remote ${UPDATE_SITE} org.eclipse.tcf.rse.feature.feature.group ${TCFVER}
+update_feature_remote ${UPDATE_SITE} org.eclipse.tm.terminal.sdk.feature.group ${TMVER}
 
 #AUTOTOOL
 ATVER="3.0.1"
-UPDATE_SITE="http://download.eclipse.org/releases/indigo"
 echo "Install AutoTool..."
-update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.cdt.autotools.feature.group ${ATVER}
+update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
 
-#TMF
-TMFREL="0.4.0"
-TMFREL_MAX="0.5.0"
-TMFDATE="201202152032"
-UPDATE_SITE="http://download.eclipse.org/releases/indigo"
+#Lttng legacy
+TMFREL="1.0.0"
 echo "Install TMF..."
-update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}.${TMFDATE} ${TMFREL_MAX}
+update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}
 
 echo ""
 echo "Your build environment is successfully created."

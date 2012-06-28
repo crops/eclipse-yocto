@@ -58,8 +58,8 @@ public class OEFileSystem extends FileSystem {
 				return new OEIgnoreFile(new File(uri.getPath()));
 			}
 
-			if (config.get("TMPDIR") == null || config.get("DL_DIR") == null) {
-				throw new RuntimeException("Invalid local.conf: TMPDIR or DL_DIR undefined.");
+			if (config.get("TMPDIR") == null || config.get("DL_DIR") == null || config.get("SSTATE_DIR")== null) {
+				throw new RuntimeException("Invalid local.conf: TMPDIR or DL_DIR or SSTATE_DIR undefined.");
 			}
 			
 			List ignoreList = new ArrayList();
@@ -67,6 +67,7 @@ public class OEFileSystem extends FileSystem {
 			//These directories are ignored because they contain too many files for Eclipse to handle efficiently.
 			ignoreList.add(config.get("TMPDIR"));
 			ignoreList.add(config.get("DL_DIR"));
+			ignoreList.add(config.get("SSTATE_DIR"));
 			
 			uf = new OEFile(new File(uri.getPath()), ignoreList, uri.getPath());
 			fileStoreCache.put(uri, uf);

@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -59,6 +58,11 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	public static final int TYPE_STATEMENT = 3;
 	public static final int TYPE_FLAG = 4;
 	
+	public static final String BUILDDIR_INDICATORS [] = {
+		File.separatorChar + "conf" + File.separatorChar + "local.conf",
+		File.separatorChar + "conf" + File.separatorChar + "bblayers.conf",
+	};
+
 	protected final ProjectInfo pinfo;
 	protected final ShellSession shell;
 	protected Map properties = null;
@@ -69,6 +73,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	private final Lock rlock = rwlock.readLock();
 	private final Lock wlock = rwlock.writeLock();
 	protected String parsingCmd;
+	private boolean silent = false;
 	
 	public BBSession(ShellSession ssession, String projectRoot) throws IOException {
 		shell = ssession;
@@ -76,6 +81,11 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		pinfo.setLocation(projectRoot);
 		pinfo.setInitScriptPath(ProjectInfoHelper.getInitScriptPath(projectRoot));
 		this.parsingCmd = "DISABLE_SANITY_CHECKS=1 bitbake -e";
+	}
+
+	public BBSession(ShellSession ssession, String projectRoot, boolean silent) throws IOException {
+		this(ssession, projectRoot);
+		this.silent = silent;
 	}
 	
 	private Collection adapttoIPath(List<File> asList, IProject project) {
@@ -327,7 +337,9 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}else {
 				text = text + " SUCCESS.\n";
 		}
-		displayInConsole(text, code, false);
+		if(!silent) {
+			displayInConsole(text, code, false);
+		}
 		return code;
 	}
 

@@ -36,6 +36,9 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.yocto.bc.bitbake.BBSession;
+import org.yocto.bc.bitbake.ProjectInfoHelper;
+import org.yocto.bc.bitbake.ShellSession;
 
 /**
  * File system implementation based on storage of files in the local
@@ -97,6 +100,52 @@ public class OEFile extends FileStore {
 		return (names == null ? EMPTY_STRING_ARRAY : names);
 	}
 
+	/*
+	 * detect if the path is potential builddir
+	 */
+	private boolean isPotentialBuildDir(String path) {
+		boolean ret = true;
+		for (int i=0; i < BBSession.BUILDDIR_INDICATORS.length && ret == true; i++) {
+			if((new File(path + BBSession.BUILDDIR_INDICATORS[i])).exists() == false) {
+				ret=false;
+				break;
+			}
+		}
+		return ret;
+	}
+
+	/*
+	 * try to find items for ignoreList
+	 */
+	private void updateIgnorePaths(String path, List list) {
+		if(isPotentialBuildDir(path)) {
+			BBSession config = null;
+			try {
+				ShellSession shell = new ShellSession(ShellSession.SHELL_TYPE_BASH, new File(root), 
+							ProjectInfoHelper.getInitScriptPath(root) + " " + path, null);
+				config = new BBSession(shell, root, true);
+				config.initialize();
+			} catch(Exception e) {
+				e.printStackTrace();
+				return;
+			}
+			if (config.get("TMPDIR") == null || config.get("DL_DIR") == null || config.get("SSTATE_DIR") == null) {
+				//wrong guess about the buildDir
+				return;
+			}else {
+				if(!list.contains(config.get("TMPDIR"))) {
+					list.add(config.get("TMPDIR"));
+				}
+				if(!list.contains(config.get("DL_DIR"))) {
+					list.add(config.get("DL_DIR"));
+				}
+				if(!list.contains(config.get("SSTATE_DIR"))) {
+					list.add(config.get("SSTATE_DIR"));
+				}
+			}
+		}
+	}
+
 	@Override
 	public IFileStore[] childStores(int options, IProgressMonitor monitor) throws CoreException {
 		String[] children = childNames(options, monitor);
@@ -105,6 +154,7 @@ public class OEFile extends FileStore {
 		for (int i = 0; i < wrapped.length; i++) {
 			String fullPath = file.toString() +File.separatorChar + children[i];
 			
+			updateIgnorePaths(fullPath, ignorePaths);
 			if (ignorePaths.contains(fullPath)) {
 				wrapped[i] = getDeadChild(children[i]);
 			} else {

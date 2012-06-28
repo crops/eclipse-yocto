@@ -29,18 +29,21 @@ import org.yocto.bc.ui.model.ProjectInfo;
  */
 public class ProjectInfoHelper {
 
+	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
 	/**
 	 * @param path
 	 * @return The path to bitbake init script
 	 * @throws IOException
 	 */
 	public static String getInitScriptPath(String path) throws IOException {
+		String val = path + File.separator + DEFAULT_INIT_SCRIPT;
+
 		File inFile = new File(path, ".eclipse-data");
-		BufferedReader br = new BufferedReader(new FileReader(inFile));
-
-		String val = br.readLine();
-
-		br.close();
+		if(inFile.exists()) {
+			BufferedReader br = new BufferedReader(new FileReader(inFile));
+			val = br.readLine();
+			br.close();
+		}
 
 		return val;
 	}

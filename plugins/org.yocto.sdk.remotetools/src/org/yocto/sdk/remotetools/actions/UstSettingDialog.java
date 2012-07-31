@@ -42,7 +42,7 @@ import org.eclipse.core.resources.IProject;
 
 public class UstSettingDialog extends BaseSettingDialog {
 	
-	static protected String TITLE="User Mode lttng";
+	static protected String TITLE="User Mode lttng (legacy)";
 	
 	protected String argument;
 	protected String application;

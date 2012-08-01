@@ -21,7 +21,7 @@ import org.eclipse.ui.progress.IProgressService;
 
 import org.yocto.sdk.remotetools.Messages;
 
-public class UstHandler extends AbstractHandler {
+public class UstHandlerLegacy extends AbstractHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
@@ -31,7 +31,7 @@ public class UstHandler extends AbstractHandler {
 		
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 
-		UstSettingDialog setting=new UstSettingDialog(
+		UstSettingDialogLegacy setting=new UstSettingDialogLegacy(
 				window.getShell()
 				);
 		
@@ -42,7 +42,7 @@ public class UstHandler extends AbstractHandler {
 				MessageDialog.openError(window.getShell(), "Lttng-ust", Messages.ErrorUstProject);
 				return null;
 			}
-			UstModel op=new UstModel(setting.getHost(),setting.getApplication(),setting.getArgument(), project, window);
+			UstModelLegacy op=new UstModelLegacy(setting.getHost(),setting.getApplication(),setting.getArgument(), project, window);
 			try {
 				progressService.busyCursorWhile(op);
 			}catch (InterruptedException e) {

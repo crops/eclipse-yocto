@@ -136,7 +136,7 @@
             commandId="org.yocto.sdk.remotetools.command.oprofile">
       </handler>
       <handler
-            class="org.yocto.sdk.remotetools.actions.UstHandler"
+            class="org.yocto.sdk.remotetools.actions.UstHandlerLegacy"
             commandId="org.yocto.sdk.remotetools.command.ust">
       </handler>
       <handler

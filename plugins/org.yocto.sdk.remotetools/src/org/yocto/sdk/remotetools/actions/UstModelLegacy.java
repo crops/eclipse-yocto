@@ -36,7 +36,7 @@ import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.RSEHelper;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
 
-public class UstModel extends BaseModel {
+public class UstModelLegacy extends BaseModel {
 	
 	static final private String REMOTE_EXEC="/tmp/yocto_ust.sh";
 	static final private String LOCAL_SCRIPT="resources/yocto_ust.sh";
@@ -55,7 +55,7 @@ public class UstModel extends BaseModel {
 	
 	private IWorkbenchWindow window;
 	
-	public UstModel(IHost host, String app,String arg, String project, IWorkbenchWindow window) {
+	public UstModelLegacy(IHost host, String app,String arg, String project, IWorkbenchWindow window) {
 		super(host);
 		application=app;
 		argument=arg;

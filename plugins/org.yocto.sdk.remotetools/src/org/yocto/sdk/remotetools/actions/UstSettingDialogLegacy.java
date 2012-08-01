@@ -40,7 +40,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.IProject;
 
 
-public class UstSettingDialog extends BaseSettingDialog {
+public class UstSettingDialogLegacy extends UstSettingDialogBase {
 	
 	static protected String TITLE="User Mode lttng (legacy)";
 	
@@ -48,16 +48,16 @@ public class UstSettingDialog extends BaseSettingDialog {
 	protected String application;
 	protected Text argText;
 	protected Text appText;
-	
+	/*
 	protected Label projectLabel;
 	protected Combo projectCombo;
 	protected String curProject = null;
-	
-	protected UstSettingDialog(Shell parentShell, String title, String conn) {
+	*/
+	protected UstSettingDialogLegacy(Shell parentShell, String title, String conn) {
 		super(parentShell,title,conn);
 	}
 	
-	public UstSettingDialog(Shell parentShell) {
+	public UstSettingDialogLegacy(Shell parentShell) {
 		this(parentShell,
 				TITLE,
 				Activator.getDefault().getDialogSettings().get(IBaseConstants.CONNECTION_NAME_UST)
@@ -71,13 +71,14 @@ public class UstSettingDialog extends BaseSettingDialog {
 	public String getApplication() {
 		return application;
 	}
-	
+	/*
 	public String getProject() {
 		return curProject;
 	}
-	
+	*/
 	@Override
 	protected void okPressed() {
+		/*
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
 	    // store the value of the generate sections checkbox
 		if(getCurrentConnection()==null) {
@@ -86,19 +87,19 @@ public class UstSettingDialog extends BaseSettingDialog {
 		}else {
 			settings.put(IBaseConstants.CONNECTION_NAME_UST, 
 					getCurrentConnection().getAliasName());
-		}
+		}*/
 		application=appText.getText();
 		argument=argText.getText();
 		super.okPressed();
 	}
-	
+	/*
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite comp=(Composite)super.createDialogArea(parent);
 		GridLayout topLayout = new GridLayout();
 		comp.setLayout(topLayout);
 		
-		/*argument*/
+		
 		SWTFactory.createVerticalSpacer(comp, 1);
 		createImportProjectGroup(comp);
 		createArgument(comp);
@@ -106,7 +107,8 @@ public class UstSettingDialog extends BaseSettingDialog {
 		updateOkButton();
 		return comp;
 	}
-	
+	*/
+	/*
 	protected void createImportProjectGroup(Composite parent) {
 		Composite projComp = new Composite(parent, SWT.NONE);
 		GridLayout projLayout = new GridLayout();
@@ -137,39 +139,19 @@ public class UstSettingDialog extends BaseSettingDialog {
 			}
 		});
 
-		/* JZ we're using Eclipse built-in lttng-viewer now
-		newRemoteConnectionButton = SWTFactory.createPushButton(projComp,
-				Messages.BaseSettingDialog_New, null);
-		newRemoteConnectionButton.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(SelectionEvent evt) {
-				handleNewRemoteConnectionSelected();
-				updateLaunchConfigurationDialog();
-				updateConnectionPulldown();
-			}
-		});
-		gd = new GridData();
-		gd.horizontalSpan = 1;
-		newRemoteConnectionButton.setLayoutData(gd);
-		*/
 		updateProjectPulldown();
 	}
-	
+	*/
+	/*
 	protected void updateCurProject() {
 		IProject currentProjectSelected = getCurrentProject();
 		
 		if (currentProjectSelected != null)
 			curProject = currentProjectSelected.getName();
-		/*
-		if (currentConnectionSelected != null) {
-			IRSESystemType sysType = currentConnectionSelected.getSystemType();
-			if (sysType != null && sysType.isEnabled() && !sysType.isLocal()) {
-				curConn=currentConnectionSelected.getAliasName();
-			}
-		} */
+		
 		updateOkButton();
 	}
-	
+
 	protected IProject getCurrentProject() {
 		if (projectCombo.getItemCount() == 0)
 			return null;
@@ -216,7 +198,7 @@ public class UstSettingDialog extends BaseSettingDialog {
 		projectCombo.getParent().layout();
 		
 		updateCurProject();
-	}
+	}*/
 	protected void createArgument(Composite parent)
 	{
 		Composite projComp = new Composite(parent, SWT.NONE);

@@ -41,14 +41,6 @@ import org.eclipse.core.resources.IProject;
 
 
 public class UstSettingDialogBase extends BaseSettingDialog {
-	
-	//static protected String TITLE="User Mode lttng Base";
-	
-	//protected String argument;
-	//protected String application;
-	//protected Text argText;
-	//protected Text appText;
-	
 	protected Label projectLabel;
 	protected Combo projectCombo;
 	protected String curProject = null;
@@ -56,22 +48,7 @@ public class UstSettingDialogBase extends BaseSettingDialog {
 	protected UstSettingDialogBase(Shell parentShell, String title, String conn) {
 		super(parentShell,title,conn);
 	}
-	/*
-	public UstSettingDialogBase(Shell parentShell) {
-		this(parentShell,
-				TITLE,
-				Activator.getDefault().getDialogSettings().get(IBaseConstants.CONNECTION_NAME_UST)
-				);
-	}
-	/*
-	public String getArgument() {
-		return argument;
-	}
 	
-	public String getApplication() {
-		return application;
-	}
-	*/
 	public String getProject() {
 		return curProject;
 	}
@@ -128,28 +105,10 @@ public class UstSettingDialogBase extends BaseSettingDialog {
 		projectCombo.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
-				//setDirty(true);
-				//updateLaunchConfigurationDialog();
-				//useDefaultsFromConnection();
 				updateCurProject();
 			}
 		});
 
-		/* JZ we're using Eclipse built-in lttng-viewer now
-		newRemoteConnectionButton = SWTFactory.createPushButton(projComp,
-				Messages.BaseSettingDialog_New, null);
-		newRemoteConnectionButton.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(SelectionEvent evt) {
-				handleNewRemoteConnectionSelected();
-				updateLaunchConfigurationDialog();
-				updateConnectionPulldown();
-			}
-		});
-		gd = new GridData();
-		gd.horizontalSpan = 1;
-		newRemoteConnectionButton.setLayoutData(gd);
-		*/
 		updateProjectPulldown();
 	}
 	
@@ -158,13 +117,7 @@ public class UstSettingDialogBase extends BaseSettingDialog {
 		
 		if (currentProjectSelected != null)
 			curProject = currentProjectSelected.getName();
-		/*
-		if (currentConnectionSelected != null) {
-			IRSESystemType sysType = currentConnectionSelected.getSystemType();
-			if (sysType != null && sysType.isEnabled() && !sysType.isLocal()) {
-				curConn=currentConnectionSelected.getAliasName();
-			}
-		} */
+		
 		updateOkButton();
 	}
 	
@@ -217,61 +170,11 @@ public class UstSettingDialogBase extends BaseSettingDialog {
 	}
 	protected void createArgument(Composite parent)
 	{
-		/*
-		Composite projComp = new Composite(parent, SWT.NONE);
-		GridLayout projLayout = new GridLayout();
-		projLayout.numColumns = 4;
-		projLayout.marginHeight = 0;
-		projLayout.marginWidth = 0;
-		projComp.setLayout(projLayout);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		projComp.setLayoutData(gd);
-		
-		Label label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Usttrace_Application_Text);
-		gd = new GridData();
-		gd.horizontalSpan = 4;
-		label.setLayoutData(gd);
-		
-		appText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
-		appText.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				updateOkButton();
-			}
-		});
-		if(application!=null)
-			appText.setText(application);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 1;
-		appText.setLayoutData(gd);
-		
-		label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Usttrace_Argument_Text);
-		gd = new GridData();
-		gd.horizontalSpan = 4;
-		label.setLayoutData(gd);
-		
-		argText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
-		if(argument!=null)
-			argText.setText(argument);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 1;
-		argText.setLayoutData(gd);
-		*/
 	}
 
 	@Override
 	protected boolean updateOkButton() {
 		boolean ret=super.updateOkButton();
-		/*
-		if(ret==true) {
-			if(appText.getText().isEmpty()) {
-				Button button=getButton(IDialogConstants.OK_ID);
-				if(button!=null)
-					button.setEnabled(false);
-				ret=false;
-			}
-		}*/
 		return ret;
 	}
 }

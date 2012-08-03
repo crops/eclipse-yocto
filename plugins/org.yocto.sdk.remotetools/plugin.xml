@@ -99,11 +99,6 @@
                style="push">
          </command>
          <command
-               commandId="org.yocto.sdk.remotetools.command.ust"
-               label="%command.name.ust.legacy"
-               style="push">
-         </command>
-         <command
                commandId="org.yocto.sdk.remotetools.command.powertop"
                label="%command.name.powertop"
                style="push">
@@ -116,6 +111,20 @@
          <command
                commandId="org.yocto.sdk.remotetools.command.systemtap"
                label="%command.name.systemtap"
+               style="push">
+         </command>
+         <separator
+               name="org.yocto.sdk.remotetools.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.yocto.sdk.remotetools.command.ustl"
+               label="%command.name.ust.legacy"
+               style="push">
+         </command>
+         <command
+               commandId="org.yocto.sdk.remotetools.command.ust2"
+               label="%command.name.ust.20"
                style="push">
          </command>
          <separator
@@ -136,8 +145,12 @@
             commandId="org.yocto.sdk.remotetools.command.oprofile">
       </handler>
       <handler
-            class="org.yocto.sdk.remotetools.actions.UstHandlerLegacy"
-            commandId="org.yocto.sdk.remotetools.command.ust">
+            class="org.yocto.sdk.remotetools.actions.PerfHandler"
+            commandId="org.yocto.sdk.remotetools.command.perf">
+      </handler>
+      <handler
+            class="org.yocto.sdk.remotetools.actions.SystemtapHandler"
+            commandId="org.yocto.sdk.remotetools.command.systemtap">
       </handler>
       <handler
             class="org.yocto.sdk.remotetools.actions.PowertopHandler"
@@ -148,12 +161,12 @@
             commandId="org.yocto.sdk.remotetools.command.latencytop">
       </handler>
       <handler
-            class="org.yocto.sdk.remotetools.actions.PerfHandler"
-            commandId="org.yocto.sdk.remotetools.command.perf">
+            class="org.yocto.sdk.remotetools.actions.UstHandlerLegacy"
+            commandId="org.yocto.sdk.remotetools.command.ustl">
       </handler>
       <handler
-            class="org.yocto.sdk.remotetools.actions.SystemtapHandler"
-            commandId="org.yocto.sdk.remotetools.command.systemtap">
+            class="org.yocto.sdk.remotetools.actions.Ust2Handler"
+            commandId="org.yocto.sdk.remotetools.command.ust2">
       </handler>
       <handler
             class="org.yocto.sdk.remotetools.actions.YoctoBspHandler"

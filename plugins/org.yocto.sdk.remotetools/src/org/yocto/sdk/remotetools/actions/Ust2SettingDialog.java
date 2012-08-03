@@ -40,38 +40,33 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.IProject;
 
 
-public class UstSettingDialogLegacy extends UstSettingDialogBase {
+public class Ust2SettingDialog extends UstSettingDialogBase {
 	
-	static protected String TITLE="User Mode lttng (legacy)";
+	static protected String TITLE="Lttng2.0 User Tracing Import";
 	
-	protected String argument;
-	protected String application;
-	protected Text argText;
-	protected Text appText;
+	protected String trace;
+	protected Text traceText;
 	
-	protected UstSettingDialogLegacy(Shell parentShell, String title, String conn) {
+	protected Ust2SettingDialog(Shell parentShell, String title, String conn) {
 		super(parentShell,title,conn);
 	}
 	
-	public UstSettingDialogLegacy(Shell parentShell) {
+	public Ust2SettingDialog(Shell parentShell) {
 		this(parentShell,
 				TITLE,
 				Activator.getDefault().getDialogSettings().get(IBaseConstants.CONNECTION_NAME_UST)
 				);
 	}
 	
-	public String getArgument() {
-		return argument;
-	}
-	
-	public String getApplication() {
-		return application;
+	public String getTrace() {
+		return trace;
 	}
 	
 	@Override
 	protected void okPressed() {
-		application=appText.getText();
-		argument=argText.getText();
+		
+		trace=traceText.getText();
+		
 		super.okPressed();
 	}
 
@@ -87,47 +82,34 @@ public class UstSettingDialogLegacy extends UstSettingDialogBase {
 		projComp.setLayoutData(gd);
 		
 		Label label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Usttrace_Application_Text);
+		label.setText(Messages.Usttrace_Trace_Loc_Text);
 		gd = new GridData();
 		gd.horizontalSpan = 4;
 		label.setLayoutData(gd);
 		
-		appText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
-		appText.addModifyListener(new ModifyListener() {
+		traceText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
+		traceText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				updateOkButton();
 			}
 		});
-		if(application!=null)
-			appText.setText(application);
+		if(trace!=null)
+			traceText.setText(trace);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 1;
-		appText.setLayoutData(gd);
-		
-		label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Usttrace_Argument_Text);
-		gd = new GridData();
-		gd.horizontalSpan = 4;
-		label.setLayoutData(gd);
-		
-		argText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
-		if(argument!=null)
-			argText.setText(argument);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 1;
-		argText.setLayoutData(gd);
+		traceText.setLayoutData(gd);
 	}
 
 	@Override
 	protected boolean updateOkButton() {
 		boolean ret=super.updateOkButton();
 		if(ret==true) {
-			if(appText.getText().isEmpty()) {
+			if(traceText.getText().isEmpty() || !traceText.getText().endsWith("/ust")) {
 				Button button=getButton(IDialogConstants.OK_ID);
 				if(button!=null)
 					button.setEnabled(false);
 				ret=false;
-			}
+			} 
 		}
 		return ret;
 	}

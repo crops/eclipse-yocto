@@ -11,42 +11,13 @@
 package org.yocto.sdk.remotetools.wizards.bsp;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileDescriptor;
 import java.io.InputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.jface.wizard.Wizard;
-
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWizard;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.progress.IProgressService;
-
 import org.yocto.sdk.remotetools.YoctoBspElement;
 import org.yocto.sdk.remotetools.YoctoBspPropertyElement;
 import org.yocto.sdk.remotetools.YoctoJSONHelper;
@@ -72,7 +43,7 @@ public class YoctoBSPWizard extends Wizard {
 
 	@Override 
 	public IWizardPage getNextPage(IWizardPage page) {
-		propertiesPage.onEnterPage(mainPage.bspElement());
+		propertiesPage.onEnterPage(mainPage.getBSPElement());
 		return propertiesPage;
 	}
 	 
@@ -89,7 +60,7 @@ public class YoctoBSPWizard extends Wizard {
 		if (propertiesPage.validatePage()) {
 			HashSet<YoctoBspPropertyElement> properties = propertiesPage.getProperties();
 			YoctoJSONHelper.createBspJSONFile(properties);
-			YoctoBspElement element = mainPage.bspElement();
+			YoctoBspElement element = mainPage.getBSPElement();
 			
 			String create_bsp_cmd = element.getMetadataLoc() + CREATE_CMD + 
 									element.getBspName() + " " + element.getKarch();

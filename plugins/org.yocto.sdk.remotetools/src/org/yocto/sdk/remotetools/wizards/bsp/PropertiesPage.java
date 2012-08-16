@@ -13,12 +13,11 @@ package org.yocto.sdk.remotetools.wizards.bsp;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.HashSet;
-import java.util.Enumeration;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardPage;
@@ -28,21 +27,20 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
-
 import org.yocto.sdk.remotetools.YoctoBspElement;
-import org.yocto.sdk.remotetools.YoctoJSONHelper;
 import org.yocto.sdk.remotetools.YoctoBspPropertyElement;
+import org.yocto.sdk.remotetools.YoctoJSONHelper;
 /**
  *
  * Setting up the parameters for creating the new Yocto Bitbake project
@@ -73,22 +71,15 @@ public class PropertiesPage extends WizardPage {
 	private Button smpButton;
 	private Composite kcContainer = null;
 	private Group kbGroup = null;
-	private Composite scContainer = null;
 	private ScrolledComposite sc = null;
 	private Composite controlContainer = null;
 	private Group propertyGroup = null;
 	
 	public PropertiesPage(YoctoBspElement element) {
 		super(PAGE_NAME, "yocto-bsp properties page", null);
-		//setTitle("Create new yocto bitbake project");
-		//setMessage("Enter these parameters to create new Yocto Project BitBake commander project");
 		this.bspElem = element;
 	}
 
-	public void test() {
-		
-	}
-	
 	public void onEnterPage(YoctoBspElement element) {
 		String[] values;
 		if (!element.getValidPropertiesFile()) {
@@ -96,7 +87,7 @@ public class PropertiesPage extends WizardPage {
 			return;
 		}
 		
-		if ((this.bspElem == null) || (!this.bspElem.getKarch().contentEquals(element.getKarch()))) {
+		if (this.bspElem == null || this.bspElem.getKarch().isEmpty() || !this.bspElem.getKarch().contentEquals(element.getKarch())) {
 			karch_changed = true;
 		} else
 			karch_changed = false;
@@ -108,7 +99,6 @@ public class PropertiesPage extends WizardPage {
 			sc = new ScrolledComposite(this.composite, SWT.H_SCROLL | SWT.V_SCROLL);
 
 			controlContainer = new Composite(sc, SWT.NONE);
-			//controlContainer.setLayout(new FillLayout(SWT.VERTICAL));
 			controlContainer.setLayout(new GridLayout(1, false));
 			controlContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			if (kcContainer == null) {
@@ -116,14 +106,11 @@ public class PropertiesPage extends WizardPage {
 
 				kcContainer.setLayout(new FillLayout());
 				new Label (kcContainer, SWT.NONE).setText(KERNEL_CHOICE+":");
-				//kcGroup.setText(KERNEL_CHOICE);
 				kcCombo = new Combo(kcContainer, SWT.DROP_DOWN | SWT.READ_ONLY);
-				//kcCombo.setBounds(50, 50, 150, 10);
 				smpButton = new Button(controlContainer, SWT.CHECK);
 				smpButton.setText("SMP Support");
 				smpButton.setSelection(true);
 				
-				//kcContainer.setSize(SWT.DEFAULT, SWT.DEFAULT);
 				kbGroup= new Group(controlContainer, SWT.NONE);		
 				kbGroup.setLayout(new FillLayout(SWT.VERTICAL));	
 				kbGroup.setText("Kernel Branch Settings:");
@@ -171,7 +158,6 @@ public class PropertiesPage extends WizardPage {
 					
 					propertyControlMap = new Hashtable<YoctoBspPropertyElement, Control>();
 					Iterator<YoctoBspPropertyElement> it = properties.iterator();
-					int height = 0;
 				
 				    while (it.hasNext()) {
 				        // Get property

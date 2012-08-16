@@ -20,24 +20,21 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-
+import org.eclipse.swt.widgets.Widget;
 import org.yocto.sdk.remotetools.YoctoBspElement;
 
 /**
@@ -47,10 +44,7 @@ import org.yocto.sdk.remotetools.YoctoBspElement;
  * @author jzhang
  */
 public class MainPage extends WizardPage {
-	public static final String PAGE_NAME = "Main";
-	private static final String META_DATA_LOC = "MetadataLoc";
-	private static final String BSP_OUT_LOC = "BspOutLoc";
-	private static final String BUILD_DIR_LOC = "BuilddirLoc";
+	public static  final String  PAGE_NAME = "Main";
 	private static final String KARCH_CMD = "yocto-bsp list karch";
 	private static final String QARCH_CMD = "yocto-bsp list qemu property qemuarch";
 	private static final String BSP_SCRIPT = "yocto-bsp";
@@ -59,27 +53,31 @@ public class MainPage extends WizardPage {
 	private static final String PROPERTIES_FILE = "/tmp/properties.json";
 
 	private Button btnMetadataLoc;
-	private Button btnBspOutLoc;
-	private Button btnBuilddirLoc;
 	private Text textMetadataLoc;
+	private Label labelMetadata;
+
+	private Button btnBspOutputLoc;
+	private Text textBspOutputLoc;
+	private Label labelBspOutput;
+
+	private Button btnBuildLoc;
+	private Text textBuildLoc;
+	private Label labelBuildLoc;
+
 	private Text textBspName;
-	private Text textBspOutLoc;
-	private Text textBuilddirLoc;
-	private Combo karchCombo;
-	private Combo qarchCombo;
-	private Label metadata_label;
-	private Label builddir_label;
-	private Label bspname_label;
-	private Label bspout_label;
-	private Label karch_label;
-	private Label qarch_label;
-	
+	private Label labelBspName;
+
+	private Combo comboKArch;
+	private Label labelKArch;
+
+	private Combo comboQArch;
+	private Label labelQArch;
+
 	private YoctoBspElement bspElem;
-	
+
 	public MainPage(YoctoBspElement element) {
 		super(PAGE_NAME, "yocto-bsp main page", null);
 
-		//setTitle("Yocto-bsp main page");
 		setMessage("Enter the required fields(with *) to create new Yocto Project BSP!");
 		this.bspElem = element;
 	}
@@ -91,84 +89,108 @@ public class MainPage extends WizardPage {
 		GridLayout layout = new GridLayout(2, false);
 		composite.setLayout(layout);
 
-		gd.horizontalSpan= 2;
+		gd.horizontalSpan = 2;
 		composite.setLayoutData(gd);	
-		
-		metadata_label = new Label(composite, SWT.NONE);
-		metadata_label.setText("Meta_data location*: ");
+
+		labelMetadata = new Label(composite, SWT.NONE);
+		labelMetadata.setText("Meta_data location*: ");
 		Composite textContainer = new Composite(composite, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		textMetadataLoc = (Text)addTextControl(textContainer,META_DATA_LOC, "");
+		textMetadataLoc = (Text)addTextControl(textContainer, "");
 		textMetadataLoc.setEnabled(false);
 		textMetadataLoc.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
-		btnMetadataLoc = addFileSelectButton(textContainer, textMetadataLoc);
-		
-		builddir_label = new Label(composite, SWT.NONE);
-		builddir_label.setText("Build location: ");
+		setBtnMetadataLoc(addFileSelectButton(textContainer, textMetadataLoc));
+
+		labelBuildLoc = new Label(composite, SWT.NONE);
+		labelBuildLoc.setText("Build location: ");
+
 		textContainer = new Composite(composite, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		textBuilddirLoc = (Text)addTextControl(textContainer, BUILD_DIR_LOC, "");
-		btnBuilddirLoc = addFileSelectButton(textContainer, textBuilddirLoc);
-		
-		bspname_label = new Label(composite, SWT.NONE);
-		bspname_label.setText("BSP Name*: ");
-		textBspName = new Text(composite, SWT.BORDER | SWT.SINGLE);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		textBspName.setLayoutData(gd);
+
+		textBuildLoc = (Text)addTextControl(textContainer, "");
+		textBuildLoc.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				controlChanged(e.widget);
+			}
+		});
+
+		setBtnBuilddirLoc(addFileSelectButton(textContainer, textBuildLoc));
+
+		labelBspName = new Label(composite, SWT.NONE);
+		labelBspName.setText("BSP Name*: ");
+
+		textContainer = new Composite(composite, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		textBspName = (Text)addTextControl(textContainer, "");
 		textBspName.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
-		
-		bspout_label = new Label(composite, SWT.NONE);
-		bspout_label.setText("Bsp output location: ");
+
+		labelBspOutput = new Label(composite, SWT.NONE);
+		labelBspOutput.setText("Bsp output location: ");
+
 		textContainer = new Composite(composite, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		textBspOutLoc = (Text)addTextControl(textContainer, BSP_OUT_LOC, "");
-		textBspOutLoc.addModifyListener(new ModifyListener() {
+
+		textBspOutputLoc = (Text)addTextControl(textContainer, "");
+		textBspOutputLoc.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
-		btnBspOutLoc = addFileSelectButton(textContainer, textBspOutLoc);
-		karch_label= new Label(composite, SWT.NONE);
-		karch_label.setText("kernel Architecture*: ");
-		karchCombo= new Combo(composite, SWT.READ_ONLY);
-		karchCombo.setLayout(new GridLayout(2, false));
-		karchCombo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-		karchCombo.setEnabled(false);
-		karchCombo.addModifyListener(new ModifyListener() {
+		setBtnBspOutLoc(addFileSelectButton(textContainer, textBspOutputLoc));
+
+		labelKArch= new Label(composite, SWT.NONE);
+		labelKArch.setText("kernel Architecture*: ");
+
+		textContainer = new Composite(composite, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		comboKArch= new Combo(textContainer, SWT.READ_ONLY);
+		comboKArch.setLayout(new GridLayout(2, false));
+		comboKArch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		comboKArch.setEnabled(false);
+		comboKArch.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
-		
-		qarch_label = new Label(composite, SWT.NONE);
-		qarch_label.setText("Qemu Architecture(* for karch as qemu): ");
-		qarch_label.setEnabled(false);
-		qarchCombo = new Combo(composite, SWT.READ_ONLY);
-		qarchCombo.setLayout(new GridLayout(2, false));
-		qarchCombo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-		qarchCombo.setEnabled(false);
-		qarchCombo.addModifyListener(new ModifyListener() {
+
+		labelQArch = new Label(composite, SWT.NONE);
+		labelQArch.setText("Qemu Architecture(* for karch as qemu): ");
+		labelQArch.setEnabled(false);
+
+		textContainer = new Composite(composite, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		comboQArch = new Combo(textContainer, SWT.READ_ONLY);
+		comboQArch.setLayout(new GridLayout(2, false));
+		comboQArch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		comboQArch.setEnabled(false);
+		comboQArch.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
-		
+
 		setControl(composite);
 		validatePage();
 	}
 
-	private Control addTextControl(final Composite parent, String key, String value) {
+	private Control addTextControl(final Composite parent, String value) {
 		final Text text;
 
 		text = new Text(parent, SWT.SINGLE | SWT.LEAD | SWT.BORDER);
@@ -178,7 +200,7 @@ public class MainPage extends WizardPage {
 
 		return (Control)text;
 	}
-	
+
 	private Button addFileSelectButton(final Composite parent, final Text text) {
 		Button button = new Button(parent, SWT.PUSH | SWT.LEAD);
 		button.setText("Browse...");
@@ -193,49 +215,48 @@ public class MainPage extends WizardPage {
 		});
 		return button;
 	}	
-	
+
 	private void controlChanged(Widget widget) {
 		 Status status = new Status(IStatus.OK, "not_used", 0, "", null);
 		 setErrorMessage(null);
-		 String metadata_loc = textMetadataLoc.getText();
+		 String metadataLoc = textMetadataLoc.getText();
+
 		 if (widget == textMetadataLoc) {
 			 resetKarchCombo();
-
-			 if (metadata_loc.length() == 0) {
+			 if (metadataLoc.length() == 0) {
 				 status = new Status(IStatus.ERROR, "not_used", 0, "Meta data location can't be empty!", null);
 			 } else {
-				 File meta_data = new File(metadata_loc);
+				 File meta_data = new File(metadataLoc);
 				 if (!meta_data.exists() || !meta_data.isDirectory()) {
 					 status = new Status(IStatus.ERROR, "not_used", 0, 
 							 "Invalid meta data location: Make sure it exists and is a directory!", null);
 				 } else {
-					 File bsp_script = new File(metadata_loc + "/scripts/" + BSP_SCRIPT);
-					 if (!bsp_script.exists() || !bsp_script.canExecute())
+					 File bspScript = new File(metadataLoc + "/scripts/" + BSP_SCRIPT);
+					 if (!bspScript.exists() || !bspScript.canExecute())
 						 status = new Status(IStatus.ERROR, "not_used", 0,
-								 "Make sure yocto-bsp exists under \"" + metadata_loc + "/scripts\" and is executable!", null);
+								 "Make sure yocto-bsp exists under \"" + metadataLoc + "/scripts\" and is executable!", null);
 					 else {		
 						 kernelArchesHandler();
 					 }
 				 }
 			 }
-		 }
-		 if (widget == karchCombo) {
-			 String selection = karchCombo.getText();
+		 } else if (widget == comboKArch) {
+			 String selection = comboKArch.getText();
 			 if (!bspElem.getKarch().contentEquals(selection))
 				 bspElem = new YoctoBspElement();
 			 if (selection.matches("qemu")) {
-				 qarch_label.setEnabled(true);
-				 qarchCombo.setEnabled(true);
+				 labelQArch.setEnabled(true);
+				 comboQArch.setEnabled(true);
 			 } else {
-				 qarch_label.setEnabled(false);
-				 qarchCombo.setEnabled(false);
+				 labelQArch.setEnabled(false);
+				 comboQArch.setEnabled(false);
 			 }		
 		 }
-		
+
 		 checkBuildDir();
 		 
-		 String build_dir = textBuilddirLoc.getText();
-		 String output_dir = textBspOutLoc.getText();
+		 String build_dir = textBuildLoc.getText();
+		 String output_dir = textBspOutputLoc.getText();
 		 String bsp_name = textBspName.getText();
 		 
 		 if (!output_dir.isEmpty() && output_dir.matches(build_dir)) {
@@ -243,8 +264,8 @@ public class MainPage extends WizardPage {
 					 "You've set BSP output directory the same as build directory, please leave output directory empty for this scenario!", null);
 		 }
 		 
-		 if (build_dir.startsWith(metadata_loc) && output_dir.isEmpty() && !bsp_name.isEmpty()) {
-			 String bsp_dir_str = metadata_loc + "/meta-" + bsp_name;
+		 if (build_dir.startsWith(metadataLoc) && output_dir.isEmpty() && !bsp_name.isEmpty()) {
+			 String bsp_dir_str = metadataLoc + "/meta-" + bsp_name;
 			 File bsp_dir = new File(bsp_dir_str);
 			 if (bsp_dir.exists()) {
 				 status = new Status(IStatus.ERROR, "not_used", 0,
@@ -259,71 +280,62 @@ public class MainPage extends WizardPage {
 		 getWizard().getContainer().updateButtons();
 		 canFlipToNextPage();
 	}
-	
+
 	private void checkBuildDir() {
 		String metadata_dir = textMetadataLoc.getText();
-		String builddir_str = textBuilddirLoc.getText();
-	
+		String builddir_str = textBuildLoc.getText();
+
 		File build_dir = null;
 		if ((builddir_str == null) || builddir_str.isEmpty()) 
 			builddir_str = metadata_dir + "/build";
-			
+
 		build_dir = new File(builddir_str);
-		
+
 		if (!build_dir.exists()) {
 			String create_builddir_cmd = metadata_dir + "/oe-init-build-env " + builddir_str;
 			try {
 				Runtime rt = Runtime.getRuntime();
-				//Process proc = rt.exec(create_builddir_cmd);
 				Process proc = rt.exec(new String[] {"sh", "-c", create_builddir_cmd});
-				InputStream stdin = proc.getInputStream();
-				InputStreamReader isr = new InputStreamReader(stdin);
-				BufferedReader br = new BufferedReader(isr);
-				String line = null;
-
-				while ( (line = br.readLine()) != null) {
-				}
-
-				int exitVal = proc.waitFor();
+				proc.waitFor();
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
 		}
 	}
-	
-	public YoctoBspElement bspElement() {
+
+	public YoctoBspElement getBSPElement() {
 		return this.bspElem;
 	}
-	
+
 	public void handleEvent(Event event) {
 		canFlipToNextPage();
 		getWizard().getContainer().updateButtons();
 	}
-	
+
 	private void resetKarchCombo() {
-		karchCombo.deselectAll();
-		qarchCombo.deselectAll();
-		karchCombo.setEnabled(false);
-		qarch_label.setEnabled(false);
-		qarchCombo.setEnabled(false);
+		comboKArch.deselectAll();
+		comboQArch.deselectAll();
+		comboKArch.setEnabled(false);
+		labelQArch.setEnabled(false);
+		comboQArch.setEnabled(false);
 	}
-	
+
 	private void kernelArchesHandler() {
 		ArrayList<String> karches = getKArches();
 		if (!karches.isEmpty()) {
 			String[] kitems = new String[karches.size()];
 			kitems = karches.toArray(kitems);
-			karchCombo.setItems(kitems);
-			karchCombo.setEnabled(true);
+			comboKArch.setItems(kitems);
+			comboKArch.setEnabled(true);
 		}
 		ArrayList<String> qarches = getQArches();
 		if (!qarches.isEmpty()) {
 			String[] qitems = new String[qarches.size()];
 			qitems = qarches.toArray(qitems);
-			qarchCombo.setItems(qitems);
+			comboQArch.setItems(qitems);
 		}
 	}
-	
+
 	public boolean canFlipToNextPage(){
 		String err = getErrorMessage();
 		if (err != null) 
@@ -332,41 +344,38 @@ public class MainPage extends WizardPage {
 			return false;
 		return true;
 	}
-	
-	
+
+
 	public boolean validatePage() {
 		String metadata_loc = textMetadataLoc.getText();
 		String bspname = textBspName.getText();
-		String karch = karchCombo.getText();
-		String qarch = qarchCombo.getText();
+		String karch = comboKArch.getText();
+		String qarch = comboQArch.getText();
 		if (metadata_loc.isEmpty() ||
 				bspname.isEmpty() ||
 				karch.isEmpty()) {
-			
 			return false;
-		} else {
-			if (karch.matches("qemu"))
-				if (qarch.isEmpty())
-					return false;
+		} else if (karch.matches("qemu") && qarch.isEmpty()) {
+			return false;
 		}
-		
+
 		bspElem.setBspName(bspname);
-		if (!textBspOutLoc.getText().isEmpty())
-			bspElem.setBspOutLoc(textBspOutLoc.getText());
+		if (!textBspOutputLoc.getText().isEmpty())
+			bspElem.setBspOutLoc(textBspOutputLoc.getText());
 		else
 			bspElem.setBspOutLoc("");
-		if (!textBuilddirLoc.getText().isEmpty())
-			bspElem.setBuildLoc(textBuilddirLoc.getText());
+		if (!textBuildLoc.getText().isEmpty())
+			bspElem.setBuildLoc(textBuildLoc.getText());
 		else
 			bspElem.setBuildLoc("");
 		bspElem.setMetadataLoc(metadata_loc);
 		bspElem.setKarch(karch);
 		bspElem.setQarch(qarch);
 		bspElem.setValidPropertiesFile(createPropertiesFile());
-		
+
 		return true;
 	}
-	
+
 	private boolean createPropertiesFile() {
 		String create_properties_cmd = bspElem.getMetadataLoc() + "/scripts/" + 
 										PROPERTIES_CMD_PREFIX + bspElem.getKarch() + 
@@ -374,25 +383,19 @@ public class MainPage extends WizardPage {
 		try {
 			Runtime rt = Runtime.getRuntime();
 			Process proc = rt.exec(create_properties_cmd);
-			InputStream stdin = proc.getInputStream();
-			InputStreamReader isr = new InputStreamReader(stdin);
-			BufferedReader br = new BufferedReader(isr);
-			String line = null;
-			
-			while ( (line = br.readLine()) != null) {
-			}
-			
 			int exitVal = proc.waitFor();
+			if (exitVal != 0)
+				return false;
+			return true;
 		} catch (Throwable t) {
 			t.printStackTrace();
 			return false;
 		}
-		return true;
 	}
-	
+
 	private ArrayList<String> getKArches() {
 		ArrayList<String> karches = new ArrayList<String>();
-		
+
 		String get_karch_cmd = textMetadataLoc.getText() + "/scripts/" + KARCH_CMD;
 		try {
 			Runtime rt = Runtime.getRuntime();
@@ -401,7 +404,7 @@ public class MainPage extends WizardPage {
 			InputStreamReader isr = new InputStreamReader(stdin);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
-			
+
 			while ( (line = br.readLine()) != null) {
 				if (line.contains(":"))
 					continue;
@@ -409,19 +412,19 @@ public class MainPage extends WizardPage {
 				line = line.replaceAll("\\s+$", "");
 				karches.add(line);
 			}
-			
-			int exitVal = proc.waitFor();
-			
+
+			proc.waitFor();
+
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
-		
+
 		return karches;
 	}
 
 	private ArrayList<String> getQArches() {
 		ArrayList<String> qarches = new ArrayList<String>();
-		
+
 		String get_qarch_cmd = textMetadataLoc.getText() + "/scripts/" + QARCH_CMD;
 		try {
 			Runtime rt = Runtime.getRuntime();
@@ -430,23 +433,47 @@ public class MainPage extends WizardPage {
 			InputStreamReader isr = new InputStreamReader(stdin);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
-			
+
 			while ( (line = br.readLine()) != null) {
 				if (!line.startsWith("["))
 					continue;
 				String[] values = line.split(",");
-				
+
 				String value = values[0];
 				value = value.replace("[\"", "");
 				value = value.replaceAll("\"$", "");
 				qarches.add(value);
 			}
-			int exitVal = proc.waitFor();
-			
+			proc.waitFor();
+
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
-		
+
 		return qarches;
+	}
+
+	public Button getBtnMetadataLoc() {
+		return btnMetadataLoc;
+	}
+
+	public void setBtnMetadataLoc(Button btnMetadataLoc) {
+		this.btnMetadataLoc = btnMetadataLoc;
+	}
+
+	public Button getBtnBspOutLoc() {
+		return btnBspOutputLoc;
+	}
+
+	public void setBtnBspOutLoc(Button btnBspOutLoc) {
+		this.btnBspOutputLoc = btnBspOutLoc;
+	}
+
+	public Button getBtnBuilddirLoc() {
+		return btnBuildLoc;
+	}
+
+	public void setBtnBuilddirLoc(Button btnBuilddirLoc) {
+		this.btnBuildLoc = btnBuilddirLoc;
 	}
 }

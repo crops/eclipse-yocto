@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -63,6 +65,9 @@ public class MainPage extends WizardPage {
 	private Button btnBuildLoc;
 	private Text textBuildLoc;
 	private Label labelBuildLoc;
+
+	private boolean buildDirChecked;
+	private BuildLocationListener buildLocationListener;
 
 	private Text textBspName;
 	private Label labelBspName;
@@ -114,11 +119,8 @@ public class MainPage extends WizardPage {
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		textBuildLoc = (Text)addTextControl(textContainer, "");
-		textBuildLoc.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				controlChanged(e.widget);
-			}
-		});
+		buildLocationListener = new BuildLocationListener("");
+		textBuildLoc.addFocusListener(buildLocationListener);
 
 		setBtnBuilddirLoc(addFileSelectButton(textContainer, textBuildLoc));
 
@@ -252,27 +254,30 @@ public class MainPage extends WizardPage {
 				 comboQArch.setEnabled(false);
 			 }		
 		 }
-
-		 checkBuildDir();
 		 
-		 String build_dir = textBuildLoc.getText();
-		 String output_dir = textBspOutputLoc.getText();
-		 String bsp_name = textBspName.getText();
+		 String buildDir = textBuildLoc.getText();
+		 String outputDir = textBspOutputLoc.getText();
+		 String bspName = textBspName.getText();
 		 
-		 if (!output_dir.isEmpty() && output_dir.matches(build_dir)) {
-			 status = new Status(IStatus.ERROR, "not_used", 0,
-					 "You've set BSP output directory the same as build directory, please leave output directory empty for this scenario!", null);
-		 }
-		 
-		 if (build_dir.startsWith(metadataLoc) && output_dir.isEmpty() && !bsp_name.isEmpty()) {
-			 String bsp_dir_str = metadataLoc + "/meta-" + bsp_name;
-			 File bsp_dir = new File(bsp_dir_str);
-			 if (bsp_dir.exists()) {
+		 if (!outputDir.isEmpty()){
+			 if (outputDir.matches(buildDir)) {
 				 status = new Status(IStatus.ERROR, "not_used", 0,
-						 "Your BSP with name: " + bsp_name + " already exist under directory: " + bsp_dir_str + ", please change your bsp name!", null);
+						 "You've set BSP output directory the same as build directory, please leave output directory empty for this scenario!", null);
+			 } else {
+				 File outputDirectory = new File(outputDir);
+				 if (outputDirectory.exists()){
+					status = new Status(IStatus.ERROR, "not_used", 0,
+							 "Your BSP output directory points to an exiting directory!", null);
+				 }
+			 }
+		 } else if (buildDir.startsWith(metadataLoc) && !bspName.isEmpty()) {
+			 String bspDirStr = metadataLoc + "/meta-" + bspName;
+			 File bspDir = new File(bspDirStr);
+			 if (bspDir.exists()) {
+				 status = new Status(IStatus.ERROR, "not_used", 0,
+						 "Your BSP with name: " + bspName + " already exist under directory: " + bspDirStr + ", please change your bsp name!", null);
 			 }
 		 }
-		 validatePage();
 		 
 		 if (status.getSeverity() == IStatus.ERROR)
 			 setErrorMessage(status.getMessage());
@@ -281,25 +286,50 @@ public class MainPage extends WizardPage {
 		 canFlipToNextPage();
 	}
 
-	private void checkBuildDir() {
-		String metadata_dir = textMetadataLoc.getText();
-		String builddir_str = textBuildLoc.getText();
+	private Status checkBuildDir() {
 
-		File build_dir = null;
-		if ((builddir_str == null) || builddir_str.isEmpty()) 
-			builddir_str = metadata_dir + "/build";
+		String metadataLoc = textMetadataLoc.getText();
+		String buildLoc = textBuildLoc.getText();
 
-		build_dir = new File(builddir_str);
+		if (buildLoc.isEmpty()) {
+			 buildLoc = metadataLoc + "/build";
+			 return createBuildDir(buildLoc);
+		} else {
+			 File buildLocDir = new File(buildLoc);
+			 if (!buildLocDir.exists()) {
+				 return createBuildDir(buildLoc);
+			 } else if (buildLocDir.isDirectory()) {
+				return createBuildDir(buildLoc);
+			 } else {
+				 return new Status(IStatus.ERROR, "not_used", 0, "Invalid build location: Make sure the build location is a directory!", null);
+			 }
+		 }
+	}
 
-		if (!build_dir.exists()) {
-			String create_builddir_cmd = metadata_dir + "/oe-init-build-env " + builddir_str;
-			try {
-				Runtime rt = Runtime.getRuntime();
-				Process proc = rt.exec(new String[] {"sh", "-c", create_builddir_cmd});
-				proc.waitFor();
-			} catch (Throwable t) {
-				t.printStackTrace();
+	private Status createBuildDir(String buildLoc) {
+		String metadataDir = textMetadataLoc.getText();
+
+		// if we do  not change the directory to metadata location the script will be looked into the directory indicated by user.dir system property
+		// system.property usually points to the location from where eclipse was started
+		String createBuildDirCmd = "cd " + metadataDir + ";source " + metadataDir + "/oe-init-build-env " + buildLoc;
+
+		try {
+			ProcessBuilder builder = new ProcessBuilder(new String[] {"sh", "-c", createBuildDirCmd});
+			Process proc = builder.start();
+			InputStream errorStream = proc.getErrorStream();
+			InputStreamReader isr = new InputStreamReader(errorStream);
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
+			String status = "";
+			while ( (line = br.readLine()) != null) {
+				status += line;
 			}
+
+			if (proc.waitFor() != 0)
+				return new Status(IStatus.ERROR, "not_used", 0, status, null);;
+			return new Status(IStatus.OK, "not_used", 0, "", null);
+		} catch (Exception e) {
+			return  new Status(IStatus.ERROR, "not_used", 0, e.getMessage(), null);
 		}
 	}
 
@@ -347,11 +377,11 @@ public class MainPage extends WizardPage {
 
 
 	public boolean validatePage() {
-		String metadata_loc = textMetadataLoc.getText();
+		String metadataLoc = textMetadataLoc.getText();
 		String bspname = textBspName.getText();
 		String karch = comboKArch.getText();
 		String qarch = comboQArch.getText();
-		if (metadata_loc.isEmpty() ||
+		if (metadataLoc.isEmpty() ||
 				bspname.isEmpty() ||
 				karch.isEmpty()) {
 			return false;
@@ -366,15 +396,21 @@ public class MainPage extends WizardPage {
 			bspElem.setBspOutLoc("");
 		if (!textBuildLoc.getText().isEmpty())
 			bspElem.setBuildLoc(textBuildLoc.getText());
-		else
-			bspElem.setBuildLoc("");
-		bspElem.setMetadataLoc(metadata_loc);
+		else {
+			bspElem.setBuildLoc(metadataLoc + "/build");
+			if (!buildDirChecked) {
+				checkBuildDir();
+				buildDirChecked = true;
+			}
+		}
+		bspElem.setMetadataLoc(metadataLoc);
 		bspElem.setKarch(karch);
 		bspElem.setQarch(qarch);
 		bspElem.setValidPropertiesFile(createPropertiesFile());
 
 		return true;
 	}
+
 
 	private boolean createPropertiesFile() {
 		String create_properties_cmd = bspElem.getMetadataLoc() + "/scripts/" + 
@@ -475,5 +511,27 @@ public class MainPage extends WizardPage {
 
 	public void setBtnBuilddirLoc(Button btnBuilddirLoc) {
 		this.btnBuildLoc = btnBuilddirLoc;
+	}
+
+	class BuildLocationListener implements FocusListener{
+		String value;
+		boolean changed;
+
+		BuildLocationListener(String value){
+			this.value = value;
+		}
+		@Override
+		public void focusGained(FocusEvent e) {
+			value = ((Text)e.getSource()).getText();
+		}
+
+		@Override
+		public void focusLost(FocusEvent e) {
+			if(!((Text)e.getSource()).getText().equals(value)) {
+				checkBuildDir();
+				buildDirChecked = true;
+			}
+		}
+
 	}
 }

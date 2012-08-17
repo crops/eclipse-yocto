@@ -153,11 +153,9 @@ public class LaunchHobDialog extends Dialog {
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			try {
-				if (validateInput()) {
-					build_dir = build_dir_combo.getText().toString();
-					updateBuildSpec(build_dir);
-					super.buttonPressed(buttonId);
-				} 
+				build_dir = build_dir_combo.getText().toString();
+				updateBuildSpec(build_dir);
+				super.buttonPressed(buttonId); 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				System.out.println(e.getMessage());

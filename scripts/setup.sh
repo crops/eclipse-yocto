@@ -66,7 +66,9 @@ if [ ! -f eclipse/plugins/org.eclipse.swt_3.100.0.v4233d.jar ]; then
   fi
   # Eclipse SDK: Need the SDK so we can link into docs
   echo "Getting Eclipse SDK..."
-  wget "http://download.eclipse.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
+  # wget "http://download.eclipse.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
+  # The eclipse site has moments where it is overloaded. Maintaining our own mirror solves this.
+  wget "http://downloads.yoctoproject.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
   tar xfz eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz || err_exit $? "extracting Eclipse SDK failed"
   rm eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz
   cd "${curdir2}"
@@ -178,7 +180,11 @@ update_feature_remote()
 }
 
 #Eclipse Update Site
-MAIN_UPDATE_SITE="http://download.eclipse.org/releases/juno"
+#MAIN_UPDATE_SITE="http://download.eclipse.org/releases/juno"
+# The main eclipse download site is unreliable at times. For now, we're going to
+# maintain a mirror of just what we need.
+MAIN_UPDATE_SITE="http://downloads.yoctoproject.org/eclipse/juno/ftp.osuosl.org/pub/eclipse/releases/juno"
+
 UPDATE_SITE="${MAIN_UPDATE_SITE}"
 
 #CDT related

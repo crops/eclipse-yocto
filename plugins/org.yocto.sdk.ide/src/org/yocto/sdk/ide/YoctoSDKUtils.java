@@ -100,7 +100,17 @@ public class YoctoSDKUtils {
 			File sysroot_dir = new File(sysroot_dir_str);
 			if (!sysroot_dir.exists())
 				return SDKCheckResults.TOOLCHAIN_NO_SYSROOT;
-			String toolchain_host_arch = findHostArch(sysroot_dir);
+			
+			String toolchain_host_arch = null;
+			
+			try 
+			{
+				toolchain_host_arch = findHostArch(sysroot_dir);
+			}
+			catch(NullPointerException e) 
+			{
+				return SDKCheckResults.TOOLCHAIN_NO_SYSROOT;
+			}
 			
 			if (!toolchain_host_arch.equalsIgnoreCase(platform)) {
 				if (!platform.matches("i\\d86") || !toolchain_host_arch.matches("i\\d86"))
@@ -576,7 +586,7 @@ public class YoctoSDKUtils {
 	static private String findHostArch(File sysroot_dir) {
 		FilenameFilter nativeFilter = new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				if (name.endsWith("-pokysdk-linux")) {
+				if (name.endsWith("sdk-linux")) {
 					return true;
 				} else {
 					return false;
@@ -590,11 +600,11 @@ public class YoctoSDKUtils {
 		for (File file : files) {
 			if (file.isDirectory()) {
 				String path = file.getName();
-				arch = path.substring(0, path.indexOf("-pokysdk-linux"));
+				String[] subPath = path.split("-");
+				arch = subPath[0];
 			} else 
 				continue;
         }
 		return arch;
 	}
 }
-

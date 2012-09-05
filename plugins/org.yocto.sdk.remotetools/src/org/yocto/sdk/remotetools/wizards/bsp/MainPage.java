@@ -520,12 +520,12 @@ public class MainPage extends WizardPage {
 		BuildLocationListener(String value){
 			this.value = value;
 		}
-		//@Override
+		@Override
 		public void focusGained(FocusEvent e) {
 			value = ((Text)e.getSource()).getText();
 		}
 
-		//@Override
+		@Override
 		public void focusLost(FocusEvent e) {
 			if(!((Text)e.getSource()).getText().equals(value)) {
 				checkBuildDir();

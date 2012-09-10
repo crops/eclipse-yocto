@@ -391,15 +391,15 @@ public class PropertiesPage extends WizardPage {
 			 boolean newBranch = newButton.getSelection();
 			 
 			 if (newBranch) {
-				 updateKernelValues(KERNEL_BRANCHES, "\"" + kernel_choice + "\"." + NEW_KBRANCH_NAME);
-			 } else {
-				 updateKernelValues(KERNEL_BRANCHES, "\"" + kernel_choice + "\"." + EXISTING_KBRANCH_NAME);
+				 kbCombo.removeAll();
+				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME);
 			 }
 		 } else if (widget == existingButton) {
 			 boolean existingBranch = existingButton.getSelection();
 
 			 if (existingBranch) {
-				 updateKernelValues(KERNEL_BRANCHES, "\"" + kernel_choice + "\"." + EXISTING_KBRANCH_NAME);
+				 kbCombo.removeAll();
+				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + EXISTING_KBRANCH_NAME);
 			 }
 		 }
 		 canFlipToNextPage();

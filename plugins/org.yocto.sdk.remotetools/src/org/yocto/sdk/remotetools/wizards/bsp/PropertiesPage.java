@@ -10,26 +10,19 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.wizards.bsp;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -45,8 +38,8 @@ import org.yocto.sdk.remotetools.YoctoBspPropertyElement;
 import org.yocto.sdk.remotetools.YoctoJSONHelper;
 /**
  *
- * Setting up the parameters for creating the new Yocto Bitbake project
- * 
+ * Setting up the parameters for creating the new Yocto BSP
+ *
  * @author jzhang
  */
 public class PropertiesPage extends WizardPage {
@@ -66,22 +59,28 @@ public class PropertiesPage extends WizardPage {
 
 	private Hashtable<YoctoBspPropertyElement, Control> propertyControlMap;
 	HashSet<YoctoBspPropertyElement> properties;
-	private Composite composite;
-	private YoctoBspElement bspElem = null;
-	private boolean karch_changed = false;
-	private Combo kcCombo;
-	private Combo kbCombo;
-	private Button newButton;
-	private Button existingButton;
-	private Button smpButton;
-	private Composite kcContainer = null;
-	private Group kbGroup = null;
-	private ScrolledComposite sc = null;
+
+	private ScrolledComposite composite;
 	private Composite controlContainer = null;
+
+	private YoctoBspElement bspElem = null;
+	private boolean kArchChanged = false;
+
+	private Combo kernelCombo;
+	private Combo branchesCombo;
+
+	private Button newBranchButton;
+	private Button existingBranchButton;
+
+	private Button smpButton;
+
+	private Group kGroup = null;
+	private Group kbGroup = null;
+	private Group otherSettingsGroup = null;
 	private Group propertyGroup = null;
 
 	public PropertiesPage(YoctoBspElement element) {
-		super(PAGE_NAME, "yocto-bsp properties page", null);
+		super(PAGE_NAME, "yocto-bsp Properties page", null);
 		this.bspElem = element;
 	}
 
@@ -92,64 +91,24 @@ public class PropertiesPage extends WizardPage {
 		}
 
 		if (this.bspElem == null || this.bspElem.getKarch().isEmpty() || !this.bspElem.getKarch().contentEquals(element.getKarch())) {
-			karch_changed = true;
+			kArchChanged = true;
 		} else
-			karch_changed = false;
+			kArchChanged = false;
 
 		this.bspElem = element;
-		this.composite.setLayout(new FillLayout());
-		if (sc == null) {
-
-			sc = new ScrolledComposite(this.composite, SWT.H_SCROLL | SWT.V_SCROLL);
-
-			controlContainer = new Composite(sc, SWT.NONE);
-			controlContainer.setLayout(new GridLayout(1, false));
-			controlContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			if (kcContainer == null) {
-				kcContainer = new Composite(controlContainer, SWT.NONE);
-
-				kcContainer.setLayout(new FillLayout());
-				new Label (kcContainer, SWT.NONE).setText(KERNEL_CHOICE+":");
-				kcCombo = new Combo(kcContainer, SWT.DROP_DOWN | SWT.READ_ONLY);
-				smpButton = new Button(controlContainer, SWT.CHECK);
-				smpButton.setText("SMP Support");
-				smpButton.setSelection(true);
-
-				kbGroup= new Group(controlContainer, SWT.NONE);		
-				kbGroup.setLayout(new FillLayout(SWT.VERTICAL));	
-				kbGroup.setText("Kernel Branch Settings:");
-				newButton = new Button(kbGroup, SWT.RADIO);
-				newButton.setText("New");
-				newButton.setSelection(true);
-		    
-				existingButton = new Button(kbGroup, SWT.RADIO);
-				existingButton.setText("Existing");
-				existingButton.setSelection(false);
-		    
-		    	kbCombo = new Combo(kbGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
-		    	
-			} 
-		}
-		if (karch_changed) {
-			kbCombo.removeAll();
-			newButton.setSelection(true);
-			existingButton.setSelection(false);
-
-			updateKernelValues(KERNEL_CHOICES, KERNEL_CHOICE, false);
-		}
-
 		try {
-			if (karch_changed) {
+			if (kArchChanged) {
+				updateKernelValues(KERNEL_CHOICES, KERNEL_CHOICE);
+
+				if (propertyGroup != null) {
+					for (Control cntrl : propertyGroup.getChildren()) {
+						cntrl.dispose();
+					}
+				}
+
 				properties = YoctoJSONHelper.getProperties();
 
 				if (!properties.isEmpty()) {
-
-					if (propertyGroup != null) {
-						propertyGroup.dispose();
-					}
-					propertyGroup= new Group(controlContainer, SWT.NONE);
-					propertyGroup.setLayout(new FillLayout(SWT.VERTICAL));
-					propertyGroup.setText("Other Properties Settings:");
 
 					if (!element.getQarch().isEmpty()) {
 						YoctoBspPropertyElement qarch_elem = new YoctoBspPropertyElement();
@@ -159,172 +118,254 @@ public class PropertiesPage extends WizardPage {
 					}
 
 					propertyControlMap = new Hashtable<YoctoBspPropertyElement, Control>();
-					Iterator<YoctoBspPropertyElement> it = properties.iterator();
 
-				    while (it.hasNext()) {
-				        // Get property
-				        YoctoBspPropertyElement propElem = (YoctoBspPropertyElement)it.next();
-				        String type  = propElem.getType();
-				        String name = propElem.getName();
-				        if (type.contentEquals("edit")) {
-				        	Composite textContainer = new Composite(propertyGroup, SWT.NONE);
-				        	
-				        	textContainer.setLayout(new FillLayout());
-				        	new Label (textContainer, SWT.NONE).setText(name+":");
-				        	Text text = new Text(textContainer, SWT.BORDER | SWT.SINGLE);
-				    		propertyControlMap.put(propElem, (Control)text);
-				    		
-				        } else if (type.contentEquals("boolean")) {
-				        	Composite booleanContainer = new Composite(propertyGroup, SWT.NONE);
-				        	
-				        	booleanContainer.setLayout(new FillLayout(SWT.VERTICAL));
-				        	
-				        	String default_value = propElem.getDefaultValue();
-				        	Button button = new Button(booleanContainer, SWT.CHECK);
-				    		button.setText(name);
-				    		if (default_value.equalsIgnoreCase("y")) {
-				    			button.setSelection(true);	
-				    		} else 
-				    			button.setSelection(false);
-				    		propertyControlMap.put(propElem, (Control)button);
-				    		
-				        } else if (type.contentEquals("choicelist")) {
-				        	Composite choiceContainer = new Composite(propertyGroup, SWT.NONE);
-				        	
-				        	choiceContainer.setLayout(new FillLayout());
-				        	
-				        	new Label (choiceContainer, SWT.NONE).setText(name+":");
-				        	Combo combo = new Combo(choiceContainer, SWT.BORDER | SWT.READ_ONLY);
-				    		combo.setLayout(new FillLayout());
-				    		combo.setItems(getBSPComboProperties(name));
-						//updateKernelValues(KERNEL_CHOICES, name);
+					ArrayList<YoctoBspPropertyElement> propertiesList = new ArrayList<YoctoBspPropertyElement>(properties);
+					Collections.sort(propertiesList, Collections.reverseOrder());
 
-				    		propertyControlMap.put(propElem, (Control)combo);
-				        }
-				    }
+					Iterator<YoctoBspPropertyElement> it = propertiesList.iterator();
+					Composite comp = new Composite(propertyGroup, SWT.FILL);
+					GridLayout layout = new GridLayout(2, false);
+					GridData data = new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1);
+					comp.setLayoutData(data);
+					comp.setLayout(layout);
+
+					while (it.hasNext()) {
+						// Get property
+						YoctoBspPropertyElement propElem = it.next();
+						String type = propElem.getType();
+						String name = propElem.getName();
+						if (type.contentEquals("edit")) {
+							new Label (propertyGroup, SWT.FILL).setText(name + ":");
+
+							Composite textContainer = new Composite(propertyGroup, SWT.NONE);
+							textContainer.setLayout(new GridLayout(1, false));
+							textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+							Text text = new Text(textContainer, SWT.BORDER | SWT.SINGLE);
+							text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+							propertyControlMap.put(propElem, text);
+
+						} else if (type.contentEquals("boolean")) {
+							String default_value = propElem.getDefaultValue();
+							Composite labelContainer = new Composite(propertyGroup, SWT.NONE);
+							labelContainer.setLayout(new GridLayout(2, false));
+							labelContainer.setLayoutData(new GridData(GridData.FILL_HORIZONTAL, GridData.FILL_VERTICAL, true, false, 2, 1));
+							Button button = new Button(propertyGroup, SWT.CHECK);
+							button.setText(name);
+							if (default_value.equalsIgnoreCase("y")) {
+								button.setSelection(true);
+							} else
+								button.setSelection(false);
+							propertyControlMap.put(propElem, button);
+						} else if (type.contentEquals("choicelist")) {
+							new Label (propertyGroup, SWT.NONE).setText(name + ":");
+
+							Composite textContainer = new Composite(propertyGroup, SWT.NONE);
+							textContainer.setLayout(new GridLayout(1, false));
+							textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+							Combo combo = new Combo(textContainer, SWT.READ_ONLY);
+							combo.setLayout(new GridLayout(2, false));
+							combo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+							combo.setItems(getBSPComboProperties(name));
+							propertyControlMap.put(propElem, combo);
+						}
+					}
 				}
-
+				composite.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+				composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				controlContainer.pack();
+				this.composite.layout(true, true);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		sc.setContent(controlContainer);
-		sc.setExpandHorizontal(true);
-		sc.setExpandVertical(true);
-		sc.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-		controlContainer.pack();
-
-		this.composite.layout(true, true);
-		kcCombo.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				controlChanged(e.widget);
-			}
-		});
-
-
-	    newButton.addSelectionListener(new SelectionListener() {
-	    	public void widgetDefaultSelected(SelectionEvent e) {}
-	    	
-	    	public void widgetSelected(SelectionEvent e) {
-				controlChanged(e.widget);
-			}
-		});
-	    
-	   
-	    existingButton.addSelectionListener(new SelectionListener() {
-	    	public void widgetDefaultSelected(SelectionEvent e) {}
-	    	
-	    	public void widgetSelected(SelectionEvent e) {
-				controlChanged(e.widget);
-			}
-		});
-	    
-	    
-		kbCombo.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				controlChanged(e.widget);
-			}
-		});
 
 
 	}
 
 
+	@Override
 	public void createControl(Composite parent) {
-		this.composite = new Composite(parent, SWT.NONE);
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		GridLayout layout = new GridLayout(2, false);
+		this.composite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		GridLayout layout = new GridLayout(2, true);
 		this.composite.setLayout(layout);
 
-		gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.horizontalSpan= 2;
+		gd= new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 2;
 		this.composite.setLayoutData(gd);
 
 		setControl(this.composite);
+
+		controlContainer = new Composite(composite, SWT.NONE);
+		controlContainer.setLayout(new GridLayout(1, true));
+		controlContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		kGroup = new Group(controlContainer, SWT.FILL);
+		kGroup.setLayout(new GridLayout(2, false));
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
+		kGroup.setLayoutData(data);
+		kGroup.setText("Kernel Settings:");
+
+		new Label (kGroup, SWT.NONE).setText("Kernel:");
+		Composite textContainer = new Composite(kGroup, SWT.NONE);
+		textContainer.setLayout(new GridLayout(1, false));
+		textContainer.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1));
+
+		kernelCombo = new Combo(textContainer, SWT.READ_ONLY);
+		kernelCombo.setLayout(new GridLayout(2, false));
+		kernelCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+
+		kernelCombo.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				controlChanged(e.widget);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+
+
+		new Label(kGroup, SWT.NONE).setText("Kernel branch:");
+
+		textContainer = new Composite(kGroup, SWT.NONE);
+		textContainer.setLayout(new GridLayout(1, false));
+		textContainer.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1));
+		branchesCombo = new Combo(textContainer, SWT.READ_ONLY);
+		branchesCombo.setLayout(new GridLayout(2, false));
+		branchesCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		branchesCombo.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				controlChanged(e.widget);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+		branchesCombo.setSize(200, 200);
+
+		kbGroup = new Group(kGroup, SWT.FILL);
+		kbGroup.setLayout(new GridLayout(1, true));
+		data = new GridData(SWT.FILL, SWT.FILL, true, false);
+		data.horizontalSpan = 2;
+		kbGroup.setLayoutData(data);
+		kbGroup.setText("Branch Settings:");
+
+		newBranchButton = new Button(kbGroup, SWT.RADIO);
+		newBranchButton.setText("Create a new branch from an existing one");
+		newBranchButton.setSelection(true);
+		SelectionListener listener = new SelectionListener() {
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				controlChanged(e.widget);
+			}
+		};
+
+		newBranchButton.addSelectionListener(listener);
+
+		existingBranchButton = new Button(kbGroup, SWT.RADIO);
+		existingBranchButton.setText("Use existing branch");
+		existingBranchButton.setSelection(false);
+		existingBranchButton.addSelectionListener(listener);
+
+		propertyGroup = new Group(controlContainer, SWT.NONE);
+		propertyGroup.setLayout(new GridLayout(2, false));
+		data = new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1);
+		propertyGroup.setLayoutData(data);
+		propertyGroup.setText("BSP specific settings:");
+
+		otherSettingsGroup = new Group(controlContainer, SWT.FILL);
+		otherSettingsGroup.setLayout(new GridLayout(2, true));
+		data = new GridData(SWT.FILL, SWT.FILL, true, false);
+		data.horizontalSpan = 2;
+		otherSettingsGroup.setLayoutData(data);
+		otherSettingsGroup.setText("Other Settings:");
+
+		smpButton = new Button(otherSettingsGroup, SWT.CHECK);
+		smpButton.setText("Enable SMP support");
+		smpButton.setSelection(true);
+
+		this.composite.layout(true, true);
+
+		composite.setContent(controlContainer);
+		composite.setExpandHorizontal(true);
+		composite.setExpandVertical(true);
+		composite.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		controlContainer.pack();
+		composite.pack();
 	}
 
+	@Override
 	public boolean canFlipToNextPage() {
 		return false;
 	}
 
 	public HashSet<YoctoBspPropertyElement> getProperties() {
-		String kcSelection = kcCombo.getText();
-		String kbSelection = kbCombo.getText();
-		YoctoBspPropertyElement kc_element = new YoctoBspPropertyElement();
-		kc_element.setName(KERNEL_CHOICE);
-		kc_element.setValue(kcSelection);
-		properties.add(kc_element);
-		YoctoBspPropertyElement default_element = new YoctoBspPropertyElement();
-		default_element.setName(DEFAULT_KERNEL);
-		default_element.setValue("n");
-		properties.add(default_element);
+		String kcSelection = kernelCombo.getText();
+		String kbSelection = branchesCombo.getText();
+		YoctoBspPropertyElement kcElement = new YoctoBspPropertyElement();
+		kcElement.setName(KERNEL_CHOICE);
+		kcElement.setValue(kcSelection);
+		properties.add(kcElement);
+		YoctoBspPropertyElement defaultElement = new YoctoBspPropertyElement();
+		defaultElement.setName(DEFAULT_KERNEL);
+		defaultElement.setValue("n");
+		properties.add(defaultElement);
 
-		YoctoBspPropertyElement smp_element = new YoctoBspPropertyElement();
-		smp_element.setName(SMP_NAME);
+		YoctoBspPropertyElement smpElement = new YoctoBspPropertyElement();
+		smpElement.setName(SMP_NAME);
 		if (smpButton.getSelection())
-			smp_element.setValue("y");
+			smpElement.setValue("y");
 		else
-			smp_element.setValue("n");
-		properties.add(smp_element);
+			smpElement.setValue("n");
+		properties.add(smpElement);
 
-		YoctoBspPropertyElement newkb_element = new YoctoBspPropertyElement();
-		YoctoBspPropertyElement kb_element = new YoctoBspPropertyElement();
+		YoctoBspPropertyElement newKbElement = new YoctoBspPropertyElement();
+		YoctoBspPropertyElement kbElement = new YoctoBspPropertyElement();
 
-		newkb_element.setName(NEED_NEW_KBRANCH_NAME);
-		if (newButton.getSelection()) {
-			newkb_element.setValue("y");
-			properties.add(newkb_element);
-			kb_element.setName(NEW_KBRANCH_NAME);
-			kb_element.setValue(kbSelection);
-			properties.add(kb_element);
+		newKbElement.setName(NEED_NEW_KBRANCH_NAME);
+		if (newBranchButton.getSelection()) {
+			newKbElement.setValue("y");
+			properties.add(newKbElement);
+			kbElement.setName(NEW_KBRANCH_NAME);
+			kbElement.setValue(kbSelection);
+			properties.add(kbElement);
 		} else {
-			newkb_element.setValue("n");
-			properties.add(newkb_element);
-			kb_element.setName(EXISTING_KBRANCH_NAME);
-			kb_element.setValue(kbSelection);
-			properties.add(kb_element);
+			newKbElement.setValue("n");
+			properties.add(newKbElement);
+			kbElement.setName(EXISTING_KBRANCH_NAME);
+			kbElement.setValue(kbSelection);
+			properties.add(kbElement);
 		}
 
 		return properties;
 	}
 
 	public boolean validatePage() {
-		if (kcCombo == null)
-			return false; 
+		if (kernelCombo == null)
+			return false;
 
-		if ((kcCombo != null) && (kbCombo != null)) {
-			String kcSelection = kcCombo.getText();
-			String kbSelection = kbCombo.getText();
+		if ((kernelCombo != null) && (branchesCombo != null)) {
+			String kcSelection = kernelCombo.getText();
+			String kbSelection = branchesCombo.getText();
 			if ((kcSelection == null) || (kbSelection == null) || (kcSelection.isEmpty()) || (kbSelection.isEmpty())) {
-				setErrorMessage("Please select kernel_choice and kernel_branch!");
+				setErrorMessage("Please choose a kernel and a specific branch!");
 				return false;
 			}
 		}
-		if ((propertyControlMap != null)) { 
+		if ((propertyControlMap != null)) {
 			if (!propertyControlMap.isEmpty()) {
 				Enumeration<YoctoBspPropertyElement> keys = propertyControlMap.keys();
-				while( keys.hasMoreElements() ) {
-					YoctoBspPropertyElement key = (YoctoBspPropertyElement)keys.nextElement();
+				while (keys.hasMoreElements()) {
+					YoctoBspPropertyElement key = keys.nextElement();
 					Control control = propertyControlMap.get(key);
 					String type = key.getType();
 
@@ -360,208 +401,87 @@ public class PropertiesPage extends WizardPage {
 
 	private void updateProperties(YoctoBspPropertyElement element) {
 		Iterator<YoctoBspPropertyElement> it = properties.iterator();
+
 		while (it.hasNext()) {
-			YoctoBspPropertyElement propElem = (YoctoBspPropertyElement)it.next();
+			YoctoBspPropertyElement propElem = it.next();
 			if (propElem.getName().contentEquals(element.getName())) {
-				properties.remove((Object) propElem);
+				properties.remove(propElem);
 				properties.add(element);
 				break;
-			} else 
+			} else
 				continue;
 		}
- 	}
+	}
 	private void controlChanged(Widget widget) {
-		 setErrorMessage(null);
-		 
-		 String kernel_choice = kcCombo.getText();
-		 if ((kernel_choice == null) || (kernel_choice.isEmpty())) {
-			 setErrorMessage("Please selecte kernel_choice!");
-			 return;
-		 }
-		 if (widget == kcCombo) {
-			 newButton.setSelection(true);
-			 existingButton.setSelection(false);
-			 kbCombo.removeAll();
-			 
-			 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME, true);
-		 } else if (widget == kbCombo) {
-			 setErrorMessage(null);
-		 } else if (widget == newButton) {
-			 
-			 boolean newBranch = newButton.getSelection();
-			 
-			 if (newBranch) {
-				 kbCombo.removeAll();
-				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME, true);
-			 }
-		 } else if (widget == existingButton) {
-			 boolean existingBranch = existingButton.getSelection();
+		setErrorMessage(null);
 
-			 if (existingBranch) {
-				 kbCombo.removeAll();
-				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + EXISTING_KBRANCH_NAME, true);
-			 }
-		 }
-		 canFlipToNextPage();
-		 getWizard().getContainer().updateButtons();
-	}
-
-	private void updateKernelValues(final String value, String property, boolean showProgress) {
-		final ValuesGetter runnable  = new ValuesGetter(property);
-
-		if (showProgress) {
-			ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
-			try {
-				dialog.run(true, true, new IRunnableWithProgress(){
-				     public void run(IProgressMonitor monitor) {
-				         monitor.beginTask("Loading Kernel " + value + " ...", 100);
-				         runnable.run();
-				         monitor.done();
-				     }
-				 });
-			} catch (Exception e) {
-				runnable.getBspAction().setMessage(e.getMessage());
-			}
-		} else {
-			runnable.run();
+		String kernel_choice = kernelCombo.getText();
+		if ((kernel_choice == null) || (kernel_choice.isEmpty())) {
+			setErrorMessage("Please choose kernel !");
+			return;
 		}
-
-		BSPAction action = runnable.getBspAction();
-		if (action.getItems() != null) {
-			if (value == KERNEL_CHOICES)
-				kcCombo.setItems(action.getItems());
-			else if (value == KERNEL_BRANCHES)
-				kbCombo.setItems(action.getItems());
-		} else if (action.getMessage() != null)
-			MessageDialog.openError(getShell(), "Yocto-BSP", action.getMessage());
+		if (widget == kernelCombo) {
+			updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME);
+		} else if (widget == branchesCombo) {
+			setErrorMessage(null);
+			branchesCombo.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		} else if (widget == newBranchButton || widget == existingBranchButton) {
+			System.out.println("aici " + widget.toString());
+			if (newBranchButton.getSelection()) {
+				updateKernelValues(KERNEL_BRANCHES, "\"" + kernel_choice + "\"." + NEW_KBRANCH_NAME);
+			} else {
+				updateKernelValues(KERNEL_BRANCHES, "\"" + kernel_choice + "\"." + EXISTING_KBRANCH_NAME);
+			}
+		}
+		canFlipToNextPage();
+		getWizard().getContainer().updateButtons();
+		this.composite.layout(true, true);
+		composite.pack();
 	}
-	
-	private String[] getBSPComboProperties(String property) {
+
+	private void updateKernelValues(final String value, String property) {
 		String build_dir = "";
-		ArrayList<String> values = new ArrayList<String>();
 		if ((bspElem.getBuildLoc() == null) || bspElem.getBuildLoc().isEmpty())
 			build_dir = bspElem.getMetadataLoc()+"/build";
 		else
 			build_dir = bspElem.getBuildLoc();
 
 		String valuesCmd = "export BUILDDIR=" + build_dir + ";" + bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
-		try {
-			ProcessBuilder builder = new ProcessBuilder(new String[] {"sh", "-c", valuesCmd});
-			builder.redirectErrorStream(true);
-			Process process = builder.start();
-			BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			String line = null;
-			String error_message = "";
-			while ( (line = br.readLine()) != null) {
-				if (!line.startsWith("[")) {
-					error_message += line + "\n";
-					continue;
-				}
-				String[] items = line.split(",");
-
-				String value = items[0];
-				value = value.replace("[\"", "");
-				value = value.replaceAll("\"$", "");
-				values.add(value);
+		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new KernelBranchesGetter(valuesCmd), "Loading Kernel " + value);
+		progressDialog.run();
+		BSPAction action = progressDialog.getBspAction();
+		if (action.getItems() != null) {
+			if (value.equals(KERNEL_CHOICES)) {
+				kernelCombo.setItems(action.getItems());
+				kernelCombo.pack();
+			} else if (value.equals(KERNEL_BRANCHES)) {
+				branchesCombo.setItems(action.getItems());
+				branchesCombo.pack();
 			}
-			int exitVal = process.waitFor();
-			if (exitVal != 0) {
-				MessageDialog.openError(getShell(), "Yocto-BSP", error_message);
-				return new String[]{};
-			} else 
-				return values.toArray(new String[values.size()]);
-		} catch (Exception e) {
-			MessageDialog.openError(getShell(), "Yocto-BSP",e.getMessage());
-			return new String[] {};
-        }
-
+			composite.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		} else if (action.getMessage() != null)
+			MessageDialog.openError(getShell(), "Yocto-BSP", action.getMessage());
+		composite.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 	}
 
-	class ValuesGetter implements Runnable {
-		private String property;
-		private BSPAction bspAction;
+	private String[] getBSPComboProperties(String property) {
+		String build_dir = "";
+		if ((bspElem.getBuildLoc() == null) || bspElem.getBuildLoc().isEmpty())
+			build_dir = bspElem.getMetadataLoc()+"/build";
+		else
+			build_dir = bspElem.getBuildLoc();
 
-		public ValuesGetter(String property) {
-			this.property = property;
-			this.bspAction = new BSPAction(null, null);
+		String valuesCmd = "export BUILDDIR=" + build_dir + ";" + bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
+		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new KernelBranchesGetter(valuesCmd), "Loading property " + property + "values");
+		progressDialog.run();
+		BSPAction action = progressDialog.getBspAction();
+
+		if (action.getItems() != null) {
+			return action.getItems();
+		} else if (action.getMessage() != null) {
+			MessageDialog.openError(getShell(), "Yocto-BSP", action.getMessage());
+			return new String[]{};
 		}
-
-		public void run() {
-			ArrayList<String> values = new ArrayList<String>();
-
-			String build_dir = "";
-			if ((bspElem.getBuildLoc() == null) || bspElem.getBuildLoc().isEmpty())
-				build_dir = bspElem.getMetadataLoc()+"/build";
-			else
-				build_dir = bspElem.getBuildLoc();
-
-			String values_cmd = "export BUILDDIR=" + build_dir + ";" + bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
-			try {
-				ProcessBuilder builder = new ProcessBuilder(new String[] {"sh", "-c", values_cmd});
-				builder.redirectErrorStream(true);
-				Process process = builder.start();
-				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				String line = null;
-				String error_message = "";
-				while ( (line = br.readLine()) != null) {
-					if (!line.startsWith("[")) {
-						error_message += line + "\n";
-						continue;
-					}
-					String[] items = line.split(",");
-
-					String value = items[0];
-					value = value.replace("[\"", "");
-					value = value.replaceAll("\"$", "");
-					values.add(value);
-				}
-				int exitVal = process.waitFor();
-				if (exitVal != 0) {
-					bspAction.setMessage(error_message);
-					bspAction.setItems(null);
-				}
-			} catch (Exception e) {
-				bspAction.setItems(null);
-				bspAction.setMessage(e.getMessage());
-			}
-			if (!values.isEmpty()) {
-				bspAction.setItems(values.toArray(new String[values.size()]));
-				bspAction.setMessage(null);
-			}
-		}
-
-		public BSPAction getBspAction() {
-			return bspAction;
-		}
-
-		public void setBspAction(BSPAction bspAction) {
-			this.bspAction = bspAction;
-		}
-	}
-
-	class BSPAction {
-		private String[] items;
-		private String message;
-
-		BSPAction(String[] items, String message){
-			this.setItems(items);
-			this.setMessage(message);
-		}
-
-		public String[] getItems() {
-			return items;
-		}
-
-		public void setItems(String[] items) {
-			this.items = items;
-		}
-
-		public String getMessage() {
-			return message;
-		}
-
-		public void setMessage(String message) {
-			this.message = message;
-		}
+		return new String[]{};
 	}
 }

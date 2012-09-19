@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,16 +32,15 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.yocto.sdk.remotetools.YoctoBspElement;
 
 /**
- * 
+ *
  * Setting up the parameters for creating the new Yocto BSP
- * 
+ *
  * @author jzhang
  */
 public class MainPage extends WizardPage {
@@ -81,30 +79,31 @@ public class MainPage extends WizardPage {
 	private YoctoBspElement bspElem;
 
 	public MainPage(YoctoBspElement element) {
-		super(PAGE_NAME, "yocto-bsp main page", null);
+		super(PAGE_NAME, "yocto-bsp Main page", null);
 
 		setMessage("Enter the required fields(with *) to create new Yocto Project BSP!");
 		this.bspElem = element;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		setErrorMessage(null);
 		Composite composite = new Composite(parent, SWT.NONE);
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		composite.setLayout(layout);
-
 		gd.horizontalSpan = 2;
-		composite.setLayoutData(gd);	
+		composite.setLayoutData(gd);
 
 		labelMetadata = new Label(composite, SWT.NONE);
-		labelMetadata.setText("Meta_data location*: ");
+		labelMetadata.setText("Metadata location*: ");
 		Composite textContainer = new Composite(composite, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		textMetadataLoc = (Text)addTextControl(textContainer, "");
 		textMetadataLoc.setEnabled(false);
 		textMetadataLoc.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
@@ -133,13 +132,14 @@ public class MainPage extends WizardPage {
 
 		textBspName = (Text)addTextControl(textContainer, "");
 		textBspName.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
 
 		labelBspOutput = new Label(composite, SWT.NONE);
-		labelBspOutput.setText("Bsp output location: ");
+		labelBspOutput.setText("BSP output location: ");
 
 		textContainer = new Composite(composite, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
@@ -147,24 +147,26 @@ public class MainPage extends WizardPage {
 
 		textBspOutputLoc = (Text)addTextControl(textContainer, "");
 		textBspOutputLoc.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
 		});
 		setBtnBspOutLoc(addFileSelectButton(textContainer, textBspOutputLoc));
 
-		labelKArch= new Label(composite, SWT.NONE);
-		labelKArch.setText("kernel Architecture*: ");
+		labelKArch = new Label(composite, SWT.NONE);
+		labelKArch.setText("Kernel Architecture*: ");
 
 		textContainer = new Composite(composite, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-		comboKArch= new Combo(textContainer, SWT.READ_ONLY);
+		comboKArch = new Combo(textContainer, SWT.READ_ONLY);
 		comboKArch.setLayout(new GridLayout(2, false));
 		comboKArch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		comboKArch.setEnabled(false);
 		comboKArch.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
@@ -183,6 +185,7 @@ public class MainPage extends WizardPage {
 		comboQArch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		comboQArch.setEnabled(false);
 		comboQArch.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				controlChanged(e.widget);
 			}
@@ -200,7 +203,7 @@ public class MainPage extends WizardPage {
 		text.setText(value);
 		text.setSize(10, 150);
 
-		return (Control)text;
+		return text;
 	}
 
 	private Button addFileSelectButton(final Composite parent, final Text text) {
@@ -216,74 +219,74 @@ public class MainPage extends WizardPage {
 			}
 		});
 		return button;
-	}	
+	}
 
 	private void controlChanged(Widget widget) {
-		 Status status = new Status(IStatus.OK, "not_used", 0, "", null);
-		 setErrorMessage(null);
-		 String metadataLoc = textMetadataLoc.getText();
+		Status status = new Status(IStatus.OK, "not_used", 0, "", null);
+		setErrorMessage(null);
+		String metadataLoc = textMetadataLoc.getText();
 
-		 if (widget == textMetadataLoc) {
-			 resetKarchCombo();
-			 if (metadataLoc.length() == 0) {
-				 status = new Status(IStatus.ERROR, "not_used", 0, "Meta data location can't be empty!", null);
-			 } else {
-				 File meta_data = new File(metadataLoc);
-				 if (!meta_data.exists() || !meta_data.isDirectory()) {
-					 status = new Status(IStatus.ERROR, "not_used", 0, 
-							 "Invalid meta data location: Make sure it exists and is a directory!", null);
-				 } else {
-					 File bspScript = new File(metadataLoc + "/scripts/" + BSP_SCRIPT);
-					 if (!bspScript.exists() || !bspScript.canExecute())
-						 status = new Status(IStatus.ERROR, "not_used", 0,
-								 "Make sure yocto-bsp exists under \"" + metadataLoc + "/scripts\" and is executable!", null);
-					 else {		
-						 kernelArchesHandler();
-					 }
-				 }
-			 }
-		 } else if (widget == comboKArch) {
-			 String selection = comboKArch.getText();
-			 if (!bspElem.getKarch().contentEquals(selection))
-				 bspElem = new YoctoBspElement();
-			 if (selection.matches("qemu")) {
-				 labelQArch.setEnabled(true);
-				 comboQArch.setEnabled(true);
-			 } else {
-				 labelQArch.setEnabled(false);
-				 comboQArch.setEnabled(false);
-			 }		
-		 }
-		 
-		 String buildDir = textBuildLoc.getText();
-		 String outputDir = textBspOutputLoc.getText();
-		 String bspName = textBspName.getText();
-		 
-		 if (!outputDir.isEmpty()){
-			 if (outputDir.matches(buildDir)) {
-				 status = new Status(IStatus.ERROR, "not_used", 0,
-						 "You've set BSP output directory the same as build directory, please leave output directory empty for this scenario!", null);
-			 } else {
-				 File outputDirectory = new File(outputDir);
-				 if (outputDirectory.exists()){
+		if (widget == textMetadataLoc) {
+			resetKarchCombo();
+			if (metadataLoc.length() == 0) {
+				status = new Status(IStatus.ERROR, "not_used", 0, "Meta data location can't be empty!", null);
+			} else {
+				File meta_data = new File(metadataLoc);
+				if (!meta_data.exists() || !meta_data.isDirectory()) {
 					status = new Status(IStatus.ERROR, "not_used", 0,
-							 "Your BSP output directory points to an exiting directory!", null);
-				 }
-			 }
-		 } else if (buildDir.startsWith(metadataLoc) && !bspName.isEmpty()) {
-			 String bspDirStr = metadataLoc + "/meta-" + bspName;
-			 File bspDir = new File(bspDirStr);
-			 if (bspDir.exists()) {
-				 status = new Status(IStatus.ERROR, "not_used", 0,
-						 "Your BSP with name: " + bspName + " already exist under directory: " + bspDirStr + ", please change your bsp name!", null);
-			 }
-		 }
-		 
-		 if (status.getSeverity() == IStatus.ERROR)
-			 setErrorMessage(status.getMessage());
-		 
-		 getWizard().getContainer().updateButtons();
-		 canFlipToNextPage();
+							"Invalid meta data location: Make sure it exists and is a directory!", null);
+				} else {
+					File bspScript = new File(metadataLoc + "/scripts/" + BSP_SCRIPT);
+					if (!bspScript.exists() || !bspScript.canExecute())
+						status = new Status(IStatus.ERROR, "not_used", 0,
+								"Make sure yocto-bsp exists under \"" + metadataLoc + "/scripts\" and is executable!", null);
+					else {
+						kernelArchesHandler();
+					}
+				}
+			}
+		} else if (widget == comboKArch) {
+			String selection = comboKArch.getText();
+			if (!bspElem.getKarch().contentEquals(selection))
+				bspElem = new YoctoBspElement();
+			if (selection.matches("qemu")) {
+				labelQArch.setEnabled(true);
+				comboQArch.setEnabled(true);
+			} else {
+				labelQArch.setEnabled(false);
+				comboQArch.setEnabled(false);
+			}
+		}
+
+		String buildDir = textBuildLoc.getText();
+		String outputDir = textBspOutputLoc.getText();
+		String bspName = textBspName.getText();
+
+		if (!outputDir.isEmpty()){
+			if (outputDir.matches(buildDir)) {
+				status = new Status(IStatus.ERROR, "not_used", 0,
+						"You've set BSP output directory the same as build directory, please leave output directory empty for this scenario!", null);
+			} else {
+				File outputDirectory = new File(outputDir);
+				if (outputDirectory.exists()){
+					status = new Status(IStatus.ERROR, "not_used", 0,
+							"Your BSP output directory points to an exiting directory!", null);
+				}
+			}
+		} else if (buildDir.startsWith(metadataLoc) && !bspName.isEmpty()) {
+			String bspDirStr = metadataLoc + "/meta-" + bspName;
+			File bspDir = new File(bspDirStr);
+			if (bspDir.exists()) {
+				status = new Status(IStatus.ERROR, "not_used", 0,
+						"Your BSP with name: " + bspName + " already exist under directory: " + bspDirStr + ", please change your bsp name!", null);
+			}
+		}
+
+		if (status.getSeverity() == IStatus.ERROR)
+			setErrorMessage(status.getMessage());
+
+		getWizard().getContainer().updateButtons();
+		canFlipToNextPage();
 	}
 
 	private Status checkBuildDir() {
@@ -292,18 +295,18 @@ public class MainPage extends WizardPage {
 		String buildLoc = textBuildLoc.getText();
 
 		if (buildLoc.isEmpty()) {
-			 buildLoc = metadataLoc + "/build";
-			 return createBuildDir(buildLoc);
+			buildLoc = metadataLoc + "/build";
+			return createBuildDir(buildLoc);
 		} else {
-			 File buildLocDir = new File(buildLoc);
-			 if (!buildLocDir.exists()) {
-				 return createBuildDir(buildLoc);
-			 } else if (buildLocDir.isDirectory()) {
+			File buildLocDir = new File(buildLoc);
+			if (!buildLocDir.exists()) {
 				return createBuildDir(buildLoc);
-			 } else {
-				 return new Status(IStatus.ERROR, "not_used", 0, "Invalid build location: Make sure the build location is a directory!", null);
-			 }
-		 }
+			} else if (buildLocDir.isDirectory()) {
+				return createBuildDir(buildLoc);
+			} else {
+				return new Status(IStatus.ERROR, "not_used", 0, "Invalid build location: Make sure the build location is a directory!", null);
+			}
+		}
 	}
 
 	private Status createBuildDir(String buildLoc) {
@@ -337,10 +340,6 @@ public class MainPage extends WizardPage {
 		return this.bspElem;
 	}
 
-	public void handleEvent(Event event) {
-		canFlipToNextPage();
-		getWizard().getContainer().updateButtons();
-	}
 
 	private void resetKarchCombo() {
 		comboKArch.deselectAll();
@@ -351,24 +350,26 @@ public class MainPage extends WizardPage {
 	}
 
 	private void kernelArchesHandler() {
-		ArrayList<String> karches = getKArches();
-		if (!karches.isEmpty()) {
-			String[] kitems = new String[karches.size()];
-			kitems = karches.toArray(kitems);
-			comboKArch.setItems(kitems);
+		BSPAction kArchesAction = getKArches();
+		if (kArchesAction.getMessage() == null && kArchesAction.getItems().length != 0) {
+			comboKArch.setItems(kArchesAction.getItems());
 			comboKArch.setEnabled(true);
+		} else if (kArchesAction.getMessage() != null){
+			setErrorMessage(kArchesAction.getMessage());
+			return;
 		}
-		ArrayList<String> qarches = getQArches();
-		if (!qarches.isEmpty()) {
-			String[] qitems = new String[qarches.size()];
-			qitems = qarches.toArray(qitems);
-			comboQArch.setItems(qitems);
-		}
+		BSPAction qArchesAction = getQArches();
+		if (qArchesAction.getMessage() == null && qArchesAction.getItems().length != 0) {
+			comboQArch.setItems(qArchesAction.getItems());
+		} else if (qArchesAction.getMessage() != null)
+			setErrorMessage(qArchesAction.getMessage());
+
 	}
 
+	@Override
 	public boolean canFlipToNextPage(){
 		String err = getErrorMessage();
-		if (err != null) 
+		if (err != null)
 			return false;
 		else if (!validatePage())
 			return false;
@@ -406,87 +407,41 @@ public class MainPage extends WizardPage {
 		bspElem.setMetadataLoc(metadataLoc);
 		bspElem.setKarch(karch);
 		bspElem.setQarch(qarch);
-		bspElem.setValidPropertiesFile(createPropertiesFile());
 
+
+		if (!bspElem.getValidPropertiesFile()) {
+			boolean validPropertiesFile = true;
+			BSPAction action = createPropertiesFile();
+			if (action.getMessage() != null) {
+				validPropertiesFile = false;
+				setErrorMessage(action.getMessage());
+			}
+			bspElem.setValidPropertiesFile(validPropertiesFile);
+		}
 		return true;
 	}
 
-
-	private boolean createPropertiesFile() {
-		String create_properties_cmd = bspElem.getMetadataLoc() + "/scripts/" + 
-										PROPERTIES_CMD_PREFIX + bspElem.getKarch() + 
-										PROPERTIES_CMD_SURFIX + PROPERTIES_FILE;
-		try {
-			Runtime rt = Runtime.getRuntime();
-			Process proc = rt.exec(create_properties_cmd);
-			int exitVal = proc.waitFor();
-			if (exitVal != 0)
-				return false;
-			return true;
-		} catch (Throwable t) {
-			t.printStackTrace();
-			return false;
-		}
+	private BSPAction createPropertiesFile() {
+		String createPropertiesCmd = bspElem.getMetadataLoc() + "/scripts/" +
+				PROPERTIES_CMD_PREFIX + bspElem.getKarch() +
+				PROPERTIES_CMD_SURFIX + PROPERTIES_FILE;
+		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new ErrorCollectorThread(createPropertiesCmd), "Creating properties file ");
+		progressDialog.run();
+		return progressDialog.getBspAction();
 	}
 
-	private ArrayList<String> getKArches() {
-		ArrayList<String> karches = new ArrayList<String>();
-
-		String get_karch_cmd = textMetadataLoc.getText() + "/scripts/" + KARCH_CMD;
-		try {
-			Runtime rt = Runtime.getRuntime();
-			Process proc = rt.exec(get_karch_cmd);
-			InputStream stdin = proc.getInputStream();
-			InputStreamReader isr = new InputStreamReader(stdin);
-			BufferedReader br = new BufferedReader(isr);
-			String line = null;
-
-			while ( (line = br.readLine()) != null) {
-				if (line.contains(":"))
-					continue;
-				line = line.replaceAll("^\\s+", "");
-				line = line.replaceAll("\\s+$", "");
-				karches.add(line);
-			}
-
-			proc.waitFor();
-
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
-
-		return karches;
+	private BSPAction getKArches() {
+		String getKArchCmd = textMetadataLoc.getText() + "/scripts/" + KARCH_CMD;
+		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(), new KernelArchGetter(getKArchCmd), "Loading kernel architectures ");
+		progressDialog.run();
+		return progressDialog.getBspAction();
 	}
 
-	private ArrayList<String> getQArches() {
-		ArrayList<String> qarches = new ArrayList<String>();
-
-		String get_qarch_cmd = textMetadataLoc.getText() + "/scripts/" + QARCH_CMD;
-		try {
-			Runtime rt = Runtime.getRuntime();
-			Process proc = rt.exec(get_qarch_cmd);
-			InputStream stdin = proc.getInputStream();
-			InputStreamReader isr = new InputStreamReader(stdin);
-			BufferedReader br = new BufferedReader(isr);
-			String line = null;
-
-			while ( (line = br.readLine()) != null) {
-				if (!line.startsWith("["))
-					continue;
-				String[] values = line.split(",");
-
-				String value = values[0];
-				value = value.replace("[\"", "");
-				value = value.replaceAll("\"$", "");
-				qarches.add(value);
-			}
-			proc.waitFor();
-
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
-
-		return qarches;
+	private BSPAction getQArches() {
+		String getQArchCmd = textMetadataLoc.getText() + "/scripts/" + QARCH_CMD;
+		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(), new QemuArchGetter(getQArchCmd), "Loading Qemu architectures ");
+		progressDialog.run();
+		return progressDialog.getBspAction();
 	}
 
 	public Button getBtnMetadataLoc() {

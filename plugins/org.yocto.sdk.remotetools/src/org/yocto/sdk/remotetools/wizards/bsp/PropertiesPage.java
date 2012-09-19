@@ -196,8 +196,8 @@ public class PropertiesPage extends WizardPage {
 				        	new Label (choiceContainer, SWT.NONE).setText(name+":");
 				        	Combo combo = new Combo(choiceContainer, SWT.BORDER | SWT.READ_ONLY);
 				    		combo.setLayout(new FillLayout());
-
-						updateKernelValues(KERNEL_CHOICES, name);
+				    		combo.setItems(getBSPComboProperties(name));
+						//updateKernelValues(KERNEL_CHOICES, name);
 
 				    		propertyControlMap.put(propElem, (Control)combo);
 				        }
@@ -430,6 +430,47 @@ public class PropertiesPage extends WizardPage {
 				kbCombo.setItems(action.getItems());
 		} else if (action.getMessage() != null)
 			MessageDialog.openError(getShell(), "Yocto-BSP", action.getMessage());
+	}
+	
+	private String[] getBSPComboProperties(String property) {
+		String build_dir = "";
+		ArrayList<String> values = new ArrayList<String>();
+		if ((bspElem.getBuildLoc() == null) || bspElem.getBuildLoc().isEmpty())
+			build_dir = bspElem.getMetadataLoc()+"/build";
+		else
+			build_dir = bspElem.getBuildLoc();
+
+		String valuesCmd = "export BUILDDIR=" + build_dir + ";" + bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
+		try {
+			ProcessBuilder builder = new ProcessBuilder(new String[] {"sh", "-c", valuesCmd});
+			builder.redirectErrorStream(true);
+			Process process = builder.start();
+			BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line = null;
+			String error_message = "";
+			while ( (line = br.readLine()) != null) {
+				if (!line.startsWith("[")) {
+					error_message += line + "\n";
+					continue;
+				}
+				String[] items = line.split(",");
+
+				String value = items[0];
+				value = value.replace("[\"", "");
+				value = value.replaceAll("\"$", "");
+				values.add(value);
+			}
+			int exitVal = process.waitFor();
+			if (exitVal != 0) {
+				MessageDialog.openError(getShell(), "Yocto-BSP", error_message);
+				return new String[]{};
+			} else 
+				return values.toArray(new String[values.size()]);
+		} catch (Exception e) {
+			MessageDialog.openError(getShell(), "Yocto-BSP",e.getMessage());
+			return new String[] {};
+        }
+
 	}
 
 	class ValuesGetter implements Runnable {

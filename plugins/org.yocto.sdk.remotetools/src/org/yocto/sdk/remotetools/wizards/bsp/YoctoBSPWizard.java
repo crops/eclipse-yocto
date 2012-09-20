@@ -64,7 +64,7 @@ public class YoctoBSPWizard extends Wizard {
 		createBspCmd = createBspCmd + " -i " + PROPERTY_VALUE_FILE;
 
 		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new OutputCollectorThread(createBspCmd), "Creating BSP ");
-		progressDialog.run();
+		progressDialog.run(true);
 		return progressDialog.getBspAction();
 	}
 

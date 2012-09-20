@@ -76,7 +76,7 @@ public class PropertiesPage extends WizardPage {
 
 	private Group kGroup = null;
 	private Group kbGroup = null;
-	private Group otherSettingsGroup = null;
+//	private Group otherSettingsGroup = null;
 	private Group propertyGroup = null;
 
 	public PropertiesPage(YoctoBspElement element) {
@@ -99,7 +99,7 @@ public class PropertiesPage extends WizardPage {
 		try {
 			if (kArchChanged) {
 				updateKernelValues(KERNEL_CHOICES, KERNEL_CHOICE);
-
+				
 				if (propertyGroup != null) {
 					for (Control cntrl : propertyGroup.getChildren()) {
 						cntrl.dispose();
@@ -227,14 +227,21 @@ public class PropertiesPage extends WizardPage {
 			}
 		});
 
+		kbGroup = new Group(kGroup, SWT.FILL);
+		kbGroup.setLayout(new GridLayout(2, true));
+		data = new GridData(SWT.FILL, SWT.FILL, true, false);
+		data.horizontalSpan = 2;
+		kbGroup.setLayoutData(data);
+		kbGroup.setText("Branch Settings:");
 
-		new Label(kGroup, SWT.NONE).setText("Kernel branch:");
-
-		textContainer = new Composite(kGroup, SWT.NONE);
-		textContainer.setLayout(new GridLayout(1, false));
-		textContainer.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1));
+		textContainer = new Composite(kbGroup, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1));
+		
+		new Label(textContainer, SWT.NONE).setText("Kernel branch:");
+		
 		branchesCombo = new Combo(textContainer, SWT.READ_ONLY);
-		branchesCombo.setLayout(new GridLayout(2, false));
+		branchesCombo.setLayout(new GridLayout(1, false));
 		branchesCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		branchesCombo.addSelectionListener(new SelectionListener() {
 
@@ -248,17 +255,11 @@ public class PropertiesPage extends WizardPage {
 			}
 		});
 		branchesCombo.setSize(200, 200);
-
-		kbGroup = new Group(kGroup, SWT.FILL);
-		kbGroup.setLayout(new GridLayout(1, true));
-		data = new GridData(SWT.FILL, SWT.FILL, true, false);
-		data.horizontalSpan = 2;
-		kbGroup.setLayoutData(data);
-		kbGroup.setText("Branch Settings:");
-
+		
 		newBranchButton = new Button(kbGroup, SWT.RADIO);
 		newBranchButton.setText("Create a new branch from an existing one");
 		newBranchButton.setSelection(true);
+		newBranchButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		SelectionListener listener = new SelectionListener() {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
@@ -274,24 +275,25 @@ public class PropertiesPage extends WizardPage {
 		existingBranchButton = new Button(kbGroup, SWT.RADIO);
 		existingBranchButton.setText("Use existing branch");
 		existingBranchButton.setSelection(false);
+		existingBranchButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		existingBranchButton.addSelectionListener(listener);
 
+//		otherSettingsGroup = new Group(controlContainer, SWT.FILL);
+//		otherSettingsGroup.setLayout(new GridLayout(2, true));
+//		data = new GridData(SWT.FILL, SWT.FILL, true, false);
+//		data.horizontalSpan = 2;
+//		otherSettingsGroup.setLayoutData(data);
+//		otherSettingsGroup.setText("Other Settings:");
+
+		smpButton = new Button(kGroup, SWT.CHECK);
+		smpButton.setText("Enable SMP support");
+		smpButton.setSelection(true);
+		
 		propertyGroup = new Group(controlContainer, SWT.NONE);
 		propertyGroup.setLayout(new GridLayout(2, false));
 		data = new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1);
 		propertyGroup.setLayoutData(data);
 		propertyGroup.setText("BSP specific settings:");
-
-		otherSettingsGroup = new Group(controlContainer, SWT.FILL);
-		otherSettingsGroup.setLayout(new GridLayout(2, true));
-		data = new GridData(SWT.FILL, SWT.FILL, true, false);
-		data.horizontalSpan = 2;
-		otherSettingsGroup.setLayoutData(data);
-		otherSettingsGroup.setText("Other Settings:");
-
-		smpButton = new Button(otherSettingsGroup, SWT.CHECK);
-		smpButton.setText("Enable SMP support");
-		smpButton.setSelection(true);
 
 		this.composite.layout(true, true);
 
@@ -426,12 +428,12 @@ public class PropertiesPage extends WizardPage {
 			setErrorMessage(null);
 			branchesCombo.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		} else if (widget == newBranchButton || widget == existingBranchButton) {
-			System.out.println("aici " + widget.toString());
 			if (newBranchButton.getSelection()) {
 				updateKernelValues(KERNEL_BRANCHES, "\"" + kernel_choice + "\"." + NEW_KBRANCH_NAME);
 			} else {
 				updateKernelValues(KERNEL_BRANCHES, "\"" + kernel_choice + "\"." + EXISTING_KBRANCH_NAME);
 			}
+			branchesCombo.deselectAll();
 		}
 		canFlipToNextPage();
 		getWizard().getContainer().updateButtons();
@@ -448,15 +450,23 @@ public class PropertiesPage extends WizardPage {
 
 		String valuesCmd = "export BUILDDIR=" + build_dir + ";" + bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
 		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new KernelBranchesGetter(valuesCmd), "Loading Kernel " + value);
-		progressDialog.run();
+		if (value.equals(KERNEL_CHOICES))
+			progressDialog.run(false);
+		else if (value.equals(KERNEL_BRANCHES))
+			progressDialog.run(true);
+		
 		BSPAction action = progressDialog.getBspAction();
 		if (action.getItems() != null) {
 			if (value.equals(KERNEL_CHOICES)) {
 				kernelCombo.setItems(action.getItems());
 				kernelCombo.pack();
+				kernelCombo.deselectAll();
+				branchesCombo.setEnabled(false);
+				branchesCombo.deselectAll();
 			} else if (value.equals(KERNEL_BRANCHES)) {
 				branchesCombo.setItems(action.getItems());
 				branchesCombo.pack();
+				branchesCombo.setEnabled(true);
 			}
 			composite.setMinSize(controlContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		} else if (action.getMessage() != null)
@@ -473,7 +483,7 @@ public class PropertiesPage extends WizardPage {
 
 		String valuesCmd = "export BUILDDIR=" + build_dir + ";" + bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
 		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new KernelBranchesGetter(valuesCmd), "Loading property " + property + "values");
-		progressDialog.run();
+		progressDialog.run(false);
 		BSPAction action = progressDialog.getBspAction();
 
 		if (action.getItems() != null) {

@@ -23,16 +23,19 @@ public class BSPProgressDialog extends ProgressMonitorDialog{
 		this.displayMessage = displayMessage;
 	}
 
-	public void run(){
+	public void run(boolean showProgressDialog){
 		try {
-			super.run(true, true, new IRunnableWithProgress(){
-				@Override
-				public void run(IProgressMonitor monitor) {
-					monitor.beginTask(displayMessage + " ...", 100);
-					getterThread.run();
-					monitor.done();
-				}
-			});
+			if (showProgressDialog)
+				super.run(true, true, new IRunnableWithProgress(){
+					@Override
+					public void run(IProgressMonitor monitor) {
+						monitor.beginTask(displayMessage + " ...", 100);
+						getterThread.run();
+						monitor.done();
+					}
+				});
+			else
+				getterThread.run();
 		} catch (Exception e) {
 			getterThread.getBspAction().setMessage(e.getMessage());
 		}

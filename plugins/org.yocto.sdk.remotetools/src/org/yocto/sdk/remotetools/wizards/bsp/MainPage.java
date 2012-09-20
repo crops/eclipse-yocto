@@ -426,21 +426,21 @@ public class MainPage extends WizardPage {
 				PROPERTIES_CMD_PREFIX + bspElem.getKarch() +
 				PROPERTIES_CMD_SURFIX + PROPERTIES_FILE;
 		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new ErrorCollectorThread(createPropertiesCmd), "Creating properties file ");
-		progressDialog.run();
+		progressDialog.run(false);
 		return progressDialog.getBspAction();
 	}
 
 	private BSPAction getKArches() {
 		String getKArchCmd = textMetadataLoc.getText() + "/scripts/" + KARCH_CMD;
 		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(), new KernelArchGetter(getKArchCmd), "Loading kernel architectures ");
-		progressDialog.run();
+		progressDialog.run(false);
 		return progressDialog.getBspAction();
 	}
 
 	private BSPAction getQArches() {
 		String getQArchCmd = textMetadataLoc.getText() + "/scripts/" + QARCH_CMD;
 		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(), new QemuArchGetter(getQArchCmd), "Loading Qemu architectures ");
-		progressDialog.run();
+		progressDialog.run(false);
 		return progressDialog.getBspAction();
 	}
 

@@ -135,7 +135,7 @@ public class PropertiesPage extends WizardPage {
 			newButton.setSelection(true);
 			existingButton.setSelection(false);
 
-			updateKernelValues(KERNEL_CHOICES, KERNEL_CHOICE);
+			updateKernelValues(KERNEL_CHOICES, KERNEL_CHOICE, false);
 		}
 
 		try {
@@ -383,7 +383,7 @@ public class PropertiesPage extends WizardPage {
 			 existingButton.setSelection(false);
 			 kbCombo.removeAll();
 			 
-			 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME);
+			 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME, true);
 		 } else if (widget == kbCombo) {
 			 setErrorMessage(null);
 		 } else if (widget == newButton) {
@@ -392,34 +392,38 @@ public class PropertiesPage extends WizardPage {
 			 
 			 if (newBranch) {
 				 kbCombo.removeAll();
-				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME);
+				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + NEW_KBRANCH_NAME, true);
 			 }
 		 } else if (widget == existingButton) {
 			 boolean existingBranch = existingButton.getSelection();
 
 			 if (existingBranch) {
 				 kbCombo.removeAll();
-				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + EXISTING_KBRANCH_NAME);
+				 updateKernelValues(KERNEL_BRANCHES, "\\\"" + kernel_choice + "\\\"." + EXISTING_KBRANCH_NAME, true);
 			 }
 		 }
 		 canFlipToNextPage();
 		 getWizard().getContainer().updateButtons();
 	}
 
-	private void updateKernelValues(final String value, String property) {
+	private void updateKernelValues(final String value, String property, boolean showProgress) {
 		final ValuesGetter runnable  = new ValuesGetter(property);
 
-		ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
-		try {
-			dialog.run(true, true, new IRunnableWithProgress(){
-			     public void run(IProgressMonitor monitor) {
-			         monitor.beginTask("Loading Kernel " + value + " ...", 100);
-			         runnable.run();
-			         monitor.done();
-			     }
-			 });
-		} catch (Exception e) {
-			runnable.getBspAction().setMessage(e.getMessage());
+		if (showProgress) {
+			ProgressMonitorDialog dialog = new ProgressMonitorDialog(getShell());
+			try {
+				dialog.run(true, true, new IRunnableWithProgress(){
+				     public void run(IProgressMonitor monitor) {
+				         monitor.beginTask("Loading Kernel " + value + " ...", 100);
+				         runnable.run();
+				         monitor.done();
+				     }
+				 });
+			} catch (Exception e) {
+				runnable.getBspAction().setMessage(e.getMessage());
+			}
+		} else {
+			runnable.run();
 		}
 
 		BSPAction action = runnable.getBspAction();

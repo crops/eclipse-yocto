@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+	<extension point="org.eclipse.ui.cheatsheets.cheatSheetContent">
+		<category id="org.yocto.sdk.ide.doc.user.cheatsheets" name="%category.name">
+		</category>
+		<cheatsheet category="org.yocto.sdk.ide.doc.user.cheatsheets"
+			composite="false" contentFile="cheatsheets/createNewHelloWorldProject.xml"
+			id="org.yocto.sdk.ide.doc.user.cheatsheet.helloworldProject"
+			name="%cheatsheet.name">
+		</cheatsheet>
+	</extension>
 </plugin>

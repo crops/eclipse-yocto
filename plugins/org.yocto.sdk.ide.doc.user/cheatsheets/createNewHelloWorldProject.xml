@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*******************************************************************************
+ * Copyright (c) 2012 BMW Car IT GmbH.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Atanas Gegov - initial cheat sheet for creating the hello world project.
+ *******************************************************************************
+-->
+<cheatsheet title="Creating a Hello World ANSI C or C++ Autotools Project">
+	<intro>
+		<description>
+			This cheat sheet will guide you through the process of creating and
+			building a &quot;Hello World ANSI C Autotools Project&quot; or
+			a &quot;Hello World C++ Autotools Project&quot;
+			application that uses a Yocto Project template.
+		</description>
+	</intro>
+	<item title="Open the C/C++ Perspective" dialog="false" skip="true">
+		<description>
+			Select <b>Window</b> &gt; <b>Open Perspective</b> &gt;
+			<b>Other...</b> from the menu bar.<br/>
+			Choose <b>C/C++</b> from the <b>Open Perspective</b> dialog.
+			Click <b>OK</b>.
+		</description>
+		<command
+			required="false"
+			serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.eclipse.cdt.ui.CPerspective)">
+		</command>
+	</item>
+	<item title="Specify a toolchain and sysroot location" dialog="true" skip="true">
+		<description>
+			You need to specify a toolchain and sysroot location before
+			building any project in the workspace.
+		</description>
+		<subitem>
+			<description>
+			The global settings can be modified in the <b>Yocto Project ADT</b>
+			section of the eclipse preferences. Select <b>Window</b> &gt;
+			<b>Preferences</b> from the menu bar and then select the section
+			<b>Yocto Project ADT</b>. These settings are the default ones for
+			every project you create in the workspace.
+			</description>
+			<command
+				required="false"
+				serialization="org.eclipse.ui.window.preferences(preferencePageId=org.yocto.sdk.ide.preferences.YoctoSDKPreferencePage)">
+			</command>
+		</subitem>
+		<subitem>
+			<description>
+			Choose in the <b>Cross Compiler Options</b> the
+			<b>Standalone pre-built toolchain</b>.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			Provide a <b>Toolchain Root Location</b> (e.g.
+			/opt/poky/1.3 or some other location on the filesystem).
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			Provide a <b>Sysroot Location</b>. This is the filesystem
+			containing libraries, headers etc. used while cross-building
+			binaries for the target.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			If more than one toolchain is found in the <b>Toolchain
+			Root Location</b>, use the drop-down box to select the <b>Target
+			Architecture</b>. Make sure that the selected sysroot matches
+			the toolchain.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			Choose in the <b>Target Options</b> whether the target is a QEMU
+			emulation (kernel location required) or an external hardware.
+			The target is used for running or remote debugging the binaries
+			created for it.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			Save the settings with <b>Apply</b> and <b>OK</b>. You can later
+			change these settings for any project from the menu
+			<b>Project</b> &gt; <b>Change Yocto Project Settings</b>.
+			</description>
+		</subitem>
+	</item>
+	<item title="Choose the programming language for the project" dialog="true">
+		<description>
+			Choose between the available &quot;Hello World ANSI C Autotools
+			Project&quot; or the &quot;Hello World C++ Autotools Project&quot;
+			template projects.
+		</description>
+		<command returns="progLanguage"
+		serialization="org.eclipse.ui.dialogs.openMessageDialog(title=Select Programming Language,buttonLabel0=C++,message=Select the programming language for the Hello World Autotools Project project,buttonLabel1=C)"/>
+		<onCompletion> You selected ${progLanguage}.</onCompletion>
+	</item>
+	<item title="Create a Hello World Autotools Project">
+		<description>
+			Create a Yocto Project ADT Project &quot;Hello World ANSI C Autotools
+			Project&quot; or &quot;Hello World C++ Autotools Project&quot;
+			by using the appropriate Project wizard.
+		</description>
+		<conditional-subitem condition="${progLanguage}">
+			<subitem when="C++">
+				<description>
+					Click <b>File</b> &gt; <b>New</b> &gt; <b>C++ Project</b> to
+					launch the C++ Project wizard.
+				</description>
+				<command
+					required="false"
+					serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.cdt.ui.wizards.NewCWizard1)">
+				</command>
+			</subitem>
+			<subitem when="C">
+				<description>
+					Click <b>File</b> &gt; <b>New</b> &gt; <b>C Project</b> to
+					launch the C Project wizard.
+				</description>
+				<command
+					required="false"
+					serialization="org.eclipse.ui.newWizard(newWizardId=org.eclipse.cdt.ui.wizards.NewCWizard2)">
+				</command>
+			</subitem>
+		</conditional-subitem>
+		<conditional-subitem condition="${progLanguage}">
+			<subitem when="C++">
+				<description>
+					Enter <b>HelloWorld</b> as the project name, then select
+					<b>Yocto Project ADT Project</b> &gt;
+					<b>Hello World C++ Autotools Project</b> from the Project type
+					list and click <b>Next</b>.
+				</description>
+			</subitem>
+			<subitem when="C">
+				<description>
+					Enter <b>HelloWorld</b> as the project name, then select
+					<b>Yocto Project ADT Project</b> &gt;
+					<b>Hello World ANSI C Autotools Project</b> from the Project type
+					list and click <b>Next</b>.
+				</description>
+			</subitem>
+		</conditional-subitem>
+		<subitem skip="true">
+			<description>
+			Fill in the name of the <b>Author</b>. Make some changes in the
+			other fields if needed. Possibly change the <b>License</b> from
+			the drop-down box and click <b>Next</b>.
+			</description>
+		</subitem>
+		<subitem skip="true">
+			<description>
+			If needed make some Advanced settings. Confirm them with
+			<b>Apply</b> and <b>OK</b>.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			Click <b>Finish</b> to create the project in your workspace. You
+			will find the created project in the <b>Project Explorer</b> view.
+			</description>
+		</subitem>
+	</item>
+	<item title="Build the project" dialog="true">
+		<description>
+			Create the project&apos;s binary using a specified toolchain and
+			sysroot.
+		</description>
+		<subitem>
+			<description>
+			Make sure that the project is on focus in the
+			<b>Project Explorer</b> view.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			If you want to change the default settings for toolchain and
+			sysroot location go to <b>Project</b> &gt;
+			<b>Change Yocto Project Settings</b> in the menu bar. Finish the
+			editing by pressing <b>OK</b>.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			If you have changed the settings in the previous step, call
+			<b>Project</b> &gt; <b>Reconfigure Project</b> to reconfigure the
+			project with these new settings (e.g. create the correct Makefiles
+			that make use of the selected toolchain and sysroot).
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			Build the project with a click on the hammer symbol in the
+			Toolbar. Alternatively, go to <b>Project</b> &gt;
+			<b>Build Project</b>. If you didn&apos;t change the default
+			toolchain and sysroot, now the configuring step will be executed
+			at first, followed by the build step itself.
+			</description>
+		</subitem>
+		<subitem>
+			<description>
+			Observe the output in the different consoles (e.g.
+			<b>Configure [HelloWorld]</b> and
+			<b>CDT Build Console [HelloWorld]</b>) to check if everything
+			was successful.
+			</description>
+		</subitem>
+		<onCompletion>
+			Congratulations, you have completed this cheat sheet! You may
+			continue with editing, rebuilding or debugging the
+			Hello World Autotools Project.
+		</onCompletion>
+	</item>
+</cheatsheet>

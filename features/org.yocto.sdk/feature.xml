@@ -8,6 +8,7 @@
    
     Contributors:
         Intel - initial API and implementation
+        BMW Car IT - added user documentation plugin to the feature
  -->
 <feature
       id="org.yocto.sdk"
@@ -88,6 +89,13 @@
 
    <plugin
          id="org.yocto.bc.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.yocto.sdk.ide.doc.user"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -65,6 +65,10 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		boolean isEmptryProject = Boolean.valueOf(isEmptyProjetValue).booleanValue();
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		try {
+			if (projectName.contains(" ")) {
+				project.delete(true, null);
+				throw new ProcessFailureException(projectName + " contains space(s).  Project name can't contain space(s)");
+			}
 			if (!project.exists()) {
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);

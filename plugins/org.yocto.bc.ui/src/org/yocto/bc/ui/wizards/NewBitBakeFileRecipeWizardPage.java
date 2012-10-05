@@ -200,6 +200,10 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 			updateStatus("File name must be specified");
 			return;
 		}
+		if (fileName.contains(" ")) {
+			updateStatus("File name must be valid with no space in it");
+			return;
+		}
 		if (fileName.replace('\\', '/').indexOf('/', 1) > 0) {
 			updateStatus("File name must be valid");
 			return;

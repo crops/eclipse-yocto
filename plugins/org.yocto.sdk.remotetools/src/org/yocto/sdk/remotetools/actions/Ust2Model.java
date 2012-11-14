@@ -14,33 +14,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.rse.core.model.IHost;
-import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFile;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
-import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
-import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 
-import org.eclipse.linuxtools.tmf.ui.project.model.TmfTraceType;
-import org.eclipse.linuxtools.tmf.core.TmfCommonConstants;
-import org.yocto.sdk.remotetools.CommonHelper;
-import org.yocto.sdk.remotetools.LocalJob;
-import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.RSEHelper;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
 
@@ -175,10 +161,10 @@ public class Ust2Model extends BaseModel {
 			if (extension != null)
 				continue;
 			else {
-				traceFolder.setPersistentProperty(TmfCommonConstants.TRACETYPE, "org.eclipse.linuxtools.tmf.ui.type.ctf");
+				//traceFolder.setPersistentProperty(TmfCommonConstants.TRACETYPE, "org.eclipse.linuxtools.tmf.ui.type.ctf");
 				//resource.setPersistentProperty(TmfCommonConstants.TRACETYPE, "org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace");
-				traceFolder.setPersistentProperty(TmfCommonConstants.TRACEICON, "icons/obj16/garland16.png");
-				traceFolder.touch(null);
+				//traceFolder.setPersistentProperty(TmfCommonConstants.TRACEICON, "icons/obj16/garland16.png");
+				//traceFolder.touch(null);
 			}
 		}
 	}

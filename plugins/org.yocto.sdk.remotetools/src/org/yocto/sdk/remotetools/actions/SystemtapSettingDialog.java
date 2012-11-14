@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 
-//import org.eclipse.cdt.ui.templateengine.uitree.InputUIElement;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;

@@ -19,7 +19,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
-import org.yocto.sdk.remotetools.RSEHelper;
 
 public class SystemtapHandler extends TerminalHandler {
 	//protected SystemtapSettingDialog setting;

@@ -261,6 +261,11 @@ public class MainPage extends WizardPage {
 		String buildDir = textBuildLoc.getText();
 		String outputDir = textBspOutputLoc.getText();
 		String bspName = textBspName.getText();
+		
+		if (bspName.contains(" ")) {
+			status = new Status(IStatus.ERROR, "not_used", 0,
+					"BSP name contains space which is not allowed!", null);
+		}
 
 		if (!outputDir.isEmpty()){
 			if (outputDir.matches(buildDir)) {

@@ -6,5 +6,9 @@
    <feature url="features/org.yocto.sdk.source_@featureVerion@.jar" id="org.yocto.sdk.source" version="@featureVerion@">
       <category name="Yocto SDK"/>
    </feature>
+   <feature url="features/org.yocto.bc_@featureVerion@.jar" id="org.yocto.bc" version="@featureVerion@">
+      <category name="Yocto Project Bitbake Commander"/>
+   </feature>
    <category-def name="Yocto SDK" label="Development tools &amp; SDKs for Yocto Linux"/>
+   <category-def name="Yocto Project Bitbake Commander" label="Yocto Project Bitbake Commander Plug-in"/>
 </site>

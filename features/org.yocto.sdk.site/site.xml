@@ -4,11 +4,11 @@
       Yocto Project update site
    </description>
    <feature url="features/org.yocto.sdk_@genVerion@.jar" id="org.yocto.sdk" version="@genVerion@">
-      <category name="Yocto Project SDK plug-in"/>
+      <category name="Yocto Project ADT"/>
    </feature>
-   <category-def name="Yocto Project SDK plug-in" label="Yocto Project ADT plub-in"/>
-   <feature url="features/org.yocto.bc_@genVerion@.jar" id="org.yocto.bc" version="@genVerion@">
-      <category name="Yocto Project Bitbake Commander plug-in"/>
+   <category-def name="Yocto Project ADT" label="Yocto Project ADT plug-in"/>
+   <feature url="features/org.yocto.bc_@bcgenVerion@.jar" id="org.yocto.bc" version="@bcgenVerion@">
+      <category name="Yocto Project Bitbake Commander"/>
    </feature>
-   <category-def name="Yocto Project Bitbake Commander plug-in" label="Yocto Project Bitbake Commander plug-in"/>
+   <category-def name="Yocto Project Bitbake Commander Plug-in" label="Yocto Project Bitbake Commander plug-in"/>
 </site>

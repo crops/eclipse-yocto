@@ -465,6 +465,31 @@ public class YoctoSDKUtils {
 		return elem;
 	}
 
+	/* Load default IDE wide POKY Preference settings into YoctoUIElement */
+	public static YoctoUIElement getDefaultElemFromStore()
+	{
+		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
+		YoctoUIElement elem = new YoctoUIElement();
+		if (store.getDefaultString(PreferenceConstants.SDK_MODE).equals(IPreferenceStore.TRUE))
+			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
+		else
+			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
+
+		elem.setStrToolChainRoot(store.getDefaultString(PreferenceConstants.TOOLCHAIN_ROOT));
+		elem.setStrTarget(store.getDefaultString(PreferenceConstants.TOOLCHAIN_TRIPLET));
+		elem.setIntTargetIndex(store.getDefaultInt(PreferenceConstants.TARGET_ARCH_INDEX));
+		elem.setStrQemuKernelLoc(store.getDefaultString(PreferenceConstants.QEMU_KERNEL));
+		elem.setStrQemuOption(store.getDefaultString(PreferenceConstants.QEMU_OPTION));
+		elem.setStrSysrootLoc(store.getDefaultString(PreferenceConstants.SYSROOT));
+
+		if (store.getDefaultString(PreferenceConstants.TARGET_MODE).equals(IPreferenceStore.TRUE))
+			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.QEMU_MODE);
+		else
+			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.DEVICE_MODE);
+
+		return elem;
+	}
+
 	public static String qemuTargetTranslate(String strTargetArch) 
 	{
 		String qemu_target = "";

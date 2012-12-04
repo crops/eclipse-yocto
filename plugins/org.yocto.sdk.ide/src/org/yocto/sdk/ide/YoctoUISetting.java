@@ -307,6 +307,46 @@ public class YoctoUISetting {
 		return elem;
 	}
 
+	public void setCurrentInput(YoctoUIElement elem){
+		btnSDKRoot.setSelection(false);
+		btnPokyRoot.setSelection(false);
+		if(elem.getEnumPokyMode().equals(YoctoUIElement.PokyMode.POKY_SDK_MODE)){
+			btnSDKRoot.setSelection(true);
+		}
+		else if(elem.getEnumPokyMode().equals(YoctoUIElement.PokyMode.POKY_TREE_MODE)){
+			btnPokyRoot.setSelection(true);
+		}
+
+		btnQemu.setSelection(false);
+		btnDevice.setSelection(false);
+		if(elem.getEnumDeviceMode().equals(YoctoUIElement.DeviceMode.QEMU_MODE)){
+			btnQemu.setSelection(true);
+		}
+		else if(elem.getEnumDeviceMode().equals(YoctoUIElement.DeviceMode.DEVICE_MODE)){
+			btnDevice.setSelection(true);
+		}
+
+		textRootLoc.setText(elem.getStrToolChainRoot());
+		targetArchCombo.select(elem.getIntTargetIndex());
+		if(elem.getStrTargetsArray() == null){
+			targetArchCombo.setItems(new String[]{});
+		}
+		else {
+			targetArchCombo.setItems(elem.getStrTargetsArray());
+		}
+		targetArchCombo.setText(elem.getStrTarget());
+		textKernelLoc.setText(elem.getStrQemuKernelLoc());
+		textQemuOption.setText(elem.getStrQemuOption());
+		textSysrootLoc.setText(elem.getStrSysrootLoc());
+
+		try {
+			validateInput(SDKCheckRequestFrom.Preferences, false);
+		} catch (YoctoGeneralException e) {
+			System.out.println("Have you ever set Yocto Project Reference before?");
+			System.out.println(e.getMessage());
+		}
+	}
+
 	public boolean validateInput(SDKCheckRequestFrom from, boolean bPrompt) throws YoctoGeneralException {
 		YoctoUIElement elem = getCurrentInput();
 		boolean pass = true;

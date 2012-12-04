@@ -14,16 +14,13 @@ import org.eclipse.cdt.internal.autotools.ui.actions.InvokeAction;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.swt.widgets.Shell;
-import org.yocto.sdk.ide.YoctoSDKMessages;
-import org.yocto.sdk.ide.YoctoSDKUtils;
-import org.yocto.sdk.ide.YoctoUIElement;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.yocto.sdk.ide.YoctoSDKPlugin;
 
 
 @SuppressWarnings("restriction")
 public class ReconfigYoctoAction extends InvokeAction {
-    private static final String DIALOG_TITLE  = "Menu.SDK.Dialog.Title";
-
 	
 	public void run(IAction action) {
 		IContainer container = getSelectedContainer();
@@ -32,19 +29,13 @@ public class ReconfigYoctoAction extends InvokeAction {
 
 		IProject project = container.getProject();
 
-		//Try to get the per project configuration first
-		YoctoUIElement elem = YoctoSDKUtils.getElemFromProjectEnv(project);
-		if (elem.getStrToolChainRoot().isEmpty()|| elem.getStrTarget().isEmpty()){
-			// No project environment has been set yet, use the Preference values
-			elem = YoctoSDKUtils.getElemFromStore();
-		} 
-
-		SDKLocationDialog optionDialog = new SDKLocationDialog(new Shell(), YoctoSDKMessages.getString(DIALOG_TITLE), elem);
-		optionDialog.open();
-		elem = optionDialog.getElem();
-		if (elem.getStrToolChainRoot() != null) {
-			YoctoSDKUtils.saveElemToProjectEnv(project, elem);
-		}
+		PreferenceDialog dialog =
+				PreferencesUtil.createPropertyDialogOn(YoctoSDKPlugin.getActiveWorkbenchShell(), 
+														project,
+														"org.yocto.sdk.ide.page",
+														null,
+														null);
+		dialog.open();
 	}
 
 	public void dispose() {

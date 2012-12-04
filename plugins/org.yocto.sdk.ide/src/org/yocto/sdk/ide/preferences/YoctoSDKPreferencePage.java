@@ -89,58 +89,13 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			return false;
 		}		
 	}
-	
+
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		IPreferenceStore store= getPreferenceStore();
-		ArrayList<Control> arrControls =  this.yoctoUISetting.getfControls();
-		
-		for (int i = 0; i < arrControls.size(); i++)
-		{
-			Control control = arrControls.get(i);
-			String[] controlData = (String[])control.getData();
-			String sKey = controlData[0];
-			if (control instanceof Button)
-			{
-				sKey = sKey.substring(0, sKey.lastIndexOf("_"));
-			}
-			String sValue = store.getDefaultString(sKey);
-			if (control instanceof Button)
-			{
-				if (sValue.equalsIgnoreCase("true"))
-				{
-					if (controlData[0].endsWith("_1")) //the 1st radio button of the group
-						((Button)control).setSelection(true);
-					else
-						((Button)control).setSelection(false);//the 2nd radio button of the group
-				}
-				else
-				{
-					if (controlData[0].endsWith("_1")) //the 1st radio button of the group
-						((Button)control).setSelection(false);
-					else
-						((Button)control).setSelection(true);//the 2nd radio button of the group
-				}
-			}
-			else if (control instanceof Text)
-			{
-				((Text)control).setText(sValue);
-			}
-			else if (control instanceof Combo)
-			{
-				if (!sValue.isEmpty())
-					((Combo)control).select(Integer.valueOf(sValue).intValue());
-			}
-		}
-
-		try {
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
-		} catch (YoctoGeneralException e) {
-			System.out.println("Have you ever set Yocto Project Reference before?");
-			System.out.println(e.getMessage());
-		}
+		YoctoUIElement defaultElement = YoctoSDKUtils.getDefaultElemFromStore();
+		yoctoUISetting.setCurrentInput(defaultElement);
 		super.performDefaults();
 	}
 

@@ -180,5 +180,19 @@
             id="org.yocto.sdk.ide.YoctoConsole">
       </CBuildConsole>
    </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            adaptable="true"
+            class="org.yocto.sdk.ide.preferences.YoctoSDKProjectPropertyPage"
+            id="org.yocto.sdk.ide.page"
+            name="%projectProperties.label.0"
+            objectClass="org.eclipse.core.resources.IProject">
+         <filter
+               name="projectNature"
+               value="org.yocto.sdk.ide.YoctoSDKNature">
+         </filter>
+      </page>
+   </extension>
 
 </plugin>

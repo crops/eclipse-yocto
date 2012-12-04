@@ -22,10 +22,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.envvar.IContributedEnvironment;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
 import org.eclipse.cdt.core.model.CoreModel;
+import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.core.resources.IProject;
@@ -75,6 +77,7 @@ public class YoctoSDKUtils {
 	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
 	private static final String LIBTOOL_SYSROOT_PREFIX = "--with-libtool-sysroot=";
 	private static final String SYSROOTS_DIR = "sysroots";
+	private static final String CONSOLE_MESSAGE  = "Menu.SDK.Console.Configure.Message";
 
 	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {		
 		
@@ -417,6 +420,45 @@ public class YoctoSDKUtils {
 		else
 			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.DEVICE_MODE);
 		return elem;
+	}
+	
+	/* Save YoctoUIElement to project settings */
+	public static void saveElemToProjectEnv(IProject project, YoctoUIElement elem)
+	{
+		ConsoleOutputStream consoleOutStream = null;
+		
+		try {
+			YoctoSDKProjectNature.setEnvironmentVariables(project, elem);
+			YoctoSDKProjectNature.configureAutotoolsOptions(project);
+			IConsole console = CCorePlugin.getDefault().getConsole("org.yocto.sdk.ide.YoctoConsole");
+			console.start(project);
+			consoleOutStream = console.getOutputStream();
+			String messages = YoctoSDKMessages.getString(CONSOLE_MESSAGE);
+			consoleOutStream.write(messages.getBytes());
+		}
+		catch (CoreException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		catch (IOException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		catch (YoctoGeneralException e)
+		{
+			System.out.println(e.getMessage());
+		}
+		finally {
+			if (consoleOutStream != null) {
+				try {
+					consoleOutStream.flush();
+					consoleOutStream.close();
+				}
+				catch (IOException e) {
+					// ignore
+				}
+			}
+		}
 	}
 
 	/* Load IDE wide POKY Preference settings into Preference Store */

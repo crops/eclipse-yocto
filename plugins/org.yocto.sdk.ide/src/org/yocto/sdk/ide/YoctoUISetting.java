@@ -43,7 +43,6 @@ import org.yocto.sdk.ide.preferences.PreferenceConstants;
 public class YoctoUISetting {
 
 	private static final String ENV_SCRIPT_FILE_PREFIX = "environment-setup-";
-	private ArrayList<Control> fControls;
 
 	private SelectionListener fSelectionListener;
 	private ModifyListener fModifyListener;
@@ -66,7 +65,6 @@ public class YoctoUISetting {
 
 	public YoctoUISetting(YoctoUIElement elem)
 	{
-		fControls = new ArrayList<Control>();
 		yoctoUIElement = elem;
 		elem.setStrTargetsArray(getTargetArray(elem));
 
@@ -88,11 +86,8 @@ public class YoctoUISetting {
 
 	private Control addControls(Control fControl, final String sKey, String sValue)
 	{
-
 		fControl.setData(new String[]{sKey,sValue});
-		fControls.add(fControl);
 		return fControl;
-
 	}
 
 	private Control addRadioButton(Composite parent, String label, String key, boolean bSelected) {
@@ -373,15 +368,6 @@ public class YoctoUISetting {
 			throw new YoctoGeneralException(strErrorMessage);
 		}
 		return pass;
-	}
-
-
-	public void setfControls(ArrayList<Control> fControls) {
-		this.fControls = fControls;
-	}
-
-	public ArrayList<Control> getfControls() {
-		return fControls;
 	}
 
 	private void updateQemuControlState()

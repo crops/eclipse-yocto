@@ -99,7 +99,7 @@ public class SystemtapSettingDialog extends SimpleSettingDialog {
 	private Button addFileSelectButton(final Composite parent, final Text text) {
 		Button button = new Button(parent, SWT.PUSH | SWT.LEAD);
 		//button.setText(InputUIElement.BROWSELABEL);
-		button.setText("Browser");
+		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {

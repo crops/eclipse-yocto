@@ -65,6 +65,8 @@ check_env ()
   fi 
 }
 
+USE_LOCAL_GIT_REPO=0
+
 if [ $# -ne 2 ] && [ $# -ne 3 ]; then 
    help
 fi
@@ -97,6 +99,12 @@ mkdir ${BUILD_DIR} || fail $? "Create temporary build directory ${BUILD_DIR}"
 
 #git clone
 GIT_URL=git://git.pokylinux.org/eclipse-poky.git
+if [ $USE_LOCAL_GIT_REPO -eq 1 ]; then
+	SCRIPT_DIR=`dirname $0`
+	GIT_DIR=`readlink -f ${SCRIPTDIR}\..`
+	GIT_URL="file://${GIT_DIR}"
+fi
+
 GIT_DIR=${BUILD_SRC}
 #mkdir ${GIT_DIR}
 #cp -r features/ ${GIT_DIR}

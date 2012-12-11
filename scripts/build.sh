@@ -3,12 +3,13 @@
 help ()
 {
   echo "Build the Yocto Eclipse plugins"
-  echo "Usage: $0 <branch name> <release name>";
+  echo "Usage: $0 [OPTIONS] BRANCH_NAME RELEASE_NAME [TAG_NAME]";
   echo ""
   echo "Options:"
-  echo "<branch name> - git branch name to build upon"
-  echo "<release name> - release name in the final output name"
-  echo "[tag name] - git tag name to build upon. defaults to master if not set"
+  echo "-h - display this help and exit"
+  echo "BRANCH_NAME - git branch name to build upon"
+  echo "RELEAES_NAME - release name in the final output name"
+  echo "TAG_NAME - git tag name to build upon. defaults to HEAD if not set"
   echo ""
   echo "Example: $0 master r0 M1.1_rc1";
   exit 1;
@@ -66,6 +67,15 @@ check_env ()
 }
 
 USE_LOCAL_GIT_REPO=0
+while getopts ":h" opt; do
+	case $opt in
+		h)
+			help
+			;;
+	esac
+done
+shift $(($OPTIND - 1))
+
 
 if [ $# -ne 2 ] && [ $# -ne 3 ]; then 
    help

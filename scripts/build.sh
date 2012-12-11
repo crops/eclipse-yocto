@@ -7,6 +7,7 @@ help ()
   echo ""
   echo "Options:"
   echo "-h - display this help and exit"
+  echo "-l - use local git repository"
   echo "BRANCH_NAME - git branch name to build upon"
   echo "RELEAES_NAME - release name in the final output name"
   echo "TAG_NAME - git tag name to build upon. defaults to HEAD if not set"
@@ -67,10 +68,13 @@ check_env ()
 }
 
 USE_LOCAL_GIT_REPO=0
-while getopts ":h" opt; do
+while getopts ":lh" opt; do
 	case $opt in
 		h)
 			help
+			;;
+		l)
+			USE_LOCAL_GIT_REPO=1
 			;;
 	esac
 done

@@ -37,11 +37,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.cdt.internal.autotools.core.configure.AutotoolsConfigurationManager;
 import org.yocto.sdk.ide.YoctoGeneralException;
 import org.yocto.sdk.ide.YoctoSDKEmptyProjectNature;
 import org.yocto.sdk.ide.YoctoSDKProjectNature;
+import org.yocto.sdk.ide.YoctoSDKUtils;
+import org.yocto.sdk.ide.YoctoUIElement;
+import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 
 
 @SuppressWarnings("restriction")
@@ -110,10 +114,17 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
+				YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
+				YoctoSDKUtils.SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
+				if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
+					String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
+					throw new YoctoGeneralException(strErrorMsg);
+				}
 				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
 				if(isEmptryProject) {
 					YoctoSDKEmptyProjectNature.addYoctoSDKEmptyNature(project, monitor);
 				}
+				
 				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
 				YoctoSDKProjectNature.configureAutotools(project);
 				
@@ -145,7 +156,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 			} catch (CoreException err) {
 				throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage() + " " + err.getMessage()); 
 			}
-			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage()); 
+			throw new OperationCanceledException(Messages.getString("NewManagedProject.3") + e.getMessage());
 		}
 	}
 

@@ -38,7 +38,12 @@ public class Messages extends NLS {
 	public static String Powertop_Time_Text;
 	public static String Powertop_ShowPid_Text;
 	public static String TerminalViewer_text;
-	public static String Systemtap_KO_Text;
+	//public static String Systemtap_KO_Text;
+	public static String Metadata_Location;
+	public static String User_ID;
+	public static String Remote_Host;
+	public static String Systemtap_Script;
+	public static String Systemtap_Args;
 	public static String Import_to_Project;
 	
 	public static String LocalJob_Title;

@@ -9,60 +9,59 @@
  * Intel - initial API and implementation
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
-
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.rse.core.model.IHost;
-import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
+import org.eclipse.swt.widgets.Shell;
 
-public class SystemtapHandler extends TerminalHandler {
-	//protected SystemtapSettingDialog setting;
+public class SystemtapHandler extends AbstractHandler {
+	protected SystemtapSettingDialog setting;
 	protected String changeTerm="export TERM=vt100;";
 	protected IWorkbenchWindow window;
+	protected Shell shell;
 	
-	protected String remote_KO_file;
-	protected static String remote_KO_file_loc = "/tmp/";
-	protected static String stap_cmd = "staprun ";
-	
-	protected boolean preProcess(final ITerminalServiceSubSystem terminalSubSystem) {
-		IHost host = setting.getHost();
-		String KO_value = ((SystemtapSettingDialog)setting).getKernelModule();
-		Path KO_file_path = new Path(KO_value);
-		remote_KO_file=remote_KO_file_loc+KO_file_path.lastSegment();
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
-		if (terminalSubSystem != null) {
-			if (super.preProcess(terminalSubSystem)) {
+		this.window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+		shell = window.getShell();
+		setting=new SystemtapSettingDialog(
+				shell, "Systemtap"
+				);
 		
-				SystemtapModel op=new SystemtapModel(host,KO_value,window.getShell().getDisplay());
-				try {
-					op.preProcess(new NullProgressMonitor());
-					return true;
-					//progressService.busyCursorWhile(op);
-				}catch (Exception e) {
-					e.printStackTrace();
-					MessageDialog.openError(window.getShell(),
-							"Systemtap",
-							e.getMessage());
-				}
-			}
+		setting.open();
+		if (!setting.isOKPressed())
+			return false;
+		String metadata_location = ((SystemtapSettingDialog)setting).getMetadataLocation();
+		String remote_host = ((SystemtapSettingDialog)setting).getRemoteHost();
+		String user_id = ((SystemtapSettingDialog)setting).getUserID();
+		String systemtap_script = ((SystemtapSettingDialog)setting).getSystemtapScript();
+		String systemtap_args = ((SystemtapSettingDialog)setting).getSystemtapArgs();
+		
+		
+		SystemtapModel op=new SystemtapModel(metadata_location,remote_host, user_id, systemtap_script,
+											systemtap_args,window.getShell().getDisplay());
+		try {
+			op.process(new NullProgressMonitor());
+			return true;
+		}catch (Exception e) {
+			e.printStackTrace();
+			MessageDialog.openError(window.getShell(),
+									"Systemtap",
+									e.getMessage());
 		}
+			
 		return false;
-	}
-	
-	protected String getInitCmd() {
-		return stap_cmd+remote_KO_file+"\r";
 	}
 	
 	protected void initialize(ExecutionEvent event) throws ExecutionException {
 		this.window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		shell = window.getShell();
 		setting=new SystemtapSettingDialog(
-				shell
+				shell, "Systemtap"
 				);
 	}
 

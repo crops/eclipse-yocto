@@ -30,9 +30,10 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	}
 	
 	protected void init(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+		/*
 		if(rseConnection==null) {
 			throw new InvocationTargetException(new Exception("NULL rse connection"),"NULL rse connection");
-		}
+		}*/
 	}
 	
 	protected void uninit(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {

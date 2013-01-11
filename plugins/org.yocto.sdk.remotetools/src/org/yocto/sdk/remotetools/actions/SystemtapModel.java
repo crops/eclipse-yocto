@@ -11,66 +11,79 @@
 package org.yocto.sdk.remotetools.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.rse.core.model.IHost;
-
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.MessageConsole;
 
-import org.yocto.sdk.remotetools.RSEHelper;
+import org.yocto.sdk.remotetools.ShellSession;
 
 public class SystemtapModel extends BaseModel {
-	final private String REMOTE_KO_FILE_LOC="/tmp/";
-
-	private String KO_value;
-	private String remote_KO_file;
-	private IHost host;
+	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
+	protected static final String SYSTEMTAP_CONSOLE = "Systemtap Console";
+	protected MessageConsole sessionConsole;
+	private String metadata_location;
+	private String remote_host;
+	private String user_id;
+	private String systemtap_script;
+	private String systemtap_args;
+	
 	Display display;
 	
-	String localfile;
-	String remotefile;
-	
-	public SystemtapModel(IHost host, String ko_value,Display display) {
-		super(host);
-		this.host=host;
-		this.KO_value=ko_value;
+	public SystemtapModel(String metadata_location, String remote_host, String user_id, String systemtap_script, String systemtap_args, Display display) {
+		super(null);
+		this.metadata_location=metadata_location;
+		this.remote_host=remote_host;
+		this.user_id=user_id;
+		this.systemtap_script=systemtap_script;
+		this.systemtap_args = systemtap_args;
 		this.display=display;
-		Path KO_file_path = new Path(KO_value);
-		this.remote_KO_file=REMOTE_KO_FILE_LOC+KO_file_path.lastSegment();
+		if (sessionConsole == null) {
+			IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
+			IConsole[] existing = conMan.getConsoles();
+			for (int i = 0; i < existing.length; i++)
+				if (SYSTEMTAP_CONSOLE.equals(existing[i].getName())) {
+					sessionConsole = (MessageConsole) existing[i];
+					break;
+				}
+			if (sessionConsole == null) {
+				sessionConsole = new MessageConsole(SYSTEMTAP_CONSOLE, null);
+				conMan.addConsoles(new IConsole[] { sessionConsole });
+			}
+		}
+		
+		ConsolePlugin.getDefault().getConsoleManager().showConsoleView(sessionConsole);
 	}
 	
 	@Override
+	
 	public void preProcess(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
-		//upload KO file to remote
-		try {
-			RSEHelper.putRemoteFile(
-					host, 
-					KO_value, 
-					remote_KO_file,
-					monitor);
-		}catch (Exception e) {
-			throw new InvocationTargetException(e,e.getMessage());
-		}
-
 	}
 
 	public void process(IProgressMonitor monitor)
 	throws InvocationTargetException, InterruptedException {
+		try {
+			ShellSession shell = new ShellSession(ShellSession.SHELL_TYPE_BASH, 
+												new File(this.metadata_location),
+												DEFAULT_INIT_SCRIPT, sessionConsole.newOutputStream());
+			String crosstapCmd = "crosstap " + user_id + "@" + remote_host + " " + systemtap_script;
+			if (systemtap_args != null)
+				crosstapCmd = crosstapCmd + " " + systemtap_args;
+			shell.execute(crosstapCmd);
+									
+		} catch (Exception e) {
+			throw new InvocationTargetException(e,e.getMessage());
+		}
 	}
 	
-	@Override
+	
 	public void postProcess(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
-		try {
-			RSEHelper.deleteRemoteFile(
-					rseConnection,
-					remote_KO_file,
-					monitor);
-		}catch (Exception e) {
-			
-		}
 	}
 
 }

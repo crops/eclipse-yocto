@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,34 +24,67 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import java.io.File;
+
 import org.yocto.sdk.remotetools.Activator;
 import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.SWTFactory;
 
-public class SystemtapSettingDialog extends SimpleSettingDialog {
+public class SystemtapSettingDialog extends Dialog {
 
-	static protected String TITLE="Systemtap";
+	static protected String TITLE="Systemtap Crosstap";
+	protected String title;
+	protected String metadata_location;
+	protected String systemtap_script;
+	protected String user_id;
+	protected String remote_host;
+	protected String systemtap_args;
+	protected boolean okPressed;
+	protected Button metadataLocationBtn;
+	protected Button systemtapScriptBtn;
+	protected Text userIDText;
+	protected Text remoteHostText;
+	protected Text systemtapArgsText;
+	protected Text systemtapScriptText;
+	protected Text metadataLocationText;
 	
-	protected String KO_value="";
-	protected Button kernelModuleBtn;
-	protected Text kernelModuleText;
-	
-	protected SystemtapSettingDialog(Shell parentShell, String title, String conn) {
-		super(parentShell,title,conn);
+	protected SystemtapSettingDialog(Shell parentShell, String title) {
+		super(parentShell);
+		this.title = title;
+		this.okPressed = false;
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 	
-	public SystemtapSettingDialog(Shell parentShell) {
-		this(parentShell,
-				TITLE,
-				Activator.getDefault().getDialogSettings().get(IBaseConstants.CONNECTION_NAME_SYSTEMTAP)
-				);
+	@Override
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		newShell.setText(title);
+	}
+
+	public boolean isOKPressed() {
+		return okPressed;
 	}
 	
-	public String getKernelModule() {
-		return KO_value;
+	public String getSystemtapScript() {
+		return systemtap_script;
 	}
 	
+	public String getMetadataLocation() {
+		return metadata_location;
+	}
+	
+	public String getRemoteHost() {
+		return remote_host;
+	}
+	
+	public String getUserID() {
+		return user_id;
+	}
+	
+	public String getSystemtapArgs() {
+		return systemtap_args;
+	}
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite comp=(Composite)super.createDialogArea(parent);
@@ -61,7 +95,6 @@ public class SystemtapSettingDialog extends SimpleSettingDialog {
 		SWTFactory.createVerticalSpacer(comp, 1);
 		createInternal(comp);
 		
-		updateOkButton();
 		return comp;
 	}
 	
@@ -77,12 +110,50 @@ public class SystemtapSettingDialog extends SimpleSettingDialog {
 		projComp.setLayoutData(gd);
 		
 		Label label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.Systemtap_KO_Text);
+		label.setText(Messages.Metadata_Location);
 		Composite textContainer = new Composite(projComp, SWT.NONE);
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		kernelModuleText = (Text)addTextControl(textContainer, KO_value);
-		kernelModuleBtn = addFileSelectButton(textContainer, kernelModuleText);
+		metadataLocationText = (Text)addTextControl(textContainer, metadata_location);
+		metadataLocationBtn = addFileSelectButton(textContainer, metadataLocationText);
+		
+		label = new Label(projComp, SWT.NONE);
+		label.setText(Messages.User_ID);
+		userIDText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
+		
+		if(user_id!=null)
+			userIDText.setText(user_id);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		userIDText.setLayoutData(gd);
+		
+		label = new Label(projComp, SWT.NONE);
+		label.setText(Messages.Remote_Host);
+		
+		remoteHostText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
+		if(remote_host != null)
+			remoteHostText.setText(remote_host);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		remoteHostText.setLayoutData(gd);
+		
+		label = new Label(projComp, SWT.NONE);
+		label.setText(Messages.Systemtap_Script);
+		textContainer = new Composite(projComp, SWT.NONE);
+		textContainer.setLayout(new GridLayout(2, false));
+		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		systemtapScriptText = (Text)addTextControl(textContainer, systemtap_script);
+		systemtapScriptBtn = addFileSelectButton(textContainer, systemtapScriptText);
+		
+		label = new Label(projComp, SWT.NONE);
+		label.setText(Messages.Systemtap_Args);
+		
+		systemtapArgsText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
+		if(systemtap_args != null)
+			systemtapArgsText.setText(systemtap_args);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		systemtapArgsText.setLayoutData(gd);
 	}
 
 	private Control addTextControl(final Composite parent, String value) {
@@ -90,15 +161,14 @@ public class SystemtapSettingDialog extends SimpleSettingDialog {
 
 		text = new Text(parent, SWT.SINGLE | SWT.LEAD | SWT.BORDER);
 		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		text.setText(value);
+		if (value != null)
+			text.setText(value);
 		text.setSize(10, 150);
 		return (Control)text;
-		//return addControls((Control)text, key, value);
 	}
 
 	private Button addFileSelectButton(final Composite parent, final Text text) {
 		Button button = new Button(parent, SWT.PUSH | SWT.LEAD);
-		//button.setText(InputUIElement.BROWSELABEL);
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -114,23 +184,49 @@ public class SystemtapSettingDialog extends SimpleSettingDialog {
 		return button;
 	}		
 
-	@Override
+ 	@Override
 	protected void okPressed() {
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
-	    // store the value of the generate sections checkbox
-		if(getCurrentConnection()==null) {
-			settings.put(IBaseConstants.CONNECTION_NAME_SYSTEMTAP,
-					(String)null);
-		}else {
-			settings.put(IBaseConstants.CONNECTION_NAME_SYSTEMTAP, 
-					getCurrentConnection().getAliasName());
+		metadata_location = metadataLocationText.getText();
+		if ( (metadata_location == null) || metadata_location.isEmpty()) {
+			CommonHelper.showErrorDialog("SystemTap Error", null, "Please specify your metadata location!");
+			return;
+		} 
+		File metadata_dir = new File(metadata_location);
+		if (!metadata_dir.exists()) {
+			CommonHelper.showErrorDialog("SystemTap Error", null, "The specified metadata location does not exist!");
 		}
-	
-		KO_value=kernelModuleText.getText();
-		if ((KO_value == null) || KO_value.isEmpty()) {
-			CommonHelper.showErrorDialog("SystemTap Error", null, "Missing kernel module!");
+		if (!metadata_dir.isDirectory()) {
+			CommonHelper.showErrorDialog("SystemTap Error", null, "The specified metadata location is not a directory!");
 			return;
 		}
+		user_id = userIDText.getText();
+		if ( (user_id == null) || user_id.isEmpty()) {
+			CommonHelper.showErrorDialog("SystemTap Error", null, "Please specify remote user id!");
+			return;
+		}
+		
+		remote_host = remoteHostText.getText();
+		if ( (remote_host == null) || remote_host.isEmpty()) {
+			CommonHelper.showErrorDialog("SystemTap Error", null, "Please specify remote host IP!");
+			return;
+		}
+		
+		systemtap_script = systemtapScriptText.getText();
+		if ( (systemtap_script == null) || systemtap_script.isEmpty()) {
+			CommonHelper.showErrorDialog("SystemTap Error", null, "Please specify your systemtap script");
+			return;
+		}
+	    File script_file = new File(systemtap_script);
+	    if (!script_file.exists()) {
+	    	CommonHelper.showErrorDialog("SystemTap Error", null, "The specified systemtap script does not exist!");
+			return;
+	    }
+	    if (!script_file.isFile()) {
+	    	CommonHelper.showErrorDialog("SystemTap Error", null, "The specified systemtap script is not a file!");
+			return;
+	    }
+	    okPressed = true;
 		super.okPressed();
 	}
 }

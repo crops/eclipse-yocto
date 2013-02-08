@@ -146,6 +146,10 @@ public class YoctoProfileSetting {
 				sdkConfigsCombo.select(0);
 				sdkConfigsCombo.remove(selectionIndex);
 				profileElement.remove(selectedItem);
+
+				if (preferencePage instanceof YoctoSDKPreferencePage) {
+					((YoctoSDKPreferencePage) preferencePage).deleteProfile(selectedItem);
+				}
 			}
 		});
 	}

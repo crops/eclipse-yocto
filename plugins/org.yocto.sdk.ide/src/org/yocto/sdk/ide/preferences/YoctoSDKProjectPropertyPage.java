@@ -99,7 +99,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
 
 			YoctoUIElement elem = yoctoUISetting.getCurrentInput();
-			YoctoSDKUtils.saveElemToProjectEnv(getProject(), elem);
+			YoctoSDKUtils.saveElemToProjectEnv(elem, getProject());
 
 			return super.performOk();
 		} catch (YoctoGeneralException e) {

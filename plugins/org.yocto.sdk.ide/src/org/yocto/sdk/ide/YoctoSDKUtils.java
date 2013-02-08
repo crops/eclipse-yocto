@@ -423,7 +423,7 @@ public class YoctoSDKUtils {
 	}
 	
 	/* Save YoctoUIElement to project settings */
-	public static void saveElemToProjectEnv(IProject project, YoctoUIElement elem)
+	public static void saveElemToProjectEnv(YoctoUIElement elem, IProject project)
 	{
 		ConsoleOutputStream consoleOutStream = null;
 		

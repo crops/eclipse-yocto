@@ -33,4 +33,5 @@ public class PreferenceConstants {
 		
 	public static final String IP_ADDR = "IPAddr";
 
+	public static final String STANDARD_PROFILE_NAME = "Standard Profile";
 }

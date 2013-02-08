@@ -303,6 +303,8 @@ public class YoctoUISetting {
 	}
 
 	public void setCurrentInput(YoctoUIElement elem){
+		elem.setStrTargetsArray(getTargetArray(elem));
+
 		btnSDKRoot.setSelection(false);
 		btnPokyRoot.setSelection(false);
 		if(elem.getEnumPokyMode().equals(YoctoUIElement.PokyMode.POKY_SDK_MODE)){

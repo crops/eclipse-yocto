@@ -11,4 +11,8 @@
       <category name="Yocto Project Bitbake Commander"/>
    </feature>
    <category-def name="Yocto Project Bitbake Commander" label="Yocto Project Bitbake Commander plug-in"/>
+   <feature url="features/org.yocto.doc_@docGenVersion@.jar" id="org.yocto.doc" version="@docGenVersion@">
+      <category name="Yocto Project Documentation"/>
+   </feature>
+   <category-def name="Yocto Project Documentation" label="Yocto Project Documentation plug-in"/>
 </site>

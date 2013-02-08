@@ -67,7 +67,9 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 		final Composite result= new Composite(parent, SWT.NONE);
-		
+
+		yoctoProfileSetting.createComposite(result);
+
 		try {
 			yoctoUISetting.createComposite(result);
 			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);

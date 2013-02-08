@@ -7,6 +7,7 @@
  *
  * Contributors:
  * Intel - initial API and implementation
+ * BMW Car IT - add methods to use different preference stores
  *******************************************************************************/
 package org.yocto.sdk.ide;
 
@@ -16,7 +17,6 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +38,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 
 public class YoctoSDKUtils {
+
 	public static enum SDKCheckResults {
 		SDK_PASS,
 		POKY_DEVICE_EMPTY,
@@ -396,7 +397,7 @@ public class YoctoSDKUtils {
 
 	}
 
-	/* Load project wide POKY Preference settings into YoctoUIElement */
+	/* Get POKY Preference settings from project's environment */
 	public static YoctoUIElement getElemFromProjectEnv(IProject project)
 	{
 		YoctoUIElement elem = new YoctoUIElement();
@@ -422,7 +423,7 @@ public class YoctoSDKUtils {
 		return elem;
 	}
 	
-	/* Save YoctoUIElement to project settings */
+	/* Save POKY Preference settings to project's environment */
 	public static void saveElemToProjectEnv(YoctoUIElement elem, IProject project)
 	{
 		ConsoleOutputStream consoleOutStream = null;
@@ -461,11 +462,15 @@ public class YoctoSDKUtils {
 		}
 	}
 
-	/* Load IDE wide POKY Preference settings into Preference Store */
-	public static void saveElemToStore(YoctoUIElement elem)
+	/* Save IDE wide POKY Preference settings to the default preference store */
+	public static void saveElemToDefaultStore(YoctoUIElement elem)
 	{
-		IPreferenceStore store= YoctoSDKPlugin.getDefault().getPreferenceStore();
+		saveElemToStore(elem, YoctoSDKPlugin.getDefault().getPreferenceStore());
+	}
 
+	/* Save IDE wide POKY Preference settings to a specific preference store */
+	public static void saveElemToStore(YoctoUIElement elem, IPreferenceStore store)
+	{
 		store.setValue(PreferenceConstants.TARGET_ARCH_INDEX, elem.getIntTargetIndex());
 		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE)
 			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
@@ -482,10 +487,14 @@ public class YoctoSDKUtils {
 		store.setValue(PreferenceConstants.TOOLCHAIN_TRIPLET, elem.getStrTarget());		
 	}
 
-	/* Load IDE wide POKY Preference settings into YoctoUIElement */
-	public static YoctoUIElement getElemFromStore()
+	/* Get IDE wide POKY Preference settings from the default preference store */
+	public static YoctoUIElement getElemFromDefaultStore()
 	{
-		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
+		return getElemFromStore(YoctoSDKPlugin.getDefault().getPreferenceStore());
+	}
+
+	/* Get IDE wide POKY Preference settings from a specific preference store */
+	public static YoctoUIElement getElemFromStore(IPreferenceStore store) {
 		YoctoUIElement elem = new YoctoUIElement();
 		if (store.getString(PreferenceConstants.SDK_MODE).equals(IPreferenceStore.TRUE))
 			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
@@ -507,8 +516,8 @@ public class YoctoSDKUtils {
 		return elem;
 	}
 
-	/* Load default IDE wide POKY Preference settings into YoctoUIElement */
-	public static YoctoUIElement getDefaultElemFromStore()
+	/* Get default POKY Preference settings from the default preference store */
+	public static YoctoUIElement getDefaultElemFromDefaultStore()
 	{
 		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
 		YoctoUIElement elem = new YoctoUIElement();
@@ -673,5 +682,32 @@ public class YoctoSDKUtils {
 				continue;
         }
 		return arch;
+	}
+
+	/* Save profiles and selected profile to the default preference store */
+	public static void saveProfilesToDefaultStore(YoctoProfileElement profileElement) {
+		saveProfilesToStore(profileElement, YoctoSDKPlugin.getDefault().getPreferenceStore());
+	}
+
+	/* Save profiles and selected profile to a specific preference store */
+	public static void saveProfilesToStore(YoctoProfileElement profileElement, IPreferenceStore store)
+	{
+		store.setValue(PreferenceConstants.PROFILES, profileElement.getProfilesAsString());
+		store.setValue(PreferenceConstants.SELECTED_PROFILE, profileElement.getSelectedProfile());
+	}
+
+	/* Get profiles and selected profile from the default preference store */
+	public static YoctoProfileElement getProfilesFromDefaultStore()
+	{
+		return getProfilesFromStore(YoctoSDKPlugin.getDefault().getPreferenceStore());
+	}
+
+	/* Get profiles and selected profile from a specific preference store */
+	public static YoctoProfileElement getProfilesFromStore(IPreferenceStore store)
+	{
+		String profiles = store.getString(PreferenceConstants.PROFILES);
+		String selectedProfile = store.getString(PreferenceConstants.SELECTED_PROFILE);
+
+		return new YoctoProfileElement(profiles, selectedProfile);
 	}
 }

@@ -40,8 +40,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.cdt.autotools.core.AutotoolsNewProjectNature;
 import org.eclipse.cdt.internal.autotools.core.configure.AutotoolsConfigurationManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.yocto.sdk.ide.YoctoGeneralException;
+import org.yocto.sdk.ide.YoctoProfileElement;
 import org.yocto.sdk.ide.YoctoSDKEmptyProjectNature;
+import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoSDKProjectNature;
 import org.yocto.sdk.ide.YoctoSDKUtils;
 import org.yocto.sdk.ide.YoctoUIElement;
@@ -114,7 +117,9 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
-				YoctoUIElement elem = YoctoSDKUtils.getElemFromStore();
+				YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
+				IPreferenceStore selecteProfileStore = YoctoSDKPlugin.getProfilePreferenceStore(profileElement.getSelectedProfile());
+				YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(selecteProfileStore);
 				YoctoSDKUtils.SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
 				if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
 					String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);

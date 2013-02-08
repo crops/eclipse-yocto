@@ -74,7 +74,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 				|| uiElement.getStrTarget().isEmpty()) {
 			// No project environment has been set yet, use the Preference
 			// values
-			uiElement = YoctoSDKUtils.getElemFromStore();
+			uiElement = YoctoSDKUtils.getElemFromDefaultStore();
 		}
 
 		return uiElement;
@@ -85,7 +85,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 	 */
 	@Override
 	protected void performDefaults() {
-		YoctoUIElement defaultElement = YoctoSDKUtils.getDefaultElemFromStore();
+		YoctoUIElement defaultElement = YoctoSDKUtils.getDefaultElemFromDefaultStore();
 		yoctoUISetting.setCurrentInput(defaultElement);
 		super.performDefaults();
 	}

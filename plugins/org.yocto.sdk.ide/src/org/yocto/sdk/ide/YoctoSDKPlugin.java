@@ -16,9 +16,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -63,6 +66,12 @@ public class YoctoSDKPlugin extends AbstractUIPlugin {
 	 */
 	public static YoctoSDKPlugin getDefault() {
 		return plugin;
+	}
+
+	public static IPreferenceStore getProfilePreferenceStore(String profileName) {
+		int profileIdentifier = profileName.hashCode();
+
+		return new ScopedPreferenceStore(InstanceScope.INSTANCE,getUniqueIdentifier() + "." + profileIdentifier);
 	}
 
 	public static void log(IStatus status) {

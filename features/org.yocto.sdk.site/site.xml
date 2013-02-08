@@ -3,11 +3,11 @@
    <description name="Yocto Project update site" url="http://yoctoproject.org/downloads/eclipse-plugin/">
       Yocto Project update site
    </description>
-   <feature url="features/org.yocto.sdk_@genVerion@.jar" id="org.yocto.sdk" version="@genVerion@">
+   <feature url="features/org.yocto.sdk_@genVersion@.jar" id="org.yocto.sdk" version="@genVersion@">
       <category name="Yocto Project ADT"/>
    </feature>
    <category-def name="Yocto Project ADT" label="Yocto Project ADT plug-in"/>
-   <feature url="features/org.yocto.bc_@bcgenVerion@.jar" id="org.yocto.bc" version="@bcgenVerion@">
+   <feature url="features/org.yocto.bc_@bcgenVersion@.jar" id="org.yocto.bc" version="@bcgenVersion@">
       <category name="Yocto Project Bitbake Commander"/>
    </feature>
    <category-def name="Yocto Project Bitbake Commander" label="Yocto Project Bitbake Commander plug-in"/>

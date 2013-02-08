@@ -81,7 +81,7 @@
 		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/category.xml" todir="${buildDirectory}" />
 		<xmlproperty file="${otherSrcDirectory}/features/org.yocto.bc/feature.xml" />
 		<replace file="${buildDirectory}/category.xml">
-			<replacefilter token="@bcfeatureVerion@" value="${feature(version)}"/>
+			<replacefilter token="@bcfeatureVersion@" value="${feature(version)}"/>
 		</replace>
 	</target>
 
@@ -177,7 +177,7 @@
 		<property file="${buildDirectory}/finalFeaturesVersions.properties" />
 		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
 		<replace file="${buildDirectory}/site.xml">
-			<replacefilter token="@bcgenVerion@" value="${org.yocto.bc}"/>
+			<replacefilter token="@bcgenVersion@" value="${org.yocto.bc}"/>
 		</replace>
 		<zip destfile="${buildDirectory}/${buildLabel}/org.yocto.bc-${buildId}-group.group.group.zip" update="true">
 			<zipfileset dir="${buildDirectory}">

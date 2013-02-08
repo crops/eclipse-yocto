@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.yocto.sdk_@featureVerion@.jar" id="org.yocto.sdk" version="@featureVerion@">
+   <feature url="features/org.yocto.sdk_@featureVersion@.jar" id="org.yocto.sdk" version="@featureVersion@">
       <category name="Yocto Project ADT"/>
    </feature>
-   <feature url="features/org.yocto.sdk.source_@featureVerion@.jar" id="org.yocto.sdk.source" version="@featureVerion@">
+   <feature url="features/org.yocto.sdk.source_@featureVersion@.jar" id="org.yocto.sdk.source" version="@featureVersion@">
       <category name="Yocto Project ADT"/>
    </feature>
-   <feature url="features/org.yocto.bc_@bcfeatureVerion@.jar" id="org.yocto.bc" version="@bcfeatureVerion@">
+   <feature url="features/org.yocto.bc_@bcfeatureVersion@.jar" id="org.yocto.bc" version="@bcfeatureVersion@">
       <category name="Yocto Project Bitbake Commander"/>
    </feature>
    <category-def name="Yocto Project ADT" label="Yocto Project ADT Plug-in"/>

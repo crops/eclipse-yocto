@@ -88,6 +88,10 @@ public class YoctoProfileSetting {
 
 				String selectedItem = sdkCombo.getItem(sdkCombo.getSelectionIndex());
 				profileElement.setSelectedProfile(selectedItem);
+
+				if (preferencePage instanceof YoctoSDKPreferencePage) {
+					((YoctoSDKPreferencePage) preferencePage).switchProfile(selectedItem);
+				}
 			}
 		};
 

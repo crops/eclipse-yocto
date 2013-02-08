@@ -13,6 +13,7 @@ package org.yocto.sdk.ide.preferences;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -39,12 +40,24 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 	public YoctoSDKPreferencePage() {
 		//super(GRID);
-        setPreferenceStore(YoctoSDKPlugin.getDefault().getPreferenceStore());
-        //setDescription(YoctoSDKMessages.getString(PREFERENCES_Yocto_CONFIG));
-		YoctoUIElement elem = YoctoSDKUtils.getElemFromDefaultStore();
-        this.yoctoUISetting = new YoctoUISetting(elem);
+		IPreferenceStore defaultStore = YoctoSDKPlugin.getDefault().getPreferenceStore();
+		String profiles = defaultStore.getString(PreferenceConstants.PROFILES);
+		String selectedProfile = defaultStore.getString(PreferenceConstants.SELECTED_PROFILE);
+
+		if (profiles.isEmpty()) {
+			profiles = defaultStore.getDefaultString(PreferenceConstants.PROFILES);
+			selectedProfile = defaultStore.getDefaultString(PreferenceConstants.SELECTED_PROFILE);
+		}
+
+		setPreferenceStore(YoctoSDKPlugin.getProfilePreferenceStore(selectedProfile));
+		//setDescription(YoctoSDKMessages.getString(PREFERENCES_Yocto_CONFIG));
+		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(getPreferenceStore());
+		this.yoctoUISetting = new YoctoUISetting(elem);
+
+		YoctoProfileElement profileElement = new YoctoProfileElement(profiles, selectedProfile);
+		this.yoctoProfileSetting = new YoctoProfileSetting(profileElement, this);
 	}
-	
+
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
@@ -75,7 +88,10 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
 
 			YoctoUIElement elem = yoctoUISetting.getCurrentInput();
-			YoctoSDKUtils.saveElemToDefaultStore(elem);
+			YoctoSDKUtils.saveElemToStore(elem, getPreferenceStore());
+
+			YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
+			YoctoSDKUtils.saveProfilesToDefaultStore(profileElement);
 
 			return super.performOk();
 		} catch (YoctoGeneralException e) {

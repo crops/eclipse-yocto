@@ -63,6 +63,12 @@ public class YoctoUISetting {
 	private Text textRootLoc;
 	private Combo targetArchCombo;
 
+	private Label root_label;
+	private Label sysroot_label;
+	private Label targetArchLabel;
+	private Label kernel_label;
+	private Label option_label;
+
 	public YoctoUISetting(YoctoUIElement elem)
 	{
 		yoctoUIElement = elem;
@@ -140,10 +146,6 @@ public class YoctoUISetting {
 
 	private void createQemuSetup(final Group targetGroup) throws YoctoGeneralException
 	{
-		Label kernel_label;
-		Label option_label;
-		
-		
 		//QEMU Setup
 		kernel_label= new Label(targetGroup, SWT.NONE);
 		kernel_label.setText("Kernel: ");
@@ -180,8 +182,6 @@ public class YoctoUISetting {
 	}
 	public void createComposite(Composite composite) throws YoctoGeneralException
 	{
-		Label root_label, sysroot_label;
-		
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
 		composite.setLayout(layout);
@@ -224,7 +224,7 @@ public class YoctoUISetting {
 		btnSysrootLoc = addFileSelectButton(textContainer, textSysrootLoc, PreferenceConstants.SYSROOT);
 
 		updateSDKControlState();
-		Label targetArchLabel= new Label(crossCompilerGroup, SWT.NONE);
+		targetArchLabel = new Label(crossCompilerGroup, SWT.NONE);
 		targetArchLabel.setText("Target Architecture: ");
 
 		targetArchCombo= new Combo(crossCompilerGroup, SWT.READ_ONLY);

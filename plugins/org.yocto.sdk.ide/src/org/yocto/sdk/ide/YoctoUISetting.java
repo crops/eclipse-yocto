@@ -370,6 +370,50 @@ public class YoctoUISetting {
 		return pass;
 	}
 
+	public void setUIFormEnabledState(boolean isEnabled) {
+		btnSDKRoot.setEnabled(isEnabled);
+		btnPokyRoot.setEnabled(isEnabled);
+
+		root_label.setEnabled(isEnabled);
+		textRootLoc.setEnabled(isEnabled);
+		btnToolChainLoc.setEnabled(isEnabled);
+
+		sysroot_label.setEnabled(isEnabled);
+		textSysrootLoc.setEnabled(isEnabled);
+		btnSysrootLoc.setEnabled(isEnabled);
+
+		targetArchLabel.setEnabled(isEnabled);
+		targetArchCombo.setEnabled(isEnabled);
+
+		btnQemu.setEnabled(isEnabled);
+
+		if(isEnabled) {
+			/* enabling widgets regarding
+			 * Kernel and Custom Options
+			 * depends on the state of the QEMU button */
+			kernel_label.setEnabled(isEnabled);
+			option_label.setEnabled(isEnabled);
+
+			if(btnQemu.getSelection()) {
+				textKernelLoc.setEnabled(isEnabled);
+				btnKernelLoc.setEnabled(isEnabled);
+
+				textQemuOption.setEnabled(isEnabled);
+			}
+		} else {
+			/* disable all widgets regarding
+			 * Kernel and Custom Options */
+			kernel_label.setEnabled(isEnabled);
+			textKernelLoc.setEnabled(isEnabled);
+			btnKernelLoc.setEnabled(isEnabled);
+
+			option_label.setEnabled(isEnabled);
+			textQemuOption.setEnabled(isEnabled);
+		}
+
+		btnDevice.setEnabled(isEnabled);
+	}
+
 	private void updateQemuControlState()
 	{
 		boolean bQemuMode = btnQemu.getSelection();

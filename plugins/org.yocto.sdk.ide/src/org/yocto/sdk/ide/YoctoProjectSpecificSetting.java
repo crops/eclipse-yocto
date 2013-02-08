@@ -19,6 +19,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.yocto.sdk.ide.preferences.YoctoSDKProjectPropertyPage;
 
 public class YoctoProjectSpecificSetting {
 	private static final String PROJECT_SPECIFIC_TITLE = "Preferences.Profile.ProjectSpecific.Title";
@@ -58,10 +59,18 @@ public class YoctoProjectSpecificSetting {
 				if (btnUseProjectSpecificSettingsCheckbox.getSelection()){
 					yoctoConfigurationsSetting.setUIFormEnabledState(false);
 					yoctoUISetting.setUIFormEnabledState(true);
+
+					if (preferencePage instanceof YoctoSDKProjectPropertyPage) {
+						((YoctoSDKProjectPropertyPage) preferencePage).switchToProjectSpecificProfile();
+					}
 				} else {
 					yoctoConfigurationsSetting.setUIFormEnabledState(true);
 					yoctoConfigurationsSetting.setButtonsEnabledState(false);
 					yoctoUISetting.setUIFormEnabledState(false);
+
+					if (preferencePage instanceof YoctoSDKProjectPropertyPage) {
+						((YoctoSDKProjectPropertyPage) preferencePage).switchToSelectedProfile();
+					}
 				}
 			}
 

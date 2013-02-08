@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 import org.yocto.sdk.ide.preferences.ProfileNameInputValidator;
 import org.yocto.sdk.ide.preferences.YoctoSDKPreferencePage;
+import org.yocto.sdk.ide.preferences.YoctoSDKProjectPropertyPage;
 
 public class YoctoProfileSetting {
 	private static final String PROFILES_TITLE = "Preferences.Profiles.Title";
@@ -91,6 +92,8 @@ public class YoctoProfileSetting {
 
 				if (preferencePage instanceof YoctoSDKPreferencePage) {
 					((YoctoSDKPreferencePage) preferencePage).switchProfile(selectedItem);
+				} else if (preferencePage instanceof YoctoSDKProjectPropertyPage) {
+					((YoctoSDKProjectPropertyPage) preferencePage).switchProfile(selectedItem);
 				}
 			}
 		};

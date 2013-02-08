@@ -21,6 +21,10 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.yocto.sdk.ide.YoctoGeneralException;
+import org.yocto.sdk.ide.YoctoProfileElement;
+import org.yocto.sdk.ide.YoctoProfileSetting;
+import org.yocto.sdk.ide.YoctoProjectSpecificSetting;
+import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoSDKUtils;
 import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 import org.yocto.sdk.ide.YoctoUIElement;
@@ -29,21 +33,56 @@ import org.yocto.sdk.ide.YoctoUISetting;
 public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 		IWorkbenchPropertyPage {
 
+	private YoctoProfileSetting yoctoProfileSetting;
+	private YoctoProjectSpecificSetting yoctoProjectSpecificSetting;
 	private YoctoUISetting yoctoUISetting;
 	private IProject project = null;
 
 	@Override
 	protected Control createContents(Composite parent) {
-		YoctoUIElement uiElement = loadUIElement();
-		this.yoctoUISetting = new YoctoUISetting(uiElement);
+		IProject project = getProject();
+
+		YoctoProfileElement globalProfileElement= YoctoSDKUtils.getProfilesFromDefaultStore();
+		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromProjectPreferences(project);
+
+		String selectedProfile = profileElement.getSelectedProfile();
+		if (!globalProfileElement.contains(selectedProfile)) {
+			selectedProfile = globalProfileElement.getSelectedProfile();
+		}
+
+		yoctoProfileSetting = new YoctoProfileSetting(
+				new YoctoProfileElement(globalProfileElement.getProfilesAsString(), selectedProfile), this);
+		boolean useProjectSpecificSetting = YoctoSDKUtils.getUseProjectSpecificOptionFromProjectPreferences(project);
+
+		if (useProjectSpecificSetting) {
+			yoctoUISetting = new YoctoUISetting(YoctoSDKUtils.getElemFromProjectPreferences(project));
+		} else {
+			yoctoUISetting = new YoctoUISetting(YoctoSDKUtils.getElemFromStore(YoctoSDKPlugin.getProfilePreferenceStore(selectedProfile)));
+		}
+
+		yoctoProjectSpecificSetting = new YoctoProjectSpecificSetting(yoctoProfileSetting, yoctoUISetting, this);
 
 		initializeDialogUnits(parent);
 		final Composite result = new Composite(parent, SWT.NONE);
 
+		yoctoProfileSetting.createComposite(result);
+		yoctoProjectSpecificSetting.createComposite(result);
+
 		try {
 			yoctoUISetting.createComposite(result);
-			yoctoUISetting
-					.validateInput(SDKCheckRequestFrom.Preferences, false);
+
+			if (useProjectSpecificSetting) {
+				yoctoProfileSetting.setUIFormEnabledState(false);
+				yoctoProjectSpecificSetting.setUseProjectSpecificSettings(true);
+				yoctoUISetting.setUIFormEnabledState(true);
+				yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
+			} else {
+				yoctoProfileSetting.setUIFormEnabledState(true);
+				yoctoProfileSetting.setButtonsEnabledState(false);
+				yoctoProjectSpecificSetting.setUseProjectSpecificSettings(false);
+				yoctoUISetting.setUIFormEnabledState(false);
+			}
+
 			Dialog.applyDialogFont(result);
 			return result;
 		} catch (YoctoGeneralException e) {
@@ -67,19 +106,6 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 		return project;
 	}
 
-	private YoctoUIElement loadUIElement() {
-		YoctoUIElement uiElement = YoctoSDKUtils.getElemFromProjectEnv(getProject());
-
-		if (uiElement.getStrToolChainRoot().isEmpty()
-				|| uiElement.getStrTarget().isEmpty()) {
-			// No project environment has been set yet, use the Preference
-			// values
-			uiElement = YoctoSDKUtils.getElemFromDefaultStore();
-		}
-
-		return uiElement;
-	}
-
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
@@ -87,6 +113,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 	protected void performDefaults() {
 		YoctoUIElement defaultElement = YoctoSDKUtils.getDefaultElemFromDefaultStore();
 		yoctoUISetting.setCurrentInput(defaultElement);
+		yoctoProjectSpecificSetting.setUseProjectSpecificSettings(true);
 		super.performDefaults();
 	}
 
@@ -96,10 +123,20 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 	@Override
 	public boolean performOk() {
 		try {
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
+			IProject project = getProject();
 
-			YoctoUIElement elem = yoctoUISetting.getCurrentInput();
-			YoctoSDKUtils.saveElemToProjectEnv(elem, getProject());
+			if (yoctoProjectSpecificSetting.isUsingProjectSpecificSettings()) {
+				yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
+
+				YoctoSDKUtils.saveUseProjectSpecificOptionToProjectPreferences(project, true);
+				YoctoSDKUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
+				YoctoSDKUtils.saveElemToProjectPreferences(yoctoUISetting.getCurrentInput(), project);
+			} else {
+				YoctoSDKUtils.saveUseProjectSpecificOptionToProjectPreferences(project, false);
+				YoctoSDKUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
+			}
+
+			YoctoSDKUtils.saveElemToProjectEnv(yoctoUISetting.getCurrentInput(), getProject());
 
 			return super.performOk();
 		} catch (YoctoGeneralException e) {
@@ -107,5 +144,22 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 			System.out.println(e.getMessage());
 			return false;
 		}
+	}
+
+	public void switchProfile(String selectedProfile)
+	{
+		YoctoUIElement profileElement = YoctoSDKUtils.getElemFromStore(YoctoSDKPlugin.getProfilePreferenceStore(selectedProfile));
+		yoctoUISetting.setCurrentInput(profileElement);
+	}
+
+	public void switchToProjectSpecificProfile()
+	{
+		YoctoUIElement profileElement = YoctoSDKUtils.getElemFromProjectPreferences(getProject());
+		yoctoUISetting.setCurrentInput(profileElement);
+	}
+
+	public void switchToSelectedProfile()
+	{
+		switchProfile(yoctoProfileSetting.getCurrentInput().getSelectedProfile());
 	}
 }

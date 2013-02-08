@@ -56,8 +56,7 @@ DOC_PLUGIN_DIR=${PLUGIN_FOLDER}/plugins/org.yocto.doc.user
 DOC_HTML_DIR=${DOC_PLUGIN_DIR}/html/
 
 # git clone
-#DOC_GIT=git://git.yoctoproject.org/yocto-docs.git
-DOC_GIT=file:///home/timo/_dev/oss/yocto/yocto-docs
+DOC_GIT=git://git.yoctoproject.org/yocto-docs.git
 git clone ${DOC_GIT} ${DOC_DIR} || fail $? "git clone ${DOC_GIT}"
 cd ${DOC_DIR}
 git checkout ${REFERENCE} || fail $? "git checkout ${REFERENCE}"

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.yocto.sdk.ide;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -24,12 +26,15 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
+import org.yocto.sdk.ide.preferences.ProfileNameInputValidator;
 import org.yocto.sdk.ide.preferences.YoctoSDKPreferencePage;
 
 public class YoctoProfileSetting {
 	private static final String PROFILES_TITLE = "Preferences.Profiles.Title";
 	private static final String NEW_PROFILE_TITLE = "Preferences.Profile.New.Title";
 	private static final String RENAME_PROFILE_TITLE = "Preferences.Profile.Rename.Title";
+	private static final String RENAME_DIALOG_TITLE = "Preferences.Profile.Rename.Dialog.Title";
+	private static final String RENAME_DIALOG_MESSAGE = "Preferences.Profile.Rename.Dialog.Message";
 	private static final String REMOVE_PROFILE_TITLE = "Preferences.Profile.Remove.Title";
 	private static final String REMOVE_DIALOG_TITLE = "Preferences.Profile.Remove.Dialog.Title";
 	private static final String REMOVE_DIALOG_MESSAGE = "Preferences.Profile.Remove.Dialog.Message";
@@ -144,6 +149,39 @@ public class YoctoProfileSetting {
 	private void createRenameButton(Group storeYoctoConfigurationsGroup) {
 		btnConfigRename = new Button(storeYoctoConfigurationsGroup, SWT.PUSH | SWT.LEAD);
 		btnConfigRename.setText(YoctoSDKMessages.getString(RENAME_PROFILE_TITLE));
+		btnConfigRename.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+				saveChangesOnCurrentProfile();
+				int selectedIndex = sdkConfigsCombo.getSelectionIndex();
+				final String selectedItem = sdkConfigsCombo.getItem(selectedIndex);
+
+				if (selectedItem.equals(PreferenceConstants.STANDARD_PROFILE_NAME)) {
+					MessageDialog.openInformation(null,
+							YoctoSDKMessages.getString(MODIFY_STANDARD_TITLE),
+							YoctoSDKMessages.getString(MODIFY_STANDARD_MESSAGE));
+					return;
+				}
+
+				InputDialog profileNameDialog =
+						new InputDialog(null,
+										YoctoSDKMessages.getString(RENAME_DIALOG_TITLE),
+										YoctoSDKMessages.getString(RENAME_DIALOG_MESSAGE),
+										null,
+										new ProfileNameInputValidator(profileElement, selectedItem));
+
+				int returnCode = profileNameDialog.open();
+				if (returnCode == IDialogConstants.CANCEL_ID) {
+					return;
+				}
+
+				String newProfileName = profileNameDialog.getValue();
+				profileElement.rename(selectedItem, profileNameDialog.getValue());
+
+				sdkConfigsCombo.setItem(selectedIndex, newProfileName);
+				sdkConfigsCombo.select(selectedIndex);
+			}
+		});
 	}
 
 	private void saveChangesOnCurrentProfile() {

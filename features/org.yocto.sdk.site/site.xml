@@ -10,5 +10,5 @@
    <feature url="features/org.yocto.bc_@bcgenVerion@.jar" id="org.yocto.bc" version="@bcgenVerion@">
       <category name="Yocto Project Bitbake Commander"/>
    </feature>
-   <category-def name="Yocto Project Bitbake Commander Plug-in" label="Yocto Project Bitbake Commander plug-in"/>
+   <category-def name="Yocto Project Bitbake Commander" label="Yocto Project Bitbake Commander plug-in"/>
 </site>

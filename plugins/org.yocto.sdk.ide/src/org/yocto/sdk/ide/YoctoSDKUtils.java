@@ -32,9 +32,13 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.osgi.service.prefs.BackingStoreException;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 
 public class YoctoSDKUtils {
@@ -62,6 +66,7 @@ public class YoctoSDKUtils {
 		Other
 	};
 
+	private static final String PROJECT_SCOPE = "org.yocto.sdk.ide";
 	private static final String POKY_DEVICE_EMPTY = "Poky.SDK.Device.Empty";
 	private static final String TOOLCHAIN_LOCATION_EMPTY     = "Poky.SDK.Location.Empty";
 	private static final String SDK_TARGET_EMPTY      = "Poky.SDK.Target.Empty";
@@ -397,6 +402,74 @@ public class YoctoSDKUtils {
 
 	}
 
+	/* Get POKY Preference settings from project's preference store */
+	public static YoctoUIElement getElemFromProjectPreferences(IProject project)
+	{
+		IScopeContext projectScope = new ProjectScope(project);
+		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
+		if (projectNode == null)
+		{
+			return getElemFromProjectEnv(project);
+		}
+
+		YoctoUIElement elem = new YoctoUIElement();
+		elem.setStrToolChainRoot(projectNode.get(PreferenceConstants.TOOLCHAIN_ROOT,""));
+		elem.setStrTarget(projectNode.get(PreferenceConstants.TOOLCHAIN_TRIPLET,""));
+		elem.setStrQemuKernelLoc(projectNode.get(PreferenceConstants.QEMU_KERNEL,""));
+		elem.setStrSysrootLoc(projectNode.get(PreferenceConstants.SYSROOT,""));
+		elem.setStrQemuOption(projectNode.get(PreferenceConstants.QEMU_OPTION,""));
+		String sTemp = projectNode.get(PreferenceConstants.TARGET_ARCH_INDEX,"");
+		if (!sTemp.isEmpty())
+			elem.setIntTargetIndex(Integer.valueOf(sTemp).intValue());
+		if (projectNode.get(PreferenceConstants.SDK_MODE,"").equalsIgnoreCase(IPreferenceStore.TRUE))
+		{
+			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
+		}
+		else
+			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
+
+		if(projectNode.get(PreferenceConstants.TARGET_MODE,"").equalsIgnoreCase(IPreferenceStore.TRUE))
+			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.QEMU_MODE);
+		else
+			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.DEVICE_MODE);
+		return elem;
+	}
+
+	/* Save POKY Preference settings to project's preference store */
+	public static void saveElemToProjectPreferences(YoctoUIElement elem, IProject project)
+	{
+		IScopeContext projectScope = new ProjectScope(project);
+		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
+		if (projectNode == null)
+		{
+			return;
+		}
+
+		projectNode.putInt(PreferenceConstants.TARGET_ARCH_INDEX, elem.getIntTargetIndex());
+		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE)
+			projectNode.put(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
+		else
+			projectNode.put(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
+		projectNode.put(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc());
+		projectNode.put(PreferenceConstants.QEMU_OPTION, elem.getStrQemuOption());
+		projectNode.put(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc());
+		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
+			projectNode.put(PreferenceConstants.TARGET_MODE, IPreferenceStore.TRUE);
+		else
+			projectNode.put(PreferenceConstants.TARGET_MODE, IPreferenceStore.FALSE);
+		projectNode.put(PreferenceConstants.TOOLCHAIN_ROOT, elem.getStrToolChainRoot());
+		projectNode.put(PreferenceConstants.TOOLCHAIN_TRIPLET, elem.getStrTarget());
+
+		try
+		{
+			projectNode.flush();
+		} catch (BackingStoreException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	/* Get POKY Preference settings from project's environment */
 	public static YoctoUIElement getElemFromProjectEnv(IProject project)
 	{
@@ -689,6 +762,27 @@ public class YoctoSDKUtils {
 		saveProfilesToStore(profileElement, YoctoSDKPlugin.getDefault().getPreferenceStore());
 	}
 
+	/* Save profiles and selected profile to the project's preference store */
+	public static void saveProfilesToProjectPreferences(YoctoProfileElement profileElement, IProject project) {
+		IScopeContext projectScope = new ProjectScope(project);
+		IEclipsePreferences projectPreferences = projectScope.getNode(PROJECT_SCOPE);
+		if (projectPreferences == null) {
+			return;
+		}
+
+		projectPreferences.put(PreferenceConstants.PROFILES, profileElement.getProfilesAsString());
+		projectPreferences.put(PreferenceConstants.SELECTED_PROFILE, profileElement.getSelectedProfile());
+
+		try
+		{
+			projectPreferences.flush();
+		} catch (BackingStoreException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	/* Save profiles and selected profile to a specific preference store */
 	public static void saveProfilesToStore(YoctoProfileElement profileElement, IPreferenceStore store)
 	{
@@ -707,6 +801,22 @@ public class YoctoSDKUtils {
 	{
 		String profiles = store.getString(PreferenceConstants.PROFILES);
 		String selectedProfile = store.getString(PreferenceConstants.SELECTED_PROFILE);
+
+		return new YoctoProfileElement(profiles, selectedProfile);
+	}
+
+	/* Get profiles and selected profile from the project's preference store */
+	public static YoctoProfileElement getProfilesFromProjectPreferences(IProject project)
+	{
+		IScopeContext projectScope = new ProjectScope(project);
+		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
+		if (projectNode == null)
+		{
+			return getProfilesFromDefaultStore();
+		}
+
+		String profiles = projectNode.get(PreferenceConstants.PROFILES, "");
+		String selectedProfile = projectNode.get(PreferenceConstants.SELECTED_PROFILE, "");
 
 		return new YoctoProfileElement(profiles, selectedProfile);
 	}

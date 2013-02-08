@@ -78,6 +78,8 @@ fi
 
 for DOC in ${DOCS}; do
 	make DOC=${DOC} eclipse
+	cp -rf ${DOC}/eclipse/html/* ${DOC_HTML_DIR}
+	cp -f ${DOC}/eclipse/${DOC}-toc.xml ${DOC_HTML_DIR}
 done
 
 sed -e "s/@.*@/${COMMIT_ID}/" < ${DOC_PLUGIN_DIR}/about.html.in > ${DOC_PLUGIN_DIR}/about.html

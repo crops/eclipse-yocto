@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.yocto.sdk.ide.preferences;
 
+import java.util.HashSet;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -25,6 +30,7 @@ import org.yocto.sdk.ide.YoctoProfileElement;
 import org.yocto.sdk.ide.YoctoProfileSetting;
 import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
+import org.yocto.sdk.ide.YoctoSDKProjectNature;
 import org.yocto.sdk.ide.YoctoSDKUtils;
 import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
 import org.yocto.sdk.ide.YoctoUIElement;
@@ -80,8 +86,8 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			System.out.println(e.getMessage());
 			return result;
 		}
-
 	}
+
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
@@ -94,6 +100,8 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 			YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
 			YoctoSDKUtils.saveProfilesToDefaultStore(profileElement);
+
+			updateAffectedProjects(profileElement.getSelectedProfile(), elem);
 
 			return super.performOk();
 		} catch (YoctoGeneralException e) {
@@ -151,9 +159,86 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	public void renameProfile(String oldProfileName, String newProfileName) {
 		YoctoUIElement oldProfileElement = YoctoSDKUtils.getElemFromStore(YoctoSDKPlugin.getProfilePreferenceStore(oldProfileName));
 		YoctoSDKUtils.saveElemToStore(oldProfileElement, YoctoSDKPlugin.getProfilePreferenceStore(newProfileName));
+
+		renameProfileInAffectedProjects(oldProfileName, newProfileName);
 	}
 
-	public void deleteProfile(String selectedProfile) {
-		// do nothing
+	public void deleteProfile(String selectedProfile)
+	{
+		resetProfileInAffectedProjects(selectedProfile);
+	}
+
+	private void resetProfileInAffectedProjects(String usedProfile)
+	{
+		HashSet<IProject> yoctoProjects = getAffectedProjects(usedProfile);
+		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
+		profileElement.setSelectedProfile(PreferenceConstants.STANDARD_PROFILE_NAME);
+
+		for (IProject project : yoctoProjects)
+		{
+			YoctoSDKUtils.saveProfilesToProjectPreferences(profileElement, project);
+			YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(
+											YoctoSDKPlugin.getProfilePreferenceStore(PreferenceConstants.STANDARD_PROFILE_NAME));
+			YoctoSDKUtils.saveElemToProjectEnv(elem, project);
+		}
+	}
+
+	private void renameProfileInAffectedProjects(String oldProfileName, String newProfileName) {
+		HashSet<IProject> yoctoProjects = getAffectedProjects(oldProfileName);
+		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
+		profileElement.setSelectedProfile(newProfileName);
+
+		for (IProject project : yoctoProjects)
+		{
+			YoctoSDKUtils.saveProfilesToProjectPreferences(profileElement, project);
+		}
+	}
+
+	private void updateAffectedProjects(String usedProfile, YoctoUIElement elem) {
+		HashSet<IProject> yoctoProjects = getAffectedProjects(usedProfile);
+
+		for (IProject project : yoctoProjects)
+		{
+			YoctoSDKUtils.saveElemToProjectEnv(elem, project);
+		}
+	}
+
+	private HashSet<IProject> getAffectedProjects(String usedProfile)
+	{
+		HashSet<IProject> yoctoProjects = new HashSet<IProject>();
+
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+
+		for (IProject project : projects)
+		{
+			try
+			{
+				if (!project.hasNature(YoctoSDKProjectNature.YoctoSDK_NATURE_ID)) {
+					continue;
+				}
+			} catch (CoreException e)
+			{
+				// project is closed or does not exist so don't update
+				continue;
+			}
+
+			if (!projectUsesProfile(project, usedProfile)) {
+				continue;
+			}
+
+			yoctoProjects.add(project);
+		}
+		return yoctoProjects;
+	}
+
+	private boolean projectUsesProfile(IProject project, String profile)
+	{
+		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromProjectPreferences(project);
+
+		if (!profileElement.getSelectedProfile().equals(profile)) {
+			return false;
+		}
+
+		return true;
 	}
 }

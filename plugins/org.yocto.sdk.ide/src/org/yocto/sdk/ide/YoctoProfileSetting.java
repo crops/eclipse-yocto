@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.yocto.sdk.ide;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
+import org.yocto.sdk.ide.preferences.PreferenceConstants;
 import org.yocto.sdk.ide.preferences.YoctoSDKPreferencePage;
 
 public class YoctoProfileSetting {
@@ -29,6 +31,10 @@ public class YoctoProfileSetting {
 	private static final String NEW_PROFILE_TITLE = "Preferences.Profile.New.Title";
 	private static final String RENAME_PROFILE_TITLE = "Preferences.Profile.Rename.Title";
 	private static final String REMOVE_PROFILE_TITLE = "Preferences.Profile.Remove.Title";
+	private static final String REMOVE_DIALOG_TITLE = "Preferences.Profile.Remove.Dialog.Title";
+	private static final String REMOVE_DIALOG_MESSAGE = "Preferences.Profile.Remove.Dialog.Message";
+	private static final String MODIFY_STANDARD_TITLE = "Preferences.Profile.Standard.Modification.Title";
+	private static final String MODIFY_STANDARD_MESSAGE = "Preferences.Profile.Standard.Modification.Message";
 
 	private Combo sdkConfigsCombo;
 	private Button btnConfigRename;
@@ -105,6 +111,34 @@ public class YoctoProfileSetting {
 		btnConfigRemove = new Button(storeYoctoConfigurationsGroup, SWT.PUSH | SWT.LEAD);
 		btnConfigRemove.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false, 3, 1));
 		btnConfigRemove.setText(YoctoSDKMessages.getString(REMOVE_PROFILE_TITLE));
+		btnConfigRemove.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+				saveChangesOnCurrentProfile();
+				int selectionIndex = sdkConfigsCombo.getSelectionIndex();
+				String selectedItem = sdkConfigsCombo.getItem(selectionIndex);
+
+				if (selectedItem.equals(PreferenceConstants.STANDARD_PROFILE_NAME)) {
+					MessageDialog.openInformation(null,
+													YoctoSDKMessages.getString(MODIFY_STANDARD_TITLE),
+													YoctoSDKMessages.getString(MODIFY_STANDARD_MESSAGE));
+					return;
+				}
+
+				boolean deleteConfirmed =
+						MessageDialog.openConfirm(null,
+													YoctoSDKMessages.getString(REMOVE_DIALOG_TITLE),
+													YoctoSDKMessages.getFormattedString(REMOVE_DIALOG_MESSAGE, selectedItem));
+
+				if (!deleteConfirmed) {
+					return;
+				}
+
+				sdkConfigsCombo.select(0);
+				sdkConfigsCombo.remove(selectionIndex);
+				profileElement.remove(selectedItem);
+			}
+		});
 	}
 
 	private void createRenameButton(Group storeYoctoConfigurationsGroup) {

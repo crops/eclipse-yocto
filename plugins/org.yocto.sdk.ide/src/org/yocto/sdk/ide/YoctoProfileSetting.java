@@ -182,6 +182,10 @@ public class YoctoProfileSetting {
 				String newProfileName = profileNameDialog.getValue();
 				profileElement.rename(selectedItem, profileNameDialog.getValue());
 
+				if (preferencePage instanceof YoctoSDKPreferencePage) {
+					((YoctoSDKPreferencePage) preferencePage).renameProfile(selectedItem, newProfileName);
+				}
+
 				sdkConfigsCombo.setItem(selectedIndex, newProfileName);
 				sdkConfigsCombo.select(selectedIndex);
 			}

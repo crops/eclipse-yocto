@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.yocto.sdk.ide;
 
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -32,9 +33,11 @@ public class YoctoProfileSetting {
 	private Button btnConfigSaveAs;
 
 	private YoctoProfileElement profileElement;
+	private PreferencePage preferencePage;
 
-	public YoctoProfileSetting(YoctoProfileElement profileElement) {
+	public YoctoProfileSetting(YoctoProfileElement profileElement, PreferencePage preferencePage) {
 		this.profileElement = profileElement;
+		this.preferencePage = preferencePage;
 	}
 
 	public void createComposite(Composite composite) {
@@ -96,6 +99,10 @@ public class YoctoProfileSetting {
 	private void createRenameButton(Group storeYoctoConfigurationsGroup) {
 		btnConfigRename = new Button(storeYoctoConfigurationsGroup, SWT.PUSH | SWT.LEAD);
 		btnConfigRename.setText(YoctoSDKMessages.getString(RENAME_PROFILE_TITLE));
+	}
+
+	private void saveChangesOnCurrentProfile() {
+		preferencePage.performOk();
 	}
 
 	private void addConfigs(Combo combo) {

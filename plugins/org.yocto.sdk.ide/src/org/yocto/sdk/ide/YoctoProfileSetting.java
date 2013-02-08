@@ -12,6 +12,8 @@ package org.yocto.sdk.ide;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -20,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
+import org.yocto.sdk.ide.preferences.YoctoSDKPreferencePage;
 
 public class YoctoProfileSetting {
 	private static final String PROFILES_TITLE = "Preferences.Profiles.Title";
@@ -88,6 +91,14 @@ public class YoctoProfileSetting {
 	private void createSaveAsProfileButton(Group storeYoctoConfigurationsGroup) {
 		btnConfigSaveAs = new Button(storeYoctoConfigurationsGroup, SWT.PUSH | SWT.LEAD);
 		btnConfigSaveAs.setText(YoctoSDKMessages.getString(NEW_PROFILE_TITLE));
+		btnConfigSaveAs.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+				if (preferencePage instanceof YoctoSDKPreferencePage) {
+					((YoctoSDKPreferencePage) preferencePage).performSaveAs();
+				}
+			}
+		});
 	}
 
 	private void createRemoveButton(Group storeYoctoConfigurationsGroup) {
@@ -109,6 +120,12 @@ public class YoctoProfileSetting {
 		for (String profile : profileElement.getProfiles()) {
 			combo.add(profile);
 		}
+	}
+
+	public void addProfile(String profileName) {
+		int index = sdkConfigsCombo.getItemCount();
+		sdkConfigsCombo.add(profileName, index);
+		sdkConfigsCombo.select(index);
 	}
 
 	public void setUIFormEnabledState(boolean isEnabled) {

@@ -11,6 +11,8 @@
 package org.yocto.sdk.ide.preferences;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -18,6 +20,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.yocto.sdk.ide.YoctoGeneralException;
+import org.yocto.sdk.ide.YoctoProfileElement;
+import org.yocto.sdk.ide.YoctoProfileSetting;
+import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoSDKUtils;
 import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
@@ -25,7 +30,11 @@ import org.yocto.sdk.ide.YoctoUIElement;
 import org.yocto.sdk.ide.YoctoUISetting;
 
 public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-    
+
+	private static final String NEW_DIALOG_TITLE = "Preferences.Profile.New.Dialog.Title";
+	private static final String NEW_DIALOG_MESSAGE = "Preferences.Profile.New.Dialog.Message";
+
+	private YoctoProfileSetting yoctoProfileSetting;
 	private YoctoUISetting yoctoUISetting;
 
 	public YoctoSDKPreferencePage() {
@@ -83,5 +92,50 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		YoctoUIElement defaultElement = YoctoSDKUtils.getDefaultElemFromDefaultStore();
 		yoctoUISetting.setCurrentInput(defaultElement);
 		super.performDefaults();
+	}
+
+	public void performSaveAs() {
+		YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
+		YoctoUIElement uiElement = yoctoUISetting.getCurrentInput();
+
+		try {
+			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
+		} catch (YoctoGeneralException e) {
+			// just abort saving, validateInput will show an error dialog
+			return;
+		}
+
+		InputDialog profileNameDialog =
+							new InputDialog(null,
+											YoctoSDKMessages.getString(NEW_DIALOG_TITLE),
+											YoctoSDKMessages.getString(NEW_DIALOG_MESSAGE),
+											null,
+											new ProfileNameInputValidator(profileElement));
+
+		int returnCode = profileNameDialog.open();
+		if (returnCode == IDialogConstants.CANCEL_ID) {
+			return;
+		}
+
+		profileElement.addProfile(profileNameDialog.getValue());
+		yoctoProfileSetting.addProfile(profileNameDialog.getValue());
+
+		yoctoUISetting.setCurrentInput(uiElement);
+		performOk();
+	}
+
+	public void switchProfile(String selectedProfile) {
+		setPreferenceStore(YoctoSDKPlugin.getProfilePreferenceStore(selectedProfile));
+		YoctoUIElement profileElement = YoctoSDKUtils.getElemFromStore(getPreferenceStore());
+		yoctoUISetting.setCurrentInput(profileElement);
+	}
+
+	public void renameProfile(String oldProfileName, String newProfileName) {
+		YoctoUIElement oldProfileElement = YoctoSDKUtils.getElemFromStore(YoctoSDKPlugin.getProfilePreferenceStore(oldProfileName));
+		YoctoSDKUtils.saveElemToStore(oldProfileElement, YoctoSDKPlugin.getProfilePreferenceStore(newProfileName));
+	}
+
+	public void deleteProfile(String selectedProfile) {
+		// do nothing
 	}
 }

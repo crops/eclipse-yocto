@@ -130,6 +130,13 @@ git checkout origin/${BRANCH} || fail $? "git checkout origin/${BRANCH}"
 git checkout ${TAG} || fail $? "git checkout ${TAG}"
 cd ${TOP}
 
+# generate and add documentation
+if [ "${TAG}" = "HEAD" ]; then
+	${GIT_DIR}/scripts/generate-doc.sh ${BRANCH} ${GIT_DIR}
+else
+	${GIT_DIR}/scripts/generate-doc.sh -t ${TAG} ${GIT_DIR}
+fi
+
 #build 
 java -jar ${LAUNCHER} -application org.eclipse.ant.core.antRunner -buildfile ${BUILDFILE} -DbaseLocation=${ECLIPSE_BASE} -Dbuilder=${GIT_DIR}/features/org.yocto.bc.headless.build -DbuildDirectory=${BUILD_DIR} -DotherSrcDirectory=${GIT_DIR} -DbuildId=${RELEASE} || fail $? "normal build"
 java -jar ${LAUNCHER} -application org.eclipse.ant.core.antRunner -buildfile ${BUILDFILE} -DbaseLocation=${ECLIPSE_BASE} -Dbuilder=${GIT_DIR}/features/org.yocto.doc.headless.build -DbuildDirectory=${BUILD_DIR} -DotherSrcDirectory=${GIT_DIR} -DbuildId=${RELEASE} || fail $? "normal build"

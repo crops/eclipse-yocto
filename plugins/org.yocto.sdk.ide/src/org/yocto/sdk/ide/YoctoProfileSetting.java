@@ -16,7 +16,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
 
 public class YoctoProfileSetting {
 	private static final String PROFILES_TITLE = "Preferences.Profiles.Title";
@@ -53,6 +55,27 @@ public class YoctoProfileSetting {
 		sdkConfigsCombo.select(sdkConfigsCombo.indexOf(profileElement.getSelectedProfile()));
 		sdkConfigsCombo.setLayout(new GridLayout(2, false));
 		sdkConfigsCombo.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+
+		Listener selectionListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				Object source = event.widget;
+				if (!(source instanceof Combo)) {
+					return;
+				}
+
+				Combo sdkCombo = (Combo) source;
+				if (sdkCombo.getSelectionIndex() < 0) {
+					return;
+				}
+
+				String selectedItem = sdkCombo.getItem(sdkCombo.getSelectionIndex());
+				profileElement.setSelectedProfile(selectedItem);
+			}
+		};
+
+		sdkConfigsCombo.addListener(SWT.Selection, selectionListener);
+		sdkConfigsCombo.addListener(SWT.Modify, selectionListener);
 
 		createSaveAsProfileButton(storeYoctoConfigurationsGroup);
 		createRenameButton(storeYoctoConfigurationsGroup);

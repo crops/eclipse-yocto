@@ -32,7 +32,7 @@ public abstract class BSPThread implements Runnable {
 		ArrayList<String> values = new ArrayList<String>();
 
 		try {
-			ProcessBuilder builder = new ProcessBuilder(new String[] {"sh", "-c", command});
+			ProcessBuilder builder = new ProcessBuilder(new String[] {"bash", "-c", command});
 			// redirect error stream to collect both output & error
 			builder.redirectErrorStream(true);
 			Process process = builder.start();

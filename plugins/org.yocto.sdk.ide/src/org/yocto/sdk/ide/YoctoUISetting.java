@@ -144,7 +144,7 @@ public class YoctoUISetting {
 		return button;
 	}		
 
-	private void createQemuSetup(final Group targetGroup) throws YoctoGeneralException
+	private void createQemuSetup(final Group targetGroup)
 	{
 		//QEMU Setup
 		kernel_label= new Label(targetGroup, SWT.NONE);
@@ -180,7 +180,7 @@ public class YoctoUISetting {
 		*/
 		
 	}
-	public void createComposite(Composite composite) throws YoctoGeneralException
+	public void createComposite(Composite composite)
 	{
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);

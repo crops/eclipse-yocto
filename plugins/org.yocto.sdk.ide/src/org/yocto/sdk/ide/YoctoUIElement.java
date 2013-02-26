@@ -100,4 +100,62 @@ public class YoctoUIElement {
 	public void setStrSysrootLoc(String strSysrootLoc) {
 		this.strSysrootLoc = strSysrootLoc;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((enumDeviceMode == null) ? 0 : enumDeviceMode.hashCode());
+		result = prime * result + ((enumPokyMode == null) ? 0 : enumPokyMode.hashCode());
+		result = prime * result + intTargetIndex;
+		result = prime * result + ((strQemuKernelLoc == null) ? 0 : strQemuKernelLoc.hashCode());
+		result = prime * result + ((strQemuOption == null) ? 0 : strQemuOption.hashCode());
+		result = prime * result + ((strSysrootLoc == null) ? 0 : strSysrootLoc.hashCode());
+		result = prime * result + ((strTarget == null) ? 0 : strTarget.hashCode());
+		result = prime * result + ((strToolChainRoot == null) ? 0 : strToolChainRoot.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		YoctoUIElement other = (YoctoUIElement) obj;
+		if (enumDeviceMode != other.enumDeviceMode)
+			return false;
+		if (enumPokyMode != other.enumPokyMode)
+			return false;
+		if (intTargetIndex != other.intTargetIndex)
+			return false;
+		if (strQemuKernelLoc == null) {
+			if (other.strQemuKernelLoc != null)
+				return false;
+		} else if (!strQemuKernelLoc.equals(other.strQemuKernelLoc))
+			return false;
+		if (strQemuOption == null) {
+			if (other.strQemuOption != null)
+				return false;
+		} else if (!strQemuOption.equals(other.strQemuOption))
+			return false;
+		if (strSysrootLoc == null) {
+			if (other.strSysrootLoc != null)
+				return false;
+		} else if (!strSysrootLoc.equals(other.strSysrootLoc))
+			return false;
+		if (strTarget == null) {
+			if (other.strTarget != null)
+				return false;
+		} else if (!strTarget.equals(other.strTarget))
+			return false;
+		if (strToolChainRoot == null) {
+			if (other.strToolChainRoot != null)
+				return false;
+		} else if (!strToolChainRoot.equals(other.strToolChainRoot))
+			return false;
+		return true;
+	}
 }

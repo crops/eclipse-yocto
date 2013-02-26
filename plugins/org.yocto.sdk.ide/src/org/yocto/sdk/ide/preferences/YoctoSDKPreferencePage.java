@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -40,6 +41,8 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 	private static final String NEW_DIALOG_TITLE = "Preferences.Profile.New.Dialog.Title";
 	private static final String NEW_DIALOG_MESSAGE = "Preferences.Profile.New.Dialog.Message";
+	private static final String UPDATE_DIALOG_TITLE = "Preferences.Profile.Update.Dialog.Title";
+	private static final String UPDATE_DIALOG_MESSAGE = "Preferences.Profile.Update.Dialog.Message";
 
 	private YoctoProfileSetting yoctoProfileSetting;
 	private YoctoUISetting yoctoUISetting;
@@ -93,15 +96,32 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	 */
 	public boolean performOk() {
 		try {
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
+			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
 
-			YoctoUIElement elem = yoctoUISetting.getCurrentInput();
-			YoctoSDKUtils.saveElemToStore(elem, getPreferenceStore());
+			YoctoUIElement savedElement = YoctoSDKUtils.getElemFromStore(getPreferenceStore());
+			YoctoUIElement modifiedElement = yoctoUISetting.getCurrentInput();
+
+			if (savedElement.equals(modifiedElement)) {
+				return true;
+			}
 
 			YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
+			HashSet<IProject> yoctoProjects = getAffectedProjects(profileElement.getSelectedProfile());
+
+			if (!yoctoProjects.isEmpty()) {
+				boolean deleteConfirmed =
+						MessageDialog.openConfirm(null, YoctoSDKMessages.getString(UPDATE_DIALOG_TITLE),
+								YoctoSDKMessages.getFormattedString(UPDATE_DIALOG_MESSAGE, profileElement.getSelectedProfile()));
+
+				if (!deleteConfirmed) {
+					return false;
+				}
+			}
+
+			YoctoSDKUtils.saveElemToStore(modifiedElement, getPreferenceStore());
 			YoctoSDKUtils.saveProfilesToDefaultStore(profileElement);
 
-			updateAffectedProjects(profileElement.getSelectedProfile(), elem);
+			updateProjects(yoctoProjects, modifiedElement);
 
 			return super.performOk();
 		} catch (YoctoGeneralException e) {
@@ -194,9 +214,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		}
 	}
 
-	private void updateAffectedProjects(String usedProfile, YoctoUIElement elem) {
-		HashSet<IProject> yoctoProjects = getAffectedProjects(usedProfile);
-
+	private void updateProjects(HashSet<IProject> yoctoProjects, YoctoUIElement elem) {
 		for (IProject project : yoctoProjects)
 		{
 			YoctoSDKUtils.saveElemToProjectEnv(elem, project);

@@ -14,6 +14,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.eclipse.cdt.ui.templateengine.uitree.InputUIElement;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -32,8 +34,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
@@ -343,13 +343,11 @@ public class YoctoUISetting {
 		//Show Error Message on the Label to help users.
 		if ((result != SDKCheckResults.SDK_PASS) && showErrorDialog) {
 			Display display = Display.getCurrent();
-			Shell shell = new Shell(display);
-			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			msgBox.setText("Yocto Project Configuration Error");
-			msgBox.setMessage(YoctoSDKChecker.getErrorMessage(result, from));
-			msgBox.open();
-			if (shell != null)
-				shell.dispose();
+			ErrorDialog.openError(display.getActiveShell(),
+									"Yocto Project Configuration Error",
+									YoctoSDKChecker.getErrorMessage(result, from),
+									new Status(Status.ERROR, YoctoSDKPlugin.PLUGIN_ID, result.getMessage()));
+
 		}
 
 		return result;

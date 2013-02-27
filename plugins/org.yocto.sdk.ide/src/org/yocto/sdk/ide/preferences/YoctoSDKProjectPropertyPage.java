@@ -51,7 +51,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 		}
 
 		yoctoProfileSetting = new YoctoProfileSetting(
-				new YoctoProfileElement(globalProfileElement.getProfilesAsString(), selectedProfile), this);
+				new YoctoProfileElement(globalProfileElement.getProfilesAsString(), selectedProfile), this, false);
 		boolean useProjectSpecificSetting = YoctoSDKUtils.getUseProjectSpecificOptionFromProjectPreferences(project);
 
 		if (useProjectSpecificSetting) {
@@ -78,7 +78,6 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 				yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
 			} else {
 				yoctoProfileSetting.setUIFormEnabledState(true);
-				yoctoProfileSetting.setButtonsEnabledState(false);
 				yoctoProjectSpecificSetting.setUseProjectSpecificSettings(false);
 				yoctoUISetting.setUIFormEnabledState(false);
 			}

@@ -64,7 +64,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		this.yoctoUISetting = new YoctoUISetting(elem);
 
 		YoctoProfileElement profileElement = new YoctoProfileElement(profiles, selectedProfile);
-		this.yoctoProfileSetting = new YoctoProfileSetting(profileElement, this);
+		this.yoctoProfileSetting = new YoctoProfileSetting(profileElement, this, true);
 	}
 
 	/*

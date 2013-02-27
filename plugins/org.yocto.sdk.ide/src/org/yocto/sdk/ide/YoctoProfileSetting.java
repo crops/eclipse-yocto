@@ -49,10 +49,12 @@ public class YoctoProfileSetting {
 
 	private YoctoProfileElement profileElement;
 	private PreferencePage preferencePage;
+	private final boolean editable;
 
-	public YoctoProfileSetting(YoctoProfileElement profileElement, PreferencePage preferencePage) {
+	public YoctoProfileSetting(YoctoProfileElement profileElement, PreferencePage preferencePage, final boolean editable) {
 		this.profileElement = profileElement;
 		this.preferencePage = preferencePage;
+		this.editable = editable;
 	}
 
 	public void createComposite(Composite composite) {
@@ -61,7 +63,11 @@ public class YoctoProfileSetting {
 		composite.setLayout(layout);
 
 		Group storeYoctoConfigurationsGroup = new Group (composite, SWT.NONE);
-		layout = new GridLayout(3, false);
+		layout = new GridLayout(1, false);
+		if (isEditable()) {
+			layout.numColumns = 3;
+		}
+
 		storeYoctoConfigurationsGroup.setLayout(layout);
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.horizontalSpan = 2;
@@ -101,9 +107,11 @@ public class YoctoProfileSetting {
 		sdkConfigsCombo.addListener(SWT.Selection, selectionListener);
 		sdkConfigsCombo.addListener(SWT.Modify, selectionListener);
 
-		createSaveAsProfileButton(storeYoctoConfigurationsGroup);
-		createRenameButton(storeYoctoConfigurationsGroup);
-		createRemoveButton(storeYoctoConfigurationsGroup);
+		if (isEditable()) {
+			createSaveAsProfileButton(storeYoctoConfigurationsGroup);
+			createRenameButton(storeYoctoConfigurationsGroup);
+			createRemoveButton(storeYoctoConfigurationsGroup);
+		}
 	}
 
 	private void createSaveAsProfileButton(Group storeYoctoConfigurationsGroup) {
@@ -225,8 +233,14 @@ public class YoctoProfileSetting {
 	}
 
 	public void setButtonsEnabledState(boolean isEnabled) {
-		btnConfigRename.setEnabled(isEnabled);
-		btnConfigRemove.setEnabled(isEnabled);
-		btnConfigSaveAs.setEnabled(isEnabled);
+		if (isEditable()) {
+			btnConfigRename.setEnabled(isEnabled);
+			btnConfigRemove.setEnabled(isEnabled);
+			btnConfigSaveAs.setEnabled(isEnabled);
+		}
+	}
+
+	private boolean isEditable() {
+		return editable;
 	}
 }

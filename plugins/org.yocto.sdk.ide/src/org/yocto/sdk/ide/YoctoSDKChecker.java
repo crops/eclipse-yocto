@@ -1,5 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2010 Intel Corporation.
+ * Copyright (c) 2013 BMW Car IT GmbH.
+ * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +9,7 @@
  *
  * Contributors:
  * Intel - initial API and implementation
+ * BMW Car IT - include error and advice messages with check results
  *******************************************************************************/
 package org.yocto.sdk.ide;
 
@@ -17,45 +20,76 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 
 public class YoctoSDKChecker {
+	private static final String[] saInvalidVer = {"1.0", "0.9", "0.9+"};
+	private static final String SYSROOTS_DIR = "sysroots";
 
 	public static enum SDKCheckResults {
-		SDK_PASS,
-		POKY_DEVICE_EMPTY,
-		TOOLCHAIN_LOCATION_EMPTY,
-		TOOLCHAIN_LOCATION_NONEXIST,
-		SDK_TARGET_EMPTY,
-		QEMU_KERNEL_EMPTY,
-		SYSROOT_EMPTY,
-		QEMU_KERNEL_NONEXIST,
-		SYSROOT_NONEXIST,
-		WRONG_ADT_VERSION,
-		ENV_SETUP_SCRIPT_NONEXIST,
-		TOOLCHAIN_NO_SYSROOT,
-		TOOLCHAIN_HOST_MISMATCH
+		SDK_PASS("", false),
+		TOOLCHAIN_LOCATION_EMPTY(
+				"Poky.SDK.Location.Empty", true),
+		TOOLCHAIN_LOCATION_NONEXIST(
+				"Poky.SDK.Location.Nonexist", true),
+		SDK_TARGET_EMPTY(
+				"Poky.SDK.Target.Empty", true),
+		SYSROOT_EMPTY(
+				"Poky.Sysroot.Empty", true),
+		SYSROOT_NONEXIST(
+				"Poky.Sysroot.Nonexist", true),
+		QEMU_KERNEL_EMPTY(
+				"Poky.Qemu.Kernel.Empty", true),
+		QEMU_KERNEL_NONEXIST(
+				"Poky.Qemu.Kernel.Nonexist", true),
+		WRONG_ADT_VERSION(
+				"Poky.ADT.Sysroot.Wrongversion", false),
+		ENV_SETUP_SCRIPT_NONEXIST(
+				"Poky.Env.Script.Nonexist", false),
+		TOOLCHAIN_NO_SYSROOT(
+				"Poky.Toolchain.No.Sysroot", false),
+		TOOLCHAIN_HOST_MISMATCH(
+				"Poky.Toolchain.Host.Mismatch", false);
+
+		private static final String DEFAULT_ADVICE = "Default.Advice";
+		private static final String ADVICE_SUFFIX = ".Advice";
+
+		private final String messageID;
+		private final boolean addDefaultAdvice;
+
+		private SDKCheckResults(final String messageID, final boolean addDefaultAdvice) {
+			this.messageID = messageID;
+			this.addDefaultAdvice = addDefaultAdvice;
+		}
+
+		public String getMessage() {
+			return YoctoSDKMessages.getString(messageID);
+		}
+
+		public String getAdvice() {
+			String advice = YoctoSDKMessages.getString(messageID + ADVICE_SUFFIX);
+
+			if (addDefaultAdvice) {
+				advice += YoctoSDKMessages.getString(DEFAULT_ADVICE);
+			}
+
+			return advice;
+		}
 	};
 
 	public static enum SDKCheckRequestFrom {
-		Wizard,
-		Menu,
-		Preferences,
-		Other
-	};
+		Wizard("Poky.SDK.Error.Origin.Wizard"),
+		Menu("Poky.SDK.Error.Origin.Menu"),
+		Preferences("Poky.SDK.Error.Origin.Preferences"),
+		Other("Poky.SDK.Error.Origin.Other");
 
-	private static final String POKY_DEVICE_EMPTY = "Poky.SDK.Device.Empty";
-	private static final String TOOLCHAIN_LOCATION_EMPTY     = "Poky.SDK.Location.Empty";
-	private static final String SDK_TARGET_EMPTY      = "Poky.SDK.Target.Empty";
-	private static final String TOOLCHAIN_LOCATION_NONEXIST = "Poky.SDK.Location.Nonexist";
-	private static final String QEMU_KERNEL_EMPTY 	  = "Poky.Qemu.Kernel.Empty";
-	private static final String SYSROOT_EMPTY = "Poky.Sysroot.Empty";
-	private static final String QEMU_KERNEL_NONEXIST = "Poky.Qemu.Kernel.Nonexist";
-	private static final String SYSROOT_NONEXIST = "Poky.Sysroot.Nonexist";
-	private static final String WRONG_ADT_VERSION = "Poky.ADT.Sysroot.Wrongversion";
-	private static final String ENV_SETUP_SCRIPT_NONEXIST = "Poky.Env.Script.Nonexist";
-	private static final String TOOLCHAIN_NO_SYSROOT = "Poky.Toolchain.No.Sysroot";
-	private static final String TOOLCHAIN_HOST_MISMATCH = "Poky.Toolchain.Host.Mismatch";
-	private static final String[] saInvalidVer = {"1.0", "0.9", "0.9+"};
-	
-	private static final String SYSROOTS_DIR = "sysroots";
+		private final String errorMessageID;
+
+		private SDKCheckRequestFrom(final String errorMessageID) {
+			this.errorMessageID = errorMessageID;
+		}
+
+		public String getErrorMessage() {
+			return YoctoSDKMessages.getString(errorMessageID);
+		}
+	};
 
 	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {
 		if (elem.getStrToolChainRoot().isEmpty())
@@ -172,62 +206,9 @@ public class YoctoSDKChecker {
 
 	public static String getErrorMessage(SDKCheckResults result, SDKCheckRequestFrom from) {
 		String strErrorMsg;
-
-		switch (from) {
-		case Wizard:
-			strErrorMsg = "Yocto Wizard Configuration Error:";
-			break;
-		case Menu:
-			strErrorMsg = "Yocto Menu Configuration Error!";
-			break;
-		case Preferences:
-			strErrorMsg = "Yocto Preferences Configuration Error!";
-			break;
-		default:
-			strErrorMsg = "Yocto Configuration Error!";
-			break;
-		}
-
-		switch (result) {
-		case POKY_DEVICE_EMPTY:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(POKY_DEVICE_EMPTY);
-			break;
-		case TOOLCHAIN_LOCATION_EMPTY:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(TOOLCHAIN_LOCATION_EMPTY);
-			break;
-		case SDK_TARGET_EMPTY:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SDK_TARGET_EMPTY);
-			break;
-		case TOOLCHAIN_LOCATION_NONEXIST:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(TOOLCHAIN_LOCATION_NONEXIST);
-			break;
-		case QEMU_KERNEL_EMPTY:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(QEMU_KERNEL_EMPTY);
-			break;
-		case SYSROOT_EMPTY:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SYSROOT_EMPTY);
-			break;
-		case QEMU_KERNEL_NONEXIST:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(QEMU_KERNEL_NONEXIST);
-			break;
-		case SYSROOT_NONEXIST:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(SYSROOT_NONEXIST);
-			break;
-		case WRONG_ADT_VERSION:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(WRONG_ADT_VERSION);
-			break;
-		case ENV_SETUP_SCRIPT_NONEXIST:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(ENV_SETUP_SCRIPT_NONEXIST);
-			break;
-		case TOOLCHAIN_NO_SYSROOT:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(TOOLCHAIN_NO_SYSROOT);
-			break;
-		case TOOLCHAIN_HOST_MISMATCH:
-			strErrorMsg = strErrorMsg + "\n" + YoctoSDKMessages.getString(TOOLCHAIN_HOST_MISMATCH);
-			break;
-		default:
-			break;
-		}
+		strErrorMsg = from.getErrorMessage();
+		strErrorMsg += "\n" + result.getMessage();
+		strErrorMsg += "\n" + result.getAdvice();
 
 		return strErrorMsg;
 	}

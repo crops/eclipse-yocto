@@ -38,7 +38,8 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
+import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
+import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 
 
 @SuppressWarnings("restriction")
@@ -157,9 +158,9 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		YoctoSDKUtils.saveProfilesToProjectPreferences(profileElement, project);
 		IPreferenceStore selecteProfileStore = YoctoSDKPlugin.getProfilePreferenceStore(profileElement.getSelectedProfile());
 		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(selecteProfileStore);
-		YoctoSDKUtils.SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
-		if (result != YoctoSDKUtils.SDKCheckResults.SDK_PASS){		
-			String strErrorMsg =  YoctoSDKUtils.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
+		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(elem);
+		if (result != SDKCheckResults.SDK_PASS){
+			String strErrorMsg =  YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
 			throw new YoctoGeneralException(strErrorMsg);
 		}
 		else

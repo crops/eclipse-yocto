@@ -36,8 +36,8 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
-import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckRequestFrom;
-import org.yocto.sdk.ide.YoctoSDKUtils.SDKCheckResults;
+import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
+import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 
 public class YoctoUISetting {
@@ -349,11 +349,11 @@ public class YoctoUISetting {
 		boolean pass = true;
 		String strErrorMessage;
 
-		SDKCheckResults result = YoctoSDKUtils.checkYoctoSDK(elem);
+		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(elem);
 
 		//Show Error Message on the Label to help users.
 		if (result != SDKCheckResults.SDK_PASS) {
-			strErrorMessage = YoctoSDKUtils.getErrorMessage(result, from);
+			strErrorMessage = YoctoSDKChecker.getErrorMessage(result, from);
 			pass = false;
 			if (bPrompt)
 			{

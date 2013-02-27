@@ -335,12 +335,6 @@ public class YoctoUISetting {
 		textKernelLoc.setText(elem.getStrQemuKernelLoc());
 		textQemuOption.setText(elem.getStrQemuOption());
 		textSysrootLoc.setText(elem.getStrSysrootLoc());
-
-		SDKCheckResults result = validateInput(SDKCheckRequestFrom.Preferences, false);
-		if (result != SDKCheckResults.SDK_PASS) {
-			System.out.println("Have you ever set Yocto Project Reference before?");
-			System.out.println(YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Other));
-		}
 	}
 
 	public SDKCheckResults validateInput(SDKCheckRequestFrom from, boolean showErrorDialog) {

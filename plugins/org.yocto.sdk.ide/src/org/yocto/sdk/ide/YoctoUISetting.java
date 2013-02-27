@@ -336,40 +336,29 @@ public class YoctoUISetting {
 		textQemuOption.setText(elem.getStrQemuOption());
 		textSysrootLoc.setText(elem.getStrSysrootLoc());
 
-		try {
-			validateInput(SDKCheckRequestFrom.Preferences, false);
-		} catch (YoctoGeneralException e) {
+		SDKCheckResults result = validateInput(SDKCheckRequestFrom.Preferences, false);
+		if (result != SDKCheckResults.SDK_PASS) {
 			System.out.println("Have you ever set Yocto Project Reference before?");
-			System.out.println(e.getMessage());
+			System.out.println(YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Other));
 		}
 	}
 
-	public boolean validateInput(SDKCheckRequestFrom from, boolean bPrompt) throws YoctoGeneralException {
-		YoctoUIElement elem = getCurrentInput();
-		boolean pass = true;
-		String strErrorMessage;
-
-		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(elem);
+	public SDKCheckResults validateInput(SDKCheckRequestFrom from, boolean showErrorDialog) {
+		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(getCurrentInput());
 
 		//Show Error Message on the Label to help users.
-		if (result != SDKCheckResults.SDK_PASS) {
-			strErrorMessage = YoctoSDKChecker.getErrorMessage(result, from);
-			pass = false;
-			if (bPrompt)
-			{
-				Display display = Display.getCurrent();
-				Shell shell = new Shell(display);
-				MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-				msgBox.setText("Yocto Project Configuration Error");
-				msgBox.setMessage(strErrorMessage);
-				msgBox.open();
-				if (shell != null)
-					shell.dispose();
-			}
-
-			throw new YoctoGeneralException(strErrorMessage);
+		if ((result != SDKCheckResults.SDK_PASS) && showErrorDialog) {
+			Display display = Display.getCurrent();
+			Shell shell = new Shell(display);
+			MessageBox msgBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+			msgBox.setText("Yocto Project Configuration Error");
+			msgBox.setMessage(YoctoSDKChecker.getErrorMessage(result, from));
+			msgBox.open();
+			if (shell != null)
+				shell.dispose();
 		}
-		return pass;
+
+		return result;
 	}
 
 	public void setUIFormEnabledState(boolean isEnabled) {

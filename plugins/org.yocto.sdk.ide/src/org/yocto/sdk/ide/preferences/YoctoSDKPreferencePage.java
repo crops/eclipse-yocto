@@ -26,14 +26,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.yocto.sdk.ide.YoctoGeneralException;
 import org.yocto.sdk.ide.YoctoProfileElement;
 import org.yocto.sdk.ide.YoctoProfileSetting;
+import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
+import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoSDKProjectNature;
 import org.yocto.sdk.ide.YoctoSDKUtils;
-import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
 import org.yocto.sdk.ide.YoctoUIElement;
 import org.yocto.sdk.ide.YoctoUISetting;
 
@@ -75,60 +75,57 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
-		final Composite result= new Composite(parent, SWT.NONE);
+		final Composite composite= new Composite(parent, SWT.NONE);
 
-		yoctoProfileSetting.createComposite(result);
+		yoctoProfileSetting.createComposite(composite);
+		yoctoUISetting.createComposite(composite);
 
-		try {
-			yoctoUISetting.createComposite(result);
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
-			Dialog.applyDialogFont(result);
-			return result;
-		} catch (YoctoGeneralException e) {
-			System.out.println("Have you ever set Yocto Project Reference before?");
-			System.out.println(e.getMessage());
-			return result;
+		SDKCheckResults result = yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
+		if (result != SDKCheckResults.SDK_PASS) {
 		}
+
+		Dialog.applyDialogFont(composite);
+		return composite;
 	}
 
 	/*
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		try {
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
+		setErrorMessage(null);
 
-			YoctoUIElement savedElement = YoctoSDKUtils.getElemFromStore(getPreferenceStore());
-			YoctoUIElement modifiedElement = yoctoUISetting.getCurrentInput();
-
-			if (savedElement.equals(modifiedElement)) {
-				return true;
-			}
-
-			YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
-			HashSet<IProject> yoctoProjects = getAffectedProjects(profileElement.getSelectedProfile());
-
-			if (!yoctoProjects.isEmpty()) {
-				boolean deleteConfirmed =
-						MessageDialog.openConfirm(null, YoctoSDKMessages.getString(UPDATE_DIALOG_TITLE),
-								YoctoSDKMessages.getFormattedString(UPDATE_DIALOG_MESSAGE, profileElement.getSelectedProfile()));
-
-				if (!deleteConfirmed) {
-					return false;
-				}
-			}
-
-			YoctoSDKUtils.saveElemToStore(modifiedElement, getPreferenceStore());
-			YoctoSDKUtils.saveProfilesToDefaultStore(profileElement);
-
-			updateProjects(yoctoProjects, modifiedElement);
-
-			return super.performOk();
-		} catch (YoctoGeneralException e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.getMessage());
+		SDKCheckResults result = yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
+		if (result != SDKCheckResults.SDK_PASS) {
+			setErrorMessage(result.getMessage());
 			return false;
 		}
+
+		YoctoUIElement savedElement = YoctoSDKUtils.getElemFromStore(getPreferenceStore());
+		YoctoUIElement modifiedElement = yoctoUISetting.getCurrentInput();
+
+		if (savedElement.equals(modifiedElement)) {
+			return true;
+		}
+
+		YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
+		HashSet<IProject> yoctoProjects = getAffectedProjects(profileElement.getSelectedProfile());
+
+		if (!yoctoProjects.isEmpty()) {
+			boolean deleteConfirmed =
+					MessageDialog.openConfirm(null, YoctoSDKMessages.getString(UPDATE_DIALOG_TITLE),
+							YoctoSDKMessages.getFormattedString(UPDATE_DIALOG_MESSAGE, profileElement.getSelectedProfile()));
+
+			if (!deleteConfirmed) {
+				return false;
+			}
+		}
+
+		YoctoSDKUtils.saveElemToStore(modifiedElement, getPreferenceStore());
+		YoctoSDKUtils.saveProfilesToDefaultStore(profileElement);
+
+		updateProjects(yoctoProjects, modifiedElement);
+
+		return super.performOk();
 	}
 
 	/*
@@ -144,10 +141,9 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
 		YoctoUIElement uiElement = yoctoUISetting.getCurrentInput();
 
-		try {
-			yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
-		} catch (YoctoGeneralException e) {
-			// just abort saving, validateInput will show an error dialog
+		SDKCheckResults result = yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
+		if (result != SDKCheckResults.SDK_PASS) {
+			setErrorMessage(result.getMessage());
 			return;
 		}
 

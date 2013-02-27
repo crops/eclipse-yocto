@@ -20,11 +20,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.yocto.sdk.ide.YoctoGeneralException;
 import org.yocto.sdk.ide.YoctoProfileElement;
 import org.yocto.sdk.ide.YoctoProfileSetting;
 import org.yocto.sdk.ide.YoctoProjectSpecificSetting;
 import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
+import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoSDKUtils;
 import org.yocto.sdk.ide.YoctoUIElement;
@@ -63,32 +63,29 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 		yoctoProjectSpecificSetting = new YoctoProjectSpecificSetting(yoctoProfileSetting, yoctoUISetting, this);
 
 		initializeDialogUnits(parent);
-		final Composite result = new Composite(parent, SWT.NONE);
+		final Composite composite = new Composite(parent, SWT.NONE);
 
-		yoctoProfileSetting.createComposite(result);
-		yoctoProjectSpecificSetting.createComposite(result);
+		yoctoProfileSetting.createComposite(composite);
+		yoctoProjectSpecificSetting.createComposite(composite);
+		yoctoUISetting.createComposite(composite);
 
-		try {
-			yoctoUISetting.createComposite(result);
+		if (useProjectSpecificSetting) {
+			yoctoProfileSetting.setUIFormEnabledState(false);
+			yoctoProjectSpecificSetting.setUseProjectSpecificSettings(true);
+			yoctoUISetting.setUIFormEnabledState(true);
 
-			if (useProjectSpecificSetting) {
-				yoctoProfileSetting.setUIFormEnabledState(false);
-				yoctoProjectSpecificSetting.setUseProjectSpecificSettings(true);
-				yoctoUISetting.setUIFormEnabledState(true);
-				yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
-			} else {
-				yoctoProfileSetting.setUIFormEnabledState(true);
-				yoctoProjectSpecificSetting.setUseProjectSpecificSettings(false);
-				yoctoUISetting.setUIFormEnabledState(false);
+			SDKCheckResults result = yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
+			if (result != SDKCheckResults.SDK_PASS) {
+				setErrorMessage(result.getMessage());
 			}
-
-			Dialog.applyDialogFont(result);
-			return result;
-		} catch (YoctoGeneralException e) {
-			System.out.println("Have you ever set Yocto Project Reference before?");
-			System.out.println(e.getMessage());
-			return result;
+		} else {
+			yoctoProfileSetting.setUIFormEnabledState(true);
+			yoctoProjectSpecificSetting.setUseProjectSpecificSettings(false);
+			yoctoUISetting.setUIFormEnabledState(false);
 		}
+
+		Dialog.applyDialogFont(composite);
+		return composite;
 	}
 
 	private IProject getProject() {
@@ -121,28 +118,28 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 	 */
 	@Override
 	public boolean performOk() {
-		try {
-			IProject project = getProject();
+		setErrorMessage(null);
 
-			if (yoctoProjectSpecificSetting.isUsingProjectSpecificSettings()) {
-				yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, true);
+		IProject project = getProject();
 
-				YoctoSDKUtils.saveUseProjectSpecificOptionToProjectPreferences(project, true);
-				YoctoSDKUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
-				YoctoSDKUtils.saveElemToProjectPreferences(yoctoUISetting.getCurrentInput(), project);
-			} else {
-				YoctoSDKUtils.saveUseProjectSpecificOptionToProjectPreferences(project, false);
-				YoctoSDKUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
+		if (yoctoProjectSpecificSetting.isUsingProjectSpecificSettings()) {
+			SDKCheckResults result = yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
+			if (result != SDKCheckResults.SDK_PASS) {
+				setErrorMessage(result.getMessage());
+				return false;
 			}
 
-			YoctoSDKUtils.saveElemToProjectEnv(yoctoUISetting.getCurrentInput(), getProject());
-
-			return super.performOk();
-		} catch (YoctoGeneralException e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.getMessage());
-			return false;
+			YoctoSDKUtils.saveUseProjectSpecificOptionToProjectPreferences(project, true);
+			YoctoSDKUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
+			YoctoSDKUtils.saveElemToProjectPreferences(yoctoUISetting.getCurrentInput(), project);
+		} else {
+			YoctoSDKUtils.saveUseProjectSpecificOptionToProjectPreferences(project, false);
+			YoctoSDKUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
 		}
+
+		YoctoSDKUtils.saveElemToProjectEnv(yoctoUISetting.getCurrentInput(), getProject());
+
+		return super.performOk();
 	}
 
 	public void switchProfile(String selectedProfile)

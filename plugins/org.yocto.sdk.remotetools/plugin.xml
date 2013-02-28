@@ -10,7 +10,6 @@
       </category>
       <view
             name="PowerTop"
-            icon="icons/sample.gif"
             category="org.yocto.sdk.remotetools"
             class="org.yocto.sdk.remotetools.views.BaseFileView"
             id="org.yocto.sdk.remotetools.views.PowerTopView">
@@ -18,7 +17,6 @@
       <view
             category="org.yocto.sdk.remotetools"
             class="org.yocto.sdk.remotetools.views.TerminalViewer"
-            icon="icons/sample.gif"
             id="org.yocto.sdk.remotetools.views.TerminalView"
             name="TerminalView">
       </view>
@@ -113,15 +111,6 @@
                label="%command.name.systemtap"
                style="push">
          </command>
-         <separator
-               name="org.yocto.sdk.remotetools.separator1"
-               visible="true">
-         </separator>
-         <command
-               commandId="org.yocto.sdk.remotetools.command.ustl"
-               label="%command.name.ust.legacy"
-               style="push">
-         </command>
          <command
                commandId="org.yocto.sdk.remotetools.command.ust2"
                label="%command.name.ust.20"
@@ -159,10 +148,6 @@
       <handler
             class="org.yocto.sdk.remotetools.actions.LatencytopHandler"
             commandId="org.yocto.sdk.remotetools.command.latencytop">
-      </handler>
-      <handler
-            class="org.yocto.sdk.remotetools.actions.UstHandlerLegacy"
-            commandId="org.yocto.sdk.remotetools.command.ustl">
       </handler>
       <handler
             class="org.yocto.sdk.remotetools.actions.Ust2Handler"

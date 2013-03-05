@@ -184,7 +184,6 @@ public class YoctoUISetting {
 	{
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
-		composite.setLayout(layout);
 
 		Group crossCompilerGroup= new Group(composite, SWT.NONE);
 		layout= new GridLayout(2, false);

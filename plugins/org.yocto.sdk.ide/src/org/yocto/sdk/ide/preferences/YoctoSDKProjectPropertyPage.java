@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPropertyPage;
@@ -64,6 +65,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 
 		initializeDialogUnits(parent);
 		final Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new GridLayout(2, false));
 
 		yoctoProfileSetting.createComposite(composite);
 		yoctoProjectSpecificSetting.createComposite(composite);

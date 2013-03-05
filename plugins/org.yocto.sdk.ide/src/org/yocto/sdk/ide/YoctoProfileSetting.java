@@ -60,7 +60,6 @@ public class YoctoProfileSetting {
 	public void createComposite(Composite composite) {
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
-		composite.setLayout(layout);
 
 		Group storeYoctoConfigurationsGroup = new Group (composite, SWT.NONE);
 		layout = new GridLayout(1, false);

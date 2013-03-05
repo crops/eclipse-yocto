@@ -25,6 +25,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.yocto.sdk.ide.YoctoProfileElement;
@@ -44,9 +46,12 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	private static final String NEW_DIALOG_MESSAGE = "Preferences.Profile.New.Dialog.Message";
 	private static final String UPDATE_DIALOG_TITLE = "Preferences.Profile.Update.Dialog.Title";
 	private static final String UPDATE_DIALOG_MESSAGE = "Preferences.Profile.Update.Dialog.Message";
+	private static final String REVALIDATION_MESSAGE = "Poky.SDK.Revalidation.Message";
 
 	private YoctoProfileSetting yoctoProfileSetting;
 	private YoctoUISetting yoctoUISetting;
+
+	private Listener changeListener;
 
 	public YoctoSDKPreferencePage() {
 		//super(GRID);
@@ -66,6 +71,16 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 		YoctoProfileElement profileElement = new YoctoProfileElement(profiles, selectedProfile);
 		this.yoctoProfileSetting = new YoctoProfileSetting(profileElement, this, true);
+
+		changeListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				if (getErrorMessage() != null) {
+					setErrorMessage(null);
+					setMessage(YoctoSDKMessages.getString(REVALIDATION_MESSAGE), INFORMATION);
+				}
+			}
+		};
 	}
 
 	/*
@@ -82,6 +97,9 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		yoctoProfileSetting.createComposite(composite);
 		yoctoUISetting.createComposite(composite);
 
+		composite.addListener(SWT.Modify, changeListener);
+		composite.addListener(SWT.Selection, changeListener);
+
 		SDKCheckResults result = yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
 		if (result != SDKCheckResults.SDK_PASS) {
 		}
@@ -94,7 +112,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	 * @see IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		setErrorMessage(null);
+		clearMessages();
 
 		SDKCheckResults result = yoctoUISetting.validateInput(SDKCheckRequestFrom.Preferences, false);
 		if (result != SDKCheckResults.SDK_PASS) {
@@ -128,6 +146,12 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		updateProjects(yoctoProjects, modifiedElement);
 
 		return super.performOk();
+	}
+
+	private void clearMessages() {
+		setErrorMessage(null);
+		setMessage(null);
+		setTitle(getTitle());
 	}
 
 	/*

@@ -300,6 +300,7 @@ public class YoctoUISetting {
 		btnPokyRoot.addSelectionListener(fSelectionListener);
 		btnQemu.addSelectionListener(fSelectionListener);
 		btnDevice.addSelectionListener(fSelectionListener);
+		targetArchCombo.addSelectionListener(fSelectionListener);
 		textRootLoc.addModifyListener(fModifyListener);
 		textKernelLoc.addModifyListener(fModifyListener);
 		textQemuOption.addModifyListener(fModifyListener);

@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -47,6 +48,8 @@ public class YoctoUISetting {
 	private SelectionListener fSelectionListener;
 	private ModifyListener fModifyListener;
 	private YoctoUIElement yoctoUIElement;
+
+	private Group crossCompilerGroup;
 
 	private Button btnSDKRoot;
 	private Button btnQemu;
@@ -79,15 +82,43 @@ public class YoctoUISetting {
 
 			public void widgetSelected(SelectionEvent e) {
 				controlChanged(e.widget);
+				relayEvent(e);
 			}
-		};		
+
+			private void relayEvent(SelectionEvent e) {
+				Event event = new Event();
+				event.data = e.data;
+				event.detail = e.detail;
+				event.display = e.display;
+				event.doit = e.doit;
+				event.height = e.height;
+				event.item = e.item;
+				event.stateMask = e.stateMask;
+				event.text = e.text;
+				event.time = e.time;
+				event.widget = e.widget;
+				event.width = e.width;
+				event.x = e.x;
+				event.y = e.y;
+				crossCompilerGroup.getParent().notifyListeners(SWT.Selection, event);
+			}
+		};
 
 		fModifyListener= new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				controlModified(e.widget);
+				relayEvent(e);
+			}
+
+			private void relayEvent(ModifyEvent e) {
+				Event event = new Event();
+				event.data = e.data;
+				event.display = e.display;
+				event.time = e.time;
+				event.widget = e.widget;
+				crossCompilerGroup.getParent().notifyListeners(SWT.Modify, event);
 			}
 		};
-
 	}
 
 	private Control addControls(Control fControl, final String sKey, String sValue)
@@ -185,7 +216,7 @@ public class YoctoUISetting {
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
 
-		Group crossCompilerGroup= new Group(composite, SWT.NONE);
+		crossCompilerGroup = new Group(composite, SWT.NONE);
 		layout= new GridLayout(2, false);
 		crossCompilerGroup.setLayout(layout);
 		gd= new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -521,5 +552,4 @@ public class YoctoUISetting {
 		}
 
 	}
-
 }

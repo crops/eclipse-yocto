@@ -31,6 +31,8 @@ public class YoctoSDKChecker {
 				"Poky.SDK.Location.Nonexist", true),
 		SDK_TARGET_EMPTY(
 				"Poky.SDK.Target.Empty", true),
+		SDK_NO_TARGET_SELECTED(
+				"Poky.SDK.No.Target.Selected", false),
 		SYSROOT_EMPTY(
 				"Poky.Sysroot.Empty", true),
 		SYSROOT_NONEXIST(
@@ -128,6 +130,10 @@ public class YoctoSDKChecker {
 				if (!platform.matches("i\\d86") || !toolchain_host_arch.matches("i\\d86"))
 					return SDKCheckResults.TOOLCHAIN_HOST_MISMATCH;
 			}
+		}
+
+		if (elem.getStrTarget().isEmpty() && elem.getStrTargetsArray().length > 0) {
+			return SDKCheckResults.SDK_NO_TARGET_SELECTED;
 		}
 
 		if (elem.getIntTargetIndex() < 0 || elem.getStrTarget().isEmpty()) {

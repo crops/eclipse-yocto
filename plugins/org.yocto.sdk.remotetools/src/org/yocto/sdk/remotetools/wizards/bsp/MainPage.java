@@ -322,7 +322,7 @@ public class MainPage extends WizardPage {
 		String createBuildDirCmd = "cd " + metadataDir + ";source " + metadataDir + "/oe-init-build-env " + buildLoc;
 
 		try {
-			ProcessBuilder builder = new ProcessBuilder(new String[] {"sh", "-c", createBuildDirCmd});
+			ProcessBuilder builder = new ProcessBuilder(new String[] {"bash", "-c", createBuildDirCmd});
 			Process proc = builder.start();
 			InputStream errorStream = proc.getErrorStream();
 			InputStreamReader isr = new InputStreamReader(errorStream);

@@ -29,6 +29,8 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.yocto.sdk.ide,
+ org.yocto.sdk.ide.natures,
+ org.yocto.sdk.ide.utils,
  org.yocto.sdk.ide.actions,
  org.yocto.sdk.ide.preferences,
  org.yocto.sdk.ide.wizard

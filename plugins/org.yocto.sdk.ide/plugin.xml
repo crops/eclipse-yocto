@@ -24,7 +24,7 @@
       </requires-nature>
       <runtime>
          <run
-               class="org.yocto.sdk.ide.YoctoSDKProjectNature">
+               class="org.yocto.sdk.ide.natures.YoctoSDKProjectNature">
          </run>
       </runtime>
       <builder
@@ -36,7 +36,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="org.yocto.sdk.ide.YoctoSDKEmptyProjectNature">
+               class="org.yocto.sdk.ide.natures.YoctoSDKEmptyProjectNature">
          </run>
       </runtime>
    </extension>

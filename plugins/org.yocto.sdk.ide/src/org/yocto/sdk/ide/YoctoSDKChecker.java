@@ -24,6 +24,7 @@ import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
 public class YoctoSDKChecker {
 	private static final String[] saInvalidVer = {"1.0", "0.9", "0.9+"};
 	private static final String SYSROOTS_DIR = "sysroots";
+	private static final String SDK_VERSION = "OECORE_SDK_VERSION";
 
 	public static enum SDKCheckResults {
 		SDK_PASS("", false),
@@ -148,10 +149,11 @@ public class YoctoSDKChecker {
 			String sFileName;
 
 			if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
-				sFileName = elem.getStrToolChainRoot()+"/" + YoctoSDKProjectNature.DEFAULT_ENV_FILE_PREFIX+elem.getStrTarget();
+				sFileName = elem.getStrToolChainRoot()+"/" + YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
 			} else {
 				//POKY TREE Mode
-				sFileName = elem.getStrToolChainRoot() + YoctoSDKProjectNature.DEFAULT_TMP_PREFIX + YoctoSDKProjectNature.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
+				sFileName = elem.getStrToolChainRoot() + YoctoSDKUtilsConstants.DEFAULT_TMP_PREFIX +
+						YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
 			}
 
 			try {
@@ -165,7 +167,7 @@ public class YoctoSDKChecker {
 						String line = null;
 
 						while ((line = input.readLine()) != null) {
-							if (line.startsWith("export "+ YoctoSDKProjectNature.SDK_VERSION)) {
+							if (line.startsWith("export "+ SDK_VERSION)) {
 								int beginIndex = 2;
 								String sVersion = "";
 								for (;;) {

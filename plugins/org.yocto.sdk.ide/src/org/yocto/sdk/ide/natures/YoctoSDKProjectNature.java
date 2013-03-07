@@ -73,7 +73,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 		String CXXFLAGS_str = YoctoSDKUtils.getEnvValue(project, "CXXFLAGS");
 		String CPPFLAGS_str = YoctoSDKUtils.getEnvValue(project, "CPPFLAGS");
 		String LDFLAGS_str = YoctoSDKUtils.getEnvValue(project, "LDFLAGS");
-		
+
 		String command_prefix = "CFLAGS=\" -g -O0 " + CFLAGS_str + "\" CXXFLAGS=\" -g -O0 "
 		+ CXXFLAGS_str + "\" LDFLAGS=\"" + LDFLAGS_str + "\" CPPFLAGS=\"" + CPPFLAGS_str + "\"";
 		String autogen_setting = command_prefix+" autogen.sh" + DEFAULT_LIBTOOL_SYSROOT_PREFIX + sysroot_str;

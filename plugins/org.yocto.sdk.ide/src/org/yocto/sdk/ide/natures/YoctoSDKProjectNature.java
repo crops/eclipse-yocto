@@ -60,7 +60,7 @@ public class YoctoSDKProjectNature implements IProjectNature {
 	}
 
 	public static void addYoctoSDKNature(IProject project, IProgressMonitor monitor) throws CoreException {
-		YoctoSDKUtils.addNature(project, YoctoSDK_NATURE_ID, monitor);
+		YoctoSDKNatureUtils.addNature(project, YoctoSDK_NATURE_ID, monitor);
 	}
 
 	public static void configureAutotoolsOptions(IProject project) {

@@ -5,7 +5,7 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
-import org.yocto.sdk.ide.YoctoSDKUtils;
+import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
 public class YoctoSDKEmptyProjectNature implements IProjectNature {
 

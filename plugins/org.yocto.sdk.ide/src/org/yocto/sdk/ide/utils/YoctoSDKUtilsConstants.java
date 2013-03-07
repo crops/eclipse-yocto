@@ -8,7 +8,7 @@
  * Contributors:
  * BMW Car IT - initial API and implementation
  *******************************************************************************/
-package org.yocto.sdk.ide;
+package org.yocto.sdk.ide.utils;
 
 public class YoctoSDKUtilsConstants {
 

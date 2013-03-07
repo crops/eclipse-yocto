@@ -20,6 +20,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 
 import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
+import org.yocto.sdk.ide.utils.YoctoSDKUtils;
+import org.yocto.sdk.ide.utils.YoctoSDKUtilsConstants;
 
 public class YoctoSDKChecker {
 	private static final String[] saInvalidVer = {"1.0", "0.9", "0.9+"};

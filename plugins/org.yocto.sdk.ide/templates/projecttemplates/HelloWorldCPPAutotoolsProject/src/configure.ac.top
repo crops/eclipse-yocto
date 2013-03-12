@@ -27,7 +27,6 @@ PKG_PROG_PKG_CONFIG
 # Checks for library functions.
 #AC_CHECK_FUNCS([memset])
 
-#PKG_CHECK_MODULES($(projectName), glib-2.0 clutter-1.0)
 AC_SUBST($(projectName)_CFLAGS)
 AC_SUBST($(projectName)_LIBS)
 

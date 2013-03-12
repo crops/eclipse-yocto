@@ -1,6 +1,0 @@
-EXTRA_DIST = autogen.sh
-SUBDIRS = $(sourceDir) 
-
-DISTCHECK_CONFIGURE_FLAGS=
-
-CLEANFILES = *~

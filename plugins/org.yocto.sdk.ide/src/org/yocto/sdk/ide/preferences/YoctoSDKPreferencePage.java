@@ -123,11 +123,14 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		YoctoUIElement savedElement = YoctoSDKUtils.getElemFromStore(getPreferenceStore());
 		YoctoUIElement modifiedElement = yoctoUISetting.getCurrentInput();
 
-		if (savedElement.equals(modifiedElement)) {
+		YoctoProfileElement savedProfileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
+		YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
+
+		if (savedElement.equals(modifiedElement) &&
+				profileElement.getSelectedProfile().equals(savedProfileElement.getSelectedProfile())) {
 			return true;
 		}
 
-		YoctoProfileElement profileElement = yoctoProfileSetting.getCurrentInput();
 		HashSet<IProject> yoctoProjects = getAffectedProjects(profileElement.getSelectedProfile());
 
 		if (!yoctoProjects.isEmpty()) {

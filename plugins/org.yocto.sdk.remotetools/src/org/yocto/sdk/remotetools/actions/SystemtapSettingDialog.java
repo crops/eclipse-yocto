@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 
+import java.io.File;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
@@ -20,12 +22,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import java.io.File;
-
 import org.yocto.sdk.remotetools.Activator;
 import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.Messages;
@@ -175,7 +175,7 @@ public class SystemtapSettingDialog extends Dialog {
 			public void widgetSelected(SelectionEvent event) {
 				String dirName;
 				
-				dirName = new FileDialog(parent.getShell()).open();
+				dirName = new DirectoryDialog(parent.getShell()).open();
 				if (dirName != null) {
 					text.setText(dirName);
 				}

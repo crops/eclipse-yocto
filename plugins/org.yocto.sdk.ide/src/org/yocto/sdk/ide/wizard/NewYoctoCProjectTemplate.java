@@ -34,6 +34,10 @@ import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.IOption;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.templateengine.ProjectCreatedActions;
+import org.eclipse.cdt.managedbuilder.ui.wizards.MBSCustomPageManager;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.cdt.ui.wizards.CDTMainWizardPage;
+import org.eclipse.cdt.internal.ui.wizards.ICDTCommonProjectWizard;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -87,8 +91,17 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		try {
 			if (!isValidProjectName(projectName)) {
-				project.delete(true, null);
-				throw new ProcessFailureException(YoctoSDKMessages.getFormattedString(PROJECT_NAME_ERROR, new Object[]{projectName, printIllegalChars()}));
+				
+				IWizardPage[] pages = MBSCustomPageManager.getPages();
+				if(pages != null && pages.length > 0) {
+					CDTMainWizardPage cdtMainPage = (CDTMainWizardPage)pages[0];
+					cdtMainPage.setPageComplete(false);
+					ICDTCommonProjectWizard wizard = (ICDTCommonProjectWizard) pages[0].getWizard();
+					wizard.performCancel();
+
+					project.delete(true, null);
+				}
+				throw new ProcessFailureException(YoctoSDKMessages.getString(PROJECT_NAME_ERROR) + printIllegalChars());
 			}
 			if (!project.exists()) {
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();

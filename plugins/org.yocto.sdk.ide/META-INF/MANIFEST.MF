@@ -6,8 +6,8 @@ Bundle-Version: 1.4.0.qualifier
 Bundle-Activator: org.yocto.sdk.ide.YoctoSDKPlugin
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
  org.eclipse.cdt.ui;bundle-version="5.1.2",
+ org.eclipse.core.runtime,
  org.eclipse.cdt.core;bundle-version="5.1.2",
  org.eclipse.core.resources;bundle-version="3.5.1",
  org.eclipse.debug.core;bundle-version="3.5.1",
@@ -25,7 +25,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.cdt.launch.remote;bundle-version="2.4.0",
  org.eclipse.cdt.debug.mi.core;bundle-version="7.1.0",
  org.eclipse.cdt.debug.core;bundle-version="7.1.0",
- org.eclipse.debug.ui;bundle-version="3.5.1"
+ org.eclipse.debug.ui;bundle-version="3.5.1",
+ org.eclipse.ui.ide;bundle-version="3.8.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.yocto.sdk.ide,

@@ -400,9 +400,10 @@ public class MainPage extends WizardPage {
 			bspElem.setBspOutLoc(textBspOutputLoc.getText());
 		else
 			bspElem.setBspOutLoc("");
-		if (!textBuildLoc.getText().isEmpty())
+		if (!textBuildLoc.getText().isEmpty()) {
+			checkBuildDir();
 			bspElem.setBuildLoc(textBuildLoc.getText());
-		else {
+		} else {
 			bspElem.setBuildLoc(metadataLoc + "/build");
 			if (!buildDirChecked) {
 				checkBuildDir();

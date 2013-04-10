@@ -67,7 +67,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 	protected ProjectCreatedActions pca;
 	protected IManagedBuildInfo info;
 	protected List<Character> illegalChars = Arrays.asList('$', '"','#','%','&','\'','(',')','*', '+', ',','.','/',':',';','<','=','>','?','@','[','\\',']','^','`','{','|','}','~');
-	private static final String PROJECT_NAME_ERROR = "Wizard.SDK.Error.ProjecName";
+	private static final String PROJECT_NAME_ERROR = "Wizard.SDK.Error.ProjectName";
 	
 	public NewYoctoCProjectTemplate() {
 		pca = new ProjectCreatedActions();
@@ -101,7 +101,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 
 					project.delete(true, null);
 				}
-				throw new ProcessFailureException(YoctoSDKMessages.getString(PROJECT_NAME_ERROR) + printIllegalChars());
+				throw new ProcessFailureException(YoctoSDKMessages.getFormattedString(PROJECT_NAME_ERROR, new Object[]{projectName, printIllegalChars()}));
 			}
 			if (!project.exists()) {
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();

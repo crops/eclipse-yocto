@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -115,7 +116,7 @@ public class SystemtapSettingDialog extends Dialog {
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		metadataLocationText = (Text)addTextControl(textContainer, metadata_location);
-		metadataLocationBtn = addFileSelectButton(textContainer, metadataLocationText);
+		metadataLocationBtn = addDirSelectButton(textContainer, metadataLocationText);
 		
 		label = new Label(projComp, SWT.NONE);
 		label.setText(Messages.User_ID);
@@ -167,7 +168,7 @@ public class SystemtapSettingDialog extends Dialog {
 		return (Control)text;
 	}
 
-	private Button addFileSelectButton(final Composite parent, final Text text) {
+	private Button addDirSelectButton(final Composite parent, final Text text) {
 		Button button = new Button(parent, SWT.PUSH | SWT.LEAD);
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
@@ -184,6 +185,23 @@ public class SystemtapSettingDialog extends Dialog {
 		return button;
 	}		
 
+	private Button addFileSelectButton(final Composite parent, final Text text) {
+		Button button = new Button(parent, SWT.PUSH | SWT.LEAD);
+		button.setText("Browse");
+		button.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				String fileName;
+				
+				fileName = new FileDialog(parent.getShell()).open();
+				if (fileName != null) {
+					text.setText(fileName);
+				}
+			}
+		});
+		return button;
+	}		
+	
  	@Override
 	protected void okPressed() {
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
@@ -195,6 +213,7 @@ public class SystemtapSettingDialog extends Dialog {
 		File metadata_dir = new File(metadata_location);
 		if (!metadata_dir.exists()) {
 			CommonHelper.showErrorDialog("SystemTap Error", null, "The specified metadata location does not exist!");
+			return;
 		}
 		if (!metadata_dir.isDirectory()) {
 			CommonHelper.showErrorDialog("SystemTap Error", null, "The specified metadata location is not a directory!");

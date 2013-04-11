@@ -245,6 +245,7 @@ public class SystemtapSettingDialog extends Dialog {
 	    	CommonHelper.showErrorDialog("SystemTap Error", null, "The specified systemtap script is not a file!");
 			return;
 	    }
+	    systemtap_args = systemtapArgsText.getText();
 	    okPressed = true;
 		super.okPressed();
 	}

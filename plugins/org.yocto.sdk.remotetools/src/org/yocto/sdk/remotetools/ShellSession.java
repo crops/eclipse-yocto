@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
 
 public class ShellSession {
 	/**
@@ -149,43 +150,59 @@ public class ShellSession {
 		}
 		return sb.toString();
 	}
-	
+
 	synchronized 
 	public void execute(String command) throws IOException {
 		interrupt = false;
 		String errorMessage = null;
 		
-		InputStream errIs = process.getErrorStream();
-		if (errIs.available() > 0) {
-			clearErrorStream(errIs);
-		}
 		sendToProcessAndTerminate(command);
-		
-		BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		String std = null;
-		
-		do {		
-			if (errIs.available() > 0) {
-				byte[] msg = new byte[errIs.available()];
-
-				errIs.read(msg, 0, msg.length);
-				String msg_str = new String(msg);
-				
-				out.write(msg_str);
-				out.write(LT);
-				if (!msg_str.contains("WARNING"))
-					errorMessage = msg_str;
-			} 
-			
-			std = br.readLine();
-		
-			if (std != null && !std.endsWith(TERMINATOR)) {
-				out.write(std);
-				out.write(LT);
-			} 
-			
-		} while (!std.endsWith(TERMINATOR) && !interrupt);
-		
+		boolean cancel = false;
+		try {
+			InputStream is = process.getInputStream();
+			InputStream es = process.getErrorStream();
+			String info;
+			while (!cancel) {
+				info = null;
+				StringBuffer buffer = new StringBuffer();
+				int c;
+				while (is.available() > 0) {
+					c = is.read();
+					char ch = (char) c;
+					buffer.append(ch);
+					if (ch == '\n') {
+						info = buffer.toString();
+						if (!info.trim().endsWith(TERMINATOR)) {
+							out.write(info);
+							out.write(LT);
+							buffer.delete(0, buffer.length());
+						} else {
+							cancel = true;
+							break;
+						}
+					}
+				}
+				while (es.available() > 0) {
+					c = es.read();
+					char ch = (char) c;
+					buffer.append(ch);
+					if (ch == '\n') {
+						info = buffer.toString();
+						if (!info.contains("WARNING"))
+							errorMessage += info;
+						out.write(info);
+						out.write(LT);
+						buffer.delete(0, buffer.length());
+					}
+				}
+			}
+		} catch (IOException e) {
+			try {
+				throw new InvocationTargetException(e);
+			} catch (InvocationTargetException e1) {
+				e1.printStackTrace();
+			}
+		} 
 		out.flush();
 		if (errorMessage != null) {
 			throw new IOException(errorMessage);

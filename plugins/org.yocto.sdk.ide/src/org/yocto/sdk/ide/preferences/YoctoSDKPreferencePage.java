@@ -75,10 +75,8 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		changeListener = new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				if (getErrorMessage() != null) {
-					setErrorMessage(null);
-					setMessage(YoctoSDKMessages.getString(REVALIDATION_MESSAGE), INFORMATION);
-				}
+				setErrorMessage(null);
+				setMessage(YoctoSDKMessages.getString(REVALIDATION_MESSAGE), INFORMATION);
 			}
 		};
 	}

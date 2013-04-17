@@ -28,6 +28,7 @@ import org.eclipse.cdt.make.core.MakeCorePlugin;
 import org.eclipse.cdt.make.core.scannerconfig.IDiscoveredPathManager;
 import org.eclipse.cdt.make.core.scannerconfig.IDiscoveredPathManager.IDiscoveredPathInfo;
 import org.eclipse.cdt.make.core.scannerconfig.IDiscoveredPathManager.IPerProjectDiscoveredPathInfo;
+import org.eclipse.cdt.make.internal.core.scannerconfig.util.SymbolEntry;
 import org.eclipse.cdt.managedbuilder.core.BuildException;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
@@ -56,6 +57,7 @@ import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoUIElement;
+import org.yocto.sdk.ide.natures.YoctoSDKAutotoolsProjectNature;
 import org.yocto.sdk.ide.natures.YoctoSDKEmptyProjectNature;
 import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
 import org.yocto.sdk.ide.utils.YoctoSDKUtils;
@@ -88,7 +90,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		String isEmptyProjetValue = args[4].getSimpleValue();
 		String isAutotoolsProjectValue = args[5].getSimpleValue();
 		boolean isCProject = Boolean.valueOf(isCProjectValue).booleanValue();
-		boolean isEmptryProject = Boolean.valueOf(isEmptyProjetValue).booleanValue();
+		boolean isEmptyProject = Boolean.valueOf(isEmptyProjetValue).booleanValue();
 		boolean isAutotoolsProject = Boolean.valueOf(isAutotoolsProjectValue).booleanValue();
 
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
@@ -126,19 +128,8 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				pca.setArtifactExtension(artifactExtension);
 				info = pca.createProject(monitor, CCorePlugin.DEFAULT_INDEXER, isCProject);
 
-				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
-				// For each IConfiguration, create a corresponding Autotools Configuration
-				IConfiguration[] cfgs = pca.getConfigs();
-				for (int i = 0; i < cfgs.length; ++i) {
-					IConfiguration cfg = cfgs[i];
-					AutotoolsConfigurationManager.getInstance().getConfiguration(project, cfg.getName(), true);
-				}
-				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
-				if(isEmptryProject) {
-					YoctoSDKEmptyProjectNature.addYoctoSDKEmptyNature(project, monitor);
-				}
-				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
-				YoctoSDKProjectNature.configureAutotools(project);
+				addNatures(project, false, isEmptyProject, isAutotoolsProject, monitor);
+
 				info.setValid(true);
 				ManagedBuildManager.saveBuildInfo(project, true);
 
@@ -147,31 +138,19 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
-				YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
-				IPreferenceStore selecteProfileStore = YoctoSDKPlugin.getProfilePreferenceStore(profileElement.getSelectedProfile());
-				YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(selecteProfileStore);
-				SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(elem);
-				if (result != SDKCheckResults.SDK_PASS){
-					String strErrorMsg =  YoctoSDKChecker.getErrorMessage(result, SDKCheckRequestFrom.Wizard);
-					throw new YoctoGeneralException(strErrorMsg);
-				}
-				AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
-				if(isEmptryProject) {
-					YoctoSDKEmptyProjectNature.addYoctoSDKEmptyNature(project, monitor);
-				}
-				
-				YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
-				YoctoSDKProjectNature.configureAutotools(project);
-				
-				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
+
+				YoctoSDKChecker.checkIfGloballySelectedYoctoProfileIsValid();
+
+				addNatures(project, true, isEmptyProject, isAutotoolsProject, monitor);
+
 				//restoreAutoBuild(workspace);
 				IDiscoveredPathManager manager = MakeCorePlugin.getDefault().getDiscoveryManager();
 				IDiscoveredPathInfo pathInfo = manager.getDiscoveredInfo(project);
 				if (pathInfo instanceof IPerProjectDiscoveredPathInfo) {
 				    IPerProjectDiscoveredPathInfo projectPathInfo =
 				    	(IPerProjectDiscoveredPathInfo) pathInfo;
-				    projectPathInfo.setIncludeMap(new LinkedHashMap());
-				    projectPathInfo.setSymbolMap(new LinkedHashMap());    
+				    projectPathInfo.setIncludeMap(new LinkedHashMap<String, Boolean>());
+				    projectPathInfo.setSymbolMap(new LinkedHashMap<String, SymbolEntry>());
 				    manager.removeDiscoveredInfo(project);    
 				}
 			}
@@ -199,6 +178,40 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		Matcher matcher = pattern.matcher(projectName);
 		return matcher.find();
 }
+
+	private void addNatures(IProject project, boolean projectExists, boolean isEmptyProject,
+			boolean isAutotoolsProject, IProgressMonitor monitor)
+					throws CoreException, YoctoGeneralException {
+		YoctoSDKProjectNature.addYoctoSDKNature(project, monitor);
+
+		YoctoSDKChecker.checkIfGloballySelectedYoctoProfileIsValid();
+
+		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
+		YoctoSDKUtils.saveProfilesToProjectPreferences(profileElement, project);
+
+		IPreferenceStore selecteProfileStore = YoctoSDKPlugin.getProfilePreferenceStore(profileElement.getSelectedProfile());
+		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(selecteProfileStore);
+		YoctoSDKUtils.setEnvironmentVariables(project, elem);
+
+		if (isEmptyProject) {
+			YoctoSDKEmptyProjectNature.addYoctoSDKEmptyNature(project, monitor);
+		}
+
+		if (isAutotoolsProject) {
+			AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
+
+			if(!projectExists) {
+				// For each IConfiguration, create a corresponding Autotools Configuration
+				for (IConfiguration cfg : pca.getConfigs()) {
+					AutotoolsConfigurationManager.getInstance().getConfiguration(project, cfg.getName(), true);
+				}
+				AutotoolsConfigurationManager.getInstance().saveConfigs(project);
+			}
+
+			YoctoSDKAutotoolsProjectNature.addYoctoSDKAutotoolsNature(project, monitor);
+			YoctoSDKAutotoolsProjectNature.configureAutotoolsOptions(project);
+		}
+	}
 
 	protected final void turnOffAutoBuild(IWorkspace workspace) throws CoreException {
 		IWorkspaceDescription workspaceDesc = workspace.getDescription();

@@ -91,7 +91,7 @@
                            type="org.eclipse.core.resources.IResource">
                         <test
                               property="org.eclipse.core.resources.projectNature"
-                              value="org.yocto.sdk.ide.YoctoSDKNature">
+                              value="org.yocto.sdk.ide.YoctoSDKAutotoolsNature">
                         </test>
                      </adapt>
                   </iterate>

@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
 import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 import org.yocto.sdk.ide.utils.YoctoSDKUtilsConstants;
@@ -97,6 +98,18 @@ public class YoctoSDKChecker {
 			return YoctoSDKMessages.getString(errorMessageID);
 		}
 	};
+
+	public static void checkIfGloballySelectedYoctoProfileIsValid() throws YoctoGeneralException {
+		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
+		IPreferenceStore selectedProfileStore = YoctoSDKPlugin.getProfilePreferenceStore(profileElement.getSelectedProfile());
+		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(selectedProfileStore);
+
+		SDKCheckResults result = checkYoctoSDK(elem);
+		if (result != SDKCheckResults.SDK_PASS){
+			String strErrorMsg =  getErrorMessage(result, SDKCheckRequestFrom.Wizard);
+			throw new YoctoGeneralException(strErrorMsg);
+		}
+	}
 
 	public static SDKCheckResults checkYoctoSDK(YoctoUIElement elem) {
 		if (elem.getStrToolChainRoot().isEmpty())

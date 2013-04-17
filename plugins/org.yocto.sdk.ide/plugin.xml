@@ -105,13 +105,13 @@
       <template
             filterPattern=".*gcc"
             id="org.yocto.sdk.ide.template.emptyCProject"
-            location="templates/projecttemplates/EmptyCProject/template.xml"
+            location="templates/projecttemplates/EmptyCAutotoolsProject/template.xml"
             projectType="org.yocto.sdk.ide.projectType">
       </template>
       <template
             filterPattern=".*g\+\+"
             id="org.yocto.sdk.ide.template.emptyCPPProject"
-            location="templates/projecttemplates/EmptyCPPProject/template.xml"
+            location="templates/projecttemplates/EmptyCPPAutotoolsProject/template.xml"
             projectType="org.yocto.sdk.ide.projectType">
       </template>
       <template
@@ -129,7 +129,7 @@
       <template
             filterPattern=".*gcc"
             id="org.yocto.sdk.ide.template.helloWorldCGTKProject"
-            location="templates/projecttemplates/HelloWorldCGTKProject/template.xml"
+            location="templates/projecttemplates/HelloWorldCGTKAutotoolsProject/template.xml"
             projectType="org.yocto.sdk.ide.projectType">
       </template>
    </extension>

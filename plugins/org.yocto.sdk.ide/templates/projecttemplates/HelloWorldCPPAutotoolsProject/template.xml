@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <template type="ProjTempl" version="1.0" supplier="Eclipse.org" revision="1.0" author="Bala Torati (Symbian)"
 		copyright="Copyright (c) 2007,2009 Symbian Software Limited and others. All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available athttp://www.eclipse.org/legal/epl-v10.html"
-		id="HelloWorldCPPYoctoProject" label="%HelloWorld.CCtemplate.label" description="%HelloWorld.CCtemplate.description"
+		id="YoctoHelloWorldCPPAutotoolsProject" label="%HelloWorld.CCtemplate.label" description="%HelloWorld.CCtemplate.description"
 		help="help.html">
 
 	<property-group id="basics" label="%HelloWorld.basics.label" description="%HelloWorld.basics.description" type="PAGES-ONLY" help="help.html">
@@ -41,19 +41,19 @@
 			mandatory="true"
 			persist="true"/>
 		<property id="license" label="License" description="License" type="select" default="BSD" mandatory="false" persist="true">
-    		<item label="BSD License"  name="BSD"/>
-    		<item label="MIT License"  name="MIT"/>
-    		<item label="GNU General Public License v2.0"  name="GPLv2"/>
-    		<item label="GNU General Public License v2.0_or_later"  name="GPLv2_or_later"/>
-    		<item label="GNU General Public License v3.0"  name="GPLv3"/>
-    		<item label="Other"  name="Other"/>
-		</property>			
+			<item label="BSD License"  name="BSD"/>
+			<item label="MIT License"  name="MIT"/>
+			<item label="GNU General Public License v2.0"  name="GPLv2"/>
+			<item label="GNU General Public License v2.0_or_later"  name="GPLv2_or_later"/>
+			<item label="GNU General Public License v3.0"  name="GPLv3"/>
+			<item label="Other"  name="Other"/>
+		</property>
 	</property-group>
 
 	<process type="org.yocto.sdk.ide.NewYoctoProject">
-		<simple name="name" value="$(projectName)" /> 
-		<simple name="artifactExtension" value="exe" /> 
-		<simple name="isCProject" value="false" /> 
+		<simple name="name" value="$(projectName)" />
+		<simple name="artifactExtension" value="exe" />
+		<simple name="isCProject" value="false" />
 		<simple name="isEmptyProject" value="false" />
 		<simple name="isAutotoolsProject" value="true" />
 	</process>
@@ -76,11 +76,11 @@
 				<simple name="target" value="COPYING"/>
 				<simple name="replaceable" value="true"/>
 			</element>
-        	<element>
+			<element>
 				<simple name="source" value="../Licenses/Header_$(license)"/>
 				<simple name="target" value="$(sourceDir)/$(projectName).cpp"/>
 				<simple name="replaceable" value="true"/>
-        	</element>
+			</element>
 			<element>
 				<simple name="source" value="src/autogen.sh"/>
 				<simple name="target" value="autogen.sh"/>
@@ -125,14 +125,14 @@
 	</process>
 
 	<process type="org.eclipse.cdt.core.AppendCreate">
-        <simple name="projectName" value="$(projectName)"/>
-        <complex-array name="files">
+		<simple name="projectName" value="$(projectName)"/>
+		<complex-array name="files">
 			<element>
 				<simple name="source" value="src/Basename.cpp"/>
 				<simple name="target" value="$(sourceDir)/$(projectName).cpp"/>
 				<simple name="replaceable" value="true"/>
 			</element>
-        </complex-array>
+		</complex-array>
 	</process>
 
 	<process type="org.yocto.sdk.ide.NewYoctoProjectPostProcess">

@@ -164,8 +164,8 @@
          </simple>
       </processType>
       <processType
-            name="NewYoctoProjectPostProcess"
-            processRunner="org.yocto.sdk.ide.wizard.NewYoctoProjectPostProcess">
+            name="NewYoctoAutotoolsProjectPostProcess"
+            processRunner="org.yocto.sdk.ide.wizard.NewYoctoAutotoolsProjectPostProcess">
          <simple
                name="projectName">
          </simple>

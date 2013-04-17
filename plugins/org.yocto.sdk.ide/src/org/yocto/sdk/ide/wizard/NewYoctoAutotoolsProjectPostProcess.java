@@ -23,51 +23,55 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.yocto.sdk.ide.YoctoSDKMessages;
+import org.yocto.sdk.ide.natures.YoctoSDKAutotoolsProjectNature;
 
+public class NewYoctoAutotoolsProjectPostProcess extends ProcessRunner {
 
-@SuppressWarnings("restriction")
-public class NewYoctoProjectPostProcess extends ProcessRunner {
-	
-	public NewYoctoProjectPostProcess() {}
-	
+	public NewYoctoAutotoolsProjectPostProcess() {}
+
 	public void process(TemplateCore template, ProcessArgument[] args, String processId, IProgressMonitor monitor) throws ProcessFailureException {
 
 		String projectName = args[0].getSimpleValue();
-		
+
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		try {
 			if (!project.exists()) {
-					throw new ProcessFailureException(Messages.getString("NewManagedProject.4") + projectName); //$NON-NLS-1$
-				} else {
-					IPath path = project.getLocation();
-					String path_str = path.toString();
-					String autogen_cmd = "chmod +x " + path_str + "/autogen.sh";
-					try {
-						Runtime rt = Runtime.getRuntime();
-						Process proc = rt.exec(autogen_cmd);
-						InputStream stdin = proc.getInputStream();
-						InputStreamReader isr = new InputStreamReader(stdin);
-						BufferedReader br = new BufferedReader(isr);
-						String line = null;
-						String error_message = "";
-						
-						while ( (line = br.readLine()) != null) {
-							error_message = error_message + line;
-						}
-						
-						int exitVal = proc.waitFor();
-						if (exitVal != 0) {
-							throw new ProcessFailureException("Failed to make autogen.sh executable for project: " + projectName);
-						} 
-					} catch (Throwable t) {
-						t.printStackTrace();
-						
+				throw new ProcessFailureException(Messages.getString("NewManagedProject.4") + projectName); //$NON-NLS-1$
+			} else if (!project.hasNature(YoctoSDKAutotoolsProjectNature.YoctoSDK_AUTOTOOLS_NATURE_ID)) {
+				throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + //$NON-NLS-1$
+						YoctoSDKMessages.getFormattedString("AutotoolsProjectPostProcess.WrongProjectNature", //$NON-NLS-1$
+								projectName));
+			} else {
+				IPath path = project.getLocation();
+				String path_str = path.toString();
+				String autogen_cmd = "chmod +x " + path_str + "/autogen.sh";
+				try {
+					Runtime rt = Runtime.getRuntime();
+					Process proc = rt.exec(autogen_cmd);
+					InputStream stdin = proc.getInputStream();
+					InputStreamReader isr = new InputStreamReader(stdin);
+					BufferedReader br = new BufferedReader(isr);
+					String line = null;
+					String error_message = "";
+
+					while ( (line = br.readLine()) != null) {
+						error_message = error_message + line;
 					}
+
+					int exitVal = proc.waitFor();
+					if (exitVal != 0) {
+						throw new ProcessFailureException("Failed to make autogen.sh executable for project: " + projectName);
+					}
+				} catch (Throwable t) {
+					t.printStackTrace();
+
 				}
+			}
 		}
 		catch (Exception e)
 		{
 			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage(), e); //$NON-NLS-1$
-		} 
+		}
 	}
 }

@@ -11,6 +11,7 @@
 package org.yocto.sdk.ide.wizard;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -27,6 +28,9 @@ import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.natures.YoctoSDKAutotoolsProjectNature;
 
 public class NewYoctoAutotoolsProjectPostProcess extends ProcessRunner {
+
+	public static final String CHMOD_COMMAND = "chmod +x "; //$NON-NLS-1$
+	public static final String AUTOGEN_SCRIPT_NAME = "autogen.sh"; //$NON-NLS-1$
 
 	public NewYoctoAutotoolsProjectPostProcess() {}
 
@@ -45,7 +49,7 @@ public class NewYoctoAutotoolsProjectPostProcess extends ProcessRunner {
 			} else {
 				IPath path = project.getLocation();
 				String path_str = path.toString();
-				String autogen_cmd = "chmod +x " + path_str + "/autogen.sh";
+				String autogen_cmd = CHMOD_COMMAND + path_str + File.separator + AUTOGEN_SCRIPT_NAME;
 				try {
 					Runtime rt = Runtime.getRuntime();
 					Process proc = rt.exec(autogen_cmd);
@@ -53,7 +57,7 @@ public class NewYoctoAutotoolsProjectPostProcess extends ProcessRunner {
 					InputStreamReader isr = new InputStreamReader(stdin);
 					BufferedReader br = new BufferedReader(isr);
 					String line = null;
-					String error_message = "";
+					String error_message = ""; //$NON-NLS-1$
 
 					while ( (line = br.readLine()) != null) {
 						error_message = error_message + line;
@@ -61,7 +65,7 @@ public class NewYoctoAutotoolsProjectPostProcess extends ProcessRunner {
 
 					int exitVal = proc.waitFor();
 					if (exitVal != 0) {
-						throw new ProcessFailureException("Failed to make autogen.sh executable for project: " + projectName);
+						throw new ProcessFailureException("Failed to make autogen.sh executable for project: " + projectName); //$NON-NLS-1$
 					}
 				} catch (Throwable t) {
 					t.printStackTrace();

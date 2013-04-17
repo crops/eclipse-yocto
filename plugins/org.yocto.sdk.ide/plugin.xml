@@ -142,6 +142,10 @@
                external="true"
                name="isEmptyProject">
          </simple>
+         <simple
+               external="true"
+               name="isAutotoolsProject">
+         </simple>
       </processType>
       <processType
             name="NewYoctoProjectPostProcess"

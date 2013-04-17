@@ -9,6 +9,7 @@
 		<simple name="artifactExtension" value="exe" /> 
 		<simple name="isCProject" value="false" /> 
 		<simple name="isEmptyProject" value="true" />
+		<simple name="isAutotoolsProject" value="true" />
 	</process>
 
 </template>

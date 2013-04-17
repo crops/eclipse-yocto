@@ -19,12 +19,25 @@
          id="YoctoSDKNature"
          name="%extension.name.0"
          point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.yocto.sdk.ide.natures.YoctoSDKProjectNature">
+         </run>
+      </runtime>
+   </extension>
+   <extension
+         id="YoctoSDKAutotoolsNature"
+         name="%extension.name.1"
+         point="org.eclipse.core.resources.natures">
+      <requires-nature
+            id="org.yocto.sdk.ide.YoctoSDKNature">
+      </requires-nature>
       <requires-nature
             id="org.eclipse.cdt.autotools.core.autotoolsNatureV2">
       </requires-nature>
       <runtime>
          <run
-               class="org.yocto.sdk.ide.natures.YoctoSDKProjectNature">
+               class="org.yocto.sdk.ide.natures.YoctoSDKAutotoolsProjectNature">
          </run>
       </runtime>
       <builder
@@ -34,6 +47,9 @@
    <extension
          id="YoctoSDKEmptyNature"
          point="org.eclipse.core.resources.natures">
+      <requires-nature
+            id="org.yocto.sdk.ide.YoctoSDKNature">
+      </requires-nature>
       <runtime>
          <run
                class="org.yocto.sdk.ide.natures.YoctoSDKEmptyProjectNature">

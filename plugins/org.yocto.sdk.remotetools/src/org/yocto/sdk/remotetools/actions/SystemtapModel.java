@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -19,7 +19,6 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
-
 import org.yocto.sdk.remotetools.ShellSession;
 
 public class SystemtapModel extends BaseModel {
@@ -64,18 +63,20 @@ public class SystemtapModel extends BaseModel {
 	public void preProcess(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
 	}
-
+    
 	public void process(IProgressMonitor monitor)
 	throws InvocationTargetException, InterruptedException {
 		try {
 			ShellSession shell = new ShellSession(ShellSession.SHELL_TYPE_BASH, 
 												new File(this.metadata_location),
 												DEFAULT_INIT_SCRIPT, sessionConsole.newOutputStream());
-			String crosstapCmd = "crosstap " + user_id + "@" + remote_host + " " + systemtap_script;
-			if (systemtap_args != null)
-				crosstapCmd = crosstapCmd + " " + systemtap_args;
-			shell.execute(crosstapCmd);
-									
+			boolean acceptedKey = shell.ensureKnownHostKey(user_id, remote_host);
+			if (acceptedKey) {
+				String crosstapCmd = "crosstap " + user_id + "@" + remote_host + " " + systemtap_script;
+				if (systemtap_args != null)
+					crosstapCmd = crosstapCmd + " " + systemtap_args;
+				shell.execute(crosstapCmd);
+			}
 		} catch (Exception e) {
 			throw new InvocationTargetException(e,e.getMessage());
 		}

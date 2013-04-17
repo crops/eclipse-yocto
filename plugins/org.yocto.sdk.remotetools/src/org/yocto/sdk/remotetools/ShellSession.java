@@ -19,6 +19,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 
 public class ShellSession {
 	/**
@@ -212,6 +216,91 @@ public class ShellSession {
 			initializeShell();
 			interrupt = false;
 		}
+	}
+	synchronized
+	public boolean ensureKnownHostKey(String user, String host) throws IOException {
+
+		boolean loadKeysMatch = false;
+		boolean accepted = false;
+		Process proc = Runtime.getRuntime().exec("ssh -o LogLevel=DEBUG3 " + user + "@" + host);
+		Pattern patternLoad = Pattern.compile("^debug3: load_hostkeys: loaded (\\d+) keys");
+		Pattern patternAuthSucceeded = Pattern.compile("^debug1: Authentication succeeded.*");
+
+		try {
+			InputStream es = proc.getErrorStream();
+			String info;
+			while (!loadKeysMatch) {
+				info = null;
+				StringBuffer buffer = new StringBuffer();
+				int c;
+				while (es.available() > 0) {
+					c = es.read();
+					char ch = (char) c;
+					buffer.append(ch);
+					if (ch == '\r') {
+						info = buffer.toString().trim();
+						Matcher m = patternLoad.matcher(info);
+						if(m.matches()) {
+							int keys = new Integer(m.group(1));
+							if (keys == 0) {
+								proc.destroy();
+								accepted = MessageDialog.openQuestion(null, "Host authenticity", "The authenticity of host '" + host + "(" + host + ")' can't be established.\nAre you sure you want to continue connecting ?");
+								if (accepted){
+									proc = Runtime.getRuntime().exec("ssh -o StrictHostKeyChecking=no " + user + "@" + host);//add host key to known_hosts
+									try {
+										Thread.sleep(2000); //wait for process to finish
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+									proc.destroy();
+								} else {
+									MessageDialog.openError(null, "Host authenticity", "Host key verification failed.");
+								}
+							} else {
+								String errorMsg = "";
+								// wait to check if key is the same and authentication succeeds
+								while (es.available() > 0) {
+									c = es.read();
+									ch = (char) c;
+									buffer.append(ch);
+									if (ch == '\r') {
+										info = buffer.toString().trim();
+										Matcher mAuthS = patternAuthSucceeded.matcher(info);
+										if(mAuthS.matches()) {
+											accepted = true;
+											break;
+										} else {
+											if (!info.startsWith("debug"))
+												errorMsg += info + "\n";
+										}
+										try {
+											Thread.sleep(100);
+										} catch (InterruptedException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										buffer.delete(0, buffer.length());
+									}
+								}
+								if (!accepted && !errorMsg.isEmpty())
+									MessageDialog.openError(null, "Host authenticity", errorMsg);
+							}
+							loadKeysMatch = true;
+							break;
+						}
+						buffer.delete(0, buffer.length());
+					}
+				}
+			}
+			es.close();
+		} catch (IOException e) {
+			try {
+				throw new InvocationTargetException(e);
+			} catch (InvocationTargetException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return accepted;
 	}
 	
 	private void clearErrorStream(InputStream is) {

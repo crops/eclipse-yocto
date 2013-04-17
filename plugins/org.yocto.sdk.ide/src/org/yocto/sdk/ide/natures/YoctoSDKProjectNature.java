@@ -13,7 +13,6 @@ package org.yocto.sdk.ide.natures;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 
 public class YoctoSDKProjectNature implements IProjectNature {
@@ -33,9 +32,5 @@ public class YoctoSDKProjectNature implements IProjectNature {
 
 	public void setProject(IProject project) {
 		this.proj = project;
-	}
-
-	public static void addYoctoSDKNature(IProject project, IProgressMonitor monitor) throws CoreException {
-		YoctoSDKNatureUtils.addNature(project, YoctoSDK_NATURE_ID, monitor);
 	}
 }

@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.yocto.sdk.remotetools.remote.RemoteApplication;
+import org.yocto.sdk.remotetools.remote.RemoteShellExec;
 
 public class Ust2Model extends BaseModel {
 	
@@ -57,25 +57,25 @@ public class Ust2Model extends BaseModel {
 	
 	private void generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app = new RemoteApplication(host, null, remoteExec, null);
+		RemoteShellExec exec = new RemoteShellExec(host, remoteExec);
 		
 		try {
 			String temp;
 			int idx;
 			monitor.beginTask("Getting remote ust2 trace", 2);
 			//starting usttrace
-			app.start(null,trace_loc,monitor);
+			exec.start(null, trace_loc, monitor);
 			monitor.worked(1);
-			BufferedReader in=new BufferedReader(new InputStreamReader(app.getInputStream()));
-			while((temp=in.readLine())!=null) {
-				idx=temp.indexOf(DATAFILE_PREFIX);
-				if(idx!=-1) {
+			BufferedReader in = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+			while((temp = in.readLine())!=null) {
+				idx = temp.indexOf(DATAFILE_PREFIX);
+				if(idx != -1) {
 					remoteFile = temp.substring(idx + DATAFILE_PREFIX.length());
 					break;
 				}
 			}
-			exit_code=app.waitFor(monitor);
-			app.terminate();
+			exit_code = exec.waitFor(monitor);
+			exec.terminate();
 			if(exit_code!=0) {
 				throw new Exception("Getting remote ust2 trace failed with exit code " + new Integer(exit_code).toString());
 			}

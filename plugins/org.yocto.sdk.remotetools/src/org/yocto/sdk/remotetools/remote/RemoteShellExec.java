@@ -24,17 +24,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.yocto.sdk.remotetools.RSEHelper;
 
-public class RemoteApplication {
+public class RemoteShellExec {
 	
 	public static final int
     STATE_NULL = 0,
     STATE_RUNNING = 1,
     STATE_EXITED = 2;
 	
-	private String directory;
 	private String command;
-	private String []environment;
-	private IHost target;
+	private IHost host;
 	
 	private InputStream fInStream;
     private OutputStream fOutStream;
@@ -47,15 +45,10 @@ public class RemoteApplication {
 	private String RETURN_VALUE_TAG = "org.yocto.sdk.remotetools.RVTAG";
 	private String RETURN_VALUE_CMD = ";echo \"" + RETURN_VALUE_TAG + "$?\"";
 	
-	public RemoteApplication(IHost target,
-			String directory,
-			String command,
-			String[] environment) {
-		assert(target!=null);
-		this.target = target;
-		this.directory=directory;
+	public RemoteShellExec(IHost host, String command) {
+		assert(host != null);
+		this.host = host;
 		this.command=command;
-		this.environment=environment;
 	}
 	
 	public int getStatus()
@@ -91,15 +84,16 @@ public class RemoteApplication {
     }
     
 	public synchronized void start(String prelaunchCmd, String argument, IProgressMonitor monitor) throws Exception {
-		if(status==STATE_RUNNING)
+		if(status == STATE_RUNNING)
 				return;
 	
 		reset();
-		remoteShellProcess = RSEHelper.remoteShellExec(this.target, prelaunchCmd, this.command, argument==null?RETURN_VALUE_CMD:argument+RETURN_VALUE_CMD, monitor);
+		argument = (argument == null ? RETURN_VALUE_CMD : argument + RETURN_VALUE_CMD);
+		remoteShellProcess = RSEHelper.remoteShellExec(this.host, prelaunchCmd, this.command, argument, monitor);
 		fInStream = remoteShellProcess.getInputStream();
 		fOutStream = remoteShellProcess.getOutputStream();
 		fErrStream = remoteShellProcess.getErrorStream();
-		status=STATE_RUNNING;
+		status = STATE_RUNNING;
 	}
 	
 	 public synchronized void terminate() throws Exception {

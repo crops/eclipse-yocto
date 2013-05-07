@@ -16,10 +16,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
+import org.yocto.sdk.remotetools.RSEHelper;
 
 abstract public class BaseModel implements IRunnableWithProgress {
 	protected IHost host;
 	protected String taskName;
+	protected String localScript;
+	protected String remoteExec;
 
 	private static final int WORKLOAD = 100;
 
@@ -37,13 +40,26 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	private static final String CLEAN_MSG = "Cleaning ";
 	private static final String DOTS = "...";
 
-	abstract public void preProcess(IProgressMonitor monitor) throws InvocationTargetException,	InterruptedException;
+	public void preProcess(IProgressMonitor monitor) throws InvocationTargetException,	InterruptedException{
+		//upload script to remote
+		try {
+			RSEHelper.putRemoteFileInPlugin(host, localScript, remoteExec, monitor);
+		}catch (InterruptedException e){
+			throw e;
+		}catch (InvocationTargetException e) {
+			throw e;
+		}catch (Exception e) {
+			throw new InvocationTargetException(e, e.getMessage());
+		}
+	}
 	abstract public void postProcess(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException;
 	abstract public void process(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException;
 	
-	public BaseModel(IHost host, String taskName) {
+	public BaseModel(IHost host, String taskName, String localScript, String remoteExec) {
 		this.host = host;
 		this.taskName = taskName;
+		this.localScript = localScript;
+		this.remoteExec = remoteExec;
 	}
 	protected void init(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 	}

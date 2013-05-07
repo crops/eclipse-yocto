@@ -18,49 +18,29 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.rse.core.model.IHost;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
-
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
-import org.yocto.sdk.remotetools.remote.RemoteApplication;
 import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.LocalJob;
 import org.yocto.sdk.remotetools.Messages;
-import org.yocto.sdk.remotetools.RSEHelper;
+import org.yocto.sdk.remotetools.remote.RemoteApplication;
 
 public class OprofileModel extends BaseModel {
 	
-	static final private String REMOTE_EXEC="/tmp/yocto_tool.sh";
-	static final private String LOCAL_SCRIPT="resources/yocto_tool.sh";
-	static final private String LOCAL_EXEC="oprofile-viewer";
-	
+	private static final String REMOTE_EXEC = "/tmp/yocto_tool.sh";
+	private static final String LOCAL_SCRIPT = "resources/yocto_tool.sh";
+
+	private static final String LOCAL_EXEC = "oprofile-viewer";
+
 	private static final String TASK_NAME = "oprofile command";
 
 	private IWorkbenchWindow window;
 	public OprofileModel(IHost host, IWorkbenchWindow window) {
-		super(host, TASK_NAME);
-		this.window=window;
-	}
-
-	@Override
-	public void preProcess(IProgressMonitor monitor)
-			throws InvocationTargetException, InterruptedException {
-		//upload script to remote
-		try {
-			RSEHelper.putRemoteFileInPlugin(
-					host,
-					LOCAL_SCRIPT, 
-					REMOTE_EXEC,
-					monitor);
-		}catch (InterruptedException e){
-			throw e;
-		}catch (InvocationTargetException e) {
-			throw e;
-		}catch (Exception e) {
-			throw new InvocationTargetException(e,e.getMessage());
-		}
+		super(host, TASK_NAME, LOCAL_SCRIPT, REMOTE_EXEC);
+		this.window = window;
 	}
 
 	@Override
@@ -71,7 +51,7 @@ public class OprofileModel extends BaseModel {
 	
 	private void startServer(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
+		RemoteApplication app = new RemoteApplication(host, null, remoteExec, null);
 		String args="start -d oprofile-server";
 		
 		try {
@@ -92,8 +72,8 @@ public class OprofileModel extends BaseModel {
 	
 	private void stopServer(IProgressMonitor monitor) throws Exception {
 		
-		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
-		String args="stop -d oprofile-server";
+		RemoteApplication app = new RemoteApplication(host, null, remoteExec, null); 
+		String args = "stop -d oprofile-server";
 		try {
 			monitor.beginTask("Stopping oprofile-server", 2);
 			app.start(null,args,monitor);

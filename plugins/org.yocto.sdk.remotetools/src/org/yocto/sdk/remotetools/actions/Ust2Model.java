@@ -20,26 +20,25 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
-
 import org.yocto.sdk.remotetools.RSEHelper;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
 
 public class Ust2Model extends BaseModel {
 	
-	static final private String REMOTE_EXEC="/tmp/ust_tar.sh";
-	static final private String LOCAL_SCRIPT="resources/ust_tar.sh";
+	private static final String REMOTE_EXEC = "/tmp/ust_tar.sh";
+	private static final String LOCAL_SCRIPT = "resources/ust_tar.sh";
 	
-	static final private String LOCAL_FILE_SUFFIX=".local.tar";
-	static final private String REMOTE_FILE_SUFFIX=".tar";
-	static final private String LOCAL_EXEC="lttv-gui";
-	public static final String TRACE_FOLDER_NAME = "Traces";
-	static final private String DATAFILE_PREFIX = "ustfile:";
+	private static final String LOCAL_FILE_SUFFIX = ".local.tar";
+	private static final String REMOTE_FILE_SUFFIX = ".tar";
+	private static final String LOCAL_EXEC = "lttv-gui";
+	private static final String TRACE_FOLDER_NAME = "Traces";
+	private static final String DATAFILE_PREFIX = "ustfile:";
 
 	private static final String TASK_NAME = "ust2trace command";
 		
@@ -52,31 +51,11 @@ public class Ust2Model extends BaseModel {
 	private IWorkbenchWindow window;
 	
 	public Ust2Model(IHost host, String trace, String project, IWorkbenchWindow window) {
-		super(host, TASK_NAME);
-		trace_loc=trace;
+		super(host, TASK_NAME, LOCAL_SCRIPT, REMOTE_EXEC);
+		trace_loc = trace;
 		
 		prj_name = project;
-		this.window=window;
-	}
-
-	@Override
-	public void preProcess(IProgressMonitor monitor)
-			throws InvocationTargetException, InterruptedException {
-		///upload script to remote
-		try {
-			RSEHelper.putRemoteFileInPlugin(
-					host,
-					LOCAL_SCRIPT, 
-					REMOTE_EXEC,
-					monitor);
-		}catch (InterruptedException e){
-			throw e;
-		}catch (InvocationTargetException e) {
-			throw e;
-		}catch (Exception e) {
-			throw new InvocationTargetException(e,e.getMessage());
-		}
-
+		this.window = window;
 	}
 
 	@Override
@@ -93,9 +72,9 @@ public class Ust2Model extends BaseModel {
 	
 	private String generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
+		RemoteApplication app = new RemoteApplication(host, null, remoteExec, null);
 		
-		String remoteDataFile=null;
+		String remoteDataFile = null;
 		
 		try {
 			String temp;

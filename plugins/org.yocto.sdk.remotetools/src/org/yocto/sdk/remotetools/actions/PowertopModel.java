@@ -29,10 +29,11 @@ import org.yocto.sdk.remotetools.views.BaseFileView;
 
 public class PowertopModel extends BaseModel {
 	
-	final private String REMOTE_EXEC="/tmp/yocto_tool.sh";
-	final private String LOCAL_SCRIPT="resources/yocto_tool.sh";
-	final private String REMOTE_FILE_PREFIX="/tmp/yocto-powertop-";
-	final private String LOCAL_FILE_SUFFIX=".local";
+	private static final String REMOTE_EXEC = "/tmp/yocto_tool.sh";
+	private static final String LOCAL_SCRIPT = "resources/yocto_tool.sh";
+
+	private static final String REMOTE_FILE_PREFIX = "/tmp/yocto-powertop-";
+	private static final String LOCAL_FILE_SUFFIX = ".local";
 
 	private static final String TASK_NAME = "powertop command";
 
@@ -44,30 +45,10 @@ public class PowertopModel extends BaseModel {
 	String remotefile;
 	
 	public PowertopModel(IHost host, Float time,boolean showpid,Display display) {
-		super(host, TASK_NAME);
+		super(host, TASK_NAME, LOCAL_SCRIPT, REMOTE_EXEC);
 		this.time=time;
 		this.showpid=showpid;
 		this.display=display;
-	}
-	
-	@Override
-	public void preProcess(IProgressMonitor monitor)
-			throws InvocationTargetException, InterruptedException {
-		//upload script to remote
-		try {
-			RSEHelper.putRemoteFileInPlugin(
-					host,
-					LOCAL_SCRIPT, 
-					REMOTE_EXEC,
-					monitor);
-		}catch (InterruptedException e){
-			throw e;
-		}catch (InvocationTargetException e) {
-			throw e;
-		}catch (Exception e) {
-			throw new InvocationTargetException(e,e.getMessage());
-		}
-
 	}
 
 	@Override
@@ -82,13 +63,13 @@ public class PowertopModel extends BaseModel {
 	
 	private void generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
+		RemoteApplication app = new RemoteApplication(host, null, remoteExec, null);
 		String currentDate=new SimpleDateFormat("yyyyMMddHHmmssSSS").format(Calendar.getInstance().getTime()).toString();
-		remotefile=new String(REMOTE_FILE_PREFIX + currentDate);
-		localfile=new String(remotefile + LOCAL_FILE_SUFFIX);
+		remotefile = new String(REMOTE_FILE_PREFIX + currentDate);
+		localfile = new String(remotefile + LOCAL_FILE_SUFFIX);
 		
 		ArrayList <String> param= new ArrayList <String>();
-		param.add(REMOTE_EXEC);
+		param.add(remoteExec);
 		param.add("start");
 		param.add("-l");
 		param.add(remotefile);

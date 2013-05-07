@@ -37,13 +37,13 @@ public class SystemtapModel extends BaseModel {
 	Display display;
 	
 	public SystemtapModel(String metadata_location, String remote_host, String user_id, String systemtap_script, String systemtap_args, Display display) {
-		super(null, TASK_NAME);
-		this.metadata_location=metadata_location;
-		this.remote_host=remote_host;
-		this.user_id=user_id;
-		this.systemtap_script=systemtap_script;
+		super(null, TASK_NAME, "", "");
+		this.metadata_location = metadata_location;
+		this.remote_host = remote_host;
+		this.user_id = user_id;
+		this.systemtap_script = systemtap_script;
 		this.systemtap_args = systemtap_args;
-		this.display=display;
+		this.display = display;
 		if (sessionConsole == null) {
 			IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
 			IConsole[] existing = conMan.getConsoles();
@@ -62,13 +62,12 @@ public class SystemtapModel extends BaseModel {
 	}
 	
 	@Override
-	
-	public void preProcess(IProgressMonitor monitor)
-			throws InvocationTargetException, InterruptedException {
-	}
+	public void preProcess(IProgressMonitor monitor) 
+			throws InvocationTargetException, InterruptedException {}
     
-	public void process(IProgressMonitor monitor)
-	throws InvocationTargetException, InterruptedException {
+	@Override
+	public void process(IProgressMonitor monitor) 
+			throws InvocationTargetException, InterruptedException {
 		try {
 			ShellSession shell = new ShellSession(ShellSession.SHELL_TYPE_BASH, 
 												new File(this.metadata_location),
@@ -85,9 +84,8 @@ public class SystemtapModel extends BaseModel {
 		}
 	}
 	
-	
-	public void postProcess(IProgressMonitor monitor)
-			throws InvocationTargetException, InterruptedException {
-	}
+	@Override
+	public void postProcess(IProgressMonitor monitor) 
+			throws InvocationTargetException, InterruptedException {}
 
 }

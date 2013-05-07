@@ -24,17 +24,20 @@ import org.yocto.sdk.remotetools.ShellSession;
 public class SystemtapModel extends BaseModel {
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
 	protected static final String SYSTEMTAP_CONSOLE = "Systemtap Console";
+
+	private static final String TASK_NAME = "systemtap command";
+
 	protected MessageConsole sessionConsole;
 	private String metadata_location;
 	private String remote_host;
 	private String user_id;
 	private String systemtap_script;
 	private String systemtap_args;
-	
+
 	Display display;
 	
 	public SystemtapModel(String metadata_location, String remote_host, String user_id, String systemtap_script, String systemtap_args, Display display) {
-		super(null);
+		super(null, TASK_NAME);
 		this.metadata_location=metadata_location;
 		this.remote_host=remote_host;
 		this.user_id=user_id;

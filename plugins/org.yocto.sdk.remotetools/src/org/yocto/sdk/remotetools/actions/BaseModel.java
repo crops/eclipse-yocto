@@ -18,49 +18,63 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
 
 abstract public class BaseModel implements IRunnableWithProgress {
-	
-	protected IHost rseConnection;
+	protected IHost host;
+	protected String taskName;
+
+	private static final int WORKLOAD = 100;
+
+	private static final int INIT_PERCENT = 5;
+	private static final int PRE_PROCESS_PERCENT = 30;
+	private static final int PROCESS_PERCENT = 30;
+	private static final int POST_PROCESS_PERCENT = 30;
+	private static final int CLEAN_PERCENT = 5;
+
+	private static final String RUN_MSG = "Running task: ";
+	private static final String INIT_MSG = "Initializing ";
+	private static final String PRE_PROCESS_MSG = "Preparing ";
+	private static final String PROCESS_MSG = "Processing ";
+	private static final String POST_PROCESS_MSG = "Finishing ";
+	private static final String CLEAN_MSG = "Cleaning ";
+	private static final String DOTS = "...";
 
 	abstract public void preProcess(IProgressMonitor monitor) throws InvocationTargetException,	InterruptedException;
 	abstract public void postProcess(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException;
 	abstract public void process(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException;
 	
-	public BaseModel(IHost rseConnection) {
-		this.rseConnection=rseConnection;
+	public BaseModel(IHost host, String taskName) {
+		this.host = host;
+		this.taskName = taskName;
 	}
-	
 	protected void init(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		/*
-		if(rseConnection==null) {
-			throw new InvocationTargetException(new Exception("NULL rse connection"),"NULL rse connection");
-		}*/
 	}
 	
-	protected void uninit(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+	protected void clean(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+	}
 
-	}
-	
 	public void run(IProgressMonitor monitor) throws InvocationTargetException,
     InterruptedException {
 	
 		try {
-			monitor.beginTask("", 100);
-			init(new SubProgressMonitor(monitor,5));
-			if(monitor.isCanceled())
-				throw new InterruptedException("User canncelled");
-			preProcess(new SubProgressMonitor(monitor,30));
-			if(monitor.isCanceled())
-				throw new InterruptedException("User canncelled");
-			process(new SubProgressMonitor(monitor,30));
-			if(monitor.isCanceled())
-				throw new InterruptedException("User canncelled");
-			postProcess(new SubProgressMonitor(monitor,30));
-		}catch (InterruptedException e){
+			monitor.beginTask(RUN_MSG + taskName, WORKLOAD);
+
+			monitor.subTask(INIT_MSG + taskName + DOTS);
+			init(new SubProgressMonitor(monitor, INIT_PERCENT));
+
+			monitor.subTask(PRE_PROCESS_MSG + taskName + DOTS);
+			preProcess(new SubProgressMonitor(monitor, PRE_PROCESS_PERCENT));
+
+			monitor.subTask(PROCESS_MSG + taskName + DOTS);
+			process(new SubProgressMonitor(monitor, PROCESS_PERCENT));
+
+			monitor.subTask(POST_PROCESS_MSG + taskName + DOTS);
+			postProcess(new SubProgressMonitor(monitor, POST_PROCESS_PERCENT));
+		} catch (InterruptedException e){
+			throw new InterruptedException("User cancelled!");
+		} catch (InvocationTargetException e) {
 			throw e;
-		}catch (InvocationTargetException e) {
-			throw e;
-		}finally {
-			uninit(new SubProgressMonitor(monitor,5));
+		} finally {
+			monitor.subTask(CLEAN_MSG + taskName + DOTS);
+			clean(new SubProgressMonitor(monitor, CLEAN_PERCENT));
 			monitor.done();
 		}
 	}

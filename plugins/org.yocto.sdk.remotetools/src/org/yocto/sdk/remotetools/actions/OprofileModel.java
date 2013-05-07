@@ -36,18 +36,21 @@ public class OprofileModel extends BaseModel {
 	static final private String LOCAL_SCRIPT="resources/yocto_tool.sh";
 	static final private String LOCAL_EXEC="oprofile-viewer";
 	
+	private static final String TASK_NAME = "oprofile command";
+
 	private IWorkbenchWindow window;
 	public OprofileModel(IHost host, IWorkbenchWindow window) {
-		super(host);
+		super(host, TASK_NAME);
 		this.window=window;
 	}
+
 	@Override
 	public void preProcess(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
 		//upload script to remote
 		try {
 			RSEHelper.putRemoteFileInPlugin(
-					rseConnection, 
+					host,
 					LOCAL_SCRIPT, 
 					REMOTE_EXEC,
 					monitor);
@@ -68,7 +71,7 @@ public class OprofileModel extends BaseModel {
 	
 	private void startServer(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
+		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
 		String args="start -d oprofile-server";
 		
 		try {
@@ -89,7 +92,7 @@ public class OprofileModel extends BaseModel {
 	
 	private void stopServer(IProgressMonitor monitor) throws Exception {
 		
-		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
+		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
 		String args="stop -d oprofile-server";
 		try {
 			monitor.beginTask("Stopping oprofile-server", 2);
@@ -177,8 +180,8 @@ public class OprofileModel extends BaseModel {
 			
 			new LocalJob("oprofile-viewer",
 					(searchPath!=null) ? 
-						new String[] {LOCAL_EXEC,"-h",rseConnection.getHostName(),"-s",searchPath} : 
-						new String[] {LOCAL_EXEC,"-h",rseConnection.getHostName()},
+						new String[] {LOCAL_EXEC,"-h",host.getHostName(),"-s",searchPath} :
+						new String[] {LOCAL_EXEC,"-h",host.getHostName()},
 					null,
 					null,
 					window).schedule();

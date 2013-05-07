@@ -40,6 +40,8 @@ public class Ust2Model extends BaseModel {
 	static final private String LOCAL_EXEC="lttv-gui";
 	public static final String TRACE_FOLDER_NAME = "Traces";
 	static final private String DATAFILE_PREFIX = "ustfile:";
+
+	private static final String TASK_NAME = "ust2trace command";
 		
 	private String trace_loc;
 	
@@ -50,7 +52,7 @@ public class Ust2Model extends BaseModel {
 	private IWorkbenchWindow window;
 	
 	public Ust2Model(IHost host, String trace, String project, IWorkbenchWindow window) {
-		super(host);
+		super(host, TASK_NAME);
 		trace_loc=trace;
 		
 		prj_name = project;
@@ -63,7 +65,7 @@ public class Ust2Model extends BaseModel {
 		///upload script to remote
 		try {
 			RSEHelper.putRemoteFileInPlugin(
-					rseConnection, 
+					host,
 					LOCAL_SCRIPT, 
 					REMOTE_EXEC,
 					monitor);
@@ -91,7 +93,7 @@ public class Ust2Model extends BaseModel {
 	
 	private String generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
+		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
 		
 		String remoteDataFile=null;
 		
@@ -131,7 +133,7 @@ public class Ust2Model extends BaseModel {
 		localfile=new String(datafile.substring(0,datafile.length()-4) + LOCAL_FILE_SUFFIX);
 		
 		RSEHelper.getRemoteFile(
-				rseConnection, 
+				host,
 				localfile,
 				datafile, 
 				monitor);

@@ -33,15 +33,18 @@ public class PowertopModel extends BaseModel {
 	final private String LOCAL_SCRIPT="resources/yocto_tool.sh";
 	final private String REMOTE_FILE_PREFIX="/tmp/yocto-powertop-";
 	final private String LOCAL_FILE_SUFFIX=".local";
+
+	private static final String TASK_NAME = "powertop command";
+
 	private Float time;
 	private boolean showpid;
 	Display display;
-	
+
 	String localfile;
 	String remotefile;
 	
 	public PowertopModel(IHost host, Float time,boolean showpid,Display display) {
-		super(host);
+		super(host, TASK_NAME);
 		this.time=time;
 		this.showpid=showpid;
 		this.display=display;
@@ -53,7 +56,7 @@ public class PowertopModel extends BaseModel {
 		//upload script to remote
 		try {
 			RSEHelper.putRemoteFileInPlugin(
-					rseConnection, 
+					host,
 					LOCAL_SCRIPT, 
 					REMOTE_EXEC,
 					monitor);
@@ -79,7 +82,7 @@ public class PowertopModel extends BaseModel {
 	
 	private void generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
-		RemoteApplication app=new RemoteApplication(rseConnection,null,REMOTE_EXEC,null);
+		RemoteApplication app=new RemoteApplication(host,null,REMOTE_EXEC,null);
 		String currentDate=new SimpleDateFormat("yyyyMMddHHmmssSSS").format(Calendar.getInstance().getTime()).toString();
 		remotefile=new String(REMOTE_FILE_PREFIX + currentDate);
 		localfile=new String(remotefile + LOCAL_FILE_SUFFIX);
@@ -117,7 +120,7 @@ public class PowertopModel extends BaseModel {
 	private void getDataFile(IProgressMonitor monitor) throws Exception {
 				
 		RSEHelper.getRemoteFile(
-				rseConnection, 
+				host,
 				localfile,
 				remotefile, 
 				monitor);

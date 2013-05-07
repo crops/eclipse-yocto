@@ -83,9 +83,4 @@ public class SystemtapModel extends BaseModel {
 			throw new InvocationTargetException(e,e.getMessage());
 		}
 	}
-	
-	@Override
-	public void postProcess(IProgressMonitor monitor) 
-			throws InvocationTargetException, InterruptedException {}
-
 }

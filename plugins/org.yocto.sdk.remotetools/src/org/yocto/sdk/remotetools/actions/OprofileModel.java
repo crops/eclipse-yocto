@@ -42,12 +42,6 @@ public class OprofileModel extends BaseModel {
 		super(host, TASK_NAME, LOCAL_SCRIPT, REMOTE_EXEC);
 		this.window = window;
 	}
-
-	@Override
-	public void postProcess(IProgressMonitor monitor)
-			throws InvocationTargetException, InterruptedException {
-
-	}
 	
 	private void startServer(IProgressMonitor monitor) throws Exception {
 		int exit_code;

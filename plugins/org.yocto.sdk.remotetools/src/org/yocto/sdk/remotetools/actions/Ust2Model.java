@@ -57,18 +57,6 @@ public class Ust2Model extends BaseModel {
 		prj_name = project;
 		this.window = window;
 	}
-
-	@Override
-	public void postProcess(IProgressMonitor monitor)
-			throws InvocationTargetException, InterruptedException {
-		try {
-			//new File(localfile).delete();
-			//NOT delete the directory since lttv-gui is running asynchronously
-			//new File(localfile.substring(0,localfile.length()-LOCAL_FILE_SUFFIX.length())).delete();
-		}catch (Exception e) {
-			
-		}
-	}
 	
 	private String generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;

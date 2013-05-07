@@ -23,6 +23,8 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	protected String taskName;
 	protected String localScript;
 	protected String remoteExec;
+	protected String localFile;
+	protected String remoteFile;
 
 	private static final int WORKLOAD = 100;
 
@@ -96,4 +98,7 @@ abstract public class BaseModel implements IRunnableWithProgress {
 		}
 	}
 
+	protected void getDataFile(IProgressMonitor monitor) throws Exception {
+		RSEHelper.getRemoteFile( host, localFile, remoteFile, monitor);
+	}
 }

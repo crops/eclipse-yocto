@@ -40,9 +40,6 @@ public class PowertopModel extends BaseModel {
 	private Float time;
 	private boolean showpid;
 	Display display;
-
-	String localfile;
-	String remotefile;
 	
 	public PowertopModel(IHost host, Float time,boolean showpid,Display display) {
 		super(host, TASK_NAME, LOCAL_SCRIPT, REMOTE_EXEC);
@@ -55,7 +52,7 @@ public class PowertopModel extends BaseModel {
 	public void postProcess(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
 		try {
-			new File(localfile).delete();
+			new File(localFile).delete();
 		}catch (Exception e) {
 			
 		}
@@ -65,21 +62,21 @@ public class PowertopModel extends BaseModel {
 		int exit_code;
 		RemoteApplication app = new RemoteApplication(host, null, remoteExec, null);
 		String currentDate=new SimpleDateFormat("yyyyMMddHHmmssSSS").format(Calendar.getInstance().getTime()).toString();
-		remotefile = new String(REMOTE_FILE_PREFIX + currentDate);
-		localfile = new String(remotefile + LOCAL_FILE_SUFFIX);
+		remoteFile = new String(REMOTE_FILE_PREFIX + currentDate);
+		localFile = new String(remoteFile + LOCAL_FILE_SUFFIX);
 		
 		ArrayList <String> param= new ArrayList <String>();
 		param.add(remoteExec);
 		param.add("start");
 		param.add("-l");
-		param.add(remotefile);
+		param.add(remoteFile);
 		param.add("powertop");
 		param.add("-d");
 		param.add("-t");
 		param.add(time.toString());
 		if(showpid)
 			param.add("-p");
-		String args = "start -l " + remotefile + " powertop -d -t " + time.toString();
+		String args = "start -l " + remoteFile + " powertop -d -t " + time.toString();
 		if(showpid)
 			args += " -p";
 		
@@ -98,16 +95,6 @@ public class PowertopModel extends BaseModel {
 		}
 	}
 
-	private void getDataFile(IProgressMonitor monitor) throws Exception {
-				
-		RSEHelper.getRemoteFile(
-				host,
-				localfile,
-				remotefile, 
-				monitor);
-	}
-	
-	
 	@Override
 	public void process(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
@@ -131,7 +118,7 @@ public class PowertopModel extends BaseModel {
 						e.printStackTrace();
 						return;
 					}
-					view.setInput(localfile);
+					view.setInput(localFile);
 					page.bringToTop(view);
 				}
 			});

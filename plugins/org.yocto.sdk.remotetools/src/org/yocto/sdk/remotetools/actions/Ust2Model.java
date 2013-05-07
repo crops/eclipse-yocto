@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.yocto.sdk.remotetools.RSEHelper;
 import org.yocto.sdk.remotetools.remote.RemoteApplication;
 
 public class Ust2Model extends BaseModel {
@@ -46,8 +45,6 @@ public class Ust2Model extends BaseModel {
 	
 	private String prj_name;
 	
-	private String localfile;
-	
 	private IWorkbenchWindow window;
 	
 	public Ust2Model(IHost host, String trace, String project, IWorkbenchWindow window) {
@@ -58,11 +55,9 @@ public class Ust2Model extends BaseModel {
 		this.window = window;
 	}
 	
-	private String generateData(IProgressMonitor monitor) throws Exception {
+	private void generateData(IProgressMonitor monitor) throws Exception {
 		int exit_code;
 		RemoteApplication app = new RemoteApplication(host, null, remoteExec, null);
-		
-		String remoteDataFile = null;
 		
 		try {
 			String temp;
@@ -75,7 +70,7 @@ public class Ust2Model extends BaseModel {
 			while((temp=in.readLine())!=null) {
 				idx=temp.indexOf(DATAFILE_PREFIX);
 				if(idx!=-1) {
-					remoteDataFile=temp.substring(idx + DATAFILE_PREFIX.length());
+					remoteFile = temp.substring(idx + DATAFILE_PREFIX.length());
 					break;
 				}
 			}
@@ -87,33 +82,22 @@ public class Ust2Model extends BaseModel {
 		}finally {
 			monitor.done();
 		}
-		if(remoteDataFile==null)
+		if(remoteFile == null)
 			throw new Exception("Ust: null remote data file");
-		return remoteDataFile;
-	}
-	
-	private void getDataFile(IProgressMonitor monitor,String datafile) throws Exception {
+		if(remoteFile.endsWith(REMOTE_FILE_SUFFIX)==false)
+			throw new Exception("Wrong ust data file " + remoteFile);
 		
-		if(datafile.endsWith(REMOTE_FILE_SUFFIX)==false)
-			throw new Exception("Wrong ust data file "+datafile);
-		
-		localfile=new String(datafile.substring(0,datafile.length()-4) + LOCAL_FILE_SUFFIX);
-		
-		RSEHelper.getRemoteFile(
-				host,
-				localfile,
-				datafile, 
-				monitor);
+		localFile = new String(remoteFile.substring(0, remoteFile.length()-4) + LOCAL_FILE_SUFFIX);
 	}
 
 	private void importToProject(IProgressMonitor monitor) throws Exception {
-		ProcessBuilder pb = new ProcessBuilder("tar", "fx", localfile);
+		ProcessBuilder pb = new ProcessBuilder("tar", "fx", localFile);
 		pb.directory(new File("/tmp"));
 		Process p=pb.start();
 		if(p.waitFor()!=0)
 			throw new Exception("extract ust data files failed");
 		
-		String traceName = localfile.substring(0,localfile.length()-LOCAL_FILE_SUFFIX.length());
+		String traceName = localFile.substring(0,localFile.length()-LOCAL_FILE_SUFFIX.length());
 		
 		IWorkspaceRoot wsroot = ResourcesPlugin.getWorkspace().getRoot();
 		IPath full_path = wsroot.getFullPath();
@@ -142,12 +126,12 @@ public class Ust2Model extends BaseModel {
 		String viewerParam=new String(LOCAL_EXEC);
 		int i;
 		
-		ProcessBuilder pb = new ProcessBuilder("tar", "fx", localfile);
+		ProcessBuilder pb = new ProcessBuilder("tar", "fx", localFile);
 		pb.directory(new File("/tmp"));
 		Process p=pb.start();
 		if(p.waitFor()!=0)
 			throw new Exception("extract ust data files failed");
-		File f=new File(localfile.substring(0,localfile.length()-LOCAL_FILE_SUFFIX.length()));
+		File f=new File(localFile.substring(0,localFile.length()-LOCAL_FILE_SUFFIX.length()));
 		File []subdir=f.listFiles();
 		
 		for (i=0;i<subdir.length;i++) {
@@ -171,11 +155,11 @@ public class Ust2Model extends BaseModel {
 			//preparing remote trace
 			
 			monitor.subTask("Preparing user space lttng data file remotely");
-			datafile=generateData(new SubProgressMonitor(monitor,30));
+			generateData(new SubProgressMonitor(monitor,30));
 			
 			//download datafile to local
 			monitor.subTask("Downloading user space lttng data file");
-			getDataFile(new SubProgressMonitor(monitor,30),datafile);
+			getDataFile(new SubProgressMonitor(monitor,30));
 			
 			//extract datafile and import to lttng project
 			importToProject(new SubProgressMonitor(monitor,30));

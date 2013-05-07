@@ -12,6 +12,8 @@ package org.yocto.sdk.remotetools.actions;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 
@@ -26,7 +28,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.yocto.sdk.remotetools.remote.RemoteShellExec;
 
 public class Ust2Model extends BaseModel {
 	
@@ -55,33 +56,21 @@ public class Ust2Model extends BaseModel {
 		this.window = window;
 	}
 	
-	private void generateData(IProgressMonitor monitor) throws Exception {
-		int exit_code;
-		RemoteShellExec exec = new RemoteShellExec(host, remoteExec);
-		
-		try {
-			String temp;
-			int idx;
-			monitor.beginTask("Getting remote ust2 trace", 2);
-			//starting usttrace
-			exec.start(null, trace_loc, monitor);
-			monitor.worked(1);
-			BufferedReader in = new BufferedReader(new InputStreamReader(exec.getInputStream()));
-			while((temp = in.readLine())!=null) {
-				idx = temp.indexOf(DATAFILE_PREFIX);
-				if(idx != -1) {
-					remoteFile = temp.substring(idx + DATAFILE_PREFIX.length());
-					break;
-				}
+	@Override
+	protected void checkTerminate(InputStream is) throws IOException {
+		String temp;
+		BufferedReader in = new BufferedReader(new InputStreamReader(is));
+		while((temp = in.readLine())!=null) {
+			int idx = temp.indexOf(DATAFILE_PREFIX);
+			if(idx != -1) {
+				remoteFile = temp.substring(idx + DATAFILE_PREFIX.length());
+				break;
 			}
-			exit_code = exec.waitFor(monitor);
-			exec.terminate();
-			if(exit_code!=0) {
-				throw new Exception("Getting remote ust2 trace failed with exit code " + new Integer(exit_code).toString());
-			}
-		}finally {
-			monitor.done();
 		}
+	}
+
+	private void generateData(IProgressMonitor monitor) throws Exception {
+		runRemoteShellExec(monitor, trace_loc, true);
 		if(remoteFile == null)
 			throw new Exception("Ust: null remote data file");
 		if(remoteFile.endsWith(REMOTE_FILE_SUFFIX)==false)

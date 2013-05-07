@@ -26,7 +26,6 @@ import org.yocto.sdk.ide.preferences.PreferenceConstants;
 import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.LocalJob;
 import org.yocto.sdk.remotetools.Messages;
-import org.yocto.sdk.remotetools.remote.RemoteShellExec;
 
 public class OprofileModel extends BaseModel {
 	
@@ -44,40 +43,13 @@ public class OprofileModel extends BaseModel {
 	}
 	
 	private void startServer(IProgressMonitor monitor) throws Exception {
-		int exit_code;
-		RemoteShellExec exec = new RemoteShellExec(host, remoteExec);
 		String args="start -d oprofile-server";
-		
-		try {
-			monitor.beginTask("Starting oprofile-server", 2);
-			//starting oprofile-server
-			exec.start(null,args,monitor);
-			monitor.worked(1);
-
-			exit_code = exec.waitFor(monitor);
-			exec.terminate();
-			if(exit_code!=0) {
-				throw new RuntimeException("Starting oprofile-server failed with exit code " + new Integer(exit_code).toString());
-			}
-		}finally {
-			monitor.done();
-		}
+		runRemoteShellExec(monitor, args, true);
 	}
 	
 	private void stopServer(IProgressMonitor monitor) throws Exception {
-		
-		RemoteShellExec exec = new RemoteShellExec(host, remoteExec);
 		String args = "stop -d oprofile-server";
-		try {
-			monitor.beginTask("Stopping oprofile-server", 2);
-			exec.start(null, args, monitor);
-			monitor.worked(1);
-			//no cancel for stop server
-			exec.waitFor(null);
-			exec.terminate();
-		}finally {
-			monitor.done();
-		}
+		runRemoteShellExec(monitor, args, false);
 	}
 	
 	private String getSearchPath()

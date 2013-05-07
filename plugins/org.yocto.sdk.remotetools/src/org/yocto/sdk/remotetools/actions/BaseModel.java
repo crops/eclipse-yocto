@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -17,6 +19,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
 import org.yocto.sdk.remotetools.RSEHelper;
+import org.yocto.sdk.remotetools.remote.RemoteShellExec;
 
 abstract public class BaseModel implements IRunnableWithProgress {
 	protected IHost host;
@@ -41,6 +44,7 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	private static final String POST_PROCESS_MSG = "Finishing ";
 	private static final String CLEAN_MSG = "Cleaning ";
 	private static final String DOTS = "...";
+	private static final String FAILED_ERR_MSG = " failed with exit code ";
 
 	public void preProcess(IProgressMonitor monitor) throws InvocationTargetException,	InterruptedException{
 		//upload script to remote
@@ -101,4 +105,19 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	protected void getDataFile(IProgressMonitor monitor) throws Exception {
 		RSEHelper.getRemoteFile( host, localFile, remoteFile, monitor);
 	}
+	protected void runRemoteShellExec(IProgressMonitor monitor, String args, boolean cancelable) throws Exception {
+		try {
+			RemoteShellExec exec = new RemoteShellExec(host, remoteExec);
+			exec.start(null, args, monitor);
+			monitor.worked(1);
+			checkTerminate(exec.getInputStream());
+			int exit_code = exec.waitFor(cancelable ? monitor : null);
+			exec.terminate();
+			if(exit_code != 0)
+				throw new Exception(taskName + FAILED_ERR_MSG + new Integer(exit_code).toString());
+		} finally {
+			monitor.done();
+		}
+	}
+	protected void checkTerminate(InputStream inputStream) throws IOException {}
 }

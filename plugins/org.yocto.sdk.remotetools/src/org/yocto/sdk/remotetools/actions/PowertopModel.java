@@ -13,7 +13,6 @@ package org.yocto.sdk.remotetools.actions;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,8 +22,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.yocto.sdk.remotetools.RSEHelper;
-import org.yocto.sdk.remotetools.remote.RemoteShellExec;
 import org.yocto.sdk.remotetools.views.BaseFileView;
 
 public class PowertopModel extends BaseModel {
@@ -59,8 +56,6 @@ public class PowertopModel extends BaseModel {
 	}
 	
 	private void generateData(IProgressMonitor monitor) throws Exception {
-		int exit_code;
-		RemoteShellExec exec = new RemoteShellExec(host, remoteExec);
 		String currentDate = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(Calendar.getInstance().getTime()).toString();
 		remoteFile = new String(REMOTE_FILE_PREFIX + currentDate);
 		localFile = new String(remoteFile + LOCAL_FILE_SUFFIX);
@@ -68,20 +63,7 @@ public class PowertopModel extends BaseModel {
 		String args = "start -l " + remoteFile + " powertop -d -t " + time.toString();
 		if(showpid)
 			args += " -p";
-		
-		try {
-			monitor.beginTask("Starting powertop", 2);
-			//starting oprofile-server
-			exec.start(null,args,monitor);
-			monitor.worked(1);
-			exit_code = exec.waitFor(monitor);
-			exec.terminate();
-			if(exit_code != 0) {
-				throw new Exception("Starting powertop failed with exit code " + new Integer(exit_code).toString());
-			}
-		}finally {
-			monitor.done();
-		}
+		runRemoteShellExec(monitor, args, true);
 	}
 
 	@Override

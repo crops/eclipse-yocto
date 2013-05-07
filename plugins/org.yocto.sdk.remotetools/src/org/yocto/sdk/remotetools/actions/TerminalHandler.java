@@ -13,12 +13,11 @@ package org.yocto.sdk.remotetools.actions;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.terminals.ui.TerminalServiceHelper;
 import org.eclipse.rse.internal.terminals.ui.views.RSETerminalConnector;
@@ -32,10 +31,13 @@ import org.eclipse.rse.ui.SystemBasePlugin;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tm.internal.terminal.control.ITerminalViewControl;
 import org.eclipse.tm.internal.terminal.provisional.api.ITerminalConnector;
-import org.yocto.sdk.remotetools.RSEHelper;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.yocto.sdk.remotetools.CommonHelper;
+import org.yocto.sdk.remotetools.RSEHelper;
 
 abstract public class TerminalHandler extends AbstractHandler {
 	
@@ -46,7 +48,13 @@ abstract public class TerminalHandler extends AbstractHandler {
 	protected String changeTerm="export TERM=vt100;";
 	
 	abstract protected String getInitCmd();
-	abstract protected void initialize(ExecutionEvent event) throws ExecutionException;
+	abstract protected String getConnnectionName();
+	abstract protected String getDialogTitle();
+	protected void initialize(ExecutionEvent event) throws ExecutionException{
+		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+		shell = window.getShell();
+		setting = new SimpleSettingDialog(shell, getDialogTitle(), getConnnectionName());
+	}
 	
 	protected ITerminalShell getTerminalShellFromTab(CTabItem item) {
         ITerminalShell terminalShell = null;

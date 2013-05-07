@@ -21,4 +21,7 @@ public interface IBaseConstants {
 	public static final String CONNECTION_NAME_LATENCYTOP = QUALIFIER + "connection.latencytop"; //$NON-NLS-1$
 	public static final String CONNECTION_NAME_PERF = QUALIFIER + "connection.perf"; //$NON-NLS-1$
 	public static final String CONNECTION_NAME_SYSTEMTAP = QUALIFIER + "connection.systemtap"; //$NON-NLS-1$
+
+	public static final String DIALOG_TITLE_LATENCYTOP = "Latencytop"; //$NON-NLS-1$
+	public static final String DIALOG_TITLE_PERF = "Perf"; //$NON-NLS-1$
 }

@@ -142,12 +142,9 @@ public class BaseSettingDialog extends Dialog {
 			button.setEnabled(false);
 		IHost currentConnectionSelected = getCurrentConnection();
 		if (currentConnectionSelected != null) {
-			IRSESystemType sysType = currentConnectionSelected.getSystemType();
-			if (sysType != null && sysType.isEnabled() && !sysType.isLocal()) {
-				if(button!=null) {
+			if (RSEHelper.isHostViable(currentConnectionSelected) && button != null){
 					button.setEnabled(true);
 					ret=true;
-				}
 			}
 		}
 		return ret;
@@ -156,10 +153,8 @@ public class BaseSettingDialog extends Dialog {
 	protected void updateCurConn() {
 		IHost currentConnectionSelected = getCurrentConnection();
 		if (currentConnectionSelected != null) {
-			IRSESystemType sysType = currentConnectionSelected.getSystemType();
-			if (sysType != null && sysType.isEnabled() && !sysType.isLocal()) {
+			if (RSEHelper.isHostViable(currentConnectionSelected))
 				curConn=currentConnectionSelected.getAliasName();
-			}
 		}
 		updateOkButton();
 	}

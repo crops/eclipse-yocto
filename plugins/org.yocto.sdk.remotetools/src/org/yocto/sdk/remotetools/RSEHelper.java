@@ -43,6 +43,7 @@ import org.eclipse.rse.services.shells.IHostShell;
 import org.eclipse.rse.services.shells.IShellService;
 import org.eclipse.rse.subsystems.files.core.servicesubsystem.IFileServiceSubSystem;
 import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
+import org.eclipse.rse.core.IRSESystemType;
 
 public class RSEHelper {
 	
@@ -394,5 +395,12 @@ public class RSEHelper {
 			status= new Status(IStatus.ERROR, Activator.PLUGIN_ID, code, message, null);
 		}
 		throw new CoreException(status);
+	}
+
+	public static boolean isHostViable(IHost host) {
+		IRSESystemType sysType = host.getSystemType();
+		if (sysType != null && sysType.isEnabled() && !sysType.isLocal())
+			return true;
+		return false;
 	}
 }

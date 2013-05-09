@@ -27,7 +27,6 @@ import org.yocto.sdk.remotetools.RSEHelper;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.rse.core.IRSESystemType;
-import org.eclipse.rse.core.RSECorePlugin;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.ui.actions.SystemNewConnectionAction;
 import org.eclipse.swt.SWT;
@@ -181,12 +180,7 @@ public class BaseSettingDialog extends Dialog {
 	
 	protected void updateConnectionPulldown() {
 		int index=-1;
-		if (!RSECorePlugin.isInitComplete(RSECorePlugin.INIT_MODEL))
-			try {
-				RSECorePlugin.waitForInitCompletion(RSECorePlugin.INIT_MODEL);
-			} catch (InterruptedException e) {
-				return;
-			}
+		RSEHelper.waitForRSEInitCompletition();
 		// already initialized
 		connectionCombo.removeAll();
 		IHost[] connections = RSEHelper.getSuitableConnections();

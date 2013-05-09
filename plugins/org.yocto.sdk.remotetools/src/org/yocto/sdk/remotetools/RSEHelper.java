@@ -403,4 +403,13 @@ public class RSEHelper {
 			return true;
 		return false;
 	}
+
+	public static void waitForRSEInitCompletition() {
+		if (!RSECorePlugin.isInitComplete(RSECorePlugin.INIT_MODEL))
+			try {
+				RSECorePlugin.waitForInitCompletion(RSECorePlugin.INIT_MODEL);
+			} catch (InterruptedException e) {
+				return;
+			}
+	}
 }

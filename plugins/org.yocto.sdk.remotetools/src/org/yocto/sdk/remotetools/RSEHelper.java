@@ -150,6 +150,10 @@ public class RSEHelper {
 			if(!terminalConnections.contains(fileConnection) && !shellConnections.contains(fileConnection)){
 				iter.remove();
 			}
+			IRSESystemType sysType = fileConnection.getSystemType();
+			if (sysType == null || !sysType.isEnabled()) {
+				iter.remove();
+			}
 		}
 		
 		return (IHost[]) filConnections.toArray(new IHost[filConnections.size()]);

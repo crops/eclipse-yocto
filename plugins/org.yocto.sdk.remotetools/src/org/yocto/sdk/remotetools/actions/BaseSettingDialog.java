@@ -26,7 +26,6 @@ import org.yocto.sdk.remotetools.SWTFactory;
 import org.yocto.sdk.remotetools.RSEHelper;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.rse.core.IRSESystemType;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.ui.actions.SystemNewConnectionAction;
 import org.eclipse.swt.SWT;
@@ -185,12 +184,9 @@ public class BaseSettingDialog extends Dialog {
 		connectionCombo.removeAll();
 		IHost[] connections = RSEHelper.getSuitableConnections();
 		for (int i = 0; i < connections.length; i++) {
-			IRSESystemType sysType = connections[i].getSystemType();
-			if (sysType != null && sysType.isEnabled()) {
-				connectionCombo.add(connections[i].getAliasName());
-				if(connections[i].getAliasName().equals(curConn))
-					index=i;
-			}
+			connectionCombo.add(connections[i].getAliasName());
+			if(connections[i].getAliasName().equals(curConn))
+				index=i;
 		}
 		
 		if(index>=0) {

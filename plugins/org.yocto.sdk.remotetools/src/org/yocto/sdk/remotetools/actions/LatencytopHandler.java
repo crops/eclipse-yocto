@@ -11,7 +11,7 @@
 package org.yocto.sdk.remotetools.actions;
 
 
-public class LatencytopHandler extends TerminalHandler {
+public class LatencytopHandler extends DialogHandler {
 	
 	private static String initCmd="export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin; cd; sudo latencytop\r";
 	

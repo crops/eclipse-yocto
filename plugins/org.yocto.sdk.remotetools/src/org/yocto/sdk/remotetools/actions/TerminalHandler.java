@@ -11,7 +11,6 @@
 package org.yocto.sdk.remotetools.actions;
 
 import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -34,14 +33,11 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tm.internal.terminal.control.ITerminalViewControl;
 import org.eclipse.tm.internal.terminal.provisional.api.ITerminalConnector;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.yocto.sdk.remotetools.CommonHelper;
 import org.yocto.sdk.remotetools.RSEHelper;
 
 abstract public class TerminalHandler extends AbstractHandler {
 	
-	protected BaseSettingDialog setting;
 	
 	protected Shell shell;
 	
@@ -50,11 +46,6 @@ abstract public class TerminalHandler extends AbstractHandler {
 	abstract protected String getInitCmd();
 	abstract protected String getConnnectionName();
 	abstract protected String getDialogTitle();
-	protected void initialize(ExecutionEvent event) throws ExecutionException{
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		shell = window.getShell();
-		setting = new SimpleSettingDialog(shell, getDialogTitle(), getConnnectionName());
-	}
 	
 	protected ITerminalShell getTerminalShellFromTab(CTabItem item) {
         ITerminalShell terminalShell = null;
@@ -98,70 +89,40 @@ abstract public class TerminalHandler extends AbstractHandler {
 		return false;
 	}
 	
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	public void execute(IHost host) throws ExecutionException {
 		
-		initialize(event);
+		final ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(host);
 		
-		if(setting.open()==BaseSettingDialog.OK) {
-			IHost currentHost = setting.getHost();
-			final ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(currentHost);
-			
-			if (terminalSubSystem != null) {
-				TerminalsUI terminalsUI = TerminalsUI.getInstance();
-				TerminalViewer viewer = terminalsUI.activateTerminalsView();
-				if (preProcess(terminalSubSystem)) {
-				/*if (!terminalSubSystem.isConnected()) {
-					try {
-						ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
-						dialog.run(true, true, new IRunnableWithProgress(){
-						    public void run(IProgressMonitor monitor) {
-						        monitor.beginTask("Connecting to remote target ...", 100);
-						        try {
-						        terminalSubSystem.connect(new NullProgressMonitor(), false);
-						        monitor.done();
-						        } catch (Exception e) {
-						        	CommonHelper.showErrorDialog("Connection failure", null, e.getMessage());
-						        	monitor.done();
-						        }
-						    }
-						});
-					} catch (OperationCanceledException e) {
-						// user canceled, return silently
-						return null;
-					} catch (Exception e) {
-						SystemBasePlugin.logError(e.getLocalizedMessage(), e);
-					}
-				}
-				if (terminalSubSystem.isConnected()) {*/
-					CTabItem tab = viewer.getTabFolder().createTabItem(
-							terminalSubSystem.getHost(), changeTerm + getInitCmd());
-					//since RSETerminalConnector not exit the shell during the diconnection,
-					//we have manually exit it here
-					try {
-						tab.addDisposeListener(new DisposeListener() {
-							public void widgetDisposed(DisposeEvent e) {
-								
-								Object source = e.getSource();
-								if (source instanceof CTabItem) {
-									CTabItem currentItem = (CTabItem) source;
-									ITerminalShell shell=getTerminalShellFromTab(currentItem);
-									if(shell!=null) {
-										shell.exit();
-									}
+		if (terminalSubSystem != null) {
+			TerminalsUI terminalsUI = TerminalsUI.getInstance();
+			TerminalViewer viewer = terminalsUI.activateTerminalsView();
+			if (preProcess(terminalSubSystem)) {
+				CTabItem tab = viewer.getTabFolder().createTabItem(
+						terminalSubSystem.getHost(), changeTerm + getInitCmd());
+				//since RSETerminalConnector not exit the shell during the diconnection,
+				//we have manually exit it here
+				try {
+					tab.addDisposeListener(new DisposeListener() {
+						public void widgetDisposed(DisposeEvent e) {
+							Object source = e.getSource();
+							if (source instanceof CTabItem) {
+								CTabItem currentItem = (CTabItem) source;
+								ITerminalShell shell=getTerminalShellFromTab(currentItem);
+								if(shell!=null) {
+									shell.exit();
 								}
 							}
-						});
-					}catch(Exception e) {
-						e.printStackTrace();
-					}
-					TerminalElement element = TerminalServiceHelper
-							.createTerminalElement(tab, terminalSubSystem);
-					terminalSubSystem.addChild(element);
-	
+						}
+					});
+				}catch(Exception e) {
+					e.printStackTrace();
 				}
+				TerminalElement element = TerminalServiceHelper
+						.createTerminalElement(tab, terminalSubSystem);
+				terminalSubSystem.addChild(element);
+
 			}
 		}
-		return null;
 	}
 
 }

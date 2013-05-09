@@ -11,7 +11,7 @@
 package org.yocto.sdk.remotetools.actions;
 
 
-public class PerfHandler extends TerminalHandler {
+public class PerfHandler extends DialogHandler {
 
 	private static String initCmd="cd; perf\r";
 	

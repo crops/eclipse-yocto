@@ -29,12 +29,13 @@ abstract public class DialogHandler extends TerminalHandler {
 	}
 
 	@Override
-	public void execute(ExecutionEvent event) throws ExecutionException {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		initialize(event);
 
 		if(setting.open() == BaseSettingDialog.OK) {
 			IHost currentHost = setting.getHost();
 			execute(currentHost);
 		}
+		return null;
 	}
 }

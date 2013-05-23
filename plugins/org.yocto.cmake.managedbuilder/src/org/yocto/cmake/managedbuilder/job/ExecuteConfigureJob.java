@@ -92,6 +92,31 @@ public class ExecuteConfigureJob extends Job {
 	 */
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		monitor.beginTask(
+				YoctoCMakeMessages.getString("ExecuteConfigureJob.runConfigure"), 20); //$NON-NLS-1$
+
+		IOConsoleOutputStream cos =
+				ConsoleUtility.getConsoleOutput(YoctoCMakeMessages.getFormattedString("ExecuteConfigureJob.consoleName", //$NON-NLS-1$
+						project.getName()));
+		monitor.worked(1);
+
+		try {
+			return buildProject(monitor, cos);
+		} catch (IOException e) {
+			return new Status(Status.ERROR,
+					Activator.PLUGIN_ID, Status.OK,
+					YoctoCMakeMessages.getString("ExecuteConfigureJob.error.couldNotStart"), e); //$NON-NLS-1$
+		} catch (InterruptedException e) {
+			return new Status(Status.WARNING,
+					Activator.PLUGIN_ID,
+					YoctoCMakeMessages.getString("ExecuteConfigureJob.warning.aborted")); //$NON-NLS-1$
+		} finally {
+			try {
+				cos.close();
+			} catch (IOException e) {
+				cos = null;
+			}
+		}
 	}
 
 	private IStatus buildProject(IProgressMonitor monitor,

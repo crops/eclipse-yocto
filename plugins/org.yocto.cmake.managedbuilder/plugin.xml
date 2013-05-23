@@ -111,5 +111,50 @@
                 valueType="string">
             </option>
         </tool>
+        <toolChain
+            id="org.yocto.cmake.managedbuilder.toolchain.gnu.exe"
+            name="%toolchain"
+            supportsManagedBuild="true">
+            <targetPlatform
+                id="org.yocto.cmake.managedbuilder.target.gnu.exe"
+                isAbstract="false"
+                superClass="cdt.managedbuild.target.gnu.platform.base">
+            </targetPlatform>
+            <builder
+                id="org.yocto.cmake.managedbuilder.builder.gnu.exe"
+                isAbstract="false"
+                isVariableCaseSensitive="false"
+                superClass="org.yocto.cmake.managedbuilder.builder">
+            </builder>
+            <tool
+                id="org.yocto.cmake.managedbuilder.cmakeconfigure.gnu.exe"
+                isAbstract="false"
+                superClass="org.yocto.cmake.managedbuilder.cmakeconfigure">
+            </tool>
+            <tool
+                id="org.yocto.cmake.managedbuilder.compiler.gnu.exe"
+                isAbstract="false"
+                natureFilter="ccnature"
+                superClass="cdt.managedbuild.tool.gnu.cpp.compiler">
+            </tool>
+            <tool
+                id="org.yocto.cmake.managedbuilder.linker.gnu.exe"
+                isAbstract="false"
+                natureFilter="ccnature"
+                superClass="cdt.managedbuild.tool.gnu.cpp.linker">
+            </tool>
+            <tool
+                id="org.yocto.cmake.managedbuilder.compiler.gnu.c.exe"
+                isAbstract="false"
+                natureFilter="cnature"
+                superClass="cdt.managedbuild.tool.gnu.c.compiler">
+            </tool>
+            <tool
+                id="org.yocto.cmake.managedbuilder.linker.gnu.c.exe"
+                isAbstract="false"
+                natureFilter="cnature"
+                superClass="cdt.managedbuild.tool.gnu.c.linker">
+            </tool>
+        </toolChain>
     </extension>
 </plugin>

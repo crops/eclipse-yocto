@@ -8,6 +8,7 @@
  * Contributors:
  * Intel - initial API and implementation
  * BMW Car IT - add methods to use different preference stores
+ * Atanas Gegov (BMW Car IT) - add method to get the project environment
  *******************************************************************************/
 package org.yocto.sdk.ide.utils;
 
@@ -85,6 +86,21 @@ public class YoctoSDKUtils {
 
 		else
 			return var.getValue();
+	}
+
+	public static Map<String,String> getEnvVariablesAsMap (IProject project) {
+		Map<String, String> result = new HashMap<String, String>();
+
+		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
+		ICConfigurationDescription ccdesc = cpdesc.getActiveConfiguration();
+		IEnvironmentVariableManager manager = CCorePlugin.getDefault().getBuildEnvironmentManager();
+		IContributedEnvironment env = manager.getContributedEnvironment();
+
+		for(IEnvironmentVariable var : env.getVariables(ccdesc)) {
+			result.put(var.getName(), var.getValue());
+		}
+
+		return result;
 	}
 
 	/* Save project wide settings into ENV VARs including POKY preference settings

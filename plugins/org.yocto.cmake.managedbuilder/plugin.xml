@@ -2,6 +2,14 @@
 <?eclipse version="3.4"?>
 <plugin>
     <extension
+        point="org.eclipse.cdt.managedbuilder.core.buildProperties">
+        <propertyValue
+            id="org.yocto.sdk.ide.buildArtefact.cmake.exe"
+            name="%yocto.cmake.artefactType"
+            property="org.eclipse.cdt.build.core.buildArtefactType">
+        </propertyValue>
+    </extension>
+    <extension
         id="org.yocto.cmake.managedbuilder"
         name="%extension.name"
         point="org.eclipse.cdt.managedbuilder.core.buildDefinitions">

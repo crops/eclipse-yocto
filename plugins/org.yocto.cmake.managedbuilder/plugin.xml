@@ -8,6 +8,15 @@
         <managedBuildRevision
             fileVersion="4.0.0">
         </managedBuildRevision>
+        <builder
+            id="org.yocto.cmake.managedbuilder.builder"
+            name="%builder.name"
+            buildfileGenerator="org.yocto.cmake.managedbuilder.YoctoCMakeMakefileGenerator"
+            cleanBuildTarget="clean"
+            command="make"
+            isVariableCaseSensitive="false"
+            supportsManagedBuild="true">
+        </builder>
         <tool
             id="org.yocto.cmake.managedbuilder.cmakeconfigure"
             name="%cmakeconfigure.name"

@@ -263,4 +263,21 @@
             </configuration>
         </projectType>
     </extension>
+    <extension
+        point="org.eclipse.cdt.core.templates">
+        <template
+            filterPattern=".*gcc"
+            id="org.yocto.cmake.managedbuilder.template.helloWorldCCMakeProject"
+            isCategory="false"
+            location="templates/projecttemplates/HelloWorldCCMakeProject/template.xml"
+            projectType="org.yocto.sdk.ide.buildArtefact.cmake.exe">
+        </template>
+        <template
+            filterPattern=".*g\+\+"
+            id="org.yocto.cmake.managedbuilder.template.helloWorldCPPCMakeProject"
+            isCategory="false"
+            location="templates/projecttemplates/HelloWorldCPPCMakeProject/template.xml"
+            projectType="org.yocto.sdk.ide.buildArtefact.cmake.exe">
+        </template>
+    </extension>
 </plugin>

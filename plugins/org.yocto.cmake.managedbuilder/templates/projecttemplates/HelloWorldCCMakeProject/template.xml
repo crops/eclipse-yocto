@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<template type="ProjTempl"
+	version="1.0" supplier="%template.vendor" revision="1.0" author="Atanas Gegov"
+	id="org.yocto.cmake.template.exe.helloWorldCCMakeProject" label="%template.name"
+	description="%template.description">
+
+	<property-group id="general_settings" label="%general.name"
+		description="%general.description" type="PAGES-ONLY">
+		<property id="author" label="%general.author.name" description="%general.author.description"
+			default="%general.author.default" type="input" hidden="false" mandatory="false"
+			persist="true" />
+
+		<property id="email" label="%general.email.name"
+			description="%general.email.description" default="%general.email.default"
+			type="input" hidden="false" mandatory="false" persist="true" />
+
+		<property id="vendor" label="%general.vendor.name"
+			description="%general.vendor.description" default="%general.vendor.default"
+			type="input" hidden="false" mandatory="false" persist="true" />
+
+		<property id="projectVersion" label="%general.projectVersion.name"
+			description="%general.projectVersion.description" checkproject="false"
+			default="%general.projectVersion.default" type="input"
+			pattern="([0-9]\.){2}[0-9]" hidden="false" mandatory="false" persist="true" />
+	</property-group>
+
+	<process type="org.yocto.sdk.ide.NewYoctoProject">
+		<simple name="name" value="$(projectName)" />
+		<simple name="artifactExtension" value="exe" />
+		<simple name="isCProject" value="true" />
+		<simple name="isEmptyProject" value="false" />
+		<simple name="isAutotoolsProject" value="false" />
+		<simple name="isCMakeProject" value="true" />
+	</process>
+
+	<process type="org.eclipse.cdt.core.CreateSourceFolder">
+		<simple name="projectName" value="$(projectName)" />
+		<simple name="path" value="src" />
+	</process>
+
+	<process type="org.eclipse.cdt.managedbuilder.core.CreateIncludeFolder">
+		<simple name="projectName" value="$(projectName)" />
+		<simple name="path" value="inc" />
+	</process>
+
+	<process type="org.eclipse.cdt.core.AddFiles">
+		<simple name="projectName" value="$(projectName)" />
+		<complex-array name="files">
+			<element>
+				<simple name="source" value="src/main.c" />
+				<simple name="target" value="src/main.c" />
+				<simple name="replaceable" value="true" />
+			</element>
+			<element>
+				<simple name="source" value="src/CMakeLists.txt" />
+				<simple name="target" value="CMakeLists.txt" />
+				<simple name="replaceable" value="true" />
+			</element>
+		</complex-array>
+	</process>
+</template>

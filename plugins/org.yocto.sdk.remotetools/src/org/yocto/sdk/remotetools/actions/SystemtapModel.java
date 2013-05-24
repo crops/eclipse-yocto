@@ -19,7 +19,7 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
-import org.yocto.sdk.remotetools.ShellSession;
+import org.yocto.remote.utils.ShellSession;
 
 public class SystemtapModel extends BaseModel {
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";

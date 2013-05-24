@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,7 @@
  *     Ken Gilmer - initial API and implementation
  *     Jessica Zhang - Adopt for Yocto Tools plugin
  *******************************************************************************/
-package org.yocto.sdk.remotetools;
+package org.yocto.remote.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,38 +37,36 @@ public class ShellSession {
 	/**
 	 * String used to isolate command execution
 	 */
-	//public static final String TERMINATOR = "#234o987dsfkcqiuwey18837032843259d";
 	public static final String TERMINATOR = "build$";
 	public static final String LT = System.getProperty("line.separator");
-	
+	private Process process;
+
+	private OutputStream pos = null;
+
+	private String shellPath = null;
+	private final String initCmd;
+	private final File root;
+
+	private OutputStreamWriter out;
+
 	public static String getFilePath(String file) throws IOException {
 		File f = new File(file);
-		
+
 		if (!f.exists() || f.isDirectory()) {
 			throw new IOException("Path passed is not a file: " + file);
 		}
-		
+
 		StringBuffer sb = new StringBuffer();
-		
+
 		String elems[] = file.split(File.separator);
-		
+
 		for (int i = 0; i < elems.length - 1; ++i) {
 			sb.append(elems[i]);
 			sb.append(File.separator);
 		}
-		
+
 		return sb.toString();
 	}
-	private Process process;
-
-	private OutputStream pos = null;
-	
-	private String shellPath = null;
-	private final String initCmd;
-	private final File root;
-	
-	private OutputStreamWriter out;
-	
 
 	public ShellSession(int shellType, File root, String initCmd, OutputStream out) throws IOException {
 		this.root = root;
@@ -82,31 +80,31 @@ public class ShellSession {
 			shellPath = "/bin/sh";
 		}
 		shellPath  = "/bin/bash";
-		
+
 		initializeShell();
 	}
 
 	private void initializeShell() throws IOException {
 		process = Runtime.getRuntime().exec(shellPath);
 		pos = process.getOutputStream();
-		
+
 		if (root != null) {
 			execute("cd " + root.getAbsolutePath());
 		}
-		
+
 		if (initCmd != null) {
 			execute("source " + initCmd);
 		}
 	}
 
-	synchronized 
+	synchronized
 	public String execute(String command, int[] retCode) throws IOException {
 		String errorMessage = null;
-		
+
 		interrupt = false;
 		out.write(command);
 		out.write(LT);
-		
+
 		sendToProcessAndTerminate(command);
 
 		if (process.getErrorStream().available() > 0) {
@@ -119,7 +117,7 @@ public class ShellSession {
 			if (!msg_str.contains("WARNING"))
 				errorMessage = "Error while executing: " + command + LT + new String(msg);
 		}
-		
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(process
 				.getInputStream()));
 
@@ -155,11 +153,11 @@ public class ShellSession {
 		return sb.toString();
 	}
 
-	synchronized 
+	synchronized
 	public void execute(String command) throws IOException {
 		interrupt = false;
 		String errorMessage = null;
-		
+
 		sendToProcessAndTerminate(command);
 		boolean cancel = false;
 		try {
@@ -206,7 +204,7 @@ public class ShellSession {
 			} catch (InvocationTargetException e1) {
 				e1.printStackTrace();
 			}
-		} 
+		}
 		out.flush();
 		if (errorMessage != null) {
 			throw new IOException(errorMessage);
@@ -302,23 +300,11 @@ public class ShellSession {
 		}
 		return accepted;
 	}
-	
-	private void clearErrorStream(InputStream is) {
-	
-		try {
-			byte b[] = new byte[is.available()];
-			is.read(b);			
-			System.out.println("clearing: " + new String(b));
-		} catch (IOException e) {
-			e.printStackTrace();
-			//Ignore any error
-		}
-	}
 
 	/**
 	 * Send command string to shell process and add special terminator string so
 	 * reader knows when output is complete.
-	 * 
+	 *
 	 * @param command
 	 * @throws IOException
 	 */

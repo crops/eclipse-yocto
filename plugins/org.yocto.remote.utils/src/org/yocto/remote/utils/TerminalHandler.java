@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Intel Corporation.
+ * Copyright (c) 2013 Intel Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  * Intel - initial API and implementation
  *******************************************************************************/
-package org.yocto.sdk.remotetools.actions;
+package org.yocto.remote.utils;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionException;
@@ -33,20 +33,18 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tm.internal.terminal.control.ITerminalViewControl;
 import org.eclipse.tm.internal.terminal.provisional.api.ITerminalConnector;
-import org.yocto.remote.utils.CommonHelper;
-import org.yocto.remote.utils.RSEHelper;
 
 abstract public class TerminalHandler extends AbstractHandler {
-	
-	
+
+
 	protected Shell shell;
-	
-	protected String changeTerm="export TERM=vt100;";
-	
+
+	protected String changeTerm = "export TERM=vt100;";
+
 	abstract protected String getInitCmd();
 	abstract protected String getConnnectionName();
 	abstract protected String getDialogTitle();
-	
+
 	protected ITerminalShell getTerminalShellFromTab(CTabItem item) {
         ITerminalShell terminalShell = null;
         ITerminalViewControl terminalViewControl = (ITerminalViewControl) item
@@ -65,7 +63,8 @@ abstract public class TerminalHandler extends AbstractHandler {
 			try {
 				ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
 				dialog.run(true, true, new IRunnableWithProgress(){
-				    public void run(IProgressMonitor monitor) {
+				    @Override
+					public void run(IProgressMonitor monitor) {
 				        monitor.beginTask("Connecting to remote target ...", 100);
 				        try {
 				        terminalSubSystem.connect(new NullProgressMonitor(), false);
@@ -73,7 +72,7 @@ abstract public class TerminalHandler extends AbstractHandler {
 				        } catch (Exception e) {
 				        	CommonHelper.showErrorDialog("Connection failure", null, e.getMessage());
 				        	monitor.done();
-				        	
+
 				        }
 				    }
 				});
@@ -88,11 +87,11 @@ abstract public class TerminalHandler extends AbstractHandler {
 			return true;
 		return false;
 	}
-	
+
 	public void execute(IHost host) throws ExecutionException {
-		
+
 		final ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(host);
-		
+
 		if (terminalSubSystem != null) {
 			TerminalsUI terminalsUI = TerminalsUI.getInstance();
 			TerminalViewer viewer = terminalsUI.activateTerminalsView();
@@ -103,6 +102,7 @@ abstract public class TerminalHandler extends AbstractHandler {
 				//we have manually exit it here
 				try {
 					tab.addDisposeListener(new DisposeListener() {
+						@Override
 						public void widgetDisposed(DisposeEvent e) {
 							Object source = e.getSource();
 							if (source instanceof CTabItem) {

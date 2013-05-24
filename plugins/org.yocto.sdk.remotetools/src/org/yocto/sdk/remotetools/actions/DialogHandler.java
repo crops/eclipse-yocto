@@ -15,6 +15,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.yocto.remote.utils.TerminalHandler;
 
 abstract public class DialogHandler extends TerminalHandler {
 

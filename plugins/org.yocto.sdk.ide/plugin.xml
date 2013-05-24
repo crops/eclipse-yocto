@@ -40,9 +40,28 @@
                class="org.yocto.sdk.ide.natures.YoctoSDKAutotoolsProjectNature">
          </run>
       </runtime>
+      <one-of-nature
+            id="org.yocto.sdk.ide.buildsystemNaturesSet">
+      </one-of-nature>
       <builder
             id="org.eclipse.cdt.autotools.core.genmakebuilderV2">
       </builder>
+   </extension>
+   <extension
+         id="YoctoSDKCMakeNature"
+         name="%extension.name.2"
+         point="org.eclipse.core.resources.natures">
+      <requires-nature
+            id="org.yocto.sdk.ide.YoctoSDKNature">
+      </requires-nature>
+      <runtime>
+         <run
+               class="org.yocto.sdk.ide.natures.YoctoSDKCMakeProjectNature">
+         </run>
+      </runtime>
+      <one-of-nature
+            id="org.yocto.sdk.ide.buildsystemNaturesSet">
+      </one-of-nature>
    </extension>
    <extension
          id="YoctoSDKEmptyNature"

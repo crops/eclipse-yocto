@@ -62,7 +62,6 @@ import org.yocto.sdk.ide.natures.YoctoSDKNatureUtils;
 import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
 import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
-
 @SuppressWarnings("restriction")
 public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 	protected boolean savedAutoBuildingValue;
@@ -70,10 +69,11 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 	protected IManagedBuildInfo info;
 	protected List<Character> illegalChars = Arrays.asList('$', '"','#','%','&','\'','(',')','*', '+', ',','.','/',':',';','<','=','>','?','@','[','\\',']','^','`','{','|','}','~');
 	private static final String PROJECT_NAME_ERROR = "Wizard.SDK.Error.ProjectName";
-	
+
 	public NewYoctoProjectTemplateProcess() {
 		pca = new ProjectCreatedActions();
 	}
+
 	private String printIllegalChars(){
 		String print = "";
 		for (Character ch : illegalChars)
@@ -98,7 +98,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		try {
 			if (!isValidProjectName(projectName)) {
-				
+
 				IWizardPage[] pages = MBSCustomPageManager.getPages();
 				if(pages != null && pages.length > 0) {
 					CDTMainWizardPage cdtMainPage = (CDTMainWizardPage)pages[0];
@@ -110,6 +110,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 				}
 				throw new ProcessFailureException(YoctoSDKMessages.getFormattedString(PROJECT_NAME_ERROR, new Object[]{projectName, printIllegalChars()}));
 			}
+
 			if (!project.exists()) {
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
@@ -120,6 +121,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 				}
 
 				List<?> configs = template.getTemplateInfo().getConfigurations();
+
 				if (configs == null || configs.size() == 0) {
 					throw new ProcessFailureException(Messages.getString("NewManagedProject.4") + projectName); //$NON-NLS-1$
 				}
@@ -137,7 +139,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 
 				restoreAutoBuild(workspace);
 			} else {
-				
+
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				turnOffAutoBuild(workspace);
 
@@ -148,19 +150,20 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 				//restoreAutoBuild(workspace);
 				IDiscoveredPathManager manager = MakeCorePlugin.getDefault().getDiscoveryManager();
 				IDiscoveredPathInfo pathInfo = manager.getDiscoveredInfo(project);
+
 				if (pathInfo instanceof IPerProjectDiscoveredPathInfo) {
-				    IPerProjectDiscoveredPathInfo projectPathInfo =
-				    	(IPerProjectDiscoveredPathInfo) pathInfo;
-				    projectPathInfo.setIncludeMap(new LinkedHashMap<String, Boolean>());
-				    projectPathInfo.setSymbolMap(new LinkedHashMap<String, SymbolEntry>());
-				    manager.removeDiscoveredInfo(project);    
+					IPerProjectDiscoveredPathInfo projectPathInfo =
+							(IPerProjectDiscoveredPathInfo) pathInfo;
+					projectPathInfo.setIncludeMap(new LinkedHashMap<String, Boolean>());
+					projectPathInfo.setSymbolMap(new LinkedHashMap<String, SymbolEntry>());
+					manager.removeDiscoveredInfo(project);
 				}
 			}
 		}
 		catch (CoreException e)
 		{
 			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage(), e); //$NON-NLS-1$
-		} 
+		}
 		catch (BuildException e)
 		{
 			throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage()); //$NON-NLS-1$
@@ -170,16 +173,18 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 			try {
 				project.delete(true, monitor);
 			} catch (CoreException err) {
-				throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage() + " " + err.getMessage()); 
+				throw new ProcessFailureException(Messages.getString("NewManagedProject.3") + e.getMessage() //$NON-NLS-1$
+						+ " " + err.getMessage()); //$NON-NLS-1$
 			}
-			throw new OperationCanceledException(Messages.getString("NewManagedProject.3") + e.getMessage());
+			throw new OperationCanceledException(Messages.getString("NewManagedProject.3") + e.getMessage()); //$NON-NLS-1$
 		}
 	}
+
 	private boolean isValidProjectName(String projectName) {
-		Pattern pattern = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_\\-]*$");
+		Pattern pattern = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_\\-]*$"); //$NON-NLS-1$
 		Matcher matcher = pattern.matcher(projectName);
 		return matcher.find();
-}
+	}
 
 	private void addNatures(IProject project, boolean projectExists, boolean isEmptyProject,
 			boolean isAutotoolsProject, boolean isCMakeProject, IProgressMonitor monitor)
@@ -224,13 +229,13 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 		workspaceDesc.setAutoBuilding(false);
 		workspace.setDescription(workspaceDesc);
 	}
-	
+
 	protected final void restoreAutoBuild(IWorkspace workspace) throws CoreException {
 		IWorkspaceDescription workspaceDesc = workspace.getDescription();
 		workspaceDesc.setAutoBuilding(savedAutoBuildingValue);
 		workspace.setDescription(workspaceDesc);
 	}
-	
+
 	/**
 	 * setOptionValue
 	 * @param config

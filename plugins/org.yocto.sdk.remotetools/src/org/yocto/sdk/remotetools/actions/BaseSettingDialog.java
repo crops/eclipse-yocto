@@ -16,12 +16,13 @@
  * Anna Dushistova       (MontaVista) - [181517][usability] Specify commands to be run before remote application launch
  * Anna Dushistova       (MontaVista) - [223728] [remotecdt] connection combo is not populated until RSE is activated
  * Anna Dushistova       (MontaVista) - [267951] [remotecdt] Support systemTypes without files subsystem
- * Lianhao Lu			 (Intel)      - Modified for internal use
+ * Lianhao Lu	         (Intel)      - Modified for internal use
+ * Ioana Grigoropol      (Intel)      - Adapt class for remote support
  *******************************************************************************/
 
 package org.yocto.sdk.remotetools.actions;
 
-import org.yocto.remote.utils.RSEHelper;
+import org.yocto.remote.utils.RemoteHelper;
 import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.SWTFactory;
 import org.eclipse.jface.dialogs.Dialog;
@@ -140,7 +141,7 @@ public class BaseSettingDialog extends Dialog {
 			button.setEnabled(false);
 		IHost currentConnectionSelected = getCurrentConnection();
 		if (currentConnectionSelected != null) {
-			if (RSEHelper.isHostViable(currentConnectionSelected) && button != null){
+			if (RemoteHelper.isHostViable(currentConnectionSelected) && button != null){
 					button.setEnabled(true);
 					ret=true;
 			}
@@ -151,7 +152,7 @@ public class BaseSettingDialog extends Dialog {
 	protected void updateCurConn() {
 		IHost currentConnectionSelected = getCurrentConnection();
 		if (currentConnectionSelected != null) {
-			if (RSEHelper.isHostViable(currentConnectionSelected))
+			if (RemoteHelper.isHostViable(currentConnectionSelected))
 				curConn=currentConnectionSelected.getAliasName();
 		}
 		updateOkButton();
@@ -161,7 +162,7 @@ public class BaseSettingDialog extends Dialog {
 		int currentSelection = connectionCombo.getSelectionIndex();
 		String remoteConnection = currentSelection >= 0 ? connectionCombo
 				.getItem(currentSelection) : null;
-        return RSEHelper.getRemoteConnectionByName(remoteConnection);
+        return RemoteHelper.getRemoteConnectionByName(remoteConnection);
     }
 	
 	protected void handleNewRemoteConnectionSelected() {
@@ -179,10 +180,10 @@ public class BaseSettingDialog extends Dialog {
 	
 	protected void updateConnectionPulldown() {
 		int index=-1;
-		RSEHelper.waitForRSEInitCompletition();
+		RemoteHelper.waitForRSEInitCompletition();
 		// already initialized
 		connectionCombo.removeAll();
-		IHost[] connections = RSEHelper.getSuitableConnections();
+		IHost[] connections = RemoteHelper.getSuitableConnections();
 		for (int i = 0; i < connections.length; i++) {
 			connectionCombo.add(connections[i].getAliasName());
 			if(connections[i].getAliasName().equals(curConn))

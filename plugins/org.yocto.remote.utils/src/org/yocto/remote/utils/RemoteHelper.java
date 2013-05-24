@@ -46,10 +46,10 @@ import org.eclipse.rse.subsystems.files.core.servicesubsystem.IFileServiceSubSys
 import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
 import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
 
-public class RSEHelper {
+public class RemoteHelper {
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
 	private final static String CMD_DELIMITER = ";"; //$NON-NLS-1$
-	
+
 	public static IHost getRemoteConnectionByName(String remoteConnection) {
 		if (remoteConnection == null)
 			return null;

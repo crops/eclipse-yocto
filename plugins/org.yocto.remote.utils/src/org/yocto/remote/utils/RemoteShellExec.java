@@ -82,7 +82,7 @@ public class RemoteShellExec {
 
 		reset();
 		argument = (argument == null ? RETURN_VALUE_CMD : argument + RETURN_VALUE_CMD);
-		remoteShellProcess = RSEHelper.remoteShellExec(this.host, prelaunchCmd, this.command, argument, monitor);
+		remoteShellProcess = RemoteHelper.remoteShellExec(this.host, prelaunchCmd, this.command, argument, monitor);
 		fInStream = remoteShellProcess.getInputStream();
 		fOutStream = remoteShellProcess.getOutputStream();
 		fErrStream = remoteShellProcess.getErrorStream();

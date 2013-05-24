@@ -90,7 +90,7 @@ abstract public class TerminalHandler extends AbstractHandler {
 
 	public void execute(IHost host) throws ExecutionException {
 
-		final ITerminalServiceSubSystem terminalSubSystem = RSEHelper.getTerminalSubSystem(host);
+		final ITerminalServiceSubSystem terminalSubSystem = RemoteHelper.getTerminalSubSystem(host);
 
 		if (terminalSubSystem != null) {
 			TerminalsUI terminalsUI = TerminalsUI.getInstance();

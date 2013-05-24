@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
-import org.yocto.remote.utils.RSEHelper;
+import org.yocto.remote.utils.RemoteHelper;
 import org.yocto.remote.utils.RemoteShellExec;
 
 abstract public class BaseModel implements IRunnableWithProgress {
@@ -49,7 +49,7 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	public void preProcess(IProgressMonitor monitor) throws InvocationTargetException,	InterruptedException{
 		//upload script to remote
 		try {
-			RSEHelper.putRemoteFileInPlugin(host, localScript, remoteExec, monitor);
+			RemoteHelper.putRemoteFileInPlugin(host, localScript, remoteExec, monitor);
 		}catch (InterruptedException e){
 			throw e;
 		}catch (InvocationTargetException e) {
@@ -103,7 +103,7 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	}
 
 	protected void getDataFile(IProgressMonitor monitor) throws Exception {
-		RSEHelper.getRemoteFile( host, localFile, remoteFile, monitor);
+		RemoteHelper.getRemoteFile( host, localFile, remoteFile, monitor);
 	}
 	protected void runRemoteShellExec(IProgressMonitor monitor, String args, boolean cancelable) throws Exception {
 		try {

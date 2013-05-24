@@ -70,8 +70,18 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 	protected List<Character> illegalChars = Arrays.asList('$', '"','#','%','&','\'','(',')','*', '+', ',','.','/',':',';','<','=','>','?','@','[','\\',']','^','`','{','|','}','~');
 	private static final String PROJECT_NAME_ERROR = "Wizard.SDK.Error.ProjectName";
 
+	private boolean isCProject;
+	private boolean isEmptyProject;
+	private boolean isAutotoolsProject;
+	private boolean isCMakeProject;
+
 	public NewYoctoProjectTemplateProcess() {
 		pca = new ProjectCreatedActions();
+
+		isCProject = false;
+		isEmptyProject = false;
+		isAutotoolsProject = false;
+		isCMakeProject = false;
 	}
 
 	private String printIllegalChars(){
@@ -81,6 +91,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 		print = print.substring(0, print.length() - 2);
 		return print;
 	}
+
 	public void process(TemplateCore template, ProcessArgument[] args, String processId, IProgressMonitor monitor) throws ProcessFailureException {
 
 		String projectName = args[0].getSimpleValue();
@@ -90,10 +101,11 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 		String isEmptyProjetValue = args[4].getSimpleValue();
 		String isAutotoolsProjectValue = args[5].getSimpleValue();
 		String isCMakeProjectValue = args[6].getSimpleValue();
-		boolean isCProject = Boolean.valueOf(isCProjectValue).booleanValue();
-		boolean isEmptyProject = Boolean.valueOf(isEmptyProjetValue).booleanValue();
-		boolean isAutotoolsProject = Boolean.valueOf(isAutotoolsProjectValue).booleanValue();
-		boolean isCMakeProject = Boolean.valueOf(isCMakeProjectValue).booleanValue();
+
+		isCProject = Boolean.valueOf(isCProjectValue).booleanValue();
+		isEmptyProject = Boolean.valueOf(isEmptyProjetValue).booleanValue();
+		isAutotoolsProject = Boolean.valueOf(isAutotoolsProjectValue).booleanValue();
+		isCMakeProject = Boolean.valueOf(isCMakeProjectValue).booleanValue();
 
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		try {
@@ -132,7 +144,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 				pca.setArtifactExtension(artifactExtension);
 				info = pca.createProject(monitor, CCorePlugin.DEFAULT_INDEXER, isCProject);
 
-				addNatures(project, false, isEmptyProject, isAutotoolsProject, isCMakeProject, monitor);
+				addNatures(project, false, monitor);
 
 				info.setValid(true);
 				ManagedBuildManager.saveBuildInfo(project, true);
@@ -145,7 +157,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 
 				YoctoSDKChecker.checkIfGloballySelectedYoctoProfileIsValid();
 
-				addNatures(project, true, isEmptyProject, isAutotoolsProject, isCMakeProject, monitor);
+				addNatures(project, true, monitor);
 
 				//restoreAutoBuild(workspace);
 				IDiscoveredPathManager manager = MakeCorePlugin.getDefault().getDiscoveryManager();
@@ -186,9 +198,8 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 		return matcher.find();
 	}
 
-	private void addNatures(IProject project, boolean projectExists, boolean isEmptyProject,
-			boolean isAutotoolsProject, boolean isCMakeProject, IProgressMonitor monitor)
-					throws CoreException, YoctoGeneralException {
+	private void addNatures(IProject project, boolean projectExists, IProgressMonitor monitor)
+			throws CoreException, YoctoGeneralException {
 		YoctoSDKNatureUtils.addNature(project, YoctoSDKProjectNature.YoctoSDK_NATURE_ID, monitor);
 
 		YoctoSDKChecker.checkIfGloballySelectedYoctoProfileIsValid();

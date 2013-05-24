@@ -64,14 +64,14 @@ import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
 
 @SuppressWarnings("restriction")
-public class NewYoctoCProjectTemplate extends ProcessRunner {
+public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 	protected boolean savedAutoBuildingValue;
 	protected ProjectCreatedActions pca;
 	protected IManagedBuildInfo info;
 	protected List<Character> illegalChars = Arrays.asList('$', '"','#','%','&','\'','(',')','*', '+', ',','.','/',':',';','<','=','>','?','@','[','\\',']','^','`','{','|','}','~');
 	private static final String PROJECT_NAME_ERROR = "Wizard.SDK.Error.ProjectName";
 	
-	public NewYoctoCProjectTemplate() {
+	public NewYoctoProjectTemplateProcess() {
 		pca = new ProjectCreatedActions();
 	}
 	private String printIllegalChars(){

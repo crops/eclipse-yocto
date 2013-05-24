@@ -21,9 +21,9 @@
 
 package org.yocto.sdk.remotetools.actions;
 
+import org.yocto.remote.utils.RSEHelper;
 import org.yocto.sdk.remotetools.Messages;
 import org.yocto.sdk.remotetools.SWTFactory;
-import org.yocto.sdk.remotetools.RSEHelper;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.rse.core.model.IHost;

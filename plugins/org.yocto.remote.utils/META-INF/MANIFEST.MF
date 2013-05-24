@@ -8,3 +8,13 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.rse.core,
+ org.eclipse.rse.core.model,
+ org.eclipse.rse.core.subsystems,
+ org.eclipse.rse.services,
+ org.eclipse.rse.services.files,
+ org.eclipse.rse.services.shells,
+ org.eclipse.rse.subsystems.files.core.servicesubsystem,
+ org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem,
+ org.eclipse.rse.subsystems.terminals.core
+Export-Package: org.yocto.remote.utils

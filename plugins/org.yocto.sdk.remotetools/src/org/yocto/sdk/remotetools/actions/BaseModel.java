@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
-import org.yocto.sdk.remotetools.RSEHelper;
+import org.yocto.remote.utils.RSEHelper;
 import org.yocto.sdk.remotetools.remote.RemoteShellExec;
 
 abstract public class BaseModel implements IRunnableWithProgress {

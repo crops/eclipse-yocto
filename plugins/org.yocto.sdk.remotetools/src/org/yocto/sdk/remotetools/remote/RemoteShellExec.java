@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 //import org.eclipse.tcf.services.IProcesses;
 //import org.eclipse.tcf.util.TCFTask;
 import org.eclipse.rse.core.model.IHost;
-import org.yocto.sdk.remotetools.RSEHelper;
+import org.yocto.remote.utils.RSEHelper;
 
 public class RemoteShellExec {
 	

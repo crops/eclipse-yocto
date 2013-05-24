@@ -10,6 +10,7 @@
 		<simple name="isCProject" value="false" />
 		<simple name="isEmptyProject" value="true" />
 		<simple name="isAutotoolsProject" value="true" />
+		<simple name="isCMakeProject" value="false" />
 	</process>
 
 </template>

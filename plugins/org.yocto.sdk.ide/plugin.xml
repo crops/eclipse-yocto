@@ -162,6 +162,10 @@
                external="true"
                name="isAutotoolsProject">
          </simple>
+         <simple
+               external="true"
+               name="isCMakeProject">
+         </simple>
       </processType>
       <processType
             name="NewYoctoAutotoolsProjectPostProcess"

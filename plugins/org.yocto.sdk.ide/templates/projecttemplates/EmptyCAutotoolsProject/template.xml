@@ -11,6 +11,7 @@
 		<simple name="isCProject" value="true" />
 		<simple name="isEmptyProject" value="true" />
 		<simple name="isAutotoolsProject" value="true" />
+		<simple name="isCMakeProject" value="false" />
 	</process>
 
 </template>

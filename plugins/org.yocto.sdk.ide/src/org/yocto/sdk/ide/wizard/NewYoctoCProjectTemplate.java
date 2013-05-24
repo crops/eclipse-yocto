@@ -56,6 +56,7 @@ import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoUIElement;
 import org.yocto.sdk.ide.natures.YoctoSDKAutotoolsProjectNature;
+import org.yocto.sdk.ide.natures.YoctoSDKCMakeProjectNature;
 import org.yocto.sdk.ide.natures.YoctoSDKEmptyProjectNature;
 import org.yocto.sdk.ide.natures.YoctoSDKNatureUtils;
 import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
@@ -129,7 +130,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 				pca.setArtifactExtension(artifactExtension);
 				info = pca.createProject(monitor, CCorePlugin.DEFAULT_INDEXER, isCProject);
 
-				addNatures(project, false, isEmptyProject, isAutotoolsProject, monitor);
+				addNatures(project, false, isEmptyProject, isAutotoolsProject, isCMakeProject, monitor);
 
 				info.setValid(true);
 				ManagedBuildManager.saveBuildInfo(project, true);
@@ -142,7 +143,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 
 				YoctoSDKChecker.checkIfGloballySelectedYoctoProfileIsValid();
 
-				addNatures(project, true, isEmptyProject, isAutotoolsProject, monitor);
+				addNatures(project, true, isEmptyProject, isAutotoolsProject, isCMakeProject, monitor);
 
 				//restoreAutoBuild(workspace);
 				IDiscoveredPathManager manager = MakeCorePlugin.getDefault().getDiscoveryManager();
@@ -181,7 +182,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 }
 
 	private void addNatures(IProject project, boolean projectExists, boolean isEmptyProject,
-			boolean isAutotoolsProject, IProgressMonitor monitor)
+			boolean isAutotoolsProject, boolean isCMakeProject, IProgressMonitor monitor)
 					throws CoreException, YoctoGeneralException {
 		YoctoSDKNatureUtils.addNature(project, YoctoSDKProjectNature.YoctoSDK_NATURE_ID, monitor);
 
@@ -201,7 +202,7 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 		if (isAutotoolsProject) {
 			AutotoolsNewProjectNature.addAutotoolsNature(project, monitor);
 
-			if(!projectExists) {
+			if (!projectExists) {
 				// For each IConfiguration, create a corresponding Autotools Configuration
 				for (IConfiguration cfg : pca.getConfigs()) {
 					AutotoolsConfigurationManager.getInstance().getConfiguration(project, cfg.getName(), true);
@@ -211,6 +212,9 @@ public class NewYoctoCProjectTemplate extends ProcessRunner {
 
 			YoctoSDKNatureUtils.addNature(project, YoctoSDKAutotoolsProjectNature.YoctoSDK_AUTOTOOLS_NATURE_ID, monitor);
 			YoctoSDKAutotoolsProjectNature.configureAutotoolsOptions(project);
+		} else if (isCMakeProject) {
+			YoctoSDKNatureUtils.addNature(project, YoctoSDKCMakeProjectNature.YoctoSDK_CMAKE_NATURE_ID, monitor);
+			YoctoSDKCMakeProjectNature.extendProjectEnvironmentForCMake(project);
 		}
 	}
 

@@ -14,6 +14,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.ide,
  org.eclipse.ui.console,
- org.eclipse.core.filesystem
+ org.eclipse.core.filesystem,
+ org.yocto.remote.utils;bundle-version="1.0.0"
 Eclipse-LazyStart: true
 Bundle-ClassPath: .

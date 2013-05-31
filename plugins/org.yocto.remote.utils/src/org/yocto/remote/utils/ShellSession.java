@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 
 public class ShellSession {
 	/**
@@ -242,7 +242,9 @@ public class ShellSession {
 							int keys = new Integer(m.group(1));
 							if (keys == 0) {
 								proc.destroy();
-								accepted = MessageDialog.openQuestion(null, "Host authenticity", "The authenticity of host '" + host + "(" + host + ")' can't be established.\nAre you sure you want to continue connecting ?");
+								DialogRunnable runnable = new DialogRunnable("Host authenticity", "The authenticity of host '" + host + "(" + host + ")' can't be established.\nAre you sure you want to continue connecting ?", DialogRunnable.QUESTION);
+								Display.getDefault().syncExec(runnable);
+								accepted = runnable.result;
 								if (accepted){
 									proc = Runtime.getRuntime().exec("ssh -o StrictHostKeyChecking=no " + user + "@" + host);//add host key to known_hosts
 									try {
@@ -252,7 +254,7 @@ public class ShellSession {
 									}
 									proc.destroy();
 								} else {
-									MessageDialog.openError(null, "Host authenticity", "Host key verification failed.");
+									Display.getDefault().syncExec( new DialogRunnable("Host authenticity", "Host key verification failed.", DialogRunnable.ERROR));
 								}
 							} else {
 								String errorMsg = "";
@@ -280,8 +282,9 @@ public class ShellSession {
 										buffer.delete(0, buffer.length());
 									}
 								}
-								if (!accepted && !errorMsg.isEmpty())
-									MessageDialog.openError(null, "Host authenticity", errorMsg);
+								if (!accepted && !errorMsg.isEmpty()) {
+									Display.getDefault().syncExec( new DialogRunnable("Host authenticity", errorMsg, DialogRunnable.ERROR));
+								}
 							}
 							loadKeysMatch = true;
 							break;

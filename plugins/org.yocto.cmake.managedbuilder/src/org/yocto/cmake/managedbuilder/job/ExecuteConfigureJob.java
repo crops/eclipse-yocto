@@ -12,8 +12,17 @@ package org.yocto.cmake.managedbuilder.job;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
+import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.envvar.IContributedEnvironment;
+import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
+import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
+import org.eclipse.cdt.core.model.CoreModel;
+import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.managedbuilder.core.BuildException;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.ITool;
@@ -28,7 +37,6 @@ import org.yocto.cmake.managedbuilder.Activator;
 import org.yocto.cmake.managedbuilder.YoctoCMakeMessages;
 import org.yocto.cmake.managedbuilder.util.ConsoleUtility;
 import org.yocto.cmake.managedbuilder.util.SystemProcess;
-import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
 
 public class ExecuteConfigureJob extends Job {
@@ -84,7 +92,22 @@ public class ExecuteConfigureJob extends Job {
 
 	protected void createProcesses() {
 		configureProcess =
-				new SystemProcess(configureCommand, location.toFile(), YoctoSDKUtils.getEnvVariablesAsMap(project));
+				new SystemProcess(configureCommand, location.toFile(), getEnvVariablesAsMap(project));
+	}
+
+	private Map<String,String> getEnvVariablesAsMap (IProject project) {
+		Map<String, String> result = new HashMap<String, String>();
+
+		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
+		ICConfigurationDescription ccdesc = cpdesc.getActiveConfiguration();
+		IEnvironmentVariableManager manager = CCorePlugin.getDefault().getBuildEnvironmentManager();
+		IContributedEnvironment env = manager.getContributedEnvironment();
+
+		for(IEnvironmentVariable var : env.getVariables(ccdesc)) {
+			result.put(var.getName(), var.getValue());
+		}
+
+		return result;
 	}
 
 	/* (non-Javadoc)

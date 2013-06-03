@@ -17,13 +17,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -62,7 +59,6 @@ import org.yocto.sdk.ide.preferences.PreferenceConstants;
 
 public class YoctoSDKUtils {
 
-	private static final String PROJECT_SCOPE = "org.yocto.sdk.ide";
 	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
 	private static final String LIBTOOL_SYSROOT_PREFIX = "--with-libtool-sysroot=";
 	private static final String CONSOLE_MESSAGE  = "Menu.SDK.Console.Configure.Message";
@@ -86,21 +82,6 @@ public class YoctoSDKUtils {
 
 		else
 			return var.getValue();
-	}
-
-	public static Map<String,String> getEnvVariablesAsMap (IProject project) {
-		Map<String, String> result = new HashMap<String, String>();
-
-		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
-		ICConfigurationDescription ccdesc = cpdesc.getActiveConfiguration();
-		IEnvironmentVariableManager manager = CCorePlugin.getDefault().getBuildEnvironmentManager();
-		IContributedEnvironment env = manager.getContributedEnvironment();
-
-		for(IEnvironmentVariable var : env.getVariables(ccdesc)) {
-			result.put(var.getName(), var.getValue());
-		}
-
-		return result;
 	}
 
 	/* Save project wide settings into ENV VARs including POKY preference settings
@@ -414,74 +395,6 @@ public class YoctoSDKUtils {
 		return qemu_target;
 	}
 
-	/* Get POKY Preference settings from project's preference store */
-	public static YoctoUIElement getElemFromProjectPreferences(IProject project)
-	{
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
-		if (projectNode == null)
-		{
-			return getElemFromProjectEnv(project);
-		}
-
-		YoctoUIElement elem = new YoctoUIElement();
-		elem.setStrToolChainRoot(projectNode.get(PreferenceConstants.TOOLCHAIN_ROOT,""));
-		elem.setStrTarget(projectNode.get(PreferenceConstants.TOOLCHAIN_TRIPLET,""));
-		elem.setStrQemuKernelLoc(projectNode.get(PreferenceConstants.QEMU_KERNEL,""));
-		elem.setStrSysrootLoc(projectNode.get(PreferenceConstants.SYSROOT,""));
-		elem.setStrQemuOption(projectNode.get(PreferenceConstants.QEMU_OPTION,""));
-		String sTemp = projectNode.get(PreferenceConstants.TARGET_ARCH_INDEX,"");
-		if (!sTemp.isEmpty())
-			elem.setIntTargetIndex(Integer.valueOf(sTemp).intValue());
-		if (projectNode.get(PreferenceConstants.SDK_MODE,"").equalsIgnoreCase(IPreferenceStore.TRUE))
-		{
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
-		}
-		else
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
-
-		if(projectNode.get(PreferenceConstants.TARGET_MODE,"").equalsIgnoreCase(IPreferenceStore.TRUE))
-			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.QEMU_MODE);
-		else
-			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.DEVICE_MODE);
-		return elem;
-	}
-
-	/* Save POKY Preference settings to project's preference store */
-	public static void saveElemToProjectPreferences(YoctoUIElement elem, IProject project)
-	{
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
-		if (projectNode == null)
-		{
-			return;
-		}
-
-		projectNode.putInt(PreferenceConstants.TARGET_ARCH_INDEX, elem.getIntTargetIndex());
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE)
-			projectNode.put(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
-		else
-			projectNode.put(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
-		projectNode.put(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc());
-		projectNode.put(PreferenceConstants.QEMU_OPTION, elem.getStrQemuOption());
-		projectNode.put(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc());
-		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
-			projectNode.put(PreferenceConstants.TARGET_MODE, IPreferenceStore.TRUE);
-		else
-			projectNode.put(PreferenceConstants.TARGET_MODE, IPreferenceStore.FALSE);
-		projectNode.put(PreferenceConstants.TOOLCHAIN_ROOT, elem.getStrToolChainRoot());
-		projectNode.put(PreferenceConstants.TOOLCHAIN_TRIPLET, elem.getStrTarget());
-
-		try
-		{
-			projectNode.flush();
-		} catch (BackingStoreException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	/* Get POKY Preference settings from project's environment */
 	public static YoctoUIElement getElemFromProjectEnv(IProject project)
 	{
@@ -554,25 +467,6 @@ public class YoctoSDKUtils {
 		}
 	}
 
-	/* Save IDE wide POKY Preference settings to a specific preference store */
-	public static void saveElemToStore(YoctoUIElement elem, IPreferenceStore store)
-	{
-		store.setValue(PreferenceConstants.TARGET_ARCH_INDEX, elem.getIntTargetIndex());
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE)
-			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
-		else
-			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
-		store.setValue(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc());
-		store.setValue(PreferenceConstants.QEMU_OPTION, elem.getStrQemuOption());
-		store.setValue(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc());
-		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE)
-			store.setValue(PreferenceConstants.TARGET_MODE, IPreferenceStore.TRUE);
-		else
-			store.setValue(PreferenceConstants.TARGET_MODE, IPreferenceStore.FALSE);
-		store.setValue(PreferenceConstants.TOOLCHAIN_ROOT, elem.getStrToolChainRoot());
-		store.setValue(PreferenceConstants.TOOLCHAIN_TRIPLET, elem.getStrTarget());
-	}
-
 	/* Get IDE wide POKY Preference settings from a specific preference store */
 	public static YoctoUIElement getElemFromStore(IPreferenceStore store) {
 		YoctoUIElement elem = new YoctoUIElement();
@@ -621,30 +515,6 @@ public class YoctoSDKUtils {
 		return elem;
 	}
 
-	public static String getPlatformArch()
-	{
-		String value = null;
-		try
-		{
-			Runtime rt = Runtime.getRuntime();
-			Process proc = rt.exec("uname -m");
-			InputStream stdin = proc.getInputStream();
-			InputStreamReader isr = new InputStreamReader(stdin);
-			BufferedReader br = new BufferedReader(isr);
-			String line = null;
-
-			while ( (line = br.readLine()) != null) {
-				value = line;
-			}
-			int exitVal = proc.waitFor();
-
-		} catch (Throwable t)
-		  {
-			t.printStackTrace();
-		  }
-		return value;
-	}
-
 	/* Save profiles and selected profile to the default preference store */
 	public static void saveProfilesToDefaultStore(YoctoProfileElement profileElement) {
 		saveProfilesToStore(profileElement, YoctoSDKPlugin.getDefault().getPreferenceStore());
@@ -653,7 +523,7 @@ public class YoctoSDKUtils {
 	/* Save profiles and selected profile to the project's preference store */
 	public static void saveProfilesToProjectPreferences(YoctoProfileElement profileElement, IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectPreferences = projectScope.getNode(PROJECT_SCOPE);
+		IEclipsePreferences projectPreferences = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 		if (projectPreferences == null) {
 			return;
 		}
@@ -695,7 +565,7 @@ public class YoctoSDKUtils {
 	public static YoctoProfileElement getProfilesFromProjectPreferences(IProject project)
 	{
 		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
+		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 		if (projectNode == null)
 		{
 			return getProfilesFromDefaultStore();
@@ -705,44 +575,5 @@ public class YoctoSDKUtils {
 		String selectedProfile = projectNode.get(PreferenceConstants.SELECTED_PROFILE, "");
 
 		return new YoctoProfileElement(profiles, selectedProfile);
-	}
-
-	public static boolean getUseProjectSpecificOptionFromProjectPreferences(IProject project)
-	{
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
-		if (projectNode == null) {
-			return false;
-		}
-
-		String useProjectSpecificSettingString = projectNode.get(PreferenceConstants.PROJECT_SPECIFIC_PROFILE, IPreferenceStore.FALSE);
-
-		if (useProjectSpecificSettingString.equals(IPreferenceStore.FALSE)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public static void saveUseProjectSpecificOptionToProjectPreferences(IProject project, boolean useProjectSpecificSetting)
-	{
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope.getNode(PROJECT_SCOPE);
-		if (projectNode == null) {
-			return;
-		}
-
-		if (useProjectSpecificSetting) {
-			projectNode.put(PreferenceConstants.PROJECT_SPECIFIC_PROFILE, IPreferenceStore.TRUE);
-		} else {
-			projectNode.put(PreferenceConstants.PROJECT_SPECIFIC_PROFILE, IPreferenceStore.FALSE);
-		}
-
-		try {
-			projectNode.flush();
-		} catch (BackingStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 }

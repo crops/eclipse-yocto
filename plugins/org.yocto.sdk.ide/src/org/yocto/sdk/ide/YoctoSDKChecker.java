@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
@@ -130,7 +132,7 @@ public class YoctoSDKChecker {
 
 		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
 			//Check for SDK compatible with the host arch
-			String platform = YoctoSDKUtils.getPlatformArch();
+			String platform = getPlatformArch();
 			String sysroot_dir_str = elem.getStrToolChainRoot() + "/" + SYSROOTS_DIR;
 			File sysroot_dir = new File(sysroot_dir_str);
 			if (!sysroot_dir.exists())
@@ -236,6 +238,28 @@ public class YoctoSDKChecker {
 		strErrorMsg += "\n" + result.getAdvice();
 
 		return strErrorMsg;
+	}
+
+	private static String getPlatformArch() {
+		String value = null;
+		try
+		{
+			Runtime rt = Runtime.getRuntime();
+			Process proc = rt.exec("uname -m");
+			InputStream stdin = proc.getInputStream();
+			InputStreamReader isr = new InputStreamReader(stdin);
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
+
+			while ( (line = br.readLine()) != null) {
+				value = line;
+			}
+			proc.waitFor();
+
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return value;
 	}
 
 	private static String findHostArch(File sysroot_dir) {

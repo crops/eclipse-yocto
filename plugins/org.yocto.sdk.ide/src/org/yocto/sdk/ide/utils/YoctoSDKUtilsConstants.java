@@ -14,5 +14,5 @@ public class YoctoSDKUtilsConstants {
 
 	public static final String DEFAULT_ENV_FILE_PREFIX = "environment-setup-";
 	public static final String DEFAULT_TMP_PREFIX = "/tmp/";
-
+	public static final String PROJECT_SCOPE = "org.yocto.sdk.ide";
 }

@@ -141,7 +141,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 			}
 		}
 
-		YoctoSDKUtils.saveElemToStore(modifiedElement, getPreferenceStore());
+		saveElemToStore(modifiedElement, getPreferenceStore());
 		YoctoSDKUtils.saveProfilesToDefaultStore(profileElement);
 
 		updateProjects(yoctoProjects, modifiedElement);
@@ -201,7 +201,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 	public void renameProfile(String oldProfileName, String newProfileName) {
 		YoctoUIElement oldProfileElement = YoctoSDKUtils.getElemFromStore(YoctoSDKPlugin.getProfilePreferenceStore(oldProfileName));
-		YoctoSDKUtils.saveElemToStore(oldProfileElement, YoctoSDKPlugin.getProfilePreferenceStore(newProfileName));
+		saveElemToStore(oldProfileElement, YoctoSDKPlugin.getProfilePreferenceStore(newProfileName));
 
 		renameProfileInAffectedProjects(oldProfileName, newProfileName);
 	}
@@ -209,6 +209,27 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	public void deleteProfile(String selectedProfile)
 	{
 		resetProfileInAffectedProjects(selectedProfile);
+	}
+
+	/* Save IDE wide POKY Preference settings to a specific preference store */
+	private void saveElemToStore(YoctoUIElement elem, IPreferenceStore store) {
+		store.setValue(PreferenceConstants.TARGET_ARCH_INDEX, elem.getIntTargetIndex());
+
+		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
+		} else {
+			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
+		}
+		store.setValue(PreferenceConstants.QEMU_KERNEL, elem.getStrQemuKernelLoc());
+		store.setValue(PreferenceConstants.QEMU_OPTION, elem.getStrQemuOption());
+		store.setValue(PreferenceConstants.SYSROOT, elem.getStrSysrootLoc());
+		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE) {
+			store.setValue(PreferenceConstants.TARGET_MODE, IPreferenceStore.TRUE);
+		} else {
+			store.setValue(PreferenceConstants.TARGET_MODE, IPreferenceStore.FALSE);
+		}
+		store.setValue(PreferenceConstants.TOOLCHAIN_ROOT, elem.getStrToolChainRoot());
+		store.setValue(PreferenceConstants.TOOLCHAIN_TRIPLET, elem.getStrTarget());
 	}
 
 	private void resetProfileInAffectedProjects(String usedProfile)

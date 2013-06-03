@@ -554,12 +554,6 @@ public class YoctoSDKUtils {
 		}
 	}
 
-	/* Save IDE wide POKY Preference settings to the default preference store */
-	public static void saveElemToDefaultStore(YoctoUIElement elem)
-	{
-		saveElemToStore(elem, YoctoSDKPlugin.getDefault().getPreferenceStore());
-	}
-
 	/* Save IDE wide POKY Preference settings to a specific preference store */
 	public static void saveElemToStore(YoctoUIElement elem, IPreferenceStore store)
 	{
@@ -577,12 +571,6 @@ public class YoctoSDKUtils {
 			store.setValue(PreferenceConstants.TARGET_MODE, IPreferenceStore.FALSE);
 		store.setValue(PreferenceConstants.TOOLCHAIN_ROOT, elem.getStrToolChainRoot());
 		store.setValue(PreferenceConstants.TOOLCHAIN_TRIPLET, elem.getStrTarget());
-	}
-
-	/* Get IDE wide POKY Preference settings from the default preference store */
-	public static YoctoUIElement getElemFromDefaultStore()
-	{
-		return getElemFromStore(YoctoSDKPlugin.getDefault().getPreferenceStore());
 	}
 
 	/* Get IDE wide POKY Preference settings from a specific preference store */

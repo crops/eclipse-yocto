@@ -231,28 +231,36 @@ public class YoctoSDKUtils {
 
 		setEnvVars(cpdesc, elem, envMap);
 
+		createRemoteDebugAndQemuLaunchers(project, elem);
 		try {
-			ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
-			ILaunchConfigurationType configType =
-				lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
-			ILaunchConfigurationType debug_configType =
-				lManager.getLaunchConfigurationType("org.eclipse.cdt.launch.remoteApplicationLaunchType");
-
-			String sPath = envMap.get("PATH");
-			String sDebugName = envMap.get("GDB");
-			String sysroot_str = elem.getStrSysrootLoc();
-			if (configType == null || debug_configType == null)
-				throw new YoctoGeneralException("Failed to get program or remote debug launcher!");
-			createRemoteDebugLauncher(project, lManager, debug_configType, elem.getStrTarget(), sPath, sDebugName, sysroot_str);
-
-			ArrayList<String> listValue = new ArrayList<String>();
-			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
-			if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE) {
-				createQemuLauncher(project, configType, listValue, sFileName, elem);
-			}
 			CoreModel.getDefault().setProjectDescription(project,cpdesc);
 		} catch (CoreException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void createRemoteDebugAndQemuLaunchers(IProject project, YoctoUIElement elem) throws YoctoGeneralException {
+		ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
+		ILaunchConfigurationType configType =
+				lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
+		ILaunchConfigurationType debug_configType =
+				lManager.getLaunchConfigurationType("org.eclipse.cdt.launch.remoteApplicationLaunchType");
+
+		String sPath = getEnvValue(project, "PATH");
+		String sDebugName = getEnvValue(project, "GDB");
+		String sysroot_str = elem.getStrSysrootLoc();
+
+		if (configType == null || debug_configType == null) {
+			throw new YoctoGeneralException("Failed to get program or remote debug launcher!");
+		}
+		createRemoteDebugLauncher(project, lManager, debug_configType, elem.getStrTarget(), sPath, sDebugName, sysroot_str);
+
+		ArrayList<String> listValue = new ArrayList<String>();
+		listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
+
+		if (elem.getEnumDeviceMode() == YoctoUIElement.DeviceMode.QEMU_MODE) {
+			String sFileName = getEnvironmentSetupFileFullPath(elem);
+			createQemuLauncher(project, configType, listValue, sFileName, elem);
 		}
 	}
 

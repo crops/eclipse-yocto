@@ -592,18 +592,6 @@ public class YoctoSDKUtils {
 			qemu_target = "qemuppc";
 		return qemu_target;
 	}
-	public static String splitString(String strValue, String strDelim)
-	{
-		int iBeginIndex = strValue.indexOf(strDelim);
-		if (iBeginIndex < 0)
-			return "";
-		int iEndIndex = strValue.indexOf(' ', iBeginIndex + 1);
-
-		if (iEndIndex < 0)
-			return strValue.substring(iBeginIndex + strDelim.length());
-		else
-			return strValue.substring(iBeginIndex + strDelim.length(), iEndIndex);
-	}
 
 	public static HashMap<String, String> parseEnvScript(String sFileName)
 	{

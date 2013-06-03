@@ -51,13 +51,28 @@ public class YoctoSDKAutotoolsProjectNature extends YoctoSDKProjectNature {
 		String strConfigure = YoctoSDKUtils.getEnvValue(project, "CONFIGURE_FLAGS");
 
 		cfg.setOption(DEFAULT_CONFIGURE_STR, configure_setting);
-		cfg.setOption(DEFAULT_BUILD_STR, YoctoSDKUtils.splitString(strConfigure, "--build="));
-		cfg.setOption(DEFAULT_HOST_STR, YoctoSDKUtils.splitString(strConfigure, "--host="));
-		cfg.setOption(DEFAULT_TARGET_STR, YoctoSDKUtils.splitString(strConfigure, "--target="));
+		cfg.setOption(DEFAULT_BUILD_STR, splitString(strConfigure, "--build="));
+		cfg.setOption(DEFAULT_HOST_STR, splitString(strConfigure, "--host="));
+		cfg.setOption(DEFAULT_TARGET_STR, splitString(strConfigure, "--target="));
 		cfg.setOption(DEFAULT_AUTOGEN_STR, autogen_setting);
 		cfg.setOption(DEFAULT_AUTOGEN_OPT_STR, strConfigure);
 
 		AutotoolsConfigurationManager.getInstance().addConfiguration(project, cfg);
 		AutotoolsConfigurationManager.getInstance().saveConfigs(project);
+	}
+
+	private static String splitString(String strValue, String strDelim) {
+		int iBeginIndex = strValue.indexOf(strDelim);
+
+		if (iBeginIndex < 0) {
+			return "";
+		}
+		int iEndIndex = strValue.indexOf(' ', iBeginIndex + 1);
+
+		if (iEndIndex < 0) {
+			return strValue.substring(iBeginIndex + strDelim.length());
+		} else {
+			return strValue.substring(iBeginIndex + strDelim.length(), iEndIndex);
+		}
 	}
 }

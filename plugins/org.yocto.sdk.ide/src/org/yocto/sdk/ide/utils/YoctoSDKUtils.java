@@ -223,15 +223,13 @@ public class YoctoSDKUtils {
 		return envSetupFile;
 	}
 
-	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem) throws YoctoGeneralException {
+	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem) {
 		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
 
 		String sFileName = getEnvironmentSetupFileFullPath(elem);
 		HashMap<String, String> envMap = parseEnvScript(sFileName);
 
 		setEnvVars(cpdesc, elem, envMap);
-
-		createRemoteDebugAndQemuLaunchers(project, elem);
 		try {
 			CoreModel.getDefault().setProjectDescription(project,cpdesc);
 		} catch (CoreException e) {
@@ -461,6 +459,7 @@ public class YoctoSDKUtils {
 
 		try {
 			setEnvironmentVariables(project, elem);
+			createRemoteDebugAndQemuLaunchers(project, elem);
 
 			if (project.hasNature(YoctoSDKAutotoolsProjectNature.YoctoSDK_AUTOTOOLS_NATURE_ID)) {
 				YoctoSDKAutotoolsProjectNature.configureAutotoolsOptions(project);

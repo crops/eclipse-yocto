@@ -232,6 +232,8 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 			YoctoSDKNatureUtils.addNature(project, YoctoSDKCMakeProjectNature.YoctoSDK_CMAKE_NATURE_ID, monitor);
 			YoctoSDKCMakeProjectNature.extendProjectEnvironmentForCMake(project);
 		}
+
+		YoctoSDKUtils.createRemoteDebugAndQemuLaunchers(project, elem);
 	}
 
 	protected final void turnOffAutoBuild(IWorkspace workspace) throws CoreException {

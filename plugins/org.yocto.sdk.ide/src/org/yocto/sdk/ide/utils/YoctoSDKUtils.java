@@ -210,21 +210,25 @@ public class YoctoSDKUtils {
 
 	}
 
-	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem) throws YoctoGeneralException{
-		String sFileName;
-		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
-
+	private static String getEnvironmentSetupFileFullPath(YoctoUIElement elem) {
+		String envSetupFile = "";
 
 		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
-			sFileName = elem.getStrToolChainRoot()+"/" + YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
-		}
-		else {
+			envSetupFile = elem.getStrToolChainRoot() + "/";
+		} else {
 			//POKY TREE Mode
-			sFileName = elem.getStrToolChainRoot() + YoctoSDKUtilsConstants.DEFAULT_TMP_PREFIX +
-					YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
+			envSetupFile = elem.getStrToolChainRoot() + YoctoSDKUtilsConstants.DEFAULT_TMP_PREFIX;
 		}
+		envSetupFile += YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
+		return envSetupFile;
+	}
 
+	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem) throws YoctoGeneralException {
+		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
+
+		String sFileName = getEnvironmentSetupFileFullPath(elem);
 		HashMap<String, String> envMap = parseEnvScript(sFileName);
+
 		setEnvVars(cpdesc, elem, envMap);
 
 		try {

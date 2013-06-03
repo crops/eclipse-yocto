@@ -106,7 +106,7 @@ public class YoctoSDKUtils {
 	/* Save project wide settings into ENV VARs including POKY preference settings
 	 * and Environment Script File export VARs
 	 */
-	public static void setEnvVars(ICProjectDescription cpdesc,
+	private static void setEnvVars(ICProjectDescription cpdesc,
 			YoctoUIElement elem, HashMap<String, String> envMap) {
 		ICConfigurationDescription ccdesc = cpdesc.getActiveConfiguration();
 		IEnvironmentVariableManager manager = CCorePlugin.getDefault().getBuildEnvironmentManager();
@@ -223,6 +223,46 @@ public class YoctoSDKUtils {
 		return envSetupFile;
 	}
 
+	private static HashMap<String, String> parseEnvScript(String sFileName) {
+		try {
+			HashMap<String, String> envMap = new HashMap<String, String>();
+			File file = new File(sFileName);
+
+			if (file.exists()) {
+				BufferedReader input = new BufferedReader(new FileReader(file));
+
+				try {
+					String line = null;
+
+					while ((line = input.readLine()) != null) {
+						if (!line.startsWith("export")) {
+							continue;
+						}
+						String sKey = line.substring("export".length() + 1, line.indexOf('='));
+						String sValue = line.substring(line.indexOf('=') + 1);
+						if (sValue.startsWith("\"") && sValue.endsWith("\""))
+							sValue = sValue.substring(sValue.indexOf('"') + 1, sValue.lastIndexOf('"'));
+						/* If PATH ending with $PATH, we need to join with current system path */
+						if (sKey.equalsIgnoreCase("PATH")) {
+							if (sValue.lastIndexOf("$PATH") >= 0)
+								sValue = sValue.substring(0, sValue.lastIndexOf("$PATH")) + System.getenv("PATH");
+						}
+						envMap.put(sKey, sValue);
+						System.out.printf("get env key %s value %s\n", sKey, sValue);
+					}
+				} finally {
+					input.close();
+				}
+			}
+
+			return envMap;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public static void setEnvironmentVariables(IProject project, YoctoUIElement elem) {
 		ICProjectDescription cpdesc = CoreModel.getDefault().getProjectDescription(project, true);
 
@@ -236,7 +276,7 @@ public class YoctoSDKUtils {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void createRemoteDebugAndQemuLaunchers(IProject project, YoctoUIElement elem) throws YoctoGeneralException {
 		ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
 		ILaunchConfigurationType configType =
@@ -348,7 +388,7 @@ public class YoctoSDKUtils {
 			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 
-			String argument = "-e \"source " + sScriptFile + ";runqemu " + YoctoSDKUtils.qemuTargetTranslate(elem.getStrTarget()) + " "+
+			String argument = "-e \"source " + sScriptFile + ";runqemu " + qemuTargetTranslate(elem.getStrTarget()) + " " +
 			elem.getStrQemuKernelLoc() + " " + elem.getStrSysrootLoc() + " " +  elem.getStrQemuOption() + ";bash\"";
 
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
@@ -356,6 +396,22 @@ public class YoctoSDKUtils {
 		} catch (CoreException e) {
 		}
 
+	}
+
+	private static String qemuTargetTranslate(String strTargetArch) {
+		String qemu_target = "";
+		if (strTargetArch.indexOf("i586") != -1) {
+			qemu_target = "qemux86";
+		} else if (strTargetArch.indexOf("x86_64") != -1) {
+			qemu_target = "qemux86-64";
+		} else if (strTargetArch.indexOf("arm") != -1) {
+			qemu_target = "qemuarm";
+		} else if (strTargetArch.indexOf("mips") != -1) {
+			qemu_target = "qemumips";
+		} else if (strTargetArch.indexOf("ppc") != -1) {
+			qemu_target = "qemuppc";
+		}
+		return qemu_target;
 	}
 
 	/* Get POKY Preference settings from project's preference store */
@@ -577,70 +633,6 @@ public class YoctoSDKUtils {
 		return elem;
 	}
 
-	public static String qemuTargetTranslate(String strTargetArch)
-	{
-		String qemu_target = "";
-		if (strTargetArch.indexOf("i586") != -1)
-			qemu_target = "qemux86";
-		else if (strTargetArch.indexOf("x86_64") != -1)
-			qemu_target = "qemux86-64";
-		else if (strTargetArch.indexOf("arm") != -1)
-			qemu_target = "qemuarm";
-		else if (strTargetArch.indexOf("mips") != -1)
-			qemu_target = "qemumips";
-		else if (strTargetArch.indexOf("ppc") != -1)
-			qemu_target = "qemuppc";
-		return qemu_target;
-	}
-
-	public static HashMap<String, String> parseEnvScript(String sFileName)
-	{
-		try
-		{
-			HashMap<String, String> envMap = new HashMap<String, String>();
-			File file = new File(sFileName);
-
-			if (file.exists()) {
-				BufferedReader input = new BufferedReader(new FileReader(file));
-
-				try
-				{
-					String line = null;
-
-					while ((line = input.readLine()) != null)
-					{
-						if (!line.startsWith("export"))
-							continue;
-						String sKey = line.substring("export".length() + 1, line.indexOf('='));
-						String sValue = line.substring(line.indexOf('=') + 1);
-						if (sValue.startsWith("\"") && sValue.endsWith("\""))
-							sValue = sValue.substring(sValue.indexOf('"') + 1, sValue.lastIndexOf('"'));
-						/* If PATH ending with $PATH, we need to join with current system path */
-						if (sKey.equalsIgnoreCase("PATH")) {
-							if (sValue.lastIndexOf("$PATH") >= 0)
-								sValue = sValue.substring(0, sValue.lastIndexOf("$PATH")) + System.getenv("PATH");
-						}
-						envMap.put(sKey, sValue);
-						System.out.printf("get env key %s value %s\n", sKey, sValue);
-					}
-
-				}
-				finally {
-					input.close();
-				}
-			}
-
-			return envMap;
-
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-
-	}
-
 	public static String getPlatformArch()
 	{
 		String value = null;
@@ -692,8 +684,7 @@ public class YoctoSDKUtils {
 	}
 
 	/* Save profiles and selected profile to a specific preference store */
-	public static void saveProfilesToStore(YoctoProfileElement profileElement, IPreferenceStore store)
-	{
+	private static void saveProfilesToStore(YoctoProfileElement profileElement, IPreferenceStore store) {
 		store.setValue(PreferenceConstants.PROFILES, profileElement.getProfilesAsString());
 		store.setValue(PreferenceConstants.SELECTED_PROFILE, profileElement.getSelectedProfile());
 	}
@@ -705,8 +696,7 @@ public class YoctoSDKUtils {
 	}
 
 	/* Get profiles and selected profile from a specific preference store */
-	public static YoctoProfileElement getProfilesFromStore(IPreferenceStore store)
-	{
+	private static YoctoProfileElement getProfilesFromStore(IPreferenceStore store) {
 		String profiles = store.getString(PreferenceConstants.PROFILES);
 		String selectedProfile = store.getString(PreferenceConstants.SELECTED_PROFILE);
 

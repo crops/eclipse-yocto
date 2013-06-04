@@ -748,10 +748,12 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 						return;
 					}
 				}
-				for(int i=0;changed != null && i<changed.length;i++) {
-					if (this.depends.contains(changed[i].getLocation().toString())) {
-						initialized = false;
-						return;
+				if (!depends.isEmpty()) {
+					for(int i=0;changed != null && i<changed.length;i++) {
+						if (changed[i].getLocation() != null && this.depends.contains(changed[i].getLocation().toString())) {
+							initialized = false;
+							return;
+						}
 					}
 				}
 			}

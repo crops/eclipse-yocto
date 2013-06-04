@@ -153,8 +153,7 @@ public class OEFile extends FileStore {
 		IFileStore[] wrapped = new IFileStore[children.length];
 		
 		for (int i = 0; i < wrapped.length; i++) {
-			String fullPath = file.toString() +File.separatorChar + children[i];
-			
+			String fullPath = file.getAbsolutePath() + "/" + children[i];
 			updateIgnorePaths(fullPath, ignoredPaths, monitor);
 			if (ignoredPaths.contains(fullPath)) {
 				wrapped[i] = getDeadChild(children[i]);

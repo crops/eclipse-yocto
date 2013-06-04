@@ -24,10 +24,12 @@ import org.eclipse.core.filesystem.IFileSystem;
 import org.eclipse.core.filesystem.provider.FileSystem;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 
 import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
+import org.yocto.bc.ui.model.YoctoHostFile;
 
 /**
  * A filesystem that ignores specific OE directories that contain derived information.
@@ -63,7 +65,7 @@ public class OEFileSystem extends FileSystem {
 				config.initialize();
 			} catch (Exception e) {
 				e.printStackTrace();
-				return new OEIgnoreFile(new File(uri.getPath()));
+				return new OEIgnoreFile(new YoctoHostFile(projInfo, uri));
 			}
 
 			if (config.get("TMPDIR") == null || config.get("DL_DIR") == null || config.get("SSTATE_DIR")== null) {
@@ -76,9 +78,14 @@ public class OEFileSystem extends FileSystem {
 			ignoreList.add(config.get("TMPDIR"));
 			ignoreList.add(config.get("DL_DIR"));
 			ignoreList.add(config.get("SSTATE_DIR"));
-			
-			uf = new OEFile(new File(uri.getPath()), ignoreList, uri);
-			fileStoreCache.put(uri, uf);
+
+			//FIXME: add project info
+			try {
+				uf = new OEFile(uri, ignoreList, uri, projInfo, new NullProgressMonitor());
+				fileStoreCache.put(uri, uf);
+			} catch (SystemMessageException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		return uf;

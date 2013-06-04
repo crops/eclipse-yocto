@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.filesystem;
 
@@ -22,12 +23,13 @@ import org.eclipse.core.filesystem.provider.FileInfo;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.yocto.bc.ui.model.YoctoHostFile;
 
 public class OEIgnoreFile implements IFileStore {
 
-	private final File file;
+	private final YoctoHostFile file;
 
-	public OEIgnoreFile(File file) {
+	public OEIgnoreFile(YoctoHostFile file) {
 		this.file = file;
 	}
 
@@ -118,7 +120,7 @@ public class OEIgnoreFile implements IFileStore {
 	}
 
 	public File toLocalFile(int options, IProgressMonitor monitor) throws CoreException {
-		return file;
+		return file.toLocalFile();
 	}
 
 	public URI toURI() {

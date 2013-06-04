@@ -67,9 +67,11 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	public static final int TYPE_FLAG = 4;
 	
 	public static final String BB_ENV_FILE = "bitbake.env";
+
+	public static final String CONF_DIR = "conf";
 	public static final String BUILDDIR_INDICATORS [] = {
-		File.separatorChar + "conf" + File.separatorChar + "local.conf",
-		File.separatorChar + "conf" + File.separatorChar + "bblayers.conf",
+		"local.conf",
+		"bblayers.conf",
 	};
 
 	protected final ProjectInfo pinfo;

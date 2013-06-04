@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.wizards.newproject;
 
@@ -39,7 +40,6 @@ public class BBConfigurationInitializeOperation implements IRunnableWithProgress
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		BBSession session;
 		try {
-			ProjectInfoHelper.store(pinfo.getRootPath(), pinfo);
 			session = Activator.getBBSession(pinfo.getRootPath(), writer);
 			session.initialize();
 

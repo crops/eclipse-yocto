@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.bitbake;
 
@@ -79,27 +80,4 @@ public class ProjectInfoHelper {
 
 		return null;
 	}
-
-	/**
-	 * This method will store the path to the bitbake init script for future
-	 * reference.
-	 * 
-	 * @param path
-	 * @param projInfo
-	 * @throws IOException
-	 */
-	public static void store(String path, ProjectInfo projInfo) throws IOException {
-		writeToFile(path, projInfo.getInitScriptPath());
-	}
-
-	private static void writeToFile(String path, String init) throws IOException {
-		File outFile = new File(path, ".eclipse-data");
-		FileOutputStream fos = new FileOutputStream(outFile);
-
-		fos.write(init.getBytes());
-
-		fos.flush();
-		fos.close();
-	}
-
 }

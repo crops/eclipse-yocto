@@ -39,61 +39,6 @@
             commandId="org.yocto.bc.ui.command.launchHob">
       </handler>
    </extension>
-   <!--
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="true"
-            id="org.yocto.bc.ui.contribution2"
-            nameFilter="*.bb"
-            objectClass="org.eclipse.core.resources.IFile">
-         <action
-               class="org.yocto.bc.ui.actions.BitbakeBuildRecipeAction"
-               enablesFor="+"
-               icon="icons/binary.gif"
-               id="org.yocto.bc.ui.BuildPackagePopupAction"
-               label="Build"
-               menubarPath="org.yocto.bc.ui.menu1/group1"
-               tooltip="Build a package">
-         </action>
-   		<action
-               class="org.yocto.bc.ui.actions.BitbakeCleanRecipeAction"
-               enablesFor="+"
-               icon="icons/trash.gif"
-               id="org.yocto.bc.ui.CleanPackagePopupAction"
-               label="Clean"
-               menubarPath="org.yocto.bc.ui.menu1/group1"
-               tooltip="Clean a package">
-         </action>
-         <action
-               class="org.yocto.bc.ui.actions.BitbakeImportAction"
-               enablesFor="+"
-               icon="icons/import_wiz.gif"
-               id="org.yocto.bc.ui.BitbakeImportPopupAction"
-               label="Import"
-               menubarPath="org.yocto.bc.ui.menu1/group1"
-               tooltip="Import package sources as Eclipse project.">
-         </action>
-         <menu
-               id="org.yocto.bc.ui.menu1"
-               label="BitBake"
-               path="additions">
-            <separator
-                  name="bc.separator1">
-            </separator>
-         </menu>
-         <action
-               class="org.yocto.bc.ui.actions.BitbakeRebuildRecipeAction"
-               enablesFor="+"
-               icon="icons/refresh.gif"
-               id="org.yocto.bc.ui.BuildPackagePopupAction"
-               label="Rebuild"
-               menubarPath="org.yocto.bc.ui.menu1/group1"
-               tooltip="Rebuild a package">
-         </action>
-     </objectContribution>
-   </extension>
-   -->
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution

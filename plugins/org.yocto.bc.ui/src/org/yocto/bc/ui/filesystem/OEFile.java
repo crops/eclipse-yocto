@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2006 IBM Corporation, 2013 Intel Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ken Gilmer - adaptation from internal class.
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.filesystem;
 
@@ -39,6 +40,7 @@ import org.eclipse.osgi.util.NLS;
 import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.bitbake.ProjectInfoHelper;
 import org.yocto.bc.bitbake.ShellSession;
+import org.yocto.bc.ui.Activator;
 
 /**
  * File system implementation based on storage of files in the local
@@ -62,7 +64,7 @@ public class OEFile extends FileStore {
 	 */
 	protected final String filePath;
 
-	private final String root;
+	private final URI root;
 
 	/**
 	 * Creates a new local file.
@@ -70,7 +72,7 @@ public class OEFile extends FileStore {
 	 * @param file The file this local file represents
 	 * @param root 
 	 */
-	public OEFile(File file, List ignorePaths, String root) {
+	public OEFile(File file, List ignorePaths, URI root) {
 		this.file = file;
 		this.ignorePaths = ignorePaths;
 		this.root = root;
@@ -117,13 +119,11 @@ public class OEFile extends FileStore {
 	/*
 	 * try to find items for ignoreList
 	 */
-	private void updateIgnorePaths(String path, List list) {
+	private void updateIgnorePaths(String path, List<Object> list, IProgressMonitor monitor) {
 		if(isPotentialBuildDir(path)) {
 			BBSession config = null;
 			try {
-				ShellSession shell = new ShellSession(ShellSession.SHELL_TYPE_BASH, new File(root), 
-							ProjectInfoHelper.getInitScriptPath(root) + " " + path, null);
-				config = new BBSession(shell, root, true);
+				config = Activator.getBBSession(Activator.getProjInfo(root), monitor);
 				config.initialize();
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -154,7 +154,7 @@ public class OEFile extends FileStore {
 		for (int i = 0; i < wrapped.length; i++) {
 			String fullPath = file.toString() +File.separatorChar + children[i];
 			
-			updateIgnorePaths(fullPath, ignorePaths);
+			updateIgnorePaths(fullPath, ignorePaths, monitor);
 			if (ignorePaths.contains(fullPath)) {
 				wrapped[i] = getDeadChild(children[i]);
 			} else {

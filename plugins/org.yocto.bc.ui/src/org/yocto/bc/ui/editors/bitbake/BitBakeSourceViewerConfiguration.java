@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,8 +7,12 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.editors.bitbake;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -33,7 +37,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
-
 import org.yocto.bc.bitbake.BBLanguageHelper;
 import org.yocto.bc.bitbake.BBSession;
 
@@ -66,7 +69,15 @@ public class BitBakeSourceViewerConfiguration extends TextSourceViewerConfigurat
 	public ITextHover getTextHover(ISourceViewer sv, String contentType) {
 		//only .bb file support Text Hover.
 		if (textHover == null && targetFile.getFileExtension().equals(BBLanguageHelper.BITBAKE_RECIPE_FILE_EXTENSION)) {
-			textHover = new BBVariableTextHover(session, targetFile.getLocationURI().getPath());
+			URI root = session.getProjInfoRoot();
+			try {
+				String targetFileProjPath = targetFile.getProjectRelativePath().toPortableString();
+				URI targetFileURI = new URI(root.getScheme(), root.getHost(), root.getPath() + "/" +
+						targetFileProjPath, root.getFragment());
+				textHover = new BBVariableTextHover(session, targetFileURI);
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		return textHover;

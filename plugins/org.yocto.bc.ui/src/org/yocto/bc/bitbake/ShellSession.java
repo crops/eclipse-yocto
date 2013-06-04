@@ -19,6 +19,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import org.eclipse.rse.services.files.IHostFile;
+import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.remote.utils.ICommandResponseHandler;
 
 /**
@@ -66,11 +68,21 @@ public class ShellSession {
 	//private File initFile = null;
 	private String shellPath = null;
 	private final String initCmd;
-	private final File root;
+	private final IHostFile root;
 	private final Writer out;
 	
+	private ProjectInfo projectInfo;
 
-	public ShellSession(int shellType, File root, String initCmd, Writer out) throws IOException {
+	public ProjectInfo getProjectInfo() {
+		return projectInfo;
+	}
+
+	public void setProjectInfo(ProjectInfo projectInfo) {
+		this.projectInfo = projectInfo;
+	}
+
+	public ShellSession(ProjectInfo pInfo, int shellType, IHostFile root, String initCmd, Writer out) throws IOException {
+		this.projectInfo = pInfo;
 		this.root = root;
 		this.initCmd  = initCmd;
 		if (out == null) {

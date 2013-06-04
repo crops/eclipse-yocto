@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -153,6 +154,10 @@ public class InstallWizard extends FiniteStateWizard implements
 		}
 
 		try {
+			URI uri = new URI("");
+			if (options.containsKey(INSTALL_DIRECTORY)) {
+				uri = (URI) options.get(INSTALL_DIRECTORY);
+			}
 			if (((Boolean)options.get(GIT_CLONE)).booleanValue()) {
 				String []git_clone_cmd = {"git", "clone", "--progress", "git://git.pokylinux.org/poky.git", install_dir};
 				final Pattern pattern = Pattern.compile("^Receiving objects:\\s*(\\d+)%.*");
@@ -182,7 +187,7 @@ public class InstallWizard extends FiniteStateWizard implements
 				String prjName = (String) options.get(PROJECT_NAME);
 				ProjectInfo pinfo = new ProjectInfo();
 				pinfo.setInitScriptPath(initPath);
-				pinfo.setLocation(install_dir);
+				pinfo.setLocationURI(uri);
 				pinfo.setName(prjName);
 			
 				ConsoleWriter cw = new ConsoleWriter();
@@ -192,7 +197,7 @@ public class InstallWizard extends FiniteStateWizard implements
 				myConsole.newMessageStream().println(cw.getContents());
 
 				model.put(InstallWizard.KEY_PINFO, pinfo);
-				Activator.putProjInfo(pinfo.getRootPath(), pinfo);
+				Activator.putProjInfo(pinfo.getOEFSURI(), pinfo);
 
 				this.getContainer().run(false, false,
 						new CreateBBCProjectOperation(pinfo));

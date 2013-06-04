@@ -40,7 +40,7 @@ public class BBConfigurationInitializeOperation implements IRunnableWithProgress
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		BBSession session;
 		try {
-			session = Activator.getBBSession(pinfo.getRootPath(), writer);
+			session = Activator.getBBSession(pinfo, writer, monitor);
 			session.initialize();
 
 		} catch (Exception e) {

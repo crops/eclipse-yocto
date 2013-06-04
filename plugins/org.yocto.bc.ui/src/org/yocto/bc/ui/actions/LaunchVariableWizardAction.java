@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,24 +7,27 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.actions;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.builder.BitbakeCommanderNature;
+import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.wizards.variable.VariableWizard;
 
 /**
@@ -62,12 +65,20 @@ public class LaunchVariableWizardAction implements IWorkbenchWindowActionDelegat
 				IProject p = ((IResource)element).getProject();
 
 				try {
-					if (p.isOpen() && p.hasNature(BitbakeCommanderNature.NATURE_ID)) {
-						session = Activator.getBBSession(((IResource)element).getProject().getLocationURI().getPath());
+					if (p.isAccessible() && p.isOpen() && p.hasNature(BitbakeCommanderNature.NATURE_ID)) {
+						IProject proj = ((IResource)element).getProject();
+						ProjectInfo projInfo = Activator.getProjInfo(proj.getLocationURI());
+						session = Activator.getBBSession(projInfo, new NullProgressMonitor());
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (CoreException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

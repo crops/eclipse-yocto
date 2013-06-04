@@ -49,21 +49,6 @@ public class ProjectInfoHelper {
 		return val;
 	}
 	
-	public static String getInitScript(String path) throws IOException {
-		File inFile = new File(path);
-		BufferedReader br = new BufferedReader(new FileReader(inFile));
-		StringBuffer sb = new StringBuffer();
-		String line = null;
-		
-		while ((line = br.readLine()) != null) {
-			sb.append(line);
-		}
-		
-		br.close();
-
-		return sb.toString();
-	}
-
 	public static String getProjectName(String projectRoot) {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; ++i) {

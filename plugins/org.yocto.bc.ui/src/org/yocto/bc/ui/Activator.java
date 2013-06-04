@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui;
 
@@ -187,29 +188,6 @@ public class Activator extends AbstractUIPlugin {
 		return ss;
 	}
 
-	private static String loadInit(String absolutePath) throws CoreException {
-		IProject [] prjs = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		IProject foundPrj = null;
-		
-		for (int i = 0; i < prjs.length; ++i) {
-			IProject p = prjs[i];
-			
-			System.out
-					.println(p.getDescription().getLocationURI().getPath());
-			
-			if (p.getDescription().getLocationURI().getPath().equals(absolutePath)) {
-				foundPrj = p;
-				break;
-			}
-		}
-		
-		if (foundPrj == null) {
-			throw new RuntimeException("Unable to find project associated with path! " + absolutePath);
-		}
-	
-		return foundPrj.getPersistentProperty(CreateBBCProjectOperation.BBC_PROJECT_INIT);
-	}
-	
 	public static void putProjInfo(String location, ProjectInfo pinfo) {
 		if (projInfoMap == null) {
 			projInfoMap = new Hashtable();

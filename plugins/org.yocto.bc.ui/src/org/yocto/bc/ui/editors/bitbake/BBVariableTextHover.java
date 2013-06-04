@@ -32,13 +32,19 @@ import org.yocto.bc.ui.Activator;
  */
 class BBVariableTextHover implements ITextHover {
 	private final BBSession session;
-	private volatile Map envMap;
+	private volatile Map<String, String> envMap;
 
 	public BBVariableTextHover(BBSession session, URI file) {
 		this.session = session;
-		envMap = session;
+		envMap = getEnvironmentMap();
 		LoadRecipeJob loadRecipeJob = new LoadRecipeJob(getFilename(file), file);
 		loadRecipeJob.schedule();
+	}
+
+	private Map<String, String> getEnvironmentMap() {
+		if (envMap == null)
+			envMap = this.session.getProperties();
+		return envMap;
 	}
 
 	private String getFilename(URI uri) {
@@ -84,7 +90,7 @@ class BBVariableTextHover implements ITextHover {
 		}
 		
 		String key = new String(line, start + 2, i - start - 2);
-		String val = (String) envMap.get(key);
+		String val = (String) getEnvironmentMap().get(key);
 		
 		if (val == null) {
 			val = "";

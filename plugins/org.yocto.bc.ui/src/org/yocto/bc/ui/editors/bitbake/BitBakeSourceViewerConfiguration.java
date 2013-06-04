@@ -203,4 +203,8 @@ public class BitBakeSourceViewerConfiguration extends TextSourceViewerConfigurat
 	public void setBBSession(BBSession session) {
 		this.session = session;		
 	}
+
+	public BBSession getBBSession() {
+		return this.session;
+	}
 }

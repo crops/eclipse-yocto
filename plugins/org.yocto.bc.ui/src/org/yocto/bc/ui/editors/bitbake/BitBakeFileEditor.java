@@ -46,7 +46,7 @@ public class BitBakeFileEditor extends AbstractDecoratedTextEditor {
 		super();
 		viewerConfiguration = new BitBakeSourceViewerConfiguration(getSharedColors(), getPreferenceStore());
 		setSourceViewerConfiguration(viewerConfiguration);
-		setDocumentProvider(new BitBakeDocumentProvider());
+		setDocumentProvider(new BitBakeDocumentProvider(viewerConfiguration));
 	}
 	
 	@Override

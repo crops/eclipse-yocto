@@ -762,4 +762,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			wlock.unlock();
 		}
 	}
+	public ProjectInfo getProjectInfo() {
+		return pinfo;
+	}
 }

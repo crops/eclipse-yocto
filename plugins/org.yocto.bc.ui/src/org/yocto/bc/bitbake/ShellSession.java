@@ -22,6 +22,7 @@ import java.io.Writer;
 import org.eclipse.rse.services.files.IHostFile;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.remote.utils.ICommandResponseHandler;
+import org.yocto.remote.utils.RemoteHelper;
 
 /**
  * A class for Linux shell sessions.
@@ -113,11 +114,11 @@ public class ShellSession {
 
 	synchronized 
 	public String execute(String command) throws IOException {
-		return execute(command, (int [])null);
+		return execute(command, false);
 	}
 
 	synchronized 
-	public String execute(String command, int[] retCode) throws IOException {
+	public String execute(String command, boolean hasErrors) throws IOException {
 		String errorMessage = null;
 		interrupt = false;
 		out.write(command);
@@ -151,12 +152,6 @@ public class ShellSession {
 			process.destroy();
 			initializeShell();
 			interrupt = false;
-		}else if (line != null && retCode != null) {
-			try {
-				retCode[0]=Integer.parseInt(line.substring(0,line.lastIndexOf(TERMINATOR)));
-			}catch (NumberFormatException e) {
-				throw new IOException("Can NOT get return code" + command + LT + line);
-			}
 		}
 		
 		if (errorMessage != null) {
@@ -259,5 +254,8 @@ synchronized
 		public void write(char[] cbuf, int off, int len) throws IOException {			
 		}
 		
+	}
+	public void printError(String errorLines) {
+		RemoteHelper.getCommandHandler(projectInfo.getConnection()).response(errorLines, true);
 	}
 }

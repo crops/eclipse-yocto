@@ -27,7 +27,7 @@ public class BBRecipe extends BBSession {
 		super(session.shell, session.pinfo.getOriginalURI());
 		this.session = session;
 		this.fileURI = filePath;
-		this.parsingCmd = "DISABLE_SANITY_CHECKS=1 bitbake -e -b " + filePath;
+		this.parsingCmd = "DISABLE_SANITY_CHECKS=\"1\" bitbake -e -b " + filePath.getPath() + " >& " + BB_ENV_FILE;
 	}
 	
 	@Override

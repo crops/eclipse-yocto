@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,9 +36,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -46,6 +50,8 @@ import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.yocto.bc.ui.model.IModelElement;
 import org.yocto.bc.ui.model.ProjectInfo;
+import org.yocto.remote.utils.RemoteHelper;
+import org.yocto.remote.utils.YoctoCommand;
 
 /**
  * BBSession encapsulates a global bitbake configuration and is the primary interface
@@ -60,6 +66,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	public static final int TYPE_STATEMENT = 3;
 	public static final int TYPE_FLAG = 4;
 	
+	public static final String BB_ENV_FILE = "bitbake.env";
 	public static final String BUILDDIR_INDICATORS [] = {
 		File.separatorChar + "conf" + File.separatorChar + "local.conf",
 		File.separatorChar + "conf" + File.separatorChar + "bblayers.conf",
@@ -70,19 +77,21 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	protected Map<?,?> properties = null;
 	protected List <URI> depends = null;
 	protected boolean initialized = false;
+	protected boolean errorOccured = false;
 	protected MessageConsole sessionConsole;
 	private final ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 	private final Lock rlock = rwlock.readLock();
 	private final Lock wlock = rwlock.writeLock();
 	protected String parsingCmd;
 	private boolean silent = false;
-	
+	private String errorLines = "";
+
 	public BBSession(ShellSession ssession, URI projectRoot) throws IOException {
 		shell = ssession;
 		this.pinfo = new ProjectInfo();
 		pinfo.setLocationURI(projectRoot);
 		pinfo.setInitScriptPath(ProjectInfoHelper.getInitScriptPath(projectRoot));
-		this.parsingCmd = "DISABLE_SANITY_CHECKS=1 bitbake -e";
+		this.parsingCmd = "DISABLE_SANITY_CHECKS=\"1\" bitbake -e >& " + BB_ENV_FILE;
 	}
 
 	public BBSession(ShellSession ssession, URI projectRoot, boolean silent) throws IOException {
@@ -331,18 +340,17 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	protected int checkExecuteError(String result, int code) {
+	protected void checkExecuteError(String result, boolean hasErrors) {
 		URI recipeURI = getDefaultDepends();
 		String text = "Parsing " + ((recipeURI != null) ? ("recipe " + recipeURI) : "base configurations");
-		if (code != 0) {
+		if (hasErrors) {
 			text = text + " ERROR!\n" + result;
 		}else {
 				text = text + " SUCCESS.\n";
 		}
 		if(!silent) {
-			displayInConsole(text, code, false);
+			displayInConsole(text, -1, false);
 		}
-		return code;
 	}
 
 	protected void displayInConsole(final String result, final int code, boolean clear) {
@@ -379,14 +387,20 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			}
 			try {
 				if(!initialized) { //recheck
-					int [] codes = {-1};
-					String result = shell.execute(parsingCmd, codes);
-					if(checkExecuteError(result, codes[0]) == 0) {
-						properties = parseBBEnvironment(result);
+					boolean hasErrors = false;
+					String result = shell.execute(parsingCmd, hasErrors);
+
+					properties = parseBBEnvironment(result);
+
+					if (properties.size() == 0) { // there was an error in sourcing bitbake environment
+						shell.printError(errorLines);
+						errorOccured = true;
 					} else {
-						properties = parseBBEnvironment("");
+						errorLines = "";
+						errorOccured = false;
+						initialized = true;
 					}
-					initialized = true;
+					RemoteHelper.handleRunCommandRemote(this.pinfo.getConnection(), new YoctoCommand("rm -rf " + result + BB_ENV_FILE, result, ""), new NullProgressMonitor());
 				}
 			} finally {
 				//downgrade lock
@@ -441,8 +455,11 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	protected void parse(String content, Map outMap) throws Exception {
-		BufferedReader reader = new BufferedReader(new StringReader(content));
+	protected void parse(String bbOutfilePath, Map outMap) throws Exception {
+		IHost connection = shell.getProjectInfo().getConnection();
+		InputStream is = RemoteHelper.getRemoteInputStream(connection, bbOutfilePath, BB_ENV_FILE, new NullProgressMonitor());
+		RemoteHelper.getRemoteHostFile(connection, bbOutfilePath + BB_ENV_FILE, new NullProgressMonitor());
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		String line;
 		boolean inLine = false;
 		StringBuffer sb = null;
@@ -509,11 +526,11 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		return null;
 	}
 	
-	protected Map parseBBEnvironment(String bbOut) throws Exception {
+	protected Map parseBBEnvironment(String bbOutFilePath) throws Exception {
 		Map env = new Hashtable();
 		this.depends = new ArrayList<URI>();
 
-		parse(bbOut, env);
+		parse(bbOutFilePath, env);
 
 		String included = (String) env.get("BBINCLUDED");
 		if(getDefaultDepends() != null) {

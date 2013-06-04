@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     Ken Gilmer - initial API and implementation
  *     Jessica Zhang - extend to support HOB build
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.builder;
 
@@ -44,7 +45,7 @@ public class BitbakeCommanderNature implements IProjectNature {
 			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);		
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 
-			String init_script = project.getLocation().toString() + "/oe-init-build-env ";
+			String init_script = project.getLocationURI().getPath() + "/oe-init-build-env ";
 			String argument = "-e \"source " + init_script + buildDir + ";hob";// + ";bash\"";
 
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);

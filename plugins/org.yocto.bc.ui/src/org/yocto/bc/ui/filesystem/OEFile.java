@@ -83,23 +83,6 @@ public class OEFile extends FileStore {
 		this.filePath = file.getAbsolutePath();
 	}
 
-	/**
-	 * This method is called after a failure to modify a file or directory.
-	 * Check to see if the parent is read-only and if so then
-	 * throw an exception with a more specific message and error code.
-	 * 
-	 * @param target The file that we failed to modify
-	 * @param exception The low level exception that occurred, or <code>null</code>
-	 * @throws CoreException A more specific exception if the parent is read-only
-	 */
-	private void checkReadOnlyParent(File target, Throwable exception) throws CoreException {
-		File parent = target.getParentFile();
-		if (parent != null && (attributes(parent) & EFS.ATTRIBUTE_READ_ONLY) != 0) {
-			String message = NLS.bind(Messages.readOnlyParent, target.getAbsolutePath());
-			Policy.error(EFS.ERROR_PARENT_READ_ONLY, message, exception);
-		}
-	}
-
 	@Override
 	public String[] childNames(int options, IProgressMonitor monitor) {
 		return file.getChildNames(monitor);

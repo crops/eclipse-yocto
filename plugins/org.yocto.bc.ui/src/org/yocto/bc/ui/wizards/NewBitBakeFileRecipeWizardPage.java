@@ -55,6 +55,8 @@ import java.io.InputStream;
 import java.io.FilenameFilter;
 import java.security.MessageDigest;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	private Text containerText;
@@ -77,6 +79,17 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	private String metaDirLoc;
 	private ArrayList inheritance;
 	private final IHost connection;
+
+	private String srcFileNameExt;
+	private String srcFileName;
+
+	public static final String TEMP_FOLDER_NAME = "temp";
+	public static final String TAR_BZ2_EXT = ".tar.bz2";
+	public static final String TAR_GZ_EXT = ".tar.gz";
+	public static final String HTTP = "http";
+	public static final String FTP ="ftp";
+	public static final String BB_RECIPE_EXT =".bb";
+	private static final String COPYING_FILE = "COPYING";
 	
 	public NewBitBakeFileRecipeWizardPage(ISelection selection, IHost connection) {
 		super("wizardPage");
@@ -262,20 +275,46 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	}
 	
 	private void handlePopulate() {
-		String src_uri = txtSrcURI.getText();
-		if ((src_uri.startsWith("http://") || src_uri.startsWith("ftp://")) 
-			&& (src_uri.endsWith("tar.gz") || src_uri.endsWith("tar.bz2"))) {
-			handleRemotePopulate(src_uri);
-		} else if (src_uri.startsWith("file://")) {
-			String path_str = src_uri.substring(7);
-			File package_dir = new File(path_str);
-			if (package_dir.isDirectory()) {
-				handleLocalPopulate(path_str);
+		try {
+			String src_uri = txtSrcURI.getText();
+			URI srcURI = new URI(txtSrcURI.getText().trim());
+			String scheme = srcURI.getScheme();
+			this.srcFileNameExt = getSrcFileName(true);
+			this.srcFileName = getSrcFileName(false);
+			if ((scheme.equals(HTTP) || scheme.equals(FTP))
+					&& (srcFileNameExt.endsWith(TAR_GZ_EXT) || srcFileNameExt.endsWith(TAR_BZ2_EXT))) {
+				handleRemotePopulate(src_uri);
+			} else {
+				String packageName = srcFileName.replace("-", "_");
+				fileText.setText(packageName + BB_RECIPE_EXT);
+
+				handleLocalPopulate(src_uri);
 			}
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
 		}
-		
 	}
 
+	private String getSrcFileName(boolean withExt){
+		URI srcURI;
+		try {
+			srcURI = new URI(txtSrcURI.getText().trim());
+			String path = srcURI.getPath();
+			String fileName = path.substring(path.lastIndexOf("/") + 1);
+			if (withExt)
+				return fileName;
+			else {
+				if (fileName.endsWith(TAR_BZ2_EXT)) {
+					return fileName.substring(0, fileName.indexOf(TAR_BZ2_EXT));
+				} else if(fileName.endsWith(TAR_GZ_EXT)){
+					return fileName.substring(0, fileName.indexOf(TAR_GZ_EXT));
+				}
+			}
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
 	private void handleRemotePopulate(String src_uri) {
 		HashMap<String, String> mirror_map = createMirrorLookupTable();
 		populateRecipeName(src_uri);

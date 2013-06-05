@@ -76,6 +76,7 @@ public class InstallWizard extends FiniteStateWizard implements
 
 	private Map model;
 	private MessageConsole myConsole;
+	private OptionsPage optionsPage;
 
 	public InstallWizard() {
 		this.model = new Hashtable();
@@ -132,7 +133,8 @@ public class InstallWizard extends FiniteStateWizard implements
 	 */
 	@Override
 	public void addPages() {
-		addPage(new OptionsPage(model));
+		optionsPage = new OptionsPage(model);
+		addPage(optionsPage);
 	}
 
 	@Override

@@ -184,6 +184,12 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		txtSrcURI.setLayoutData(gd);
 		txtSrcURI.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
+				if (txtSrcURI.getText().trim().isEmpty()) {
+					if (btnPopulate != null)
+						btnPopulate.setEnabled(false);
+				} else if (btnPopulate != null){
+					btnPopulate.setEnabled(true);
+				}
 				dialogChanged();
 			}
 		});
@@ -368,7 +374,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	}
 	private void handleRemotePopulate(final URI srcURI, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		populateRecipeName();
-
+		
 		this.getContainer().run(true, true, new IRunnableWithProgress() {
 
 			@Override
@@ -380,48 +386,48 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 					monitor.subTask("Cleaning environment");
 					YoctoCommand rmYCmd = new YoctoCommand("rm -rf " + TEMP_FOLDER_NAME, metaDirLocPath, "");
 					RemoteHelper.handleRunCommandRemote(connection, rmYCmd, new SubProgressMonitor(monitor, 5));
-
+		
 					YoctoCommand mkdirYCmd = new YoctoCommand( "mkdir " + TEMP_FOLDER_NAME, metaDirLocPath, "");
 					RemoteHelper.handleRunCommandRemote(connection, mkdirYCmd, new SubProgressMonitor(monitor, 5));
-
+		
 					updateTempFolderPath();
 					monitor.worked(10);
-
+		
 					monitor.subTask("Downloading package sources");
-
+		
 					updateTempFolderPath();
-
+		
 					YoctoCommand wgetYCmd = new YoctoCommand("wget " + srcURI.toURL(), tempFolderPath, "");
 					RemoteHelper.handleRunCommandRemote(connection, wgetYCmd, new SubProgressMonitor(monitor, 40));
-
+		
 					monitor.worked(50);
-
+		
 					monitor.subTask("Compute package checksums");
 					String md5Cmd = "md5sum " + srcFileNameExt;
 					YoctoCommand md5YCmd = new YoctoCommand(md5Cmd, tempFolderPath, "");
-
+		
 					RemoteHelper.handleRunCommandRemote(connection, md5YCmd, new SubProgressMonitor(monitor, 10));
 					md5Buffer =  md5YCmd.getProcessBuffer();
-
+		
 					monitor.worked(60);
-
+		
 					String sha256Cmd = "sha256sum " + srcFileNameExt;
 					YoctoCommand sha256YCmd = new YoctoCommand(sha256Cmd, tempFolderPath, "");
 					RemoteHelper.handleRunCommandRemote(connection, sha256YCmd, new SubProgressMonitor(monitor, 10));
 					sha256Buffer = sha256YCmd.getProcessBuffer();
-
+		
 					monitor.worked(70);
-
+		
 					monitor.subTask("Extracting package");
 					extractDir = extractPackage(srcURI, new SubProgressMonitor(monitor, 0));
 					monitor.worked(80);
-
+		
 					YoctoCommand licenseChecksumCmd = populateLicenseFileChecksum(extractDir, new SubProgressMonitor(monitor, 10));
 					md5CopyingBuffer = 	licenseChecksumCmd.getProcessBuffer();
-
+		
 					monitor.subTask("Creating mirror lookup table");
 					mirrorTable = createMirrorLookupTable(new SubProgressMonitor(monitor, 10));
-
+		
 					monitor.worked(90);
 					monitor.done();
 				} catch (Exception e) {

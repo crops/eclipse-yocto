@@ -54,11 +54,11 @@ public class ShellSession {
 		
 		StringBuffer sb = new StringBuffer();
 		
-		String elems[] = file.split(File.separator);
+		String elems[] = file.split("//");
 		
 		for (int i = 0; i < elems.length - 1; ++i) {
 			sb.append(elems[i]);
-			sb.append(File.separator);
+			sb.append("//");
 		}
 		
 		return sb.toString();

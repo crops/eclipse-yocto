@@ -265,28 +265,33 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		String src_uri = txtSrcURI.getText();
 		if ((src_uri.startsWith("http://") || src_uri.startsWith("ftp://")) 
 			&& (src_uri.endsWith("tar.gz") || src_uri.endsWith("tar.bz2"))) {
-		
-			HashMap<String, String> mirror_map = createMirrorLookupTable();
-		
-			populateRecipeName(src_uri);
-			populateSrcuriChecksum(src_uri);
-			String extractDir = extractPackage(src_uri);
-			populateLicensefileChecksum(extractDir);
-			updateSrcuri(mirror_map, src_uri);
-			populateInheritance(extractDir);
+			handleRemotePopulate(src_uri);
 		} else if (src_uri.startsWith("file://")) {
 			String path_str = src_uri.substring(7);
 			File package_dir = new File(path_str);
 			if (package_dir.isDirectory()) {
-				String package_name = path_str.substring(path_str.lastIndexOf("/")+1);
-				fileText.setText(package_name+".bb");
-				populateLicensefileChecksum(path_str);
-				populateInheritance(path_str);
+				handleLocalPopulate(path_str);
 			}
 		}
 		
 	}
+
+	private void handleRemotePopulate(String src_uri) {
+		HashMap<String, String> mirror_map = createMirrorLookupTable();
+		populateRecipeName(src_uri);
+		populateSrcuriChecksum(src_uri);
+		String extractDir = extractPackage(src_uri);
+		populateLicensefileChecksum(extractDir);
+		updateSrcuri(mirror_map, src_uri);
+		populateInheritance(extractDir);
+	}
 	
+	private void handleLocalPopulate(String path_str) {
+		String package_name = path_str.substring(path_str.lastIndexOf("/")+1);
+		fileText.setText(package_name+".bb");
+		populateLicensefileChecksum(path_str);
+		populateInheritance(path_str);
+	}
 	private String extractPackage(String src_uri) {
 		try {
 			File working_dir = new File(metaDirLoc+"/temp");

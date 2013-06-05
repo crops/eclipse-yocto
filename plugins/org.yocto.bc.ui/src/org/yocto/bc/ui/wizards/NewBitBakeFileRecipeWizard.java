@@ -62,7 +62,7 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 
 	@Override
 	public void addPages() {
-		page = new NewBitBakeFileRecipeWizardPage(selection);
+		page = new NewBitBakeFileRecipeWizardPage(selection, connection);
 		addPage(page);
 	}
 

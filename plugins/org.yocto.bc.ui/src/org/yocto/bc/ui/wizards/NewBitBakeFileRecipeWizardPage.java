@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     Ken Gilmer - initial API and implementation
  *     Jessica Zhang (Intel) - Extend to support auto-fill base on src_uri value
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.wizards;
 
@@ -21,6 +22,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.rse.core.model.IHost;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -72,12 +74,14 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	private ISelection selection;
 	private String metaDirLoc;
 	private ArrayList inheritance;
+	private final IHost connection;
 	
-	public NewBitBakeFileRecipeWizardPage(ISelection selection) {
+	public NewBitBakeFileRecipeWizardPage(ISelection selection, IHost connection) {
 		super("wizardPage");
 		setTitle("BitBake Recipe");
 		setDescription("Create a new BitBake recipe.");
 		this.selection = selection;
+		this.connection = connection;
 		element = new BitbakeRecipeUIElement();
 		inheritance = new ArrayList();
 	}

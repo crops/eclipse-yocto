@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     Ken Gilmer - initial API and implementation
  *     Jessica Zhang (Intel) - Extend to support auto-fill base on src_uri value
+ *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.wizards;
 
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -33,6 +35,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -42,10 +45,15 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import org.yocto.bc.bitbake.BBLanguageHelper;
+import org.yocto.bc.ui.Activator;
+import org.yocto.bc.ui.model.ProjectInfo;
+import org.yocto.remote.utils.RemoteHelper;
+import org.yocto.remote.utils.YoctoCommand;
 
 public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 	private NewBitBakeFileRecipeWizardPage page;
 	private ISelection selection;
+	private IHost connection;
 
 	public NewBitBakeFileRecipeWizard() {
 		super();
@@ -106,6 +114,24 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.selection = selection;
+		if (selection instanceof IStructuredSelection) {
+			Object element = selection.getFirstElement();
+
+			if (element instanceof IResource) {
+				IProject p = ((IResource)element).getProject();
+				try {
+					ProjectInfo projInfo = Activator.getProjInfo(p.getLocationURI());
+					this.connection = projInfo.getConnection();
+				} catch (CoreException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
 	}
 
 	/**
@@ -178,17 +204,7 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					doFinish(element, monitor);
-					File temp_dir = new File(element.getMetaDir() + "/temp");
-					if (temp_dir.exists()) {
-						File working_dir = new File(element.getMetaDir());
-					
-						String rm_cmd = "rm -rf temp";
-						final Process process = Runtime.getRuntime().exec(rm_cmd, null, working_dir);
-						int returnCode = process.waitFor();
-						if (returnCode != 0) {
-							throw new Exception("Failed to clean up the temp dir");
-						}
-					}
+					RemoteHelper.handleRunCommandRemote(connection, new YoctoCommand("rm -rf " + element.getMetaDir() + "/temp", "", ""), monitor);
 				} catch (Exception e) {
 					throw new InvocationTargetException(e);
 				} finally {

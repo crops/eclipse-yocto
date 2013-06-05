@@ -34,14 +34,6 @@ import org.yocto.remote.utils.YoctoCommand;
  *
  */
 public class ShellSession {
-	/**
-	 * Bash shell
-	 */
-	public static final int SHELL_TYPE_BASH = 1;
-	/**
-	 * sh shell
-	 */
-	public static final int SHELL_TYPE_SH = 2;
 	private volatile boolean interrupt = false;
 	/**
 	 * String used to isolate command execution
@@ -87,14 +79,10 @@ public class ShellSession {
 		this.projectInfo = projectInfo;
 	}
 
-	public ShellSession(ProjectInfo pInfo, int shellType, IHostFile root, String initCmd) throws IOException {
+	public ShellSession(ProjectInfo pInfo, IHostFile root, String initCmd) throws IOException {
 		this.projectInfo = pInfo;
 		this.root = root;
 		this.initCmd  = initCmd;
-		if (shellType == SHELL_TYPE_SH) {
-			shellPath = "/bin/sh";
-		}
-		shellPath  = "/bin/bash";
 
 		initializeShell(new NullProgressMonitor());
 	}

@@ -69,6 +69,7 @@ public class BitBakeFileEditor extends AbstractDecoratedTextEditor {
 			
 			try {
 				ProjectInfo projInfo = Activator.getProjInfo(p.getLocationURI());
+				((BitBakeDocumentProvider)getDocumentProvider()).setActiveConnection(projInfo.getConnection());
 				viewerConfiguration.setBBSession(Activator.getBBSession(projInfo, new NullProgressMonitor()));
 			} catch (IOException e) {
 				e.printStackTrace();

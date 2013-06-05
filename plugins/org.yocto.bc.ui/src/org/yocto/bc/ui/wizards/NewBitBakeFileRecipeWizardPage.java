@@ -66,9 +66,11 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	private Text homepageText;
 	private Text authorText;
 	private Text sectionText;
-	private Text srcuriText;
+	private Text txtSrcURI;
 	private Text md5sumText;
 	private Text sha256sumText;
+	private Button btnPopulate;
+
 	private BitbakeRecipeUIElement element;
 	
 	private ISelection selection;
@@ -127,18 +129,19 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		label = new Label(container, SWT.NULL);
 		label.setText("SRC_&URI:");
 
-		srcuriText = new Text(container, SWT.BORDER | SWT.SINGLE);
+		txtSrcURI = new Text(container, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		srcuriText.setLayoutData(gd);
-		srcuriText.addModifyListener(new ModifyListener() {
+		txtSrcURI.setLayoutData(gd);
+		txtSrcURI.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				dialogChanged();
 			}
 		});
 
-		Button buttonP = new Button(container, SWT.PUSH);
-		buttonP.setText("Populate...");
-		buttonP.addSelectionListener(new SelectionAdapter() {
+		btnPopulate = new Button(container, SWT.PUSH);
+		btnPopulate.setText("Populate...");
+		btnPopulate.setEnabled(false);
+		btnPopulate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handlePopulate();
@@ -223,7 +226,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 			return;
 		}
 
-		if (srcuriText.getText().length() == 0) {
+		if (txtSrcURI.getText().length() == 0) {
 			updateStatus("SRC_URI can't be empty");
 		}
 		
@@ -241,7 +244,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		element.setMd5sum(md5sumText.getText());
 		element.setSection(sectionText.getText());
 		element.setSha256sum(sha256sumText.getText());
-		element.setSrcuri(srcuriText.getText());
+		element.setSrcuri(txtSrcURI.getText());
 		element.setInheritance(inheritance);
 		element.setMetaDir(metaDirLoc);
 		
@@ -259,7 +262,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	}
 	
 	private void handlePopulate() {
-		String src_uri = srcuriText.getText();
+		String src_uri = txtSrcURI.getText();
 		if ((src_uri.startsWith("http://") || src_uri.startsWith("ftp://")) 
 			&& (src_uri.endsWith("tar.gz") || src_uri.endsWith("tar.bz2"))) {
 		
@@ -520,7 +523,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	    }
 	    int idx = src_uri.lastIndexOf("-");
 	    String new_src_uri = src_uri.substring(0, idx)+"-${PV}.tar.gz";
-	    srcuriText.setText(new_src_uri);
+	    txtSrcURI.setText(new_src_uri);
 	}
 	
 	private void initialize() {

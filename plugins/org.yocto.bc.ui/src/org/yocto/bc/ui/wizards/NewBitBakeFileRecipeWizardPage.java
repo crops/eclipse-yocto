@@ -233,7 +233,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		updateStatus(null);
 	}
 
-	public BitbakeRecipeUIElement getUIElement() {
+	public BitbakeRecipeUIElement populateUIElement() {
 		element.setAuthor(authorText.getText());
 		element.setChecksum(checksumText.getText());
 		element.setContainer(containerText.getText());

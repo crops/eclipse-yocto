@@ -198,7 +198,7 @@ public class NewBitBakeFileRecipeWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		final BitbakeRecipeUIElement element = page.getUIElement();
+		final BitbakeRecipeUIElement element = page.populateUIElement();
 		
 		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {

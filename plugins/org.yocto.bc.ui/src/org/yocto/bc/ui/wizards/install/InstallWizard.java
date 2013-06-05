@@ -55,6 +55,7 @@ import org.yocto.remote.utils.CommandResponseHandler;
 import org.yocto.remote.utils.ICommandResponseHandler;
 import org.yocto.remote.utils.RemoteHelper;
 import org.yocto.remote.utils.YoctoCommand;
+import org.yocto.bc.remote.utils.ConsoleWriter;
 
 /**
  * A wizard for installing a fresh copy of an OE system.

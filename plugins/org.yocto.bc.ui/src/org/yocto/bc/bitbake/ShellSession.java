@@ -131,11 +131,6 @@ public class ShellSession {
 				+ exportColumnsCmd + ";" + "cd " + getBuildDirAbsolutePath()
 				+ ";";
 	}
-
-synchronized 
-	public void execute(String command, ICommandResponseHandler handler) throws IOException {
-		execute(command, TERMINATOR, handler);
-	}
 	
 	synchronized 
 	public void execute(String command, String terminator, ICommandResponseHandler handler) throws IOException {
@@ -208,21 +203,6 @@ synchronized
 		interrupt = true;
 	}
 	
-	private class NullWriter extends Writer {
-
-		@Override
-		public void close() throws IOException {			
-		}
-
-		@Override
-		public void flush() throws IOException {			
-		}
-
-		@Override
-		public void write(char[] cbuf, int off, int len) throws IOException {			
-		}
-		
-	}
 	public void printError(String errorLines) {
 		RemoteHelper.getCommandHandler(projectInfo.getConnection()).response(errorLines, true);
 	}

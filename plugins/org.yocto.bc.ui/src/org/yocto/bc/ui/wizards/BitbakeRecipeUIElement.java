@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Intel Corporation.
+ * Copyright (c) 2013 Intel Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +7,15 @@
  *
  * Contributors:
  * Intel - initial API and implementation
+ * Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.wizards;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Text;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class BitbakeRecipeUIElement {
@@ -27,7 +31,7 @@ public class BitbakeRecipeUIElement {
 	private String srcuri;
 	private String md5sum;
 	private String sha256sum;
-	private String metaDir;
+	private URI metaDir;
 	private ArrayList inheritance;
 
 	public BitbakeRecipeUIElement()
@@ -44,7 +48,11 @@ public class BitbakeRecipeUIElement {
 		this.md5sum = "";
 		this.sha256sum = "";
 		this.inheritance = new ArrayList();
-		this.metaDir = "";
+		try {
+			this.metaDir = new URI("");
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getContainer() {
@@ -135,11 +143,11 @@ public class BitbakeRecipeUIElement {
 		this.inheritance = value;
 	}
 	
-	public String getMetaDir() {
+	public URI getMetaDir() {
 		return metaDir;
 	}
 	
-	public void setMetaDir(String value) {
+	public void setMetaDir(URI value) {
 		metaDir = value;
 	}
 }

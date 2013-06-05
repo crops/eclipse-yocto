@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.ISelection;
@@ -37,6 +38,9 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
+import org.yocto.bc.ui.Activator;
+import org.yocto.bc.ui.model.ProjectInfo;
+import org.yocto.remote.utils.RemoteHelper;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -54,6 +58,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.FilenameFilter;
 import java.security.MessageDigest;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -76,7 +81,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	private BitbakeRecipeUIElement element;
 	
 	private ISelection selection;
-	private String metaDirLoc;
+	private URI metaDirLoc;
 	private ArrayList inheritance;
 	private final IHost connection;
 
@@ -214,7 +219,17 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		}
 		
 		IProject project = container.getProject();
-		metaDirLoc = project.getLocation().toString() + "/meta";
+		ProjectInfo projInfo = null;
+		try {
+			projInfo = Activator.getProjInfo(project.getLocationURI());
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		metaDirLoc = RemoteHelper.createNewURI(projInfo.getOriginalURI(), "meta");
 	
 		if (fileName.length() == 0) {
 			updateStatus("File name must be specified");

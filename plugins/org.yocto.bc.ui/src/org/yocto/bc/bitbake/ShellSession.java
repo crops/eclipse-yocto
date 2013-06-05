@@ -19,10 +19,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.services.files.IHostFile;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.remote.utils.ICommandResponseHandler;
 import org.yocto.remote.utils.RemoteHelper;
+import org.yocto.remote.utils.YoctoCommand;
 
 /**
  * A class for Linux shell sessions.
@@ -44,6 +48,10 @@ public class ShellSession {
 	 */
 	public static final String TERMINATOR = "#234o987dsfkcqiuwey18837032843259d";
 	public static final String LT = System.getProperty("line.separator");
+	public static final String exportCmd = "export BB_ENV_EXTRAWHITE=\"DISABLE_SANITY_CHECKS $BB_ENV_EXTRAWHITE\"";
+	public static final String exportColumnsCmd = "export COLUMNS=1000";
+	private static final String BUILD_DIR = "/build/";
+
 	
 	public static String getFilePath(String file) throws IOException {
 		File f = new File(file);
@@ -66,12 +74,9 @@ public class ShellSession {
 	private Process process;
 
 	private OutputStream pos = null;
-	//private File initFile = null;
 	private String shellPath = null;
 	private final String initCmd;
 	private final IHostFile root;
-	private final Writer out;
-	
 	private ProjectInfo projectInfo;
 
 	public ProjectInfo getProjectInfo() {
@@ -82,33 +87,29 @@ public class ShellSession {
 		this.projectInfo = projectInfo;
 	}
 
-	public ShellSession(ProjectInfo pInfo, int shellType, IHostFile root, String initCmd, Writer out) throws IOException {
+	public ShellSession(ProjectInfo pInfo, int shellType, IHostFile root, String initCmd) throws IOException {
 		this.projectInfo = pInfo;
 		this.root = root;
 		this.initCmd  = initCmd;
-		if (out == null) {
-			this.out = new NullWriter();
-		} else {
-			this.out = out;
-		}
 		if (shellType == SHELL_TYPE_SH) {
 			shellPath = "/bin/sh";
 		}
 		shellPath  = "/bin/bash";
-		
-		initializeShell();
+
+		initializeShell(new NullProgressMonitor());
 	}
 
-	private void initializeShell() throws IOException {
-		process = Runtime.getRuntime().exec(shellPath);
-		pos = process.getOutputStream();
-		
-		if (root != null) {
-			out.write(execute("cd " + root.getAbsolutePath()));
-		}
-		
-		if (initCmd != null) {
-			out.write(execute("source " + initCmd));
+	private void initializeShell(IProgressMonitor monitor) throws IOException {
+		try {
+			if (root != null) {
+				IHost connection = projectInfo.getConnection();
+				RemoteHelper.handleRunCommandRemote(connection, new YoctoCommand("source " + initCmd, root.getAbsolutePath(), ""), monitor);
+				RemoteHelper.handleRunCommandRemote(connection,  new YoctoCommand(exportCmd, root.getAbsolutePath(), ""), monitor);
+			} else {
+				throw new Exception("Root file not found!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -119,51 +120,32 @@ public class ShellSession {
 
 	synchronized 
 	public String execute(String command, boolean hasErrors) throws IOException {
-		String errorMessage = null;
-		interrupt = false;
-		out.write(command);
-		out.write(LT);
-		
-		sendToProcessAndTerminate(command);
-
-		if (process.getErrorStream().available() > 0) {
-			byte[] msg = new byte[process.getErrorStream().available()];
-
-			process.getErrorStream().read(msg, 0, msg.length);
-			out.write(new String(msg));
-			out.write(LT);
-			errorMessage = "Error while executing: " + command + LT + new String(msg);
+		try {
+			if (projectInfo.getConnection() != null) {
+				command = getInitCmd() + command;
+				RemoteHelper.handleRunCommandRemote(projectInfo.getConnection(), new YoctoCommand(command, getBuildDirAbsolutePath(), ""), new NullProgressMonitor());
+				return getBuildDirAbsolutePath();
+			}
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		BufferedReader br = new BufferedReader(new InputStreamReader(process
-				.getInputStream()));
+		return null;
+	}
 
-		StringBuffer sb = new StringBuffer();
-		String line = null;
+	private String getBuildDirAbsolutePath() {
+		return root.getAbsolutePath() + BUILD_DIR;
+	}
 
-		while (((line = br.readLine()) != null) && !line.endsWith(TERMINATOR) && !interrupt) {
-			sb.append(line);
-			sb.append(LT);
-			out.write(line);
-			out.write(LT);
-		}
-		
-		if (interrupt) {
-			process.destroy();
-			initializeShell();
-			interrupt = false;
-		}
-		
-		if (errorMessage != null) {
-			throw new IOException(errorMessage);
-		}
-
-		return sb.toString();
+	private String getInitCmd() {
+		return "source " + initCmd + " " + getBuildDirAbsolutePath()
+				+ " > tempsf; rm -rf tempsf;" + exportCmd + ";"
+				+ exportColumnsCmd + ";" + "cd " + getBuildDirAbsolutePath()
+				+ ";";
 	}
 
 synchronized 
 	public void execute(String command, ICommandResponseHandler handler) throws IOException {
-		System.out.println(command);
 		execute(command, TERMINATOR, handler);
 	}
 	
@@ -184,14 +166,12 @@ synchronized
 				byte[] msg = new byte[errIs.available()];
 
 				errIs.read(msg, 0, msg.length);
-				out.write(new String(msg));
 				handler.response(new String(msg), true);
 			} 
 			
 			std = br.readLine();
 			
 			if (std != null && !std.endsWith(terminator)) {
-				out.write(std);
 				handler.response(std, false);
 			} 
 			
@@ -199,7 +179,7 @@ synchronized
 		
 		if (interrupt) {
 			process.destroy();
-			initializeShell();
+			initializeShell(null);
 			interrupt = false;
 		}
 	}

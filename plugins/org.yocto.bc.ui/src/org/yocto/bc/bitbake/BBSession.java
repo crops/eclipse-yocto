@@ -468,6 +468,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		Stack blockStack = new Stack();
 
 		while ((line = reader.readLine()) != null) {
+			errorLines += line;
 			String trimmed = line.trim();
 			if (trimmed.length() == 0 || line.startsWith("#")) {
 				// weed out the blank and comment lines
@@ -770,4 +771,13 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	public ProjectInfo getProjectInfo() {
 		return pinfo;
 	}
+
+	public boolean hasErrorOccured() {
+		return errorOccured;
+	}
+
+	public String getErrorLines() {
+		return errorLines;
+	}
+
 }

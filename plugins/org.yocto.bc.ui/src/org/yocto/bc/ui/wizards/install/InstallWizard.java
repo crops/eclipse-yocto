@@ -28,7 +28,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.ptp.remote.core.IRemoteConnection;
+import org.eclipse.ptp.remote.core.IRemoteServices;
+import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -41,12 +45,16 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.yocto.bc.remote.utils.YoctoRunnableWithProgress;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.wizards.FiniteStateWizard;
 import org.yocto.bc.ui.wizards.newproject.BBConfigurationInitializeOperation;
 import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
+import org.yocto.remote.utils.CommandResponseHandler;
 import org.yocto.remote.utils.ICommandResponseHandler;
+import org.yocto.remote.utils.RemoteHelper;
+import org.yocto.remote.utils.YoctoCommand;
 
 /**
  * A wizard for installing a fresh copy of an OE system.
@@ -66,6 +74,9 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String INSTALL_SCRIPT = "INSTALL_SCRIPT";
 	protected static final String INSTALL_DIRECTORY = "Install Directory";
 	protected static final String INIT_SCRIPT = "Init Script";
+
+	protected static final String SELECTED_CONNECTION = "SEL_CONNECTION";
+	protected static final String SELECTED_REMOTE_SERVICE = "SEL_REMOTE_SERVICE";
 
 	protected static final String PROJECT_NAME = "Project Name";
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
@@ -144,65 +155,68 @@ public class InstallWizard extends FiniteStateWizard implements
 
 	@Override
 	public boolean performFinish() {
-		BCCommandResponseHandler cmdOut = new BCCommandResponseHandler(
-				myConsole);
-		
 		WizardPage page = (WizardPage) getPage("Options");
 		page.setPageComplete(true);
-		Map options = (Map) model;
-		String install_dir = "";
-		if (options.containsKey(INSTALL_DIRECTORY)) {
-			install_dir = (String) options.get(INSTALL_DIRECTORY);
-		}
+		Map<String, Object> options = model;
 
 		try {
 			URI uri = new URI("");
 			if (options.containsKey(INSTALL_DIRECTORY)) {
 				uri = (URI) options.get(INSTALL_DIRECTORY);
 			}
+			IRemoteConnection remoteConnection = ((IRemoteConnection)model.get(InstallWizard.SELECTED_CONNECTION));
+			IRemoteServices remoteServices = ((IRemoteServices)model.get(InstallWizard.SELECTED_REMOTE_SERVICE));
+			IHost connection = RemoteHelper.getRemoteConnectionByName(remoteConnection.getName());
+			CommandResponseHandler cmdHandler = new CommandResponseHandler(RemoteHelper.getConsole(connection));
+			IWizardContainer container = this.getContainer();
 			if (((Boolean)options.get(GIT_CLONE)).booleanValue()) {
-				String []git_clone_cmd = {"git", "clone", "--progress", "git://git.pokylinux.org/poky.git", install_dir};
-				final Pattern pattern = Pattern.compile("^Receiving objects:\\s*(\\d+)%.*");
+				String cmd = "/usr/bin/git clone --progress";
+				String args = "git://git.yoctoproject.org/poky.git " + uri.getPath();
+				String taskName = "Checking out Yocto git repository";
 
-				this.getContainer().run(true,true,
-						new LongtimeRunningTask("Checking out Yocto git repository",
-							git_clone_cmd, null, null,
-							cmdOut,
-							new ICalculatePercentage() {
-								public float calWorkloadDone(String info) throws IllegalArgumentException {
-									Matcher m=pattern.matcher(info.trim());
-									if(m.matches()) {
-										return new Float(m.group(1)) / 100;
-									}else {
-										throw new IllegalArgumentException();
-									}
-								}
-							}
-						)
-				);
+				YoctoRunnableWithProgress adapter = new YoctoRunnableWithProgress(new YoctoCommand(cmd, "", args));
+
+				adapter.setRemoteConnection(remoteConnection);
+				adapter.setRemoteServices(remoteServices);
+				adapter.setTaskName(taskName);
+				try {
+					container.run(true, true, adapter);
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
-
-			if (!cmdOut.hasError()) {
-
-				String initPath = install_dir + "/"
-						+ (String) options.get(INIT_SCRIPT);
+			if (!cmdHandler.hasError()) {
+				String initPath = "";
+				if (uri.getPath() != null) {
+					 initPath = uri.getPath() + "/" + (String) options.get(INIT_SCRIPT);
+				} else {
+					initPath = uri.getFragment() + "/" + (String) options.get(INIT_SCRIPT);
+				}
 				String prjName = (String) options.get(PROJECT_NAME);
 				ProjectInfo pinfo = new ProjectInfo();
 				pinfo.setInitScriptPath(initPath);
 				pinfo.setLocationURI(uri);
 				pinfo.setName(prjName);
-			
-				ConsoleWriter cw = new ConsoleWriter();
-				this.getContainer().run(false, false,
-						new BBConfigurationInitializeOperation(pinfo, cw));
-				
+				pinfo.setConnection(connection);
+				pinfo.setRemoteServices(remoteServices);
+
+				final ConsoleWriter cw = new ConsoleWriter();
+				BBConfigurationInitializeOperation configInitOp = new BBConfigurationInitializeOperation(pinfo, null);
+				container.run(false, false, configInitOp);
+				myConsole = RemoteHelper.getConsole(connection);
 				myConsole.newMessageStream().println(cw.getContents());
+
+				if (configInitOp.hasErrorOccured()) {
+					optionsPage.setErrorMessage(configInitOp.getErrorMessage());
+					return false;
+				}
 
 				model.put(InstallWizard.KEY_PINFO, pinfo);
 				Activator.putProjInfo(pinfo.getOEFSURI(), pinfo);
 
-				this.getContainer().run(false, false,
-						new CreateBBCProjectOperation(pinfo));
+				container.run(false, false, new CreateBBCProjectOperation(pinfo));
 				return true;
 			}
 		} catch (Exception e) {

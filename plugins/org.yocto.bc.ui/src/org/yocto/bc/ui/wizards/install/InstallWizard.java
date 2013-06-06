@@ -209,37 +209,4 @@ public class InstallWizard extends FiniteStateWizard implements
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 	}
 
-	private class ConsoleWriter extends Writer {
-
-		private StringBuffer sb;
-
-		public ConsoleWriter() {
-			sb = new StringBuffer();
-		}
-
-		@Override
-		public void close() throws IOException {
-		}
-
-		public String getContents() {
-			return sb.toString();
-		}
-
-		@Override
-		public void flush() throws IOException {
-		}
-
-		@Override
-		public void write(char[] cbuf, int off, int len) throws IOException {
-			// txtConsole.getText().concat(new String(cbuf));
-			sb.append(cbuf);
-		}
-
-		@Override
-		public void write(String str) throws IOException {
-			sb.append(str);
-		}
-
-	}
-
 }

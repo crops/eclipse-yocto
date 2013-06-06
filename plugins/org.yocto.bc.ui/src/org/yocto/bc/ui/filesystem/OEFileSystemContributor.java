@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer
+ * Copyright (c) 2013 Ken Gilmer, Intel Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
+ *     Ioana Grigoropol(Intel) - initial API and implementation
  *******************************************************************************/
 package org.yocto.bc.ui.filesystem;
 
@@ -16,6 +17,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ide.fileSystem.FileSystemContributor;
 
 public class OEFileSystemContributor extends FileSystemContributor  {
+
+	public OEFileSystemContributor() {
+	}
 
 	@Override
 	public URI browseFileSystem(String initialPath, Shell shell) {

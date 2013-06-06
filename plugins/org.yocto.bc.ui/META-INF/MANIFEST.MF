@@ -18,8 +18,10 @@ Require-Bundle: org.eclipse.ui,
  org.yocto.remote.utils;bundle-version="1.0.0"
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
-Import-Package: org.eclipse.ptp.remote.core,
+Import-Package: org.eclipse.ptp.rdt.ui.wizards,
+ org.eclipse.ptp.remote.core,
  org.eclipse.ptp.remote.core.exception,
+ org.eclipse.ptp.remote.rse.core,
  org.eclipse.rse.core.model,
  org.eclipse.rse.services.clientserver.messages,
  org.eclipse.rse.services.files,

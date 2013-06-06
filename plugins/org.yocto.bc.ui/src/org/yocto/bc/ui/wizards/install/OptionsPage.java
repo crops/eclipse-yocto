@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Intel Corporation.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Intel - initial API and implementation
+ * Ioana Grigoropol (Intel) - adapt class for remote support
+ *******************************************************************************/
 package org.yocto.bc.ui.wizards.install;
 
 import java.io.IOException;
@@ -45,19 +56,13 @@ import org.yocto.bc.ui.wizards.FiniteStateWizardPage.ValidationListener;
  */
 public class OptionsPage extends FiniteStateWizardPage {
 
-	private Map vars;
-	private Composite c1;
 	private Composite top;
-	
-	private List controlList;
-	private boolean controlsCreated = false;
 	
 	private Text txtProjectLocation;
 
-	private Text txtInit;
 	private ValidationListener validationListener;
 	private Text txtProjectName;
-	private Button gitButton;
+	private Button btnGit;
 
 	protected OptionsPage(Map model) {
 		super("Options", model);
@@ -125,10 +130,10 @@ public class OptionsPage extends FiniteStateWizardPage {
 		gl.marginWidth = 0;
 		gitComposite.setLayout(gl);
 
-		gitButton = new Button(gitComposite, SWT.CHECK);
-		gitButton.setText("Clone from Yocto Project &Git Repository");
-		gitButton.setEnabled(true);
-		gitButton.addSelectionListener(validationListener);
+		btnGit = new Button(gitComposite, SWT.CHECK);
+		btnGit.setText("Clone from Yocto Project &Git Repository");
+		btnGit.setEnabled(true);
+		btnGit.addSelectionListener(validationListener);
 
 		setControl(top);
 	}
@@ -155,7 +160,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 	protected void updateModel() {
 		model.put(InstallWizard.INSTALL_DIRECTORY, txtProjectLocation.getText()+File.separator+txtProjectName.getText());
 		model.put(InstallWizard.PROJECT_NAME, txtProjectName.getText());
-		model.put(InstallWizard.GIT_CLONE, new Boolean(gitButton.getSelection()));
+		model.put(InstallWizard.GIT_CLONE, new Boolean(btnGit.getSelection()));
 	}
 
 	private boolean isValidProjectName(String projectName) {
@@ -192,7 +197,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 		
 		String projectPath = projectLoc + File.separator+txtProjectName.getText();
 		File git_dir=new File(projectPath);
-		if(!gitButton.getSelection()) {
+		if(!btnGit.getSelection()) {
 			if(!git_dir.isDirectory() || !git_dir.exists()) {
 				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " does not exist, please select git clone.");
 				return false;
@@ -226,22 +231,4 @@ public class OptionsPage extends FiniteStateWizardPage {
 		return true;
 	}
 	
-	private class FileOpenSelectionAdapter extends SelectionAdapter {
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-			FileDialog fd = new FileDialog(PlatformUI.getWorkbench()
-					.getDisplay().getActiveShell(), SWT.OPEN);
-
-			fd.setText("Open Configuration Script");
-			fd.setFilterPath(txtProjectLocation.getText());
-
-			String selected = fd.open();
-
-			if (selected != null) {
-				txtInit.setText(selected);
-				updateModel();
-			}
-		}
-	}
-
 }

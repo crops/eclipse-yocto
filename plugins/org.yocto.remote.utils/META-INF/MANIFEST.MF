@@ -23,5 +23,6 @@ Import-Package: org.eclipse.rse.core,
  org.eclipse.rse.subsystems.terminals.core.elements,
  org.eclipse.rse.ui,
  org.eclipse.tm.internal.terminal.control,
- org.eclipse.tm.internal.terminal.provisional.api
+ org.eclipse.tm.internal.terminal.provisional.api,
+ org.eclipse.ui.console
 Export-Package: org.yocto.remote.utils

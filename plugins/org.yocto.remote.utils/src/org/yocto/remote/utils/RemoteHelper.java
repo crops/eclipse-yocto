@@ -49,6 +49,8 @@ import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
 public class RemoteHelper {
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
 	private final static String CMD_DELIMITER = ";"; //$NON-NLS-1$
+	public static final String TERMINATOR = "234o987dsfkcqiuwey18837032843259d";//$NON-NLS-1$
+	public static final int TOTALWORKLOAD = 100;
 
 	public static IHost getRemoteConnectionByName(String remoteConnection) {
 		if (remoteConnection == null)

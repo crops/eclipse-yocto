@@ -33,7 +33,6 @@ public class SystemtapHandler extends AbstractHandler {
 				shell, "Systemtap"
 				);
 		
-		setting.open();
 		String metadata_location = ((SystemtapSettingDialog)setting).getMetadataLocation();
 		String remote_host = ((SystemtapSettingDialog)setting).getRemoteHost();
 		String user_id = ((SystemtapSettingDialog)setting).getUserID();

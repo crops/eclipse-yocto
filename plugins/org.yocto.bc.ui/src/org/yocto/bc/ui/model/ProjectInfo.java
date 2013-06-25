@@ -61,6 +61,13 @@ public class ProjectInfo implements IModelElement {
 	public void setLocationURI(URI location) {
 		if (this.location == null)
 			this.location = new YoctoLocation();
+		if (location.getScheme().equalsIgnoreCase("oefs")) {
+			if (this.name ==  null) {
+				String path = location.getPath();
+				this.name = path.substring(path.lastIndexOf("/") + 1);
+			}
+			location = RemoteHelper.retrieveURIFromMetaArea(this.name);
+		}
 		this.location.setOriginalURI(location);
 		try {
 			this.location.setOEFSURI(new URI(ProjectInfoHelper.OEFS_SCHEME + location.getPath() ));
@@ -79,7 +86,7 @@ public class ProjectInfo implements IModelElement {
 	}
 
 	public IHost getConnection() {
-		if (connection == null) {
+		if (connection == null && RemoteHelper.isInitialized(getOriginalURI())) {
 			connection = RemoteHelper.getRemoteConnectionForURI(location.getOriginalURI(), new NullProgressMonitor());
 		}
 		return connection;
@@ -99,6 +106,8 @@ public class ProjectInfo implements IModelElement {
 
 	public IFileService getFileService(IProgressMonitor monitor){
 		try {
+			if (!RemoteHelper.isInitialized(getOriginalURI()))
+				return null;
 			return RemoteHelper.getConnectedRemoteFileService(connection, monitor);
 		} catch (Exception e) {
 			e.printStackTrace();

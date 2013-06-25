@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.yocto.bc.ui.filesystem;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -22,14 +21,16 @@ import java.util.Map;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.IFileSystem;
 import org.eclipse.core.filesystem.provider.FileSystem;
+import org.eclipse.core.internal.filesystem.NullFileStore;
+import org.eclipse.core.internal.resources.LocalMetaArea;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
-
 import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
-import org.yocto.bc.ui.model.YoctoHostFile;
 
 /**
  * A filesystem that ignores specific OE directories that contain derived information.
@@ -64,8 +65,7 @@ public class OEFileSystem extends FileSystem {
 				config = Activator.getBBSession(projInfo, new NullProgressMonitor());
 				config.initialize();
 			} catch (Exception e) {
-				e.printStackTrace();
-				return new OEIgnoreFile(new YoctoHostFile(projInfo, uri));
+				return new NullFileStore(new Path(uri.getPath()));
 			}
 
 			if (config.get("TMPDIR") == null || config.get("DL_DIR") == null || config.get("SSTATE_DIR")== null) {

@@ -313,4 +313,14 @@ public class YoctoHostFile implements IHostFile{
 	public void setFileService(IFileService fileService) {
 		this.fileService = fileService;
 	}
+
+	@Override
+	public String toString() {
+		URI uri = this.projectInfo.getOriginalURI();
+		try {
+			return new URI(uri.getScheme(), uri.getHost(), fileURI.getPath(), uri.getFragment()).toString();
+		} catch (URISyntaxException e) {
+			return fileURI.toString();
+		}
+	}
 }

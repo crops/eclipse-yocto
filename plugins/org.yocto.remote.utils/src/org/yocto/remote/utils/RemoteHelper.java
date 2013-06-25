@@ -13,19 +13,30 @@ package org.yocto.remote.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.internal.filesystem.InternalFileSystemCore;
+import org.eclipse.core.internal.resources.LocalMetaArea;
+import org.eclipse.core.internal.resources.Workspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -34,12 +45,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.rse.core.IRSECoreStatusCodes;
+import org.eclipse.rse.core.IRSEInitListener;
 import org.eclipse.rse.core.IRSESystemType;
 import org.eclipse.rse.core.RSECorePlugin;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.model.ISubSystemConfigurationCategories;
 import org.eclipse.rse.core.model.ISystemRegistry;
 import org.eclipse.rse.core.subsystems.ISubSystem;
+import org.eclipse.rse.internal.core.RSEInitJob;
 import org.eclipse.rse.services.IService;
 import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 import org.eclipse.rse.services.files.IFileService;
@@ -61,6 +74,72 @@ public class RemoteHelper {
 	public static final String TERMINATOR = "234o987dsfkcqiuwey18837032843259d";//$NON-NLS-1$
 	public static final int TOTALWORKLOAD = 100;
 	private static Map<IHost, RemoteMachine> machines;
+
+	public static IPath getWorkspaceMetaArea(){
+		Workspace workspace = (Workspace)ResourcesPlugin.getWorkspace();
+		LocalMetaArea metaDataArea = workspace.getMetaArea();
+		return metaDataArea.getLocation();
+	}
+
+	public static void storeURIInMetaArea(String projName, URI uri){
+		IPath path = getWorkspaceMetaArea();
+		String sep = File.separator;
+		File f = new File(path.toString() + sep + ".projects" + sep + projName + sep + ".originalURI");
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(f);
+			writer.println(uri.getScheme());
+			writer.println(uri.getHost());
+			writer.println(uri.getPath());
+			writer.println(uri.getFragment());
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static URI retrieveURIFromMetaArea(String projName){
+		IPath path = getWorkspaceMetaArea();
+		String sep = File.separator;
+		File f = new File(path.toString() + sep + ".projects" + sep + projName + sep + ".originalURI");
+		try {
+			BufferedReader buf = new BufferedReader(new FileReader(f));
+			String line = null;
+			List<String> elems = new ArrayList<String>();
+			while((line = buf.readLine()) != null){
+				if (line.equals("null"))
+					line = null;
+				elems.add(line);
+			}
+			buf.close();
+			if (elems.size() == 4){
+				URI uri = new URI(elems.get(0), elems.get(1), elems.get(2), elems.get(3));
+				return uri;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static boolean isInitialized(final URI uri){
+		boolean init = RSECorePlugin.isInitComplete(RSECorePlugin.INIT_MODEL);
+		if (!init) {
+			RSEInitJob.getInstance().addInitListener(new IRSEInitListener() {
+				@Override
+				public void phaseComplete(int arg0) {
+					try {
+						InternalFileSystemCore.getInstance().getStore(uri);
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+		return init;
+	}
 
 	public static IHost getRemoteConnectionByName(String remoteConnection) {
 		if (remoteConnection == null)

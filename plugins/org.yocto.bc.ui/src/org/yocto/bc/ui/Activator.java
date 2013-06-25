@@ -108,7 +108,7 @@ public class Activator extends AbstractUIPlugin {
 		
 		BBSession bbs = (BBSession) bbSessionMap.get(projectRoot);
 		
-		if (bbs == null) {
+		if (bbs == null || bbs.getShell() == null) {
 			bbs = new BBSession(getShellSession(projectInfo, null, monitor), projectRoot);
 			bbSessionMap.put(projectRoot, bbs);
 		}
@@ -190,7 +190,7 @@ public class Activator extends AbstractUIPlugin {
 		
 		ShellSession ss = (ShellSession) shellMap.get(absolutePath);
 		
-		if (ss == null) {
+		if (ss == null && RemoteHelper.isInitialized(projInfo.getOriginalURI())) {
 			IHostFile remoteHostFile = RemoteHelper.getRemoteHostFile(projInfo.getConnection(), absolutePath.getPath(), monitor);
 			ss = new ShellSession(projInfo, remoteHostFile, ProjectInfoHelper.getInitScriptPath(absolutePath));
 		}

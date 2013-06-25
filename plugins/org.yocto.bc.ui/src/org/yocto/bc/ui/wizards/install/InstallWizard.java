@@ -195,6 +195,7 @@ public class InstallWizard extends FiniteStateWizard implements
 				Activator.putProjInfo(pinfo.getOEFSURI(), pinfo);
 
 				container.run(false, false, new CreateBBCProjectOperation(pinfo));
+				RemoteHelper.storeURIInMetaArea(pinfo.getProjectName(), uri);
 				return true;
 			}
 		} catch (Exception e) {

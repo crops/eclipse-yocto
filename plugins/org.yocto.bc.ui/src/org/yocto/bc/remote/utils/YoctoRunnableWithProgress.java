@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ptp.remote.core.IRemoteConnection;
 import org.eclipse.ptp.remote.core.IRemoteServices;
@@ -77,9 +78,7 @@ public class YoctoRunnableWithProgress implements IRunnableWithProgress {
 				}
 			}
 
-			if (!remoteServices.isInitialized()) {
-				remoteServices.initialize();
-			}
+			remoteServices.initialize(new NullProgressMonitor());
 
 			try {
 				IHost connection = RemoteHelper.getRemoteConnectionByName(remoteConnection.getName());

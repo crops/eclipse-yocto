@@ -34,7 +34,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ptp.rdt.ui.wizards.RemoteProjectContentsLocationArea;
 import org.eclipse.ptp.rdt.ui.wizards.RemoteProjectContentsLocationArea.IErrorMessageReporter;
 import org.eclipse.ptp.remote.core.IRemoteConnection;
-import org.eclipse.ptp.remote.rse.core.RSEConnection;
+import org.eclipse.ptp.internal.remote.rse.core.RSEConnection;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.services.files.IFileService;
 import org.eclipse.rse.services.files.IHostFile;

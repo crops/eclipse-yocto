@@ -15,6 +15,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,6 +42,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -80,7 +83,21 @@ public class RemoteHelper {
 		LocalMetaArea metaDataArea = workspace.getMetaArea();
 		return metaDataArea.getLocation();
 	}
-
+	public static void storeProjDescrInMetaArea(IHost conn, String projName, String remoteSrc){
+		IPath path = getWorkspaceMetaArea();
+		String sep = File.separator;
+		String localDest = path.toString() + sep + ".projects" + sep + projName + sep + ".project";
+		try {
+			getRemoteFile(conn, localDest, remoteSrc + sep + ".project", new NullProgressMonitor());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	public static String retrieveProjRootFromMetaArea(String projName){
+		IPath path = getWorkspaceMetaArea();
+		String sep = File.separator;
+		return path.toString() + sep + ".projects" + sep + projName + sep;
+	}
 	public static void storeURIInMetaArea(String projName, URI uri){
 		IPath path = getWorkspaceMetaArea();
 		String sep = File.separator;
@@ -255,7 +272,6 @@ public class RemoteHelper {
 							connection,
 							new SubProgressMonitor(monitor, 10));
 			File file = new File(localExePath);
-			file.deleteOnExit();
 			monitor.worked(5);
 			Path remotePath = new Path(remoteExePath);
 			fileService.download(remotePath.removeLastSegments(1).toString(),

@@ -31,14 +31,15 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.yocto.sdk.ide.YoctoProfileElement;
 import org.yocto.sdk.ide.YoctoProfileSetting;
 import org.yocto.sdk.ide.YoctoProjectSpecificSetting;
+import org.yocto.sdk.ide.YoctoSDKChecker;
 import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
 import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.yocto.sdk.ide.YoctoSDKMessages;
-import org.yocto.sdk.ide.utils.YoctoSDKUtils;
-import org.yocto.sdk.ide.utils.YoctoSDKUtilsConstants;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoUIElement;
 import org.yocto.sdk.ide.YoctoUISetting;
+import org.yocto.sdk.ide.utils.YoctoSDKUtils;
+import org.yocto.sdk.ide.utils.YoctoSDKUtilsConstants;
 
 public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 		IWorkbenchPropertyPage {
@@ -288,6 +289,15 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 	public void switchToProjectSpecificProfile()
 	{
 		YoctoUIElement profileElement = getElemFromProjectPreferences(getProject());
+		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(profileElement);
+
+		if ((result != SDKCheckResults.SDK_PASS)) {
+			/* Project specific profile has not yet been defined,
+			 * leave settings from previously selected profile
+			 */
+			return;
+		}
+
 		yoctoUISetting.setCurrentInput(profileElement);
 	}
 

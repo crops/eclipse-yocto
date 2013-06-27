@@ -206,7 +206,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 		YoctoSDKChecker.checkIfGloballySelectedYoctoProfileIsValid();
 
 		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromDefaultStore();
-		ProjectPreferenceUtils.saveProfilesToProjectPreferences(profileElement, project);
+		ProjectPreferenceUtils.saveProfiles(profileElement, project);
 
 		IPreferenceStore selecteProfileStore = YoctoSDKPlugin.getProfilePreferenceStore(profileElement.getSelectedProfile());
 		YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(selecteProfileStore);

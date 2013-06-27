@@ -65,7 +65,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 		IProject project = getProject();
 
 		YoctoProfileElement globalProfileElement= YoctoSDKUtils.getProfilesFromDefaultStore();
-		YoctoProfileElement profileElement = ProjectPreferenceUtils.getProfilesFromProjectPreferences(project);
+		YoctoProfileElement profileElement = ProjectPreferenceUtils.getProfiles(project);
 
 		String selectedProfile = profileElement.getSelectedProfile();
 		if (!globalProfileElement.contains(selectedProfile)) {
@@ -74,10 +74,10 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 
 		yoctoProfileSetting = new YoctoProfileSetting(
 				new YoctoProfileElement(globalProfileElement.getProfilesAsString(), selectedProfile), this, false);
-		boolean useProjectSpecificSetting = ProjectPreferenceUtils.getUseProjectSpecificOptionFromProjectPreferences(project);
+		boolean useProjectSpecificSetting = ProjectPreferenceUtils.getUseProjectSpecificOption(project);
 
 		if (useProjectSpecificSetting) {
-			yoctoUISetting = new YoctoUISetting(ProjectPreferenceUtils.getElemFromProjectPreferences(project));
+			yoctoUISetting = new YoctoUISetting(ProjectPreferenceUtils.getElem(project));
 		} else {
 			yoctoUISetting = new YoctoUISetting(YoctoSDKUtils.getElemFromStore(YoctoSDKPlugin.getProfilePreferenceStore(selectedProfile)));
 		}
@@ -155,12 +155,12 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 				return false;
 			}
 
-			ProjectPreferenceUtils.saveUseProjectSpecificOptionToProjectPreferences(project, true);
-			ProjectPreferenceUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
-			ProjectPreferenceUtils.saveElemToProjectPreferences(yoctoUISetting.getCurrentInput(), project);
+			ProjectPreferenceUtils.saveUseProjectSpecificOption(project, true);
+			ProjectPreferenceUtils.saveProfiles(yoctoProfileSetting.getCurrentInput(), project);
+			ProjectPreferenceUtils.saveElem(yoctoUISetting.getCurrentInput(), project);
 		} else {
-			ProjectPreferenceUtils.saveUseProjectSpecificOptionToProjectPreferences(project, false);
-			ProjectPreferenceUtils.saveProfilesToProjectPreferences(yoctoProfileSetting.getCurrentInput(), project);
+			ProjectPreferenceUtils.saveUseProjectSpecificOption(project, false);
+			ProjectPreferenceUtils.saveProfiles(yoctoProfileSetting.getCurrentInput(), project);
 		}
 
 		ProjectPreferenceUtils.saveElemToProjectEnv(yoctoUISetting.getCurrentInput(), getProject());
@@ -182,7 +182,7 @@ public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 
 	public void switchToProjectSpecificProfile()
 	{
-		YoctoUIElement profileElement = ProjectPreferenceUtils.getElemFromProjectPreferences(getProject());
+		YoctoUIElement profileElement = ProjectPreferenceUtils.getElem(getProject());
 		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(profileElement);
 
 		if ((result != SDKCheckResults.SDK_PASS)) {

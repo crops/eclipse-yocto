@@ -36,7 +36,7 @@ public class ProjectPreferenceUtils {
 	private static final String CONSOLE_MESSAGE  = "Menu.SDK.Console.Configure.Message";
 
 	/* Get POKY Preference settings from project's preference store */
-	public static YoctoUIElement getElemFromProjectPreferences(IProject project) {
+	public static YoctoUIElement getElem(IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 		if (projectNode == null) {
@@ -98,7 +98,7 @@ public class ProjectPreferenceUtils {
 	}
 
 	/* Get profiles and selected profile from the project's preference store */
-	public static YoctoProfileElement getProfilesFromProjectPreferences(IProject project) {
+	public static YoctoProfileElement getProfiles(IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 
@@ -112,7 +112,7 @@ public class ProjectPreferenceUtils {
 		return new YoctoProfileElement(profiles, selectedProfile);
 	}
 
-	public static boolean getUseProjectSpecificOptionFromProjectPreferences(IProject project) {
+	public static boolean getUseProjectSpecificOption(IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 		if (projectNode == null) {
@@ -130,7 +130,7 @@ public class ProjectPreferenceUtils {
 	}
 
 	/* Save POKY Preference settings to project's preference store */
-	public static void saveElemToProjectPreferences(YoctoUIElement elem, IProject project) {
+	public static void saveElem(YoctoUIElement elem, IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 		if (projectNode == null) {
@@ -199,7 +199,7 @@ public class ProjectPreferenceUtils {
 	}
 
 	/* Save profiles and selected profile to the project's preference store */
-	public static void saveProfilesToProjectPreferences(YoctoProfileElement profileElement, IProject project) {
+	public static void saveProfiles(YoctoProfileElement profileElement, IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectPreferences = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 
@@ -218,7 +218,7 @@ public class ProjectPreferenceUtils {
 		}
 	}
 
-	public static void saveUseProjectSpecificOptionToProjectPreferences(IProject project, boolean useProjectSpecificSetting) {
+	public static void saveUseProjectSpecificOption(IProject project, boolean useProjectSpecificSetting) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
 		if (projectNode == null) {

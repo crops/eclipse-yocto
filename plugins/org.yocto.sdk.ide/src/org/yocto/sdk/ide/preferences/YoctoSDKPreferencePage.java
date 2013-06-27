@@ -241,7 +241,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 		for (IProject project : yoctoProjects)
 		{
-			ProjectPreferenceUtils.saveProfilesToProjectPreferences(profileElement, project);
+			ProjectPreferenceUtils.saveProfiles(profileElement, project);
 			YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(
 											YoctoSDKPlugin.getProfilePreferenceStore(PreferenceConstants.STANDARD_PROFILE_NAME));
 			ProjectPreferenceUtils.saveElemToProjectEnv(elem, project);
@@ -255,7 +255,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 		for (IProject project : yoctoProjects)
 		{
-			ProjectPreferenceUtils.saveProfilesToProjectPreferences(profileElement, project);
+			ProjectPreferenceUtils.saveProfiles(profileElement, project);
 		}
 	}
 
@@ -296,7 +296,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 	private boolean projectUsesProfile(IProject project, String profile)
 	{
-		YoctoProfileElement profileElement = ProjectPreferenceUtils.getProfilesFromProjectPreferences(project);
+		YoctoProfileElement profileElement = ProjectPreferenceUtils.getProfiles(project);
 
 		if (!profileElement.getSelectedProfile().equals(profile)) {
 			return false;

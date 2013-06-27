@@ -225,5 +225,23 @@
          </filter>
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.yocto.sdk.ide.actions.ProfileSwitchHandler"
+            description="%command.targetProfileSwitch.description"
+            id="org.yocto.sdk.ide.targetProfile.switch"
+            name="%command.targetProfileSwitch.name">
+         <commandParameter
+               id="org.eclipse.ui.commands.radioStateParameter"
+               name="%command.targetProfileSwitch.parameter.name"
+               optional="false">
+         </commandParameter>
+         <state
+               class="org.eclipse.ui.handlers.RadioState:project-specific"
+               id="org.eclipse.ui.commands.radioState">
+         </state>
+      </command>
+   </extension>
 
 </plugin>

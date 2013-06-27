@@ -251,6 +251,15 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="true"
+            locationURI="menu:project">
+         <menu
+               id="org.yocto.sdk.ide.profiles.menu"
+               label="%command.targetProfileSwitch.label"
+               tooltip="%command.targetProfileSwitch.description">
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="true"
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
                id="org.yocto.sdk.ide.profiles.toolbar">
@@ -281,6 +290,22 @@
                </visibleWhen>
             </command>
          </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.yocto.sdk.ide.profiles.menu">
+         <dynamic
+               class="org.yocto.sdk.ide.ProjectSpecificContributionItem"
+               id="org.yocto.sdk.ide.dynamic.projectSpecific.targetProfile">
+         </dynamic>
+         <separator
+               name="org.yocto.sdk.ide.profiles.separator"
+               visible="true">
+         </separator>
+         <dynamic
+               class="org.yocto.sdk.ide.TargetProfileContributionItem"
+               id="org.yocto.sdk.ide.dynamic.targetProfile">
+         </dynamic>
       </menuContribution>
       <menuContribution
             allPopups="false"

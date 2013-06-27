@@ -81,6 +81,10 @@
             id="org.yocto.sdk.ide.command.reconfigYocto"
             name="%command.name">
       </command>
+      <command
+            id="org.yocto.sdk.ide.command.disabled"
+            name="DisabledCommand">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -243,5 +247,56 @@
          </state>
       </command>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="true"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="org.yocto.sdk.ide.profiles.toolbar">
+            <command
+                  commandId="org.yocto.sdk.ide.command.reconfigYocto"
+                  id="org.yocto.sdk.ide.profiles.toolbar.dropdown"
+                  label="%command.targetProfileSwitch.label"
+                  mode="FORCE_TEXT"
+                  style="pulldown"
+                  tooltip="%command.targetProfileSwitch.description">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+	                  <count
+	                        value="1">
+	                  </count>
+	                  <iterate
+	                        operator="and">
+	                     <adapt
+	                           type="org.eclipse.core.resources.IResource">
+	                        <test
+	                              property="org.eclipse.core.resources.projectNature"
+	                              value="org.yocto.sdk.ide.YoctoSDKNature">
+	                        </test>
+	                     </adapt>
+	                  </iterate>
+	               </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.yocto.sdk.ide.profiles.toolbar.dropdown">
+         <dynamic
+               class="org.yocto.sdk.ide.ProjectSpecificContributionItem"
+               id="org.yocto.sdk.ide.dynamic.projectSpecific.targetProfile">
+         </dynamic>
+         <separator
+               name="org.yocto.sdk.ide.profiles.separator"
+               visible="true">
+         </separator>
+         <dynamic
+               class="org.yocto.sdk.ide.TargetProfileContributionItem"
+               id="org.yocto.sdk.ide.dynamic.targetProfile">
+         </dynamic>
+      </menuContribution>
+   </extension>
 </plugin>

@@ -42,7 +42,6 @@ import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 
 public class YoctoUISetting {
-
 	private static final String ENV_SCRIPT_FILE_PREFIX = "environment-setup-";
 
 	private SelectionListener fSelectionListener;
@@ -375,7 +374,7 @@ public class YoctoUISetting {
 		if ((result != SDKCheckResults.SDK_PASS) && showErrorDialog) {
 			Display display = Display.getCurrent();
 			ErrorDialog.openError(display.getActiveShell(),
-									"Yocto Project Configuration Error",
+									YoctoSDKChecker.SDKCheckRequestFrom.Other.getErrorMessage(),
 									YoctoSDKChecker.getErrorMessage(result, from),
 									new Status(Status.ERROR, YoctoSDKPlugin.PLUGIN_ID, result.getMessage()));
 

@@ -34,6 +34,7 @@ import org.yocto.sdk.ide.YoctoProfileSetting;
 import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckRequestFrom;
 import org.yocto.sdk.ide.YoctoSDKChecker.SDKCheckResults;
 import org.yocto.sdk.ide.natures.YoctoSDKProjectNature;
+import org.yocto.sdk.ide.utils.ProjectPreferenceUtils;
 import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
@@ -240,10 +241,10 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 		for (IProject project : yoctoProjects)
 		{
-			YoctoSDKUtils.saveProfilesToProjectPreferences(profileElement, project);
+			ProjectPreferenceUtils.saveProfilesToProjectPreferences(profileElement, project);
 			YoctoUIElement elem = YoctoSDKUtils.getElemFromStore(
 											YoctoSDKPlugin.getProfilePreferenceStore(PreferenceConstants.STANDARD_PROFILE_NAME));
-			YoctoSDKUtils.saveElemToProjectEnv(elem, project);
+			ProjectPreferenceUtils.saveElemToProjectEnv(elem, project);
 		}
 	}
 
@@ -254,14 +255,14 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 		for (IProject project : yoctoProjects)
 		{
-			YoctoSDKUtils.saveProfilesToProjectPreferences(profileElement, project);
+			ProjectPreferenceUtils.saveProfilesToProjectPreferences(profileElement, project);
 		}
 	}
 
 	private void updateProjects(HashSet<IProject> yoctoProjects, YoctoUIElement elem) {
 		for (IProject project : yoctoProjects)
 		{
-			YoctoSDKUtils.saveElemToProjectEnv(elem, project);
+			ProjectPreferenceUtils.saveElemToProjectEnv(elem, project);
 		}
 	}
 
@@ -295,7 +296,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 
 	private boolean projectUsesProfile(IProject project, String profile)
 	{
-		YoctoProfileElement profileElement = YoctoSDKUtils.getProfilesFromProjectPreferences(project);
+		YoctoProfileElement profileElement = ProjectPreferenceUtils.getProfilesFromProjectPreferences(project);
 
 		if (!profileElement.getSelectedProfile().equals(profile)) {
 			return false;

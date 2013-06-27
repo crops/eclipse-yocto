@@ -25,34 +25,26 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.envvar.IContributedEnvironment;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
 import org.eclipse.cdt.core.model.CoreModel;
-import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.debug.core.ICDTLaunchConfigurationConstants;
 import org.eclipse.cdt.debug.mi.core.IMILaunchConfigurationConstants;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.osgi.service.prefs.BackingStoreException;
 import org.yocto.sdk.ide.YoctoGeneralException;
 import org.yocto.sdk.ide.YoctoProfileElement;
-import org.yocto.sdk.ide.YoctoSDKMessages;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoUIElement;
-import org.yocto.sdk.ide.natures.YoctoSDKAutotoolsProjectNature;
 import org.yocto.sdk.ide.natures.YoctoSDKCMakeProjectNature;
 import org.yocto.sdk.ide.natures.YoctoSDKEmptyProjectNature;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
@@ -61,7 +53,6 @@ public class YoctoSDKUtils {
 
 	private static final String DEFAULT_SYSROOT_PREFIX = "--sysroot=";
 	private static final String LIBTOOL_SYSROOT_PREFIX = "--with-libtool-sysroot=";
-	private static final String CONSOLE_MESSAGE  = "Menu.SDK.Console.Configure.Message";
 
 	private static final String DEFAULT_USR_BIN = "/usr/bin/";
 	private static final String NATIVE_SYSROOT = "OECORE_NATIVE_SYSROOT";
@@ -395,78 +386,6 @@ public class YoctoSDKUtils {
 		return qemu_target;
 	}
 
-	/* Get POKY Preference settings from project's environment */
-	public static YoctoUIElement getElemFromProjectEnv(IProject project)
-	{
-		YoctoUIElement elem = new YoctoUIElement();
-		elem.setStrToolChainRoot(getEnvValue(project, PreferenceConstants.TOOLCHAIN_ROOT));
-		elem.setStrTarget(getEnvValue(project, PreferenceConstants.TOOLCHAIN_TRIPLET));
-		elem.setStrQemuKernelLoc(getEnvValue(project, PreferenceConstants.QEMU_KERNEL));
-		elem.setStrSysrootLoc(getEnvValue(project, PreferenceConstants.SYSROOT));
-		elem.setStrQemuOption(getEnvValue(project, PreferenceConstants.QEMU_OPTION));
-		String sTemp = getEnvValue(project, PreferenceConstants.TARGET_ARCH_INDEX);
-		if (!sTemp.isEmpty())
-			elem.setIntTargetIndex(Integer.valueOf(sTemp).intValue());
-		if (getEnvValue(project, PreferenceConstants.SDK_MODE).equalsIgnoreCase(IPreferenceStore.TRUE))
-		{
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
-		}
-		else
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
-
-		if(getEnvValue(project, PreferenceConstants.TARGET_MODE).equalsIgnoreCase(IPreferenceStore.TRUE))
-			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.QEMU_MODE);
-		else
-			elem.setEnumDeviceMode(YoctoUIElement.DeviceMode.DEVICE_MODE);
-		return elem;
-	}
-
-	/* Save POKY Preference settings to project's environment */
-	public static void saveElemToProjectEnv(YoctoUIElement elem, IProject project)
-	{
-		ConsoleOutputStream consoleOutStream = null;
-
-		try {
-			setEnvironmentVariables(project, elem);
-			createRemoteDebugAndQemuLaunchers(project, elem);
-
-			if (project.hasNature(YoctoSDKAutotoolsProjectNature.YoctoSDK_AUTOTOOLS_NATURE_ID)) {
-				YoctoSDKAutotoolsProjectNature.configureAutotoolsOptions(project);
-			} else if (project.hasNature(YoctoSDKCMakeProjectNature.YoctoSDK_CMAKE_NATURE_ID)) {
-				YoctoSDKCMakeProjectNature.extendProjectEnvironmentForCMake(project);
-			}
-
-			IConsole console = CCorePlugin.getDefault().getConsole("org.yocto.sdk.ide.YoctoConsole");
-			console.start(project);
-			consoleOutStream = console.getOutputStream();
-			String messages = YoctoSDKMessages.getString(CONSOLE_MESSAGE);
-			consoleOutStream.write(messages.getBytes());
-		}
-		catch (CoreException e)
-		{
-			System.out.println(e.getMessage());
-		}
-		catch (IOException e)
-		{
-			System.out.println(e.getMessage());
-		}
-		catch (YoctoGeneralException e)
-		{
-			System.out.println(e.getMessage());
-		}
-		finally {
-			if (consoleOutStream != null) {
-				try {
-					consoleOutStream.flush();
-					consoleOutStream.close();
-				}
-				catch (IOException e) {
-					// ignore
-				}
-			}
-		}
-	}
-
 	/* Get IDE wide POKY Preference settings from a specific preference store */
 	public static YoctoUIElement getElemFromStore(IPreferenceStore store) {
 		YoctoUIElement elem = new YoctoUIElement();
@@ -520,27 +439,6 @@ public class YoctoSDKUtils {
 		saveProfilesToStore(profileElement, YoctoSDKPlugin.getDefault().getPreferenceStore());
 	}
 
-	/* Save profiles and selected profile to the project's preference store */
-	public static void saveProfilesToProjectPreferences(YoctoProfileElement profileElement, IProject project) {
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectPreferences = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
-		if (projectPreferences == null) {
-			return;
-		}
-
-		projectPreferences.put(PreferenceConstants.PROFILES, profileElement.getProfilesAsString());
-		projectPreferences.put(PreferenceConstants.SELECTED_PROFILE, profileElement.getSelectedProfile());
-
-		try
-		{
-			projectPreferences.flush();
-		} catch (BackingStoreException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	/* Save profiles and selected profile to a specific preference store */
 	private static void saveProfilesToStore(YoctoProfileElement profileElement, IPreferenceStore store) {
 		store.setValue(PreferenceConstants.PROFILES, profileElement.getProfilesAsString());
@@ -557,22 +455,6 @@ public class YoctoSDKUtils {
 	private static YoctoProfileElement getProfilesFromStore(IPreferenceStore store) {
 		String profiles = store.getString(PreferenceConstants.PROFILES);
 		String selectedProfile = store.getString(PreferenceConstants.SELECTED_PROFILE);
-
-		return new YoctoProfileElement(profiles, selectedProfile);
-	}
-
-	/* Get profiles and selected profile from the project's preference store */
-	public static YoctoProfileElement getProfilesFromProjectPreferences(IProject project)
-	{
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
-		if (projectNode == null)
-		{
-			return getProfilesFromDefaultStore();
-		}
-
-		String profiles = projectNode.get(PreferenceConstants.PROFILES, "");
-		String selectedProfile = projectNode.get(PreferenceConstants.SELECTED_PROFILE, "");
 
 		return new YoctoProfileElement(profiles, selectedProfile);
 	}

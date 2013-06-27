@@ -18,6 +18,7 @@ import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IProject;
 import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoUIElement;
+import org.yocto.sdk.ide.utils.ProjectPreferenceUtils;
 import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
 public class YoctoSDKAutotoolsProjectNature extends YoctoSDKProjectNature {
@@ -35,7 +36,7 @@ public class YoctoSDKAutotoolsProjectNature extends YoctoSDKProjectNature {
 	public static void configureAutotoolsOptions(IProject project) {
 		IManagedBuildInfo info = ManagedBuildManager.getBuildInfo(project);
 		IConfiguration icfg = info.getDefaultConfiguration();
-		YoctoUIElement elem = YoctoSDKUtils.getElemFromProjectEnv(project);
+		YoctoUIElement elem = ProjectPreferenceUtils.getElemFromProjectEnv(project);
 		String sysroot_str = elem.getStrSysrootLoc();
 		String id = icfg.getId();
 		String CFLAGS_str = YoctoSDKUtils.getEnvValue(project, "CFLAGS");

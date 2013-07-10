@@ -60,7 +60,7 @@ public class PowertopModel extends BaseModel {
 		remoteFile = new String(REMOTE_FILE_PREFIX + currentDate);
 		localFile = new String(remoteFile + LOCAL_FILE_SUFFIX);
 		
-		String args = "start -l " + remoteFile + " powertop -d -t " + time.toString();
+		String args = "start -l " + remoteFile + " powertop --debug --time " + time.toString();
 		if(showpid)
 			args += " -p";
 		runRemoteShellExec(monitor, args, true);

@@ -2,7 +2,7 @@
 
 #setup eclipse building environment for Indigo.
 #comment out the following line if you want to using your own http proxy setting for eclipse update site
-#PROXY=http://proxy.jf.intel.com:911
+PROXY=http://proxy.jf.intel.com:911
 
 err_exit() 
 {
@@ -49,11 +49,11 @@ fi
 
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
-ep_ver="4.2"
-ep_date="-201206081400"
+ep_ver="4.3"
+ep_date="-201306052000"
 P2_disabled=false
 P2_no_dropins=false
-if [ ! -f eclipse/plugins/org.eclipse.swt_3.100.0.v4233d.jar ]; then
+if [ ! -f eclipse/plugins/3.102.0.v20130605-1539.jar ]; then
   curdir2=`pwd`
   if [ ! -d eclipse -o -h eclipse ]; then
     if [ -d eclipse-${ep_ver}-${ep_arch} ]; then
@@ -66,9 +66,9 @@ if [ ! -f eclipse/plugins/org.eclipse.swt_3.100.0.v4233d.jar ]; then
   fi
   # Eclipse SDK: Need the SDK so we can link into docs
   echo "Getting Eclipse SDK..."
-  # wget "http://download.eclipse.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
+  wget "http://download.eclipse.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
   # The eclipse site has moments where it is overloaded. Maintaining our own mirror solves this.
-  wget "http://downloads.yoctoproject.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
+  # wget "http://downloads.yoctoproject.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
   tar xfz eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz || err_exit $? "extracting Eclipse SDK failed"
   rm eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz
   cd "${curdir2}"
@@ -180,38 +180,45 @@ update_feature_remote()
 }
 
 #Eclipse Update Site
-#MAIN_UPDATE_SITE="http://download.eclipse.org/releases/juno"
+MAIN_UPDATE_SITE="http://download.eclipse.org/releases/kepler"
 # The main eclipse download site is unreliable at times. For now, we're going to
 # maintain a mirror of just what we need.
-MAIN_UPDATE_SITE="http://downloads.yoctoproject.org/eclipse/juno/ftp.osuosl.org/pub/eclipse/releases/juno"
+#MAIN_UPDATE_SITE="http://downloads.yoctoproject.org/eclipse/juno/ftp.osuosl.org/pub/eclipse/releases/juno"
 
 UPDATE_SITE="${MAIN_UPDATE_SITE}"
 
 #CDT related
-CDTFEAT="8.1.0"
+CDTFEAT="8.2.0"
 echo "Installing CDT..."
-update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
-CDTREMOTEVER="6.0.0"
+update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.feature.group ${CDTFEAT}
+CDTREMOTEVER="6.2.0"
 update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
 
 #RSE SDK
-RSEVER="3.4.0"
-TCFVER="1.0.0"
-TMVER="3.3.0"
+RSEVER="3.5.0"
+#TCFVER="1.0.0"
+TMVER="3.3.1"
 echo "Installing RSE/TCF/TM related component..."
 update_feature_remote ${UPDATE_SITE} org.eclipse.rse.feature.group ${RSEVER}
-update_feature_remote ${UPDATE_SITE} org.eclipse.tcf.rse.feature.feature.group ${TCFVER}
+#update_feature_remote ${UPDATE_SITE} org.eclipse.tcf.rse.feature.feature.group ${TCFVER}
 update_feature_remote ${UPDATE_SITE} org.eclipse.tm.terminal.sdk.feature.group ${TMVER}
 
 #AUTOTOOL
-ATVER="3.0.1"
+ATVER="3.2.0"
 echo "Install AutoTool..."
 update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
 
-#Lttng legacy
-TMFREL="1.0.0"
-echo "Install TMF..."
-update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.feature.group ${TMFREL}
+#Lttng2 
+LTTNGREL="2.0.0"
+echo "Install Lttng..."
+update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.lttng2.feature.group ${LTTNGREL}
+
+#PTP RDT
+PTPVER="7.0.0"
+RDTVER="7.0.0"
+
+update_feature_remote ${UPDATE_SITE} org.eclipse.ptp.feature.group ${PTPVER}
+update_feature_remote ${UPDATE_SITE} org.eclipse.ptp.rdt.feature.group ${RDTVER}
 
 echo ""
 echo "Your build environment is successfully created."

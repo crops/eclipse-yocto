@@ -79,9 +79,9 @@
 	<target name="prepareForP2" if="p2.gathering">
 		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
 		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/category.xml" todir="${buildDirectory}" />
-		<xmlproperty file="${otherSrcDirectory}/features/org.yocto.bc/feature.xml" />
+		<xmlproperty file="${otherSrcDirectory}/features/org.yocto.utils/feature.xml" />
 		<replace file="${buildDirectory}/category.xml">
-			<replacefilter token="@bcfeatureVersion@" value="${feature(version)}"/>
+			<replacefilter token="@utilsfeatureVersion@" value="${feature(version)}"/>
 		</replace>
 	</target>
 
@@ -177,9 +177,9 @@
 		<property file="${buildDirectory}/finalFeaturesVersions.properties" />
 		<copy file="${otherSrcDirectory}/features/org.yocto.sdk.site/site.xml" todir="${buildDirectory}" />
 		<replace file="${buildDirectory}/site.xml">
-			<replacefilter token="@bcGenVersion@" value="${org.yocto.bc}"/>
+			<replacefilter token="@utilsGenVersion@" value="${org.yocto.utils}"/>
 		</replace>
-		<zip destfile="${buildDirectory}/${buildLabel}/org.yocto.bc-${buildId}-group.group.group.zip" update="true">
+		<zip destfile="${buildDirectory}/${buildLabel}/org.yocto.utils-${buildId}-group.group.group.zip" update="true">
 			<zipfileset dir="${buildDirectory}">
 				<include name="site.xml"/>
 			</zipfileset>

@@ -112,7 +112,7 @@ mkdir ${BUILD_DIR} || fail $? "Create temporary build directory ${BUILD_DIR}"
 
 
 #git clone
-GIT_URL=git://git.pokylinux.org/eclipse-poky.git
+GIT_URL=git://git.pokylinux.org/eclipse-poky-kepler.git
 if [ $USE_LOCAL_GIT_REPO -eq 1 ]; then
 	SCRIPT_DIR=`dirname $0`
 	GIT_DIR=`readlink -f ${SCRIPT_DIR}/..`

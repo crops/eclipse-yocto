@@ -12,11 +12,7 @@
    <feature url="features/org.yocto.doc_@docFeatureVersion@.jar" id="org.yocto.doc" version="@docFeatureVersion@">
       <category name="Yocto Project Documentation"/>
    </feature>
-   <feature url="features/org.yocto.utils_@utilsFeatureVersion@.jar" id="org.yocto.utils" version="@utilsFeatureVersion@">
-      <category name="Yocto Project Utils"/>
-   </feature>
    <category-def name="Yocto Project ADT" label="Yocto Project ADT Plug-in"/>
    <category-def name="Yocto Project Bitbake Commander" label="Yocto Project Bitbake Commander Plug-in"/>
    <category-def name="Yocto Project Documentation" label="Yocto Project Documentation plug-in"/>
-   <category-def name="Yocto Project Utils" label="Yocto Project Utils plug-in"/>
 </site>

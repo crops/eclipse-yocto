@@ -60,6 +60,9 @@ abstract public class BaseModel implements IRunnableWithProgress {
 	}
 	public void postProcess(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException{}
 
+	public void setHost (IHost host) {
+		this.host = host;
+	}
 	abstract public void process(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException;
 	
 	public BaseModel(IHost host, String taskName, String localScript, String remoteExec) {

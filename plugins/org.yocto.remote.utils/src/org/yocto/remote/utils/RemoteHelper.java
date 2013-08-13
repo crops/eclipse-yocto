@@ -50,12 +50,18 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.rse.core.IRSECoreStatusCodes;
 import org.eclipse.rse.core.IRSEInitListener;
 import org.eclipse.rse.core.IRSESystemType;
+import org.eclipse.rse.core.IRSEUserIdConstants;
 import org.eclipse.rse.core.RSECorePlugin;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.model.ISubSystemConfigurationCategories;
+import org.eclipse.rse.core.model.ISubSystemConfigurator;
+import org.eclipse.rse.core.model.ISystemHostPool;
 import org.eclipse.rse.core.model.ISystemRegistry;
+import org.eclipse.rse.core.IRSECoreRegistry;
 import org.eclipse.rse.core.subsystems.ISubSystem;
+import org.eclipse.rse.core.subsystems.ISubSystemConfiguration;
 import org.eclipse.rse.internal.core.RSEInitJob;
+import org.eclipse.rse.internal.ui.view.SystemPerspectiveHelpers;
 import org.eclipse.rse.services.IService;
 import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 import org.eclipse.rse.services.files.IFileService;
@@ -69,11 +75,17 @@ import org.eclipse.rse.subsystems.files.core.servicesubsystem.IFileServiceSubSys
 import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
 import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
+import org.eclipse.rse.ui.RSEUIPlugin;
+import org.eclipse.rse.ui.SystemBasePlugin;
+import org.eclipse.rse.ui.SystemConnectionForm;
 import org.eclipse.ui.console.MessageConsole;
 
 public class RemoteHelper {
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
 	private final static String CMD_DELIMITER = ";"; //$NON-NLS-1$
+	private final static String LOCAL_CONN_NAME = "Local";
+	private final static String CONNECTION_NAME = "127.0.0.1";
+	private final static String HOST_NAME = "LOCALHOST";
 	public static final String TERMINATOR = "234o987dsfkcqiuwey18837032843259d";//$NON-NLS-1$
 	public static final int TOTALWORKLOAD = 100;
 	private static Map<IHost, RemoteMachine> machines;
@@ -594,5 +606,75 @@ public class RemoteHelper {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public static IHost createLocalConnection() {
+		IHost createdHost = null;
+		try {
+			
+			ISubSystemConfigurator[] configurators = getSubSystemConfigurators();
+			
+			IRSESystemType systemType = getSSHSystemType();
+			ISystemRegistry sr = RSECorePlugin.getTheSystemRegistry();
+			IHost[] connections = sr.getHosts();
+			for (IHost conn : connections) {
+				if (conn.getName().equals(LOCAL_CONN_NAME)) {
+					ISystemHostPool pool = conn.getHostPool();
+					createdHost = sr.createHost(pool.getSystemProfile().getName(), systemType, CONNECTION_NAME, HOST_NAME, "", "",IRSEUserIdConstants.USERID_LOCATION_NOTSET,configurators);
+					break;
+				}
+			}
+
+			// a tweak that is the result of UCD feedback. Phil
+			if ((createdHost != null) && SystemPerspectiveHelpers.isRSEPerspectiveActive()) {
+				if (systemType.getId().equals(IRSESystemType.SYSTEMTYPE_ISERIES_ID)) {
+					ISubSystem[] objSubSystems = sr.getSubSystemsBySubSystemConfigurationCategory("nativefiles", createdHost); //$NON-NLS-1$
+					if ((objSubSystems != null) && (objSubSystems.length > 0))// might be in product that doesn't have iSeries plugins
+						RSEUIPlugin.getTheSystemRegistryUI().expandSubSystem(objSubSystems[0]);
+					else
+						RSEUIPlugin.getTheSystemRegistryUI().expandHost(createdHost);
+				} else
+					RSEUIPlugin.getTheSystemRegistryUI().expandHost(createdHost);
+			}
+		} catch (Exception exc) {
+			exc.printStackTrace();
+		}
+		return createdHost;
+	}
+	
+	private static IRSESystemType getSSHSystemType() {
+		IRSECoreRegistry coreReg = RSECorePlugin.getTheCoreRegistry();
+		return coreReg.getSystemTypeById("org.eclipse.rse.systemtype.ssh");
+	}
+	
+	private static ISubSystemConfigurator[] getSubSystemConfigurators()
+	{		
+		// what kind of subsystems do we have here?
+		ISystemRegistry sr = RSECorePlugin.getTheSystemRegistry();
+		ISubSystemConfiguration[] configurations = sr.getSubSystemConfigurationsBySystemType(getSSHSystemType(), true);
+		
+		ArrayList configList = new ArrayList();
+		for (int i = 0; i < configurations.length; i++){
+			ISubSystemConfiguration configuration = configurations[i];
+			
+			class DefaultConfigurator implements ISubSystemConfigurator {
+				private ISubSystemConfiguration _configuration;
+				public DefaultConfigurator(ISubSystemConfiguration configuration){
+					_configuration = configuration;
+				}
+					
+				public boolean applyValues(ISubSystem ss) {
+					return true;
+				}
+
+				public ISubSystemConfiguration getSubSystemConfiguration() {
+					return _configuration;
+				}						
+			}
+			configList.add(new DefaultConfigurator(configuration));
+		}				
+			
+		return (ISubSystemConfigurator[])configList.toArray(new ISubSystemConfigurator[configList.size()]);
+
 	}
 }

@@ -41,6 +41,7 @@ public class Messages extends NLS {
 	//public static String Systemtap_KO_Text;
 	public static String Metadata_Location;
 	public static String User_ID;
+	public static String Remote_User_ID;
 	public static String Remote_Host;
 	public static String Systemtap_Script;
 	public static String Systemtap_Args;

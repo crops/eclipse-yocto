@@ -14,12 +14,20 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
+import org.eclipse.rse.ui.SystemBasePlugin;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.yocto.remote.utils.ShellSession;
+import org.yocto.remote.utils.RemoteHelper;
+import org.yocto.remote.utils.CommonHelper;
 
 public class SystemtapModel extends BaseModel {
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
@@ -44,26 +52,37 @@ public class SystemtapModel extends BaseModel {
 		this.systemtap_script = systemtap_script;
 		this.systemtap_args = systemtap_args;
 		this.display = display;
-		if (sessionConsole == null) {
-			IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
-			IConsole[] existing = conMan.getConsoles();
-			for (int i = 0; i < existing.length; i++)
-				if (SYSTEMTAP_CONSOLE.equals(existing[i].getName())) {
-					sessionConsole = (MessageConsole) existing[i];
-					break;
-				}
-			if (sessionConsole == null) {
-				sessionConsole = new MessageConsole(SYSTEMTAP_CONSOLE, null);
-				conMan.addConsoles(new IConsole[] { sessionConsole });
-			}
-		}
-		
-		ConsolePlugin.getDefault().getConsoleManager().showConsoleView(sessionConsole);
 	}
 	
 	@Override
 	public void preProcess(IProgressMonitor monitor) 
-			throws InvocationTargetException, InterruptedException {}
+			throws InvocationTargetException, InterruptedException {
+		final ITerminalServiceSubSystem terminalSubSystem = RemoteHelper.getTerminalSubSystem(host);
+		if (!terminalSubSystem.isConnected()) {
+			try {
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(null);
+				dialog.run(true, true, new IRunnableWithProgress(){
+					@Override
+					public void run(IProgressMonitor monitor) {
+						monitor.beginTask("Connecting to remote target ...", 100);
+						try {
+							terminalSubSystem.connect(new NullProgressMonitor(), false);
+							monitor.done();
+						} catch (Exception e) {
+							CommonHelper.showErrorDialog("Connection failure", null, e.getMessage());
+							monitor.done();
+						}
+					}
+				});
+			} catch (OperationCanceledException e) {
+				// user canceled, return silently
+			} catch (Exception e) {
+				SystemBasePlugin.logError(e.getLocalizedMessage(), e);
+			}
+		}
+		}
+	
+		protected String changeTerm = "export TERM=vt100;";
     
 	@Override
 	public void process(IProgressMonitor monitor) 

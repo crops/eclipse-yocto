@@ -119,7 +119,7 @@ public class SystemtapSettingDialog extends Dialog {
 		metadataLocationBtn = addDirSelectButton(textContainer, metadataLocationText);
 		
 		label = new Label(projComp, SWT.NONE);
-		label.setText(Messages.User_ID);
+		label.setText(Messages.Remote_User_ID);
 		userIDText = new Text(projComp, SWT.SINGLE | SWT.BORDER);
 		
 		if(user_id!=null)

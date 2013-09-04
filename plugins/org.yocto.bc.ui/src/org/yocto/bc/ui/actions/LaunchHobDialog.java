@@ -118,6 +118,7 @@ public class LaunchHobDialog extends Dialog {
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		build_dir_combo = new Combo(textContainer, SWT.DROP_DOWN);
+		build_dir_combo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		initializeBuildCombo();
 		
 		Button buildButton = addDirSelectButton(textContainer, build_dir_combo);

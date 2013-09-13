@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.yocto.cmake.managedbuilder.Activator;
 import org.yocto.cmake.managedbuilder.YoctoCMakeMessages;
@@ -126,9 +128,21 @@ public class ExecuteConfigureJob extends Job {
 		try {
 			return buildProject(monitor, cos);
 		} catch (IOException e) {
-			return new Status(Status.ERROR,
-					Activator.PLUGIN_ID, Status.OK,
-					YoctoCMakeMessages.getString("ExecuteConfigureJob.error.couldNotStart"), e); //$NON-NLS-1$
+			if(e.getMessage().startsWith("Cannot run program \"cmake\"")) { //$NON-NLS-1$
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						MessageDialog.openWarning(null,
+								YoctoCMakeMessages.getString("ExecuteConfigureJob.cmakeWarning.dialogTitle"), //$NON-NLS-1$
+								YoctoCMakeMessages.getString("ExecuteConfigureJob.cmakeWarning.dialogMessage")); //$NON-NLS-1$
+					}
+				});
+				return Status.OK_STATUS;
+			} else {
+				return new Status(Status.ERROR,
+						Activator.PLUGIN_ID, Status.OK,
+						YoctoCMakeMessages.getString("ExecuteConfigureJob.error.couldNotStart"), e); //$NON-NLS-1$	
+			}
 		} catch (InterruptedException e) {
 			return new Status(Status.WARNING,
 					Activator.PLUGIN_ID,

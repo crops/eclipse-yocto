@@ -13,7 +13,7 @@ package org.yocto.sdk.remotetools.actions;
 
 public class LatencytopHandler extends DialogHandler {
 	
-	private static String initCmd="export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin; cd; sudo latencytop\r";
+	private static String initCmd="export TERM=xterm; export PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin; cd; sudo latencytop\r";
 	
 	@Override
 	protected String getInitCmd() {

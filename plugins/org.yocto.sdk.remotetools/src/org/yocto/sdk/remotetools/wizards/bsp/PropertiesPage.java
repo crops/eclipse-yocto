@@ -448,7 +448,8 @@ public class PropertiesPage extends WizardPage {
 		else
 			build_dir = bspElem.getBuildLoc();
 
-		String valuesCmd = "export BUILDDIR=" + build_dir + ";" + bspElem.getMetadataLoc() + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
+		String metadataLoc = bspElem.getMetadataLoc();
+		String valuesCmd = "source " + metadataLoc + "/oe-init-build-env;" + metadataLoc + "/scripts/" + VALUES_CMD_PREFIX + bspElem.getKarch() + VALUES_CMD_SURFIX + property;
 		BSPProgressDialog progressDialog = new BSPProgressDialog(getShell(),  new KernelBranchesGetter(valuesCmd), "Loading Kernel " + value);
 		if (value.equals(KERNEL_CHOICES))
 			progressDialog.run(false);

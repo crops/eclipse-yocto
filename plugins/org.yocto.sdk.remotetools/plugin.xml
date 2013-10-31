@@ -56,8 +56,8 @@
       </command>
       <command
             categoryId="org.yocto.sdk.remotetools.commands.category"
-            id="org.yocto.sdk.remotetools.command.ust"
-            name="%command.name.ust">
+            id="org.yocto.sdk.remotetools.command.ust2"
+            name="%command.name.ust.20">
       </command>
       <command
             categoryId="org.yocto.sdk.remotetools.commands.category"

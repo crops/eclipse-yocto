@@ -110,7 +110,9 @@ public class TargetProfileContributionItem extends CompoundContributionItem impl
 		ICommandService commandService = (ICommandService) serviceLocator.getService(ICommandService.class);
 		Command command = commandService.getCommand(ProfileSwitchHandler.PROFILE_SWITCH_COMMAND);
 		IProject project = getSelectedProject(serviceLocator);
-
+		if (project == null) {
+			return;
+		}
 		try {
 			if (ProjectPreferenceUtils.getUseProjectSpecificOption(project)) {
 				HandlerUtil.updateRadioState(command, ProfileSwitchHandler.PROJECT_SPECIFIC_PARAMETER);

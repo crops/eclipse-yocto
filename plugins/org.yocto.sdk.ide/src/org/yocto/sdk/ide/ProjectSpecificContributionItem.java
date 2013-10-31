@@ -40,24 +40,26 @@ public class ProjectSpecificContributionItem extends TargetProfileContributionIt
 		ArrayList<IContributionItem> items = new ArrayList<IContributionItem>();
 
 		IProject project = getSelectedProject(serviceLocator);
-		YoctoUIElement yoctoUIElement = ProjectPreferenceUtils.getElem(project);
-		SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(yoctoUIElement);
+		if (project != null) {
+			YoctoUIElement yoctoUIElement = ProjectPreferenceUtils.getElem(project);
+			SDKCheckResults result = YoctoSDKChecker.checkYoctoSDK(yoctoUIElement);
 
-		if ((result != SDKCheckResults.SDK_PASS)) {
-			CommandContributionItemParameter parameter = new CommandContributionItemParameter(serviceLocator,
-															null,
-															DISABLED_COMMAND_ID,
-															CommandContributionItem.STYLE_PUSH);
+			if ((result != SDKCheckResults.SDK_PASS)) {
+				CommandContributionItemParameter parameter = new CommandContributionItemParameter(serviceLocator,
+																								null,
+																								DISABLED_COMMAND_ID,
+																								CommandContributionItem.STYLE_PUSH);
 
-			parameter.label = YoctoSDKMessages.getString(PROJECT_SPECIFIC_PROFILE);
+				parameter.label = YoctoSDKMessages.getString(PROJECT_SPECIFIC_PROFILE);
 
-			items.add(new CommandContributionItem(parameter));
-		} else {
-			items.add(super.createProfileItem(serviceLocator, ProfileSwitchHandler.PROJECT_SPECIFIC_PARAMETER,
+				items.add(new CommandContributionItem(parameter));
+			} else {
+				items.add(super.createProfileItem(serviceLocator, ProfileSwitchHandler.PROJECT_SPECIFIC_PARAMETER,
 												YoctoSDKMessages.getString(PROJECT_SPECIFIC_PROFILE)));
-		}
+			}
 
-		updateSelection(serviceLocator);
+			updateSelection(serviceLocator);
+		}
 
 		return items.toArray(new IContributionItem[items.size()]);
 	}

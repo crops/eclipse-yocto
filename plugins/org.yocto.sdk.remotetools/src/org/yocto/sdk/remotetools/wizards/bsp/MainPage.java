@@ -101,7 +101,7 @@ public class MainPage extends WizardPage {
 		textContainer.setLayout(new GridLayout(2, false));
 		textContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		textMetadataLoc = (Text)addTextControl(textContainer, "");
-		textMetadataLoc.setEnabled(false);
+		textMetadataLoc.setEnabled(true);
 		textMetadataLoc.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {

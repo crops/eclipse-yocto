@@ -542,7 +542,9 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		if(included != null) {
 			String[] includedSplitted = included.split(" ");
 			for (String incl : includedSplitted){
-				this.depends.add(new URI(incl));
+				if (!incl.contains("${")) {
+					this.depends.add(new URI(incl));
+				}
 			}
 		}
 

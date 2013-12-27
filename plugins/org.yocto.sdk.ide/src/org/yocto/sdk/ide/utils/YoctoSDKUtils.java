@@ -259,12 +259,14 @@ public class YoctoSDKUtils {
 		String sPath = getEnvValue(project, "PATH");
 		String sDebugName = getEnvValue(project, "GDB");
 		String sysroot_str = elem.getStrSysrootLoc();
+		String target_prefix_str = getEnvValue(project,"TARGET_PREFIX");
+		String target_str = target_prefix_str.substring(0, target_prefix_str.length() - 1);
 
 		if (configType == null || debug_configType == null) {
 			throw new YoctoGeneralException("Failed to get program or remote debug launcher!");
 		}
-		createRemoteDebugLauncher(project, lManager, debug_configType, elem.getStrTarget(), sPath, sDebugName, sysroot_str);
-
+		
+		createRemoteDebugLauncher(project, lManager, debug_configType, target_str, sPath, sDebugName, sysroot_str);
 		ArrayList<String> listValue = new ArrayList<String>();
 		listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
 

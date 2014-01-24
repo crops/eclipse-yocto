@@ -40,7 +40,7 @@ public class ShellSession {
 	 */
 	public static final String TERMINATOR = "#234o987dsfkcqiuwey18837032843259d";
 	public static final String LT = System.getProperty("line.separator");
-	public static final String exportCmd = "export BB_ENV_EXTRAWHITE=\"DISABLE_SANITY_CHECKS $BB_ENV_EXTRAWHITE\"";
+	public static final String exportCmd = "export BB_ENV_EXTRAWHITE=\\\"DISABLE_SANITY_CHECKS $BB_ENV_EXTRAWHITE\\\"";
 	public static final String exportColumnsCmd = "export COLUMNS=1000";
 	private static final String BUILD_DIR = "/build/";
 

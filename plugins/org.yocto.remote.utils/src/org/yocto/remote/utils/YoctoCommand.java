@@ -29,7 +29,7 @@ public class YoctoCommand {
 	}
 
 	public void setCommand(String command) {
-		this.command = command;
+		this.command = "bash -l -c \"" + command + "\"";
 	}
 
 	public String getInitialDirectory() {

@@ -178,9 +178,10 @@
                 name="%config.debug.name"
                 parent="cdt.managedbuild.config.gnu.base">
                 <toolChain
-                    id="org.yocto.cmake.managedbuilder.toolchain.gnu.exe.debug"
-                    superClass="org.yocto.cmake.managedbuilder.toolchain.gnu.exe"
-                    supportsManagedBuild="true">
+                      id="org.yocto.cmake.managedbuilder.toolchain.gnu.exe.debug"
+                      languageSettingsProviders="org.yocto.cmake.managedbuilder.includeProvider"
+                      superClass="org.yocto.cmake.managedbuilder.toolchain.gnu.exe"
+                      supportsManagedBuild="true">
                     <targetPlatform
                         id="org.yocto.cmake.managedbuilder.target.gnu.exe.debug"
                         isAbstract="false"
@@ -279,5 +280,17 @@
             location="templates/projecttemplates/HelloWorldCPPCMakeProject/template.xml"
             projectType="org.yocto.sdk.ide.buildArtefact.cmake.exe">
         </template>
+    </extension>
+    <extension
+          point="org.eclipse.cdt.core.LanguageSettingsProvider">
+       <provider
+             id="org.yocto.cmake.managedbuilder.includeProvider"
+             name="IncludeProvider"
+             prefer-non-shared="false">
+          <entry
+                kind="includePath"
+                name="${Sysroot}/usr/include">
+          </entry>
+       </provider>
     </extension>
 </plugin>

@@ -12,6 +12,8 @@ package org.yocto.cmake.managedbuilder;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.cdt.managedbuilder.core.IBuilder;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
@@ -226,18 +228,13 @@ public class YoctoCMakeMakefileGenerator implements IManagedBuilderMakefileGener
 		toolchainCMakeFileContentAsString += "# only search in the paths provided so cmake doesnt pick\n"; //$NON-NLS-1$
 		toolchainCMakeFileContentAsString += "# up libraries and tools from the native build machine\n"; //$NON-NLS-1$
 
-		String findRootPathValue = YoctoSDKUtils.getEnvValue(project, "STAGING_DIR_HOST"); //$NON-NLS-1$
-		findRootPathValue += " "; //$NON-NLS-1$
-		findRootPathValue += YoctoSDKUtils.getEnvValue(project, "STAGING_DIR_NATIVE"); //$NON-NLS-1$
-		findRootPathValue += " "; //$NON-NLS-1$
-		findRootPathValue += YoctoSDKUtils.getEnvValue(project, "CROSS_DIR"); //$NON-NLS-1$
-		findRootPathValue += " "; //$NON-NLS-1$
-		findRootPathValue += YoctoSDKUtils.getEnvValue(project, "OECMAKE_PERLNATIVE_DIR"); //$NON-NLS-1$
-		findRootPathValue += " "; //$NON-NLS-1$
-		findRootPathValue += YoctoSDKUtils.getEnvValue(project, "OECMAKE_EXTRA_ROOT_PATH"); //$NON-NLS-1$
-		findRootPathValue += " "; //$NON-NLS-1$
-		findRootPathValue += YoctoSDKUtils.getEnvValue(project, "EXTERNAL_TOOLCHAIN"); //$NON-NLS-1$
-		toolchainCMakeFileContentAsString += createCMakeSetStatement("CMAKE_FIND_ROOT_PATH", findRootPathValue, null); //$NON-NLS-1$
+		List<String> findRootPathValues = Arrays.asList("STAGING_DIR_HOST", //$NON-NLS-1$
+														"STAGING_DIR_NATIVE", //$NON-NLS-1$
+														"CROSS_DIR", //$NON-NLS-1$
+														"OECMAKE_PERLNATIVE_DIR", //$NON-NLS-1$
+														"OECMAKE_EXTRA_ROOT_PATH", //$NON-NLS-1$
+														"EXTERNAL_TOOLCHAIN"); //$NON-NLS-1$
+		toolchainCMakeFileContentAsString += createCMakeSetStatement("CMAKE_FIND_ROOT_PATH", getFindRootPath(findRootPathValues), null); //$NON-NLS-1$
 
 		toolchainCMakeFileContentAsString += createCMakeSetStatement("CMAKE_FIND_ROOT_PATH_MODE_PROGRAM", "ONLY", null); //$NON-NLS-1$ //$NON-NLS-2$
 		toolchainCMakeFileContentAsString += createCMakeSetStatement("CMAKE_FIND_ROOT_PATH_MODE_LIBRARY", "ONLY", null); //$NON-NLS-1$ //$NON-NLS-2$
@@ -277,5 +274,19 @@ public class YoctoCMakeMakefileGenerator implements IManagedBuilderMakefileGener
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String getFindRootPath(List<String> values) {
+		String findRootPath = "";
+
+		for (String value : values) {
+			String pathValue = YoctoSDKUtils.getEnvValue(project, value);
+
+			if (pathValue.length() > 0) {
+				findRootPath += pathValue + " ";
+			}
+		}
+
+		return findRootPath;
 	}
 }

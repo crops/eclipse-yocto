@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.yocto.cmake.managedbuilder.job;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -124,10 +125,11 @@ public class ExecuteConfigureJob extends Job {
 		IOConsoleOutputStream cos =
 				ConsoleUtility.getConsoleOutput(YoctoCMakeMessages.getFormattedString("ExecuteConfigureJob.consoleName", //$NON-NLS-1$
 						project.getName()));
+		ByteArrayOutputStream ces = new ByteArrayOutputStream();
 		monitor.worked(1);
 
 		try {
-			return buildProject(monitor, cos);
+			return buildProject(monitor, cos, ces);
 		} catch (IOException e) {
 			if(e.getMessage().startsWith("Cannot run program \"cmake\"")) { //$NON-NLS-1$
 				Display.getDefault().asyncExec(new Runnable() {
@@ -158,16 +160,17 @@ public class ExecuteConfigureJob extends Job {
 	}
 
 	private IStatus buildProject(IProgressMonitor monitor,
-			OutputStream cos) throws IOException, InterruptedException {
+			OutputStream stdout, OutputStream stderr) throws IOException, InterruptedException {
 		monitor.subTask(
 				YoctoCMakeMessages.getString("ExecuteConfigureJob.buildingMakefile")); //$NON-NLS-1$
-		configureProcess.start(cos);
+		configureProcess.start(stdout, stderr);
 		int exitValue = configureProcess.waitForResultAndStop();
 		monitor.worked(15);
 
 		if (exitValue != 0) {
 			return new Status(Status.ERROR, Activator.PLUGIN_ID,
-					YoctoCMakeMessages.getString("ExecuteConfigureJob.error.buildFailed") + " " + exitValue); //$NON-NLS-1$ //$NON-NLS-2$
+					YoctoCMakeMessages.getFormattedString("ExecuteConfigureJob.error.buildFailed", //$NON-NLS-1$
+															stderr.toString().trim()));
 		}
 
 		return Status.OK_STATUS;

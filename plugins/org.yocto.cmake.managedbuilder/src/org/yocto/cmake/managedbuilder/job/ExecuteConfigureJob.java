@@ -11,6 +11,7 @@
 package org.yocto.cmake.managedbuilder.job;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -157,7 +158,7 @@ public class ExecuteConfigureJob extends Job {
 	}
 
 	private IStatus buildProject(IProgressMonitor monitor,
-			IOConsoleOutputStream cos) throws IOException, InterruptedException {
+			OutputStream cos) throws IOException, InterruptedException {
 		monitor.subTask(
 				YoctoCMakeMessages.getString("ExecuteConfigureJob.buildingMakefile")); //$NON-NLS-1$
 		configureProcess.start(cos);

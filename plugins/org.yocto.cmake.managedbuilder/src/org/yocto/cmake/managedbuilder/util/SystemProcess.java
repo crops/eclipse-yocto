@@ -24,6 +24,7 @@ public class SystemProcess {
 	private ProcessBuilder builder;
 	private Process process;
 	private StreamPipe outputRedirector;
+	private StreamPipe errorRedirector;
 
 	public SystemProcess(LinkedList<String> command) {
 		this(command, null);
@@ -47,7 +48,6 @@ public class SystemProcess {
 		if (workingDirectory != null) {
 			builder.directory(workingDirectory);
 		}
-		builder.redirectErrorStream(true);
 
 		if(additionalEnvironmentVariables != null && !additionalEnvironmentVariables.isEmpty()) {
 			builder.environment().putAll(additionalEnvironmentVariables);
@@ -56,8 +56,18 @@ public class SystemProcess {
 
 	public void start(OutputStream out) throws IOException {
 		if (builder != null) {
+			builder.redirectErrorStream(true);
 			process = builder.start();
 			outputRedirector = redirectOutput(process, out);
+		}
+	}
+
+	public void start(OutputStream out, OutputStream err) throws IOException {
+		if (builder != null) {
+			builder.redirectErrorStream(false);
+			process = builder.start();
+			outputRedirector = redirectOutput(process, out);
+			errorRedirector = redirectError(process, err, out);
 		}
 	}
 
@@ -69,11 +79,23 @@ public class SystemProcess {
 		process.waitFor();
 		outputRedirector.interrupt();
 
+		if (!builder.redirectErrorStream()) {
+			errorRedirector.interrupt();
+		}
+
 		return process.exitValue();
 	}
 
 	public void interrupt() {
 		process.destroy();
+	}
+
+	private StreamPipe redirectError(Process process, OutputStream errOut, OutputStream out) {
+		InputStream err = process.getErrorStream();
+		StreamPipe stderrPipe = new StreamPipe(err, errOut, out);
+		stderrPipe.start();
+
+		return stderrPipe;
 	}
 
 	private StreamPipe redirectOutput(Process process, OutputStream out) {

@@ -228,7 +228,9 @@ public class YoctoCMakeMakefileGenerator implements IManagedBuilderMakefileGener
 		toolchainCMakeFileContentAsString += "# only search in the paths provided so cmake doesnt pick\n"; //$NON-NLS-1$
 		toolchainCMakeFileContentAsString += "# up libraries and tools from the native build machine\n"; //$NON-NLS-1$
 
-		List<String> findRootPathValues = Arrays.asList("STAGING_DIR_HOST", //$NON-NLS-1$
+		List<String> findRootPathValues = Arrays.asList("OECORE_NATIVE_SYSROOT", //$NON-NLS-1$
+														"OECORE_TARGET_SYSROOT", //$NON-NLS-1$
+														"STAGING_DIR_HOST", //$NON-NLS-1$
 														"STAGING_DIR_NATIVE", //$NON-NLS-1$
 														"CROSS_DIR", //$NON-NLS-1$
 														"OECMAKE_PERLNATIVE_DIR", //$NON-NLS-1$

@@ -87,12 +87,12 @@ public class SystemProcess {
 
 	private class StreamPipe extends Thread {
 		private InputStream in;
-		private OutputStream out;
+		private OutputStream[] outputs;
 		boolean shutdown = false;
 
-		public StreamPipe(InputStream in, OutputStream out) {
+		public StreamPipe(InputStream in, OutputStream... outputs) {
 			this.in = in;
-			this.out = out;
+			this.outputs = outputs;
 		}
 
 		@Override
@@ -102,7 +102,9 @@ public class SystemProcess {
 
 			try {
 				while(!shutdown && ((length = in.read(buffer)) > -1)) {
-					out.write(buffer, 0, length);
+					for (OutputStream out : outputs) {
+						out.write(buffer, 0, length);
+					}
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

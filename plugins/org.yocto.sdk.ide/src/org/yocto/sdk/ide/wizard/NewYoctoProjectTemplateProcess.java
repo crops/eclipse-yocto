@@ -121,7 +121,7 @@ public class NewYoctoProjectTemplateProcess extends ProcessRunner {
 
 					project.delete(true, null);
 				}
-				throw new ProcessFailureException(YoctoSDKMessages.getFormattedString(PROJECT_NAME_ERROR, new Object[]{projectName, printIllegalChars()}));
+				throw new OperationCanceledException(YoctoSDKMessages.getFormattedString(PROJECT_NAME_ERROR, new Object[]{projectName, printIllegalChars()}));
 			}
 
 			if (!project.exists()) {

@@ -1,18 +1,20 @@
 #!/bin/sh
 
+export http_proxy=http://proxy.jf.intel.com:911
+
 help ()
 {
   echo "Build the Yocto Eclipse plugins"
-  echo "Usage: $0 [OPTIONS] BRANCH_NAME RELEASE_NAME [TAG_NAME]";
-  echo ""
+  echo "Usage: $0 [OPTIONS] (PLUGIN_BRANCH_NAME | PLUGIN_TAG_NAME) && (DOC_BRANCH_NAME | DOC_TAG_NAME)
+  RELEASE_NAME\n";
+  echo "Example: $0 plugin_branch doc_tag my_release"
   echo "Options:"
   echo "-h - display this help and exit"
   echo "-l - use local git repository"
   echo "BRANCH_NAME - git branch name to build upon"
-  echo "RELEAES_NAME - release name in the final output name"
-  echo "TAG_NAME - git tag name to build upon. defaults to HEAD if not set"
-  echo ""
-  echo "Example: $0 master r0 M1.1_rc1";
+  echo "RELEASE_NAME - release name in the final output name"
+  echo "TAG_NAME - git tag name to build upon\n"
+  echo "Example [branch]: $0 luna master r0";
   exit 1;
 }
 
@@ -68,6 +70,7 @@ check_env ()
 }
 
 USE_LOCAL_GIT_REPO=0
+
 while getopts ":lh" opt; do
 	case $opt in
 		h)
@@ -81,20 +84,14 @@ done
 shift $(($OPTIND - 1))
 
 
-if [ $# -ne 2 ] && [ $# -ne 3 ]; then 
+if [ $# -ne 3 ]; then
    help
 fi
 
-#milestone
-BRANCH=$1
-RELEASE=$2
 
-if [ "x" = "x${3}" ] 
-then
-    TAG="HEAD"
-else
-    TAG=$3
-fi
+PLUGIN_REF=$1
+DOC_REF=$2
+RELEASE=$3
 
 TOP=`pwd`
 
@@ -102,7 +99,7 @@ check_env
 
 #create tmp dir for build
 DATE=`date +%Y%m%d%H%M`
-BUILD_TOP=`echo ${BRANCH} | sed 's%/%-%'`
+BUILD_TOP=`echo $1 | sed 's%/%-%'`
 BUILD_TOP=${TOP}/${BUILD_TOP}_build_${DATE}
 rm -rf ${BUILD_TOP}
 mkdir ${BUILD_TOP} || fail $? "Create temporary build directory ${BUILD_TOP}"
@@ -110,9 +107,8 @@ BUILD_SRC=${BUILD_TOP}/src
 BUILD_DIR=${BUILD_TOP}/build
 mkdir ${BUILD_DIR} || fail $? "Create temporary build directory ${BUILD_DIR}"
 
-
 #git clone
-GIT_URL=git://git.pokylinux.org/eclipse-poky-kepler.git
+GIT_URL=http://git.yoctoproject.org/git/eclipse-poky-luna
 if [ $USE_LOCAL_GIT_REPO -eq 1 ]; then
 	SCRIPT_DIR=`dirname $0`
 	GIT_DIR=`readlink -f ${SCRIPT_DIR}/..`
@@ -120,22 +116,19 @@ if [ $USE_LOCAL_GIT_REPO -eq 1 ]; then
 fi
 
 GIT_DIR=${BUILD_SRC}
-#mkdir ${GIT_DIR}
-#cp -r features/ ${GIT_DIR}
-#cp -r plugins/ ${GIT_DIR}
-#cp -r tcf/ ${GIT_DIR}
+
 git clone ${GIT_URL} ${GIT_DIR} || fail $? "git clone ${GIT_URL}" 
+
 cd ${GIT_DIR}
-git checkout origin/${BRANCH} || fail $? "git checkout origin/${BRANCH}"
-git checkout ${TAG} || fail $? "git checkout ${TAG}"
+
+echo -e "\nChecking out ${PLUGIN_REF}\n"
+git checkout ${PLUGIN_REF} || fail $? "git checkout ${PLUGIN_REF}"
+
 cd ${TOP}
 
 # generate and add documentation
-if [ "${TAG}" = "HEAD" ]; then
-	${GIT_DIR}/scripts/generate-doc.sh ${BRANCH} ${GIT_DIR}
-else
-	${GIT_DIR}/scripts/generate-doc.sh -t ${TAG} ${GIT_DIR}
-fi
+echo "\nGenerate Yocto documentation\n"
+${GIT_DIR}/scripts/generate-doc.sh ${DOC_REF} ${GIT_DIR}
 
 #build 
 java -jar ${LAUNCHER} -application org.eclipse.ant.core.antRunner -buildfile ${BUILDFILE} -DbaseLocation=${ECLIPSE_BASE} -Dbuilder=${GIT_DIR}/features/org.yocto.bc.headless.build -DbuildDirectory=${BUILD_DIR} -DotherSrcDirectory=${GIT_DIR} -DbuildId=${RELEASE} || fail $? "normal build"

@@ -1,14 +1,14 @@
 #!/bin/sh
 
+export http_proxy=http://proxy.jf.intel.com:911
+
 help()
 {
 	echo "Generate and add eclipse help from yocto's documentation"
-	echo "Usage: $0 BRANCH_NAME PLUGIN_FOLDER"
-	echo "       $0 -t TAG_NAME PLUGIN_FOLDER"
-	echo ""
+	echo -e "Usage: $0 BRANCH_NAME | TAG_NAME PLUGIN_FOLDER\n"
 	echo "Options:"
 	echo "-h - display this help and exit"
-	echo "-t TAG_NAME - tag to build the documentation upon"
+	echo "TAG_NAME - tag to build the documentation upon"
 	echo "BRANCH_NAME - branch to build the documentation upon"
 	echo "PLUGIN_FOLDER - root folder of the eclipse-poky project"
 	exit 1
@@ -25,13 +25,10 @@ fail ()
 }
 
 CHECKOUT_TAG=0
-while getopts ":ht" opt; do
+while getopts ":h" opt; do
 	case $opt in
 		h)
 			help
-			;;
-		t)
-			CHECKOUT_TAG=1
 			;;
 	esac
 done
@@ -41,11 +38,6 @@ if [ $# -ne 2 ]; then
 	help
 fi
 
-if [ $CHECKOUT_TAG -eq 0 ]; then
-	REFERENCE=origin/$1
-else
-	REFERENCE=$1
-fi
 PLUGIN_FOLDER=`readlink -f $2`
 
 TOP=`pwd`
@@ -56,10 +48,11 @@ DOC_PLUGIN_DIR=${PLUGIN_FOLDER}/plugins/org.yocto.doc.user
 DOC_HTML_DIR=${DOC_PLUGIN_DIR}/html/
 
 # git clone
-DOC_GIT=git://git.yoctoproject.org/yocto-docs.git
+DOC_GIT=http://git.yoctoproject.org/git/yocto-docs
 git clone ${DOC_GIT} ${DOC_DIR} || fail $? "git clone ${DOC_GIT}"
 cd ${DOC_DIR}
-git checkout ${REFERENCE} || fail $? "git checkout ${REFERENCE}"
+
+git checkout $1 || fail $? "git checkout $1"
 COMMIT_ID=`git rev-parse HEAD`
 
 # build and copy

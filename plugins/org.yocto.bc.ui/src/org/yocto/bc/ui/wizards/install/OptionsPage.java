@@ -11,50 +11,34 @@
  *******************************************************************************/
 package org.yocto.bc.ui.wizards.install;
 
-import java.io.IOException;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.ptp.internal.remote.rse.core.RSEConnection;
 import org.eclipse.ptp.rdt.ui.wizards.RemoteProjectContentsLocationArea;
 import org.eclipse.ptp.rdt.ui.wizards.RemoteProjectContentsLocationArea.IErrorMessageReporter;
-import org.eclipse.ptp.remote.core.IRemoteConnection;
-import org.eclipse.ptp.internal.remote.rse.core.RSEConnection;
+import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.services.files.IFileService;
 import org.eclipse.rse.services.files.IHostFile;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
-
-import org.yocto.bc.ui.wizards.FiniteStateWizard;
 import org.yocto.bc.ui.wizards.FiniteStateWizardPage;
-import org.yocto.bc.ui.wizards.FiniteStateWizardPage.ValidationListener;
 import org.yocto.remote.utils.RemoteHelper;
 
 /**
@@ -74,6 +58,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 	private Composite top;
 
 	private RemoteProjectContentsLocationArea locationArea;
+	private BCErrorMessageReporter errorReporter ;
 
 	private ValidationListener validationListener;
 	private Text txtProjectName;
@@ -106,22 +91,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 		validationListener = new ValidationListener();
 		
 		txtProjectName.addModifyListener(validationListener);
-
-		IErrorMessageReporter errorReporter = new IErrorMessageReporter() {
-
-			@Override
-			public void reportError(String errorMessage, boolean infoOnly) {
-				setMessage(errorMessage);
-				if (validatePage()) {
-	                updateModel();
-	                setPageComplete(true);
-	                return;
-	            }
-
-	            setPageComplete(false);
-			}
-		};
-
+		errorReporter = new BCErrorMessageReporter() ;
 		locationArea = new RemoteProjectContentsLocationArea(errorReporter, top, null);
 
 		btnGit = new Button(top, SWT.CHECK);
@@ -324,4 +294,18 @@ public class OptionsPage extends FiniteStateWizardPage {
 		return true;
 	}
 	
+	class BCErrorMessageReporter implements IErrorMessageReporter{
+
+		@Override
+		public void reportError(String errorMessage, boolean infoOnly) {
+			setMessage(errorMessage);
+			if (validatePage()) {
+                updateModel();
+                setPageComplete(true);
+                return;
+            }
+
+            setPageComplete(false);
+		}
+	};
 }

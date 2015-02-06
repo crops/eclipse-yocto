@@ -4,6 +4,26 @@
 #comment out the following line if you wish to use your own http proxy settings
 PROXY=http://proxy.jf.intel.com:911
 
+
+help ()
+{
+  echo -e "\nThis script sets up the Yocto Project Eclipse plugins build environment"
+  echo -e "All files are downloaded from the Yocto Project mirror by default\n"
+  echo -e "Usage: $0 [--upstream]\n";
+  echo "Options:"
+  echo -e "--upstream - download from the upstream Eclipse repository\n"
+  echo -e "Example: $0 --upstream\n";
+  exit 1;
+}
+
+while getopts ":h" opt; do
+  case $opt in
+    h)
+      help
+      ;;
+  esac
+done
+
 err_exit() 
 {
   echo "[FAILED $1]$2"
@@ -72,12 +92,11 @@ if [ ! -f eclipse/plugins/org.eclipse.swt_3.103.1.v20140903-1938.jar ]; then
   # Eclipse SDK: Need the SDK so we can link into docs
   echo -e "\nPlease wait. Downloading Eclipse SDK ${ep_rel}${ep_ver}${ep_date} \n"
 
-#TODO - update mirror URL
-  if [[ "$1" = "--mirror" ]]
+  if [[ "$1" = "--upstream" ]]
   then
-        wget "http://downloads.yoctoproject.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
-  else
         wget "http://download.eclipse.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
+  else
+        wget "http://downloads.yoctoproject.org/eclipse/downloads/drops4/${ep_rel}${ep_ver}${ep_date}/eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz"
   fi
 
   echo -e "Please wait. Extracting Eclipse SDK: eclipse-SDK-${ep_ver}-${ep_arch}.tar.gz\n"
@@ -201,13 +220,12 @@ update_feature_remote()
     -installIU ${installIU} || err_exit $? "installing ${installIU} failed"
 }
 
-#TODO - update yocto mirror
 #Eclipse Update Site
-if [[ "$1" = "--mirror" ]]
+if [[ "$1" = "--upstream" ]]
 then
-        UPDATE_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
-else
         UPDATE_SITE="http://download.eclipse.org/releases/luna"
+else
+        UPDATE_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
 fi
 
 #CDT related

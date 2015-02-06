@@ -220,52 +220,59 @@ update_feature_remote()
     -installIU ${installIU} || err_exit $? "installing ${installIU} failed"
 }
 
-#Eclipse Update Site
+#Main Site
 if [[ "$1" = "--upstream" ]]
 then
-        UPDATE_SITE="http://download.eclipse.org/releases/luna"
+        MAIN_SITE="http://download.eclipse.org/releases/luna"
 else
-        UPDATE_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
+        MAIN_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
 fi
+
+#Update Site - always use updates from upstream
+UPDATE_SITE="http://download.eclipse.org/eclipse/updates/4.4"
 
 #CDT related
 echo -e "\nPlease wait. Installing CDT.SDK.FEATURE.GROUP"
 CDTFEAT="8.5.0"
-update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
+update_feature_remote ${MAIN_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
 
 echo -e "\nPlease wait. Installing CDT.LAUNCH.REMOTE.FEATURE.GROUP"
 CDTREMOTEVER="8.5.0"
-update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
+update_feature_remote ${MAIN_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
 
 #RSE SDK
 
 echo -e "\nPlease wait. Installing RSE.FEATURE.GROUP"
 RSEVER="3.5.0"
-update_feature_remote ${UPDATE_SITE} org.eclipse.rse.feature.group ${RSEVER}
+update_feature_remote ${MAIN_SITE} org.eclipse.rse.feature.group ${RSEVER}
 
 echo -e "\nPlease wait. Installing TM.TERMINAL.SDK.FEATURE.GROUP"
 TMVER="3.3.1"
-update_feature_remote ${UPDATE_SITE} org.eclipse.tm.terminal.sdk.feature.group ${TMVER}
+update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.sdk.feature.group ${TMVER}
 
 #AUTOTOOLS
 echo -e "\nPlease wait. Installing AUTOTOOLS.FEATURE.GROUP"
 ATVER="8.5.0"
-update_feature_remote ${UPDATE_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
+update_feature_remote ${MAIN_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
 
 
 #Lttng2 
 TMF_CTF_REL="3.1.0"
 echo -e "\nPlease wait. Installing TMF.CTF.FEATURE.GROUP"
-update_feature_remote ${UPDATE_SITE} org.eclipse.linuxtools.tmf.ctf.feature.group ${TMF_CTF_REL}
+update_feature_remote ${MAIN_SITE} org.eclipse.linuxtools.tmf.ctf.feature.group ${TMF_CTF_REL}
 
 #PTP RDT
 echo -e "\nPlease wait. Installing PTP.FEATURE.GROUP"
 PTPVER="8.0.0"
-update_feature_remote ${UPDATE_SITE} org.eclipse.ptp.feature.group ${PTPVER}
+update_feature_remote ${MAIN_SITE} org.eclipse.ptp.feature.group ${PTPVER}
 
 echo -e "\nPlease wait. Installing PTP.RDT.FEATURE.GROUP"
 RDTVER="8.0.0"
-update_feature_remote ${UPDATE_SITE} org.eclipse.ptp.rdt.feature.group ${RDTVER}
+update_feature_remote ${MAIN_SITE} org.eclipse.ptp.rdt.feature.group ${RDTVER}
+
+echo -e "\nPlease wait. Installing OSGI.COMPATIBILITY.PLUGINS.FEATURE.FEATURE.GROUP"
+COMPAT_VER="1.0.0"
+update_feature_remote ${UPDATE_SITE} org.eclipse.osgi.compatibility.plugins.feature.feature.group ${COMPAT_VER}
 
 echo -e "\nYour build environment is successfully created."
 

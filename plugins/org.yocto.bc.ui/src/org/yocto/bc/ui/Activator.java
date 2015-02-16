@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.yocto.bc.ui;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
@@ -19,8 +18,8 @@ import java.net.URI;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -32,14 +31,14 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.rse.services.files.IHostFile;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-
 import org.yocto.bc.bitbake.BBRecipe;
 import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.bitbake.ProjectInfoHelper;
 import org.yocto.bc.bitbake.ShellSession;
 import org.yocto.bc.ui.model.ProjectInfo;
-import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
 import org.yocto.remote.utils.RemoteHelper;
+import org.yocto.sdk.ide.preferences.LoggerConstants;
+import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
 public class Activator extends AbstractUIPlugin {
 
@@ -54,6 +53,7 @@ public class Activator extends AbstractUIPlugin {
 	private static Map<URI, ProjectInfo> projInfoMap;
 	private static Hashtable bbSessionMap;
 	private static Hashtable bbRecipeMap;
+	public static Logger logger ;
 
 	private IResourceChangeListener listener = new BCResourceChangeListener();
 
@@ -224,6 +224,8 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(
 			      listener, IResourceChangeEvent.POST_CHANGE);
+		logger = YoctoSDKUtils.registerLogger(LoggerConstants.BC_LOGGER_NAME, LoggerConstants.BC_LOG_FILE) ;
+
 	}
 
 	/*
@@ -236,6 +238,7 @@ public class Activator extends AbstractUIPlugin {
 			      listener);
 		plugin = null;
 		super.stop(context);
+		YoctoSDKUtils.unRegisterLogger(logger, LoggerConstants.BC_LOG_FILE) ;
 	}
 
 	/**

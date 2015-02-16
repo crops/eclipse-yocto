@@ -295,17 +295,15 @@ public class OptionsPage extends FiniteStateWizardPage {
 	}
 	
 	class BCErrorMessageReporter implements IErrorMessageReporter{
-
 		@Override
 		public void reportError(String errorMessage, boolean infoOnly) {
 			setMessage(errorMessage);
 			if (validatePage()) {
-                updateModel();
-                setPageComplete(true);
-                return;
-            }
-
-            setPageComplete(false);
+				updateModel();
+				setPageComplete(true);
+				return;
+			}
+			setPageComplete(false);
 		}
 	};
 }

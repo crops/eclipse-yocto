@@ -11,6 +11,7 @@
 package org.yocto.sdk.ide;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Logger;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +24,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
+import org.yocto.sdk.ide.preferences.LoggerConstants;
+import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -34,6 +37,7 @@ public class YoctoSDKPlugin extends AbstractUIPlugin {
 
 	// The shared instance
 	private static YoctoSDKPlugin plugin;
+	public static Logger logger ;
 	
 	/**
 	 * The constructor
@@ -48,6 +52,7 @@ public class YoctoSDKPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		logger = YoctoSDKUtils.registerLogger(LoggerConstants.ADT_LOGGER_NAME, LoggerConstants.ADT_LOG_FILE) ;
 	}
 
 	/*
@@ -57,6 +62,7 @@ public class YoctoSDKPlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+		YoctoSDKUtils.unRegisterLogger(logger, LoggerConstants.ADT_LOG_FILE) ;
 	}
 
 	/**

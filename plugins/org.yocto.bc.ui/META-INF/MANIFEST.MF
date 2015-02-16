@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.rse.services;bundle-version="3.3.0",
  org.eclipse.remote.core;bundle-version="1.0.0",
  org.eclipse.ptp.rdt.ui,
- org.eclipse.ptp.remote.rse.core;bundle-version="5.0.1"
+ org.eclipse.ptp.remote.rse.core;bundle-version="5.0.1",
+ org.yocto.sdk.ide;bundle-version="1.4.0"
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
 Import-Package: org.eclipse.rse.core.subsystems,

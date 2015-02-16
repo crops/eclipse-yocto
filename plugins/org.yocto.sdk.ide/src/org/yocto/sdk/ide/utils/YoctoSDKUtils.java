@@ -23,6 +23,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.envvar.IContributedEnvironment;
@@ -47,6 +52,7 @@ import org.yocto.sdk.ide.YoctoSDKPlugin;
 import org.yocto.sdk.ide.YoctoUIElement;
 import org.yocto.sdk.ide.natures.YoctoSDKCMakeProjectNature;
 import org.yocto.sdk.ide.natures.YoctoSDKEmptyProjectNature;
+import org.yocto.sdk.ide.preferences.LoggerConstants;
 import org.yocto.sdk.ide.preferences.PreferenceConstants;
 
 public class YoctoSDKUtils {
@@ -195,7 +201,7 @@ public class YoctoSDKUtils {
 		return envSetupFile;
 	}
 
-	private static HashMap<String, String> parseEnvScript(String sFileName) {
+	public static HashMap<String, String> parseEnvScript(String sFileName) {
 		try {
 			HashMap<String, String> envMap = new HashMap<String, String>();
 			File file = new File(sFileName);
@@ -459,5 +465,38 @@ public class YoctoSDKUtils {
 		String selectedProfile = store.getString(PreferenceConstants.SELECTED_PROFILE);
 
 		return new YoctoProfileElement(profiles, selectedProfile);
+	}
+
+	public static Logger registerLogger(String logger_name, String log_file) {
+		Logger logger = null;
+		if (System.getenv(LoggerConstants.ENV_LOG_FILE) != null) {
+			try {
+				Handler handler = new FileHandler(log_file, LoggerConstants.LOG_SIZE, LoggerConstants.LOG_COUNT, true);
+				logger = Logger.getLogger(logger_name) ;
+				handler.setFormatter(new SimpleFormatter());
+				logger.addHandler(handler);
+				logger.log(Level.INFO, "Registered logger : " + logger_name + " Log File: [" + log_file + "]");
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Logging is not enabled. Set ENABLE_ADT_LOGS=1 environment variable to enable the logger") ;
+		}
+		return logger ;
+	}
+
+	public static void unRegisterLogger(Logger logger, String log_file) {
+		if (System.getenv(LoggerConstants.ENV_LOG_FILE) != null) {
+			logger.log(Level.INFO, "Unregistered logger : " + logger.getName() + " Log file: [" + log_file + "]");
+			Handler[] handlers = logger.getHandlers() ;
+			if(handlers != null) {
+				for (Handler handler : handlers) {
+					handler.close();
+					logger.removeHandler(handler);
+				}
+			}
+		}
 	}
 }

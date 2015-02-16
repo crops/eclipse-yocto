@@ -127,7 +127,7 @@ git checkout ${PLUGIN_REF} || fail $? "git checkout ${PLUGIN_REF}"
 cd ${TOP}
 
 # generate and add documentation
-echo "\nGenerate Yocto documentation\n"
+echo -e "\nGenerate Yocto documentation\n"
 ${GIT_DIR}/scripts/generate-doc.sh ${DOC_REF} ${GIT_DIR}
 
 #build 

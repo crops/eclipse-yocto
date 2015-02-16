@@ -275,7 +275,9 @@ COMPAT_VER="1.0.0"
 update_feature_remote ${UPDATE_SITE} org.eclipse.osgi.compatibility.plugins.feature.feature.group ${COMPAT_VER}
 
 echo -e "\nYour build environment is successfully created."
+echo -e "\nPlease execute the following command to build the plugins and their documentation."
+echo -e "\nThe build log will be stored at `pwd`/build.log."
 
-echo -e "\nRun ECLIPSE_HOME=`pwd`/eclipse `dirname $0`/build.sh <plugin branch or tag name> <documentation branch or tag name> <release name> to build the plugin and its documentation\n"
+echo -e "\nECLIPSE_HOME=`pwd`/eclipse `dirname $0`/build.sh <plugin branch or tag name> <documentation branch or tag name> <release name> 2>&1 | tee -a build.log\n"
 
 exit 0

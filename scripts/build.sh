@@ -108,7 +108,7 @@ BUILD_DIR=${BUILD_TOP}/build
 mkdir ${BUILD_DIR} || fail $? "Create temporary build directory ${BUILD_DIR}"
 
 #git clone
-GIT_URL=http://git.yoctoproject.org/git/eclipse-poky-luna
+GIT_URL=http://git.yoctoproject.org/git/eclipse-poky
 if [ $USE_LOCAL_GIT_REPO -eq 1 ]; then
 	SCRIPT_DIR=`dirname $0`
 	GIT_DIR=`readlink -f ${SCRIPT_DIR}/..`

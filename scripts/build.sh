@@ -1,6 +1,8 @@
 #!/bin/sh
 
-export http_proxy=http://proxy.jf.intel.com:911
+#setup Yocto Eclipse plug-in build environment for Luna
+#comment out the following line if you wish to use your own http proxy settings
+#export http_proxy=http://proxy.yourproxyinfo.com:8080
 
 help ()
 {

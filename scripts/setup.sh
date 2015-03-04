@@ -2,7 +2,7 @@
 
 #setup Yocto Eclipse plug-in build environment for Luna
 #comment out the following line if you wish to use your own http proxy settings
-PROXY=http://proxy.jf.intel.com:911
+#PROXY=http://proxy.yourproxyinfo.com:8080
 
 
 help ()

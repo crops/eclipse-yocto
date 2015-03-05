@@ -1,1 +1,4 @@
 bin
+plugins/.metadata/
+plugins/RemoteSystemsTempFiles/
+runtime-EclipseApplication/

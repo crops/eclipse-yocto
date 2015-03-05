@@ -2,8 +2,7 @@
 
 #setup Yocto Eclipse plug-in build environment for Luna
 #comment out the following line if you wish to use your own http proxy settings
-#PROXY=http://proxy.yourproxyinfo.com:8080
-
+#export http_proxy=http://proxy.yourproxyinfo.com:8080
 
 help ()
 {
@@ -53,7 +52,7 @@ command -v wget > /dev/null 2>&1 || { echo >&2 "wget not found. Aborting install
 command -v tar > /dev/null 2>&1 || { echo >&2 "tar not found. Aborting installation."; exit 1; }
 
 #parsing proxy URLS
-url=${PROXY}
+url=${http_proxy}
 if [ "x$url" != "x" ]; then
     proto=`echo $url | grep :// | sed -e 's,^\(.*://\).*,\1,g'`
     url=`echo $url | sed s,$proto,,g`

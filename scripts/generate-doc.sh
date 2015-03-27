@@ -58,14 +58,6 @@ DOCS="yocto-project-qs adt-manual kernel-dev \
       bsp-guide ref-manual dev-manual profile-manual"
 
 cd documentation
-ECLIPSE_TARGET_AVAILABLE=`make -q eclipse &> /dev/null; echo $?`
-if [ ${ECLIPSE_TARGET_AVAILABLE} -ne 1 ]; then
-	echo "WARNING:"
-	echo "This version does not support generating eclipse help"
-	echo "Documentation will not be available in eclipse"
-	exit 1
-fi
-
 for DOC in ${DOCS}; do
 	make DOC=${DOC} eclipse
 	cp -rf ${DOC}/eclipse/html/* ${DOC_HTML_DIR}

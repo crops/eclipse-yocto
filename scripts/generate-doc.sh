@@ -1,7 +1,5 @@
 #!/bin/sh
 
-export http_proxy=http://proxy.jf.intel.com:911
-
 help()
 {
 	echo "Generate and add eclipse help from yocto's documentation"

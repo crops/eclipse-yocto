@@ -1,16 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2013 Intel Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * Maps BB Variables in the editor to BBSession
+ * @author kgilmer
  *
- * Contributors:
- * Intel - initial API and implementation
- *******************************************************************************/
+ */
+
 package org.yocto.bc.ui.editors.bitbake;
 
-import java.net.URI;
+import java.io.File;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,34 +17,26 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+
 import org.yocto.bc.bitbake.BBRecipe;
 import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.ui.Activator;
 
-/**
- * Maps BB Variables in the editor to BBSession
- * @author kgilmer
- *
- */
 class BBVariableTextHover implements ITextHover {
 	private final BBSession session;
-	private volatile Map<String, String> envMap;
+	private volatile Map envMap;
 
-	public BBVariableTextHover(BBSession session, URI file) {
+	public BBVariableTextHover(BBSession session, String file) {
 		this.session = session;
-		envMap = getEnvironmentMap();
+		envMap = session;
 		LoadRecipeJob loadRecipeJob = new LoadRecipeJob(getFilename(file), file);
 		loadRecipeJob.schedule();
 	}
 
-	private Map<String, String> getEnvironmentMap() {
-		if (envMap == null)
-			envMap = this.session.getProperties();
-		return envMap;
-	}
+	private String getFilename(String file) {
+		String [] elems = file.split(File.separator);
 
-	private String getFilename(URI uri) {
-		return uri.getPath();
+		return elems[elems.length - 1];
 	}
 
 	public IRegion getHoverRegion(ITextViewer tv, int off) {
@@ -90,7 +78,7 @@ class BBVariableTextHover implements ITextHover {
 		}
 		
 		String key = new String(line, start + 2, i - start - 2);
-		String val = (String) getEnvironmentMap().get(key);
+		String val = (String) envMap.get(key);
 		
 		if (val == null) {
 			val = "";
@@ -104,9 +92,9 @@ class BBVariableTextHover implements ITextHover {
 	}
 	
 	private class LoadRecipeJob extends Job {
-		private final URI filePath;
+		private final String filePath;
 
-		public LoadRecipeJob(String name, URI filePath) {
+		public LoadRecipeJob(String name, String filePath) {
 			super("Extracting BitBake environment for " + name);
 			this.filePath = filePath;
 		}

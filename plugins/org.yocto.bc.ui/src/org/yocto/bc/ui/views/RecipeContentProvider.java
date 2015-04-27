@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2013 Ken Gilmer, Intel Corporation
+ * Copyright (c) 2009 Ken Gilmer
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +7,6 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
- *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.views;
 
@@ -52,7 +51,7 @@ class RecipeContentProvider implements IStructuredContentProvider {
 	}
 
 	private Collection getRecipesFromProject(IProject project) throws Exception {
-		BBSession session = Activator.getBBSession(Activator.getProjInfo(project.getLocationURI()), null);
+		BBSession session = Activator.getBBSession(project.getLocationURI().getPath(), null);
 		return session.getRecipeFiles(project);
 	}
 

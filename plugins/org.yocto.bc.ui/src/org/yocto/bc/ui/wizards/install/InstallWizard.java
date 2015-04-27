@@ -11,32 +11,41 @@
  *******************************************************************************/
 package org.yocto.bc.ui.wizards.install;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.remote.core.IRemoteConnection;
-import org.eclipse.remote.core.IRemoteServices;
-import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWizard;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
-import org.yocto.bc.remote.utils.ConsoleWriter;
-import org.yocto.bc.remote.utils.YoctoRunnableWithProgress;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.wizards.FiniteStateWizard;
 import org.yocto.bc.ui.wizards.newproject.BBConfigurationInitializeOperation;
 import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
-import org.yocto.remote.utils.CommandResponseHandler;
-import org.yocto.remote.utils.RemoteHelper;
-import org.yocto.remote.utils.YoctoCommand;
+import org.yocto.remote.utils.ICommandResponseHandler;
 
 /**
  * A wizard for installing a fresh copy of an OE system.
@@ -57,9 +66,6 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String INSTALL_DIRECTORY = "Install Directory";
 	protected static final String INIT_SCRIPT = "Init Script";
 
-	protected static final String SELECTED_CONNECTION = "SEL_CONNECTION";
-	protected static final String SELECTED_REMOTE_SERVICE = "SEL_REMOTE_SERVICE";
-
 	protected static final String PROJECT_NAME = "Project Name";
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
 	protected static final String DEFAULT_INSTALL_DIR = "~/yocto";
@@ -69,7 +75,6 @@ public class InstallWizard extends FiniteStateWizard implements
 
 	private Map model;
 	private MessageConsole myConsole;
-	private OptionsPage optionsPage;
 
 	public InstallWizard() {
 		this.model = new Hashtable();
@@ -78,9 +83,31 @@ public class InstallWizard extends FiniteStateWizard implements
 		
 		setWindowTitle("Yocto Project BitBake Commander");
 		setNeedsProgressMonitor(true);
+		myConsole = findConsole("Yocto Project Console");
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+		IWorkbenchPage page = win.getActivePage();
+		String id = IConsoleConstants.ID_CONSOLE_VIEW;
+		try {
+			IConsoleView view = (IConsoleView) page.showView(id);
+			view.display(myConsole);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-
+	private MessageConsole findConsole(String name) {
+		ConsolePlugin plugin = ConsolePlugin.getDefault();
+		IConsoleManager conMan = plugin.getConsoleManager();
+		IConsole[] existing = conMan.getConsoles();
+		for (int i = 0; i < existing.length; i++)
+			if (name.equals(existing[i].getName()))
+				return (MessageConsole) existing[i];
+		// no console found, so create a new one
+		MessageConsole myConsole = new MessageConsole(name, null);
+		conMan.addConsoles(new IConsole[] { myConsole });
+		return myConsole;
+	}
 
 	public InstallWizard(IStructuredSelection selection) {
 		model = new Hashtable();
@@ -103,8 +130,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	 */
 	@Override
 	public void addPages() {
-		optionsPage = new OptionsPage(model);
-		addPage(optionsPage);
+		addPage(new OptionsPage(model));
 	}
 
 	@Override
@@ -114,69 +140,61 @@ public class InstallWizard extends FiniteStateWizard implements
 
 	@Override
 	public boolean performFinish() {
+		BCCommandResponseHandler cmdOut = new BCCommandResponseHandler(
+				myConsole);
+
 		WizardPage page = (WizardPage) getPage("Options");
 		page.setPageComplete(true);
-		Map<String, Object> options = model;
+		Map options = (Map) model;
+		String install_dir = "";
+		if (options.containsKey(INSTALL_DIRECTORY)) {
+			install_dir = (String) options.get(INSTALL_DIRECTORY);
+		}
 
 		try {
-			URI uri = new URI("");
-			if (options.containsKey(INSTALL_DIRECTORY)) {
-				uri = (URI) options.get(INSTALL_DIRECTORY);
-			}
-			IRemoteConnection remoteConnection = ((IRemoteConnection)model.get(InstallWizard.SELECTED_CONNECTION));
-			IRemoteServices remoteServices = ((IRemoteServices)model.get(InstallWizard.SELECTED_REMOTE_SERVICE));
-			IHost connection = RemoteHelper.getRemoteConnectionByName(remoteConnection.getName());
-			CommandResponseHandler cmdHandler = new CommandResponseHandler(RemoteHelper.getConsole(connection));
-			IWizardContainer container = this.getContainer();
 			if (((Boolean)options.get(GIT_CLONE)).booleanValue()) {
-				String cmd = "git clone --progress git://git.yoctoproject.org/poky.git " + uri.getPath();
-				String taskName = "Checking out Yocto git repository";
+				String []git_clone_cmd = {"git", "clone", "--progress", "git://git.pokylinux.org/poky.git", install_dir};
+				final Pattern pattern = Pattern.compile("^Receiving objects:\\s*(\\d+)%.*");
 
-				YoctoRunnableWithProgress adapter = new YoctoRunnableWithProgress(new YoctoCommand(cmd, "", ""));
-
-				adapter.setRemoteConnection(remoteConnection);
-				adapter.setRemoteServices(remoteServices);
-				adapter.setTaskName(taskName);
-				try {
-					container.run(true, true, adapter);
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				this.getContainer().run(true,true,
+						new LongtimeRunningTask("Checking out Yocto git repository",
+							git_clone_cmd, null, null,
+							cmdOut,
+							new ICalculatePercentage() {
+								public float calWorkloadDone(String info) throws IllegalArgumentException {
+									Matcher m=pattern.matcher(info.trim());
+									if(m.matches()) {
+										return new Float(m.group(1)) / 100;
+									}else {
+										throw new IllegalArgumentException();
+									}
+								}
+							}
+						)
+				);
 			}
-			if (!cmdHandler.hasError()) {
-				String initPath = "";
-				if (uri.getPath() != null) {
-					 initPath = uri.getPath() + "/" + (String) options.get(INIT_SCRIPT);
-				} else {
-					initPath = uri.getFragment() + "/" + (String) options.get(INIT_SCRIPT);
-				}
+
+			if (!cmdOut.hasError()) {
+
+				String initPath = install_dir + "/"
+						+ (String) options.get(INIT_SCRIPT);
 				String prjName = (String) options.get(PROJECT_NAME);
 				ProjectInfo pinfo = new ProjectInfo();
 				pinfo.setInitScriptPath(initPath);
-				pinfo.setLocationURI(uri);
+				pinfo.setLocation(install_dir);
 				pinfo.setName(prjName);
-				pinfo.setConnection(connection);
-				pinfo.setRemoteServices(remoteServices);
 
-				final ConsoleWriter cw = new ConsoleWriter();
-				BBConfigurationInitializeOperation configInitOp = new BBConfigurationInitializeOperation(pinfo, null);
-				container.run(false, false, configInitOp);
-				myConsole = RemoteHelper.getConsole(connection);
+				ConsoleWriter cw = new ConsoleWriter();
+				this.getContainer().run(false, false,
+						new BBConfigurationInitializeOperation(pinfo, cw));
+
 				myConsole.newMessageStream().println(cw.getContents());
 
-				if (configInitOp.hasErrorOccured()) {
-					optionsPage.setErrorMessage(configInitOp.getErrorMessage());
-					return false;
-				}
-
 				model.put(InstallWizard.KEY_PINFO, pinfo);
-				Activator.putProjInfo(pinfo.getOEFSURI(), pinfo);
+				Activator.putProjInfo(pinfo.getRootPath(), pinfo);
 
-				container.run(false, false, new CreateBBCProjectOperation(pinfo));
-				RemoteHelper.storeURIInMetaArea(pinfo.getProjectName(), uri);
-				RemoteHelper.storeProjDescrInMetaArea(pinfo.getConnection(), pinfo.getProjectName(), pinfo.getOriginalURI().getPath());
+				this.getContainer().run(false, false,
+						new CreateBBCProjectOperation(pinfo));
 				return true;
 			}
 		} catch (Exception e) {
@@ -189,6 +207,194 @@ public class InstallWizard extends FiniteStateWizard implements
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
+	}
+
+	private interface ICalculatePercentage {
+		public float calWorkloadDone(String info) throws IllegalArgumentException;
+	}
+
+	private class LongtimeRunningTask implements IRunnableWithProgress {
+		private String []cmdArray;
+		private String []envp;
+		private File dir;
+		private ICommandResponseHandler handler;
+		private Process p;
+		private String taskName;
+		static public final int TOTALWORKLOAD=100;
+		private int reported_workload;
+		ICalculatePercentage cal;
+
+		public LongtimeRunningTask(String taskName,
+				String []cmdArray, String []envp, File dir,
+				ICommandResponseHandler handler,
+				ICalculatePercentage calculator) {
+			this.taskName=taskName;
+			this.cmdArray=cmdArray;
+			this.envp=envp;
+			this.dir=dir;
+			this.handler=handler;
+			this.p=null;
+			this.cal=calculator;
+		}
+
+		private void reportProgress(IProgressMonitor monitor,String info) {
+			if(cal == null) {
+				monitor.worked(1);
+			}else {
+				float percentage;
+				try {
+					percentage=cal.calWorkloadDone(info);
+				} catch (IllegalArgumentException e) {
+					//can't get percentage
+					return;
+				}
+				int delta=(int) (TOTALWORKLOAD * percentage - reported_workload);
+				if( delta > 0 ) {
+					monitor.worked(delta);
+					reported_workload += delta;
+				}
+			}
+		}
+
+		synchronized public void run(IProgressMonitor monitor)
+				throws InvocationTargetException, InterruptedException {
+
+			boolean cancel=false;
+			reported_workload=0;
+
+			try {
+				monitor.beginTask(taskName, TOTALWORKLOAD);
+
+				p=Runtime.getRuntime().exec(cmdArray,envp,dir);
+				BufferedReader inbr = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				BufferedReader errbr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+				String info;
+				while (!cancel) {
+					if(monitor.isCanceled())
+					{
+						cancel=true;
+						throw new InterruptedException("User Cancelled");
+					}
+
+					info=null;
+					//reading stderr
+					while (errbr.ready()) {
+						info=errbr.readLine();
+						//some application using stderr to print out information
+						handler.response(info, false);
+					}
+					//reading stdout
+					while (inbr.ready()) {
+						info=inbr.readLine();
+						handler.response(info, false);
+					}
+
+					//report progress
+					if(info!=null)
+						reportProgress(monitor,info);
+
+					//check if exit
+					try {
+						int exitValue=p.exitValue();
+						if (exitValue != 0) {
+							handler.response(
+									taskName + " failed with the return value " + new Integer(exitValue).toString(),
+									true);
+						}
+						break;
+					}catch (IllegalThreadStateException e) {
+					}
+
+					Thread.sleep(500);
+				}
+			} catch (IOException e) {
+				throw new InvocationTargetException(e);
+			} finally {
+				monitor.done();
+				if (p != null ) {
+					p.destroy();
+				}
+			}
+		}
+	}
+
+	private class BCCommandResponseHandler implements ICommandResponseHandler {
+		private MessageConsoleStream myConsoleStream;
+		private Boolean errorOccured = false;
+
+		public BCCommandResponseHandler(MessageConsole console) {
+			try {
+				this.myConsoleStream = console.newMessageStream();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void printDialog(String msg) {
+			try {
+				myConsoleStream.println(msg);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public Boolean hasError() {
+			return errorOccured;
+		}
+
+		public void response(String line, boolean isError) {
+			try {
+				if (isError) {
+					myConsoleStream.println(line);
+					errorOccured = true;
+				} else {
+					myConsoleStream.println(line);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public void printCmd(String cmd) {
+			try {
+				myConsoleStream.println(cmd);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private class ConsoleWriter extends Writer {
+
+		private StringBuffer sb;
+
+		public ConsoleWriter() {
+			sb = new StringBuffer();
+		}
+
+		@Override
+		public void close() throws IOException {
+		}
+
+		public String getContents() {
+			return sb.toString();
+		}
+
+		@Override
+		public void flush() throws IOException {
+		}
+
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException {
+			// txtConsole.getText().concat(new String(cbuf));
+			sb.append(cbuf);
+		}
+
+		@Override
+		public void write(String str) throws IOException {
+			sb.append(str);
+		}
+
 	}
 
 }

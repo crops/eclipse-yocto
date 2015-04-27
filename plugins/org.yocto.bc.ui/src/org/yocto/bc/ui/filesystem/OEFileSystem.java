@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2013 Ken Gilmer, Intel Corporation
+ * Copyright (c) 2009 Ken Gilmer
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,12 +7,10 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
- *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.filesystem;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -22,12 +20,9 @@ import java.util.Map;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.IFileSystem;
 import org.eclipse.core.filesystem.provider.FileSystem;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
+
 import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.ui.Activator;
-import org.yocto.bc.ui.model.ProjectInfo;
 
 /**
  * A filesystem that ignores specific OE directories that contain derived information.
@@ -37,8 +32,6 @@ import org.yocto.bc.ui.model.ProjectInfo;
 public class OEFileSystem extends FileSystem {
 
 	private static IFileSystem ref;
-	private ProjectInfo projInfo;
-
 	public static IFileSystem getInstance() {
 		return ref;
 	}
@@ -54,15 +47,15 @@ public class OEFileSystem extends FileSystem {
 	public IFileStore getStore(URI uri) {
 		
 		OEFile uf = (OEFile) fileStoreCache.get(uri);
-		setProjInfo(uri);
 		
 		if (uf == null) {
 			BBSession config = null;
 			try {
-				config = Activator.getBBSession(projInfo, new NullProgressMonitor());
+				config = Activator.getBBSession(uri.getPath());
 				config.initialize();
 			} catch (Exception e) {
-				return new CustomLocalFile(projInfo.getProjectName(), new File(uri.getPath()));
+				e.printStackTrace();
+				return new OEIgnoreFile(new File(uri.getPath()));
 			}
 
 			if (config.get("TMPDIR") == null || config.get("DL_DIR") == null || config.get("SSTATE_DIR")== null) {
@@ -76,28 +69,10 @@ public class OEFileSystem extends FileSystem {
 			ignoreList.add(config.get("DL_DIR"));
 			ignoreList.add(config.get("SSTATE_DIR"));
 
-			//FIXME: add project info
-			try {
-				uf = new OEFile(uri, ignoreList, uri, projInfo, new NullProgressMonitor());
-				fileStoreCache.put(uri, uf);
-			} catch (SystemMessageException e) {
-				e.printStackTrace();
-			}
+			uf = new OEFile(new File(uri.getPath()), ignoreList, uri.getPath());
+			fileStoreCache.put(uri, uf);
 		}
 		
 		return uf;
-	}
-
-	private void setProjInfo(URI uri) {
-		try {
-			if(projInfo == null)
-				projInfo = Activator.getProjInfo(uri);
-		} catch (CoreException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 }

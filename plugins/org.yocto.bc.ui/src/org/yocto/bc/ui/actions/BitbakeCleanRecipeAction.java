@@ -8,23 +8,17 @@
  * Contributors:
  *     Ken Gilmer - initial API and implementation
  *******************************************************************************/
-package org.yocto.bc.ui.filesystem;
+package org.yocto.bc.ui.actions;
 
-import java.net.URI;
-
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.ide.fileSystem.FileSystemContributor;
-
-public class OEFileSystemContributor extends FileSystemContributor  {
+public class BitbakeCleanRecipeAction extends AbstractBitbakeCommandAction {
 
 	@Override
-	public URI browseFileSystem(String initialPath, Shell shell) {
-		return null;
+	public String [] getCommands() {
+		return new String[] {"bitbake -c clean -b " + recipe.getLocationURI().getPath()};
 	}
-	
+
 	@Override
-	public URI getURI(String string) {
-		return super.getURI(string);
+	public String getJobTitle() {
+		return "Cleaning " + recipe.getName();
 	}
-	
 }

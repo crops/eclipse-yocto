@@ -21,22 +21,17 @@ import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.bitbake.ProjectInfoHelper;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
-import org.yocto.remote.utils.RemoteHelper;
 
 public class BBConfigurationInitializeOperation implements IRunnableWithProgress {
 
 	private final ProjectInfo pinfo;
 	private final Writer writer;
-	private boolean errorOccured = false;
-	private String errorMessage = "";
 
 	public BBConfigurationInitializeOperation(ProjectInfo pinfo) {
 		this.pinfo = pinfo;
 		writer = null;
 	}
-	public boolean hasErrorOccured() {
-		return errorOccured;
-	}
+
 	public BBConfigurationInitializeOperation(ProjectInfo pinfo, Writer writer) {
 		this.pinfo = pinfo;
 		this.writer = writer;
@@ -45,25 +40,11 @@ public class BBConfigurationInitializeOperation implements IRunnableWithProgress
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		BBSession session;
 		try {
-			System.out.println("Initialize bitbake session ...");
-			monitor.beginTask("Initialize bitbake session ...", RemoteHelper.TOTALWORKLOAD);
-			session = Activator.getBBSession(pinfo, writer, monitor);
+			session = Activator.getBBSession(pinfo.getRootPath(), writer);
 			session.initialize();
-			monitor.worked(90);
-			monitor.done();
-			errorOccured = session.hasErrorOccured();
-			errorMessage = session.getErrorLines();
-			if (!errorOccured) {
-				System.out.println("Bitbake session initialized successfully.");
-				errorMessage = "";
-			} else
-				System.out.println("An error occured and Bitbake session was not initialized.");
+
 		} catch (Exception e) {
 			throw new InvocationTargetException(e);
 		}
-	}
-
-	public String getErrorMessage() {
-		return errorMessage;
 	}
 }

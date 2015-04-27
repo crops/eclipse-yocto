@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -30,9 +29,6 @@ import org.yocto.bc.ui.model.ProjectInfo;
  * 
  */
 public class ProjectInfoHelper {
-	public static final String OEFS_SCHEME = "OEFS://";
-	public static final String FILE_SCHEME = "file";
-	public static final String RSE_SCHEME = "rse";
 
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
 	/**
@@ -40,16 +36,24 @@ public class ProjectInfoHelper {
 	 * @return The path to bitbake init script
 	 * @throws IOException
 	 */
-	public static String getInitScriptPath(URI uri) throws IOException {
-		String val = uri.getPath() + "/" + DEFAULT_INIT_SCRIPT;
+	public static String getInitScriptPath(String path) throws IOException {
+		String val = path + File.separator + DEFAULT_INIT_SCRIPT;
+
+		File inFile = new File(path, ".eclipse-data");
+		if(inFile.exists()) {
+			BufferedReader br = new BufferedReader(new FileReader(inFile));
+			val = br.readLine();
+			br.close();
+		}
+
 		return val;
 	}
 
-	public static String getProjectName(URI projectRoot) {
+	public static String getProjectName(String projectRoot) {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; ++i) {
 			try {
-				if (projects[i].getLocationURI().equals(projectRoot)) {
+				if (projects[i].getLocationURI().getPath().equals(projectRoot)) {
 					return projects[i].getName();
 				}
 

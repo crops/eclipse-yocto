@@ -8,23 +8,8 @@
  * Contributors:
  *     Ken Gilmer - initial API and implementation
  *******************************************************************************/
-package org.yocto.bc.ui.filesystem;
+package org.yocto.bc.bitbake;
 
-import java.net.URI;
-
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.ide.fileSystem.FileSystemContributor;
-
-public class OEFileSystemContributor extends FileSystemContributor  {
-
-	@Override
-	public URI browseFileSystem(String initialPath, Shell shell) {
-		return null;
-	}
-	
-	@Override
-	public URI getURI(String string) {
-		return super.getURI(string);
-	}
-	
+public interface ICommandResponseHandler {
+	public void response(String line, boolean isError);
 }

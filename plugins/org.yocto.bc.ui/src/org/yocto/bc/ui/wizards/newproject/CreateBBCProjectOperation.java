@@ -66,10 +66,15 @@ public class CreateBBCProjectOperation extends WorkspaceModifyOperation {
 		addNatureToProject(proj, BitbakeCommanderNature.NATURE_ID, monitor);
 	}
 
-	private IProjectDescription createProjectDescription(IWorkspace workspace, ProjectInfo projInfo) throws CoreException {
-		IProjectDescription desc = workspace.newProjectDescription(projInfo.getProjectName());
+	private IProjectDescription createProjectDescription(IWorkspace workspace, ProjectInfo projInfo2) throws CoreException {
+		IProjectDescription desc = workspace.newProjectDescription(projInfo2.getProjectName());
 
-		desc.setLocationURI(projInfo.getOEFSURI());
+		try {
+			desc.setLocationURI(new URI(OEFS_SCHEME + projInfo2.getRootPath()));
+		} catch (URISyntaxException e) {
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to load filesystem.", e));
+		}
+
 		return desc;
 	}
 
@@ -81,7 +86,6 @@ public class CreateBBCProjectOperation extends WorkspaceModifyOperation {
 
 		IProject proj = wsroot.getProject(projInfo.getProjectName());
 		proj.create(desc, monitor);
-
 		proj.open(monitor);
 
 		addNatures(proj, monitor);

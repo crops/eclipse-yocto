@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation, 2013 Intel Corporation.
+ * Copyright (c) 2005, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ken Gilmer - adaptation from internal class.
- *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.filesystem;
 
@@ -37,15 +36,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
-import org.eclipse.rse.services.files.IFileService;
-import org.eclipse.rse.services.files.IHostFile;
-import org.yocto.bc.bitbake.BBSession;
-import org.yocto.bc.bitbake.ProjectInfoHelper;
-import org.yocto.bc.bitbake.ShellSession;
-import org.yocto.bc.ui.Activator;
-import org.yocto.bc.ui.model.ProjectInfo;
-import org.yocto.bc.ui.model.YoctoHostFile;
 
 /**
  * File system implementation based on storage of files in the local
@@ -58,17 +48,18 @@ public class OEFile extends FileStore {
 		return EFS.ATTRIBUTE_READ_ONLY;
 	}
 	
-
-	protected final YoctoHostFile file;
-
-	private List<Object> ignoredPaths;
+	/**
+	 * The java.io.File that this store represents.
+	 */
+	protected final File file;
+	private List ignorePaths;
 
 	/**
 	 * The absolute file system path of the file represented by this store.
 	 */
 	protected final String filePath;
 
-	private final URI root;
+	private final String root;
 
 	/**
 	 * Creates a new local file.
@@ -76,75 +67,34 @@ public class OEFile extends FileStore {
 	 * @param file The file this local file represents
 	 * @param root 
 	 */
-	public OEFile(URI fileURI, List<Object> ignoredPaths, URI root, ProjectInfo projInfo, IProgressMonitor monitor) throws SystemMessageException {
-		this.ignoredPaths = ignoredPaths;
+	public OEFile(File file, List ignorePaths, String root) {
+		this.file = file;
+		this.ignorePaths = ignorePaths;
 		this.root = root;
-		this.file = new YoctoHostFile(projInfo, fileURI, monitor);
 		this.filePath = file.getAbsolutePath();
+	}
+
+	/**
+	 * This method is called after a failure to modify a file or directory.
+	 * Check to see if the parent is read-only and if so then
+	 * throw an exception with a more specific message and error code.
+	 *
+	 * @param target The file that we failed to modify
+	 * @param exception The low level exception that occurred, or <code>null</code>
+	 * @throws CoreException A more specific exception if the parent is read-only
+	 */
+	private void checkReadOnlyParent(File target, Throwable exception) throws CoreException {
+		File parent = target.getParentFile();
+		if (parent != null && (attributes(parent) & EFS.ATTRIBUTE_READ_ONLY) != 0) {
+			String message = NLS.bind(Messages.readOnlyParent, target.getAbsolutePath());
+			Policy.error(EFS.ERROR_PARENT_READ_ONLY, message, exception);
+		}
 	}
 
 	@Override
 	public String[] childNames(int options, IProgressMonitor monitor) {
-		return file.getChildNames(monitor);
-	}
-
-	/*
-	 * detect if the path is potential builddir
-	 */
-	private boolean isPotentialBuildDir(String path) {
-		String parentPath = path.substring(0, path.lastIndexOf("/"));
-		String name = path.substring(path.lastIndexOf("/") + 1);
-		boolean ret = true;
-		try {
-			IFileService fs = file.getFileService();
-			IHostFile hostFile = fs.getFile(parentPath, name, new NullProgressMonitor());
-			if (!hostFile.isDirectory())
-				return false;
-			IHostFile confDir = fs.getFile(path, BBSession.CONF_DIR, new NullProgressMonitor());
-			if (!confDir.exists() || !confDir.isDirectory())
-				return false;
-			for (int i = 0; i < BBSession.BUILDDIR_INDICATORS.length && ret == true; i++) {
-				IHostFile child = fs.getFile(path + "/" + BBSession.CONF_DIR, BBSession.BUILDDIR_INDICATORS[i], new NullProgressMonitor());
-				if(!child.exists() || !child.isFile()) {
-					ret = false;
-					break;
-				}
-			}
-
-		} catch (SystemMessageException e) {
-			e.printStackTrace();
-		}
-		return ret;
-	}
-
-	/*
-	 * try to find items for ignoreList
-	 */
-	private void updateIgnorePaths(String path, List<Object> list, IProgressMonitor monitor) {
-		if(isPotentialBuildDir(path)) {
-			BBSession config = null;
-			try {
-				config = Activator.getBBSession(Activator.getProjInfo(root), monitor);
-				config.initialize();
-			} catch(Exception e) {
-				e.printStackTrace();
-				return;
-			}
-			if (config.get("TMPDIR") == null || config.get("DL_DIR") == null || config.get("SSTATE_DIR") == null) {
-				//wrong guess about the buildDir
-				return;
-			}else {
-				if(!list.contains(config.get("TMPDIR"))) {
-					list.add(config.get("TMPDIR"));
-				}
-				if(!list.contains(config.get("DL_DIR"))) {
-					list.add(config.get("DL_DIR"));
-				}
-				if(!list.contains(config.get("SSTATE_DIR"))) {
-					list.add(config.get("SSTATE_DIR"));
-				}
-			}
-		}
+		String[] names = file.list();
+		return (names == null ? EMPTY_STRING_ARRAY : names);
 	}
 
 	@Override
@@ -153,9 +103,9 @@ public class OEFile extends FileStore {
 		IFileStore[] wrapped = new IFileStore[children.length];
 		
 		for (int i = 0; i < wrapped.length; i++) {
-			String fullPath = file.getAbsolutePath() + "/" + children[i];
-			updateIgnorePaths(fullPath, ignoredPaths, monitor);
-			if (ignoredPaths.contains(fullPath)) {
+			String fullPath = file.toString() +File.separatorChar + children[i];
+
+			if (ignorePaths.contains(fullPath)) {
 				wrapped[i] = getDeadChild(children[i]);
 			} else {
 				wrapped[i] = getChild(children[i]);
@@ -166,10 +116,25 @@ public class OEFile extends FileStore {
 	}
 
 	@Override
-	public void copy(IFileStore destFileStore, int options, IProgressMonitor monitor) throws CoreException {
-		if (destFileStore instanceof OEFile) {
-			file.copy(destFileStore, monitor);
+	public void copy(IFileStore destFile, int options, IProgressMonitor monitor) throws CoreException {
+		if (destFile instanceof OEFile) {
+			File source = file;
+			File destination = ((OEFile) destFile).file;
+			//handle case variants on a case-insensitive OS, or copying between
+			//two equivalent files in an environment that supports symbolic links.
+			//in these nothing needs to be copied (and doing so would likely lose data)
+			try {
+				if (source.getCanonicalFile().equals(destination.getCanonicalFile())) {
+					//nothing to do
+					return;
+				}
+			} catch (IOException e) {
+				String message = NLS.bind(Messages.couldNotRead, source.getAbsolutePath());
+				Policy.error(EFS.ERROR_READ, message, e);
+			}
 		}
+		//fall through to super implementation
+		super.copy(destFile, options, monitor);
 	}
 
 	@Override
@@ -210,7 +175,7 @@ public class OEFile extends FileStore {
 	public IFileInfo fetchInfo(int options, IProgressMonitor monitor) {
 		//in-lined non-native implementation
 		FileInfo info = new FileInfo(file.getName());
-		final long lastModified = file.getModifiedDate();
+		final long lastModified = file.lastModified();
 		if (lastModified <= 0) {
 			//if the file doesn't exist, all other attributes should be default values
 			info.setExists(false);
@@ -218,7 +183,7 @@ public class OEFile extends FileStore {
 		}
 		info.setLastModified(lastModified);
 		info.setExists(true);
-		info.setLength(file.getSize());
+		info.setLength(file.length());
 		info.setDirectory(file.isDirectory());
 		info.setAttribute(EFS.ATTRIBUTE_READ_ONLY, file.exists() && !file.canWrite());
 		info.setAttribute(EFS.ATTRIBUTE_HIDDEN, file.isHidden());
@@ -227,28 +192,16 @@ public class OEFile extends FileStore {
 	
 	@Override
 	public IFileStore getChild(IPath path) {
-		try {
-			return new OEFile(file.getChildURIformPath(path), ignoredPaths, root, file.getProjectInfo(), new NullProgressMonitor());
-		} catch (SystemMessageException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return new OEFile(new File(file, path.toOSString()), ignorePaths, root);
 	}
 
 	@Override
 	public IFileStore getChild(String name) {
-
-		try {
-			return new OEFile(file.getChildURI(name), ignoredPaths, root, file.getProjectInfo(), new NullProgressMonitor());
-		} catch (SystemMessageException e) {
-			e.printStackTrace();
-		}
-		return null;
-
+		return new OEFile(new File(file, name), ignorePaths, root);
 	}
 
 	private IFileStore getDeadChild(String name) {
-		return new OEIgnoreFile(file.getChildHostFile(name));
+		return new OEIgnoreFile(new File(file, name));
 	}
 
 	/*
@@ -267,13 +220,8 @@ public class OEFile extends FileStore {
 
 	@Override
 	public IFileStore getParent() {
-		URI parentURI = file.getParentFile();
-		try {
-			return parentURI == null ? null : new OEFile(parentURI, ignoredPaths, root, file.getProjectInfo(), new NullProgressMonitor());
-		} catch (SystemMessageException e) {
-			e.printStackTrace();
-			return null;
-		}
+		File parent = file.getParentFile();
+		return parent == null ? null : new OEFile(parent, ignorePaths, root);
 	}
 
 	@Override
@@ -286,8 +234,46 @@ public class OEFile extends FileStore {
 	 * the provided status object.  The filePath is passed as a parameter
 	 * to optimize java.io.File object creation.
 	 */
-	private boolean internalDelete(YoctoHostFile target, String pathToDelete, MultiStatus status, IProgressMonitor monitor) {
-		target.delete(monitor);
+	private boolean internalDelete(File target, String pathToDelete, MultiStatus status, IProgressMonitor monitor) {
+		//first try to delete - this should succeed for files and symbolic links to directories
+		if (target.delete() || !target.exists())
+			return true;
+		if (target.isDirectory()) {
+			monitor.subTask(NLS.bind(Messages.deleting, target));
+			String[] list = target.list();
+			if (list == null)
+				list = EMPTY_STRING_ARRAY;
+			int parentLength = pathToDelete.length();
+			boolean failedRecursive = false;
+			for (int i = 0, imax = list.length; i < imax; i++) {
+				//optimized creation of child path object
+				StringBuffer childBuffer = new StringBuffer(parentLength + list[i].length() + 1);
+				childBuffer.append(pathToDelete);
+				childBuffer.append(File.separatorChar);
+				childBuffer.append(list[i]);
+				String childName = childBuffer.toString();
+				// try best effort on all children so put logical OR at end
+				failedRecursive = !internalDelete(new java.io.File(childName), childName, status, monitor) || failedRecursive;
+				monitor.worked(1);
+			}
+			try {
+				// don't try to delete the root if one of the children failed
+				if (!failedRecursive && target.delete())
+					return true;
+			} catch (Exception e) {
+				// we caught a runtime exception so log it
+				String message = NLS.bind(Messages.couldnotDelete, target.getAbsolutePath());
+				status.add(new Status(IStatus.ERROR, Policy.PI_FILE_SYSTEM, EFS.ERROR_DELETE, message, e));
+				return false;
+			}
+		}
+		//if we got this far, we failed
+		String message = null;
+		if (fetchInfo().getAttribute(EFS.ATTRIBUTE_READ_ONLY))
+			message = NLS.bind(Messages.couldnotDeleteReadOnly, target.getAbsolutePath());
+		else
+			message = NLS.bind(Messages.couldnotDelete, target.getAbsolutePath());
+		status.add(new Status(IStatus.ERROR, Policy.PI_FILE_SYSTEM, EFS.ERROR_DELETE, message, null));
 		return false;
 	}
 
@@ -322,28 +308,133 @@ public class OEFile extends FileStore {
 
 	@Override
 	public IFileStore mkdir(int options, IProgressMonitor monitor) throws CoreException {
-		file.mkdir(options);
+		boolean shallow = (options & EFS.SHALLOW) != 0;
+		//must be a directory
+		if (shallow)
+			file.mkdir();
+		else
+			file.mkdirs();
+		if (!file.isDirectory()) {
+			checkReadOnlyParent(file, null);
+			String message = NLS.bind(Messages.failedCreateWrongType, filePath);
+			Policy.error(EFS.ERROR_WRONG_TYPE, message);
+		}
 		return this;
 	}
 
 	@Override
 	public void move(IFileStore destFile, int options, IProgressMonitor monitor) throws CoreException {
-		file.move(destFile, monitor);
+		if (!(destFile instanceof OEFile)) {
+			super.move(destFile, options, monitor);
+			return;
+		}
+		File source = file;
+		File destination = ((OEFile) destFile).file;
+		boolean overwrite = (options & EFS.OVERWRITE) != 0;
+		monitor = Policy.monitorFor(monitor);
+		try {
+			monitor.beginTask(NLS.bind(Messages.moving, source.getAbsolutePath()), 10);
+			//this flag captures case renaming on a case-insensitive OS, or moving
+			//two equivalent files in an environment that supports symbolic links.
+			//in these cases we NEVER want to delete anything
+			boolean sourceEqualsDest = false;
+			try {
+				sourceEqualsDest = source.getCanonicalFile().equals(destination.getCanonicalFile());
+			} catch (IOException e) {
+				String message = NLS.bind(Messages.couldNotMove, source.getAbsolutePath());
+				Policy.error(EFS.ERROR_WRITE, message, e);
+			}
+			if (!sourceEqualsDest && !overwrite && destination.exists()) {
+				String message = NLS.bind(Messages.fileExists, destination.getAbsolutePath());
+				Policy.error(EFS.ERROR_EXISTS, message);
+			}
+			if (source.renameTo(destination)) {
+				// double-check to ensure we really did move
+				// since java.io.File#renameTo sometimes lies
+				if (!sourceEqualsDest && source.exists()) {
+					// XXX: document when this occurs
+					if (destination.exists()) {
+						// couldn't delete the source so remove the destination and throw an error
+						// XXX: if we fail deleting the destination, the destination (root) may still exist
+						new OEFile(destination, ignorePaths, root).delete(EFS.NONE, null);
+						String message = NLS.bind(Messages.couldnotDelete, source.getAbsolutePath());
+						Policy.error(EFS.ERROR_DELETE, message);
+					}
+					// source exists but destination doesn't so try to copy below
+				} else {
+					if (!destination.exists()) {
+						// neither the source nor the destination exist. this is REALLY bad
+						String message = NLS.bind(Messages.failedMove, source.getAbsolutePath(), destination.getAbsolutePath());
+						Policy.error(EFS.ERROR_WRITE, message);
+					}
+					//the move was successful
+					monitor.worked(10);
+					return;
+				}
+			}
+			// for some reason renameTo didn't work
+			if (sourceEqualsDest) {
+				String message = NLS.bind(Messages.couldNotMove, source.getAbsolutePath());
+				Policy.error(EFS.ERROR_WRITE, message, null);
+			}
+			// fall back to default implementation
+			super.move(destFile, options, Policy.subMonitorFor(monitor, 10));
+		} finally {
+			monitor.done();
+		}
 	}
 
 	@Override
 	public InputStream openInputStream(int options, IProgressMonitor monitor) throws CoreException {
-		return file.getInputStream(options, monitor);
+		monitor = Policy.monitorFor(monitor);
+		try {
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			return new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			String message;
+			if (!file.exists())
+				message = NLS.bind(Messages.fileNotFound, filePath);
+			else if (file.isDirectory())
+				message = NLS.bind(Messages.notAFile, filePath);
+			else
+				message = NLS.bind(Messages.couldNotRead, filePath);
+			Policy.error(EFS.ERROR_READ, message, e);
+			return null;
+		} finally {
+			monitor.done();
+		}
 	}
 
 	@Override
 	public OutputStream openOutputStream(int options, IProgressMonitor monitor) throws CoreException {
-		return file.getOutputStream(options, monitor);
+		monitor = Policy.monitorFor(monitor);
+		try {
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			return new FileOutputStream(file, (options & EFS.APPEND) != 0);
+		} catch (FileNotFoundException e) {
+			checkReadOnlyParent(file, e);
+			String message;
+			String path = filePath;
+			if (file.isDirectory())
+				message = NLS.bind(Messages.notAFile, path);
+			else
+				message = NLS.bind(Messages.couldNotWrite, path);
+			Policy.error(EFS.ERROR_WRITE, message, e);
+			return null;
+		} finally {
+			monitor.done();
+		}
 	}
 
 	@Override
 	public void putInfo(IFileInfo info, int options, IProgressMonitor monitor) throws CoreException {
-		file.putInfo(info, options, monitor);
+		boolean success = true;
+
+		//native does not currently set last modified
+		if ((options & EFS.SET_LAST_MODIFIED) != 0)
+			success &= file.setLastModified(info.getLastModified());
+		if (!success && !file.exists())
+			Policy.error(EFS.ERROR_NOT_EXISTS, NLS.bind(Messages.fileNotFound, filePath));
 	}
 
 	/* (non-Javadoc)
@@ -351,7 +442,9 @@ public class OEFile extends FileStore {
 	 */
 	@Override
 	public File toLocalFile(int options, IProgressMonitor monitor) throws CoreException {
-		return file.toLocalFile();
+		if (options == EFS.CACHE)
+			return super.toLocalFile(options, monitor);
+		return file;
 	}
 
 	/* (non-Javadoc)
@@ -368,8 +461,5 @@ public class OEFile extends FileStore {
 	@Override
 	public URI toURI() {
 		return URIUtil.toURI(filePath);
-	}
-	public String getParentPath() {
-		return filePath.substring(0, filePath.lastIndexOf("/"));
 	}
 }

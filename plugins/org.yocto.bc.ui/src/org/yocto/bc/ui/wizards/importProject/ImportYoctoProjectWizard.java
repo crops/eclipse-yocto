@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Intel Corporation.
+ * Copyright (c) 2011 Intel Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,11 @@
  *
  * Contributors:
  * Intel - initial API and implementation
- * Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.ui.wizards.importProject;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URI;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -31,9 +29,11 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
+
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.wizards.FiniteStateWizard;
+
 import org.yocto.bc.ui.wizards.newproject.BBConfigurationInitializeOperation;
 import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
 
@@ -68,7 +68,7 @@ public class ImportYoctoProjectWizard extends FiniteStateWizard  implements IImp
 	public boolean performFinish() {
 		ProjectInfo pinfo = new ProjectInfo();
 		pinfo.setInitScriptPath((String) projectModel.get(ImportYoctoProjectWizard.KEY_INITPATH));
-		pinfo.setLocationURI((URI) projectModel.get(ImportYoctoProjectWizard.KEY_LOCATION));
+		pinfo.setLocation((String) projectModel.get(ImportYoctoProjectWizard.KEY_LOCATION));
 		pinfo.setName((String) projectModel.get(ImportYoctoProjectWizard.KEY_NAME));
 		
 		try {
@@ -87,7 +87,7 @@ public class ImportYoctoProjectWizard extends FiniteStateWizard  implements IImp
 		projectModel.put(ImportYoctoProjectWizard.KEY_PINFO, pinfo);
 		//setPageComplete(valid);
 		//ProjectInfo pinfo = (ProjectInfo) projectModel.get(KEY_PINFO);
-		Activator.putProjInfo(pinfo.getOEFSURI(), pinfo);
+		Activator.putProjInfo(pinfo.getRootPath(), pinfo);
 		try {
 			getContainer().run(false, false, new CreateBBCProjectOperation(pinfo));
 		} catch (Exception e) {

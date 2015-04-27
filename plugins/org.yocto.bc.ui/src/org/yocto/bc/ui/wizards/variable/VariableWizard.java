@@ -2,9 +2,7 @@ package org.yocto.bc.ui.wizards.variable;
 
 import java.util.Hashtable;
 import java.util.Map;
-
 import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.yocto.bc.ui.wizards.FiniteStateWizard;
 
 /**

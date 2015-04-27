@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2009 Ken Gilmer, 2013 Intel Corporation
+ * Copyright (c) 2009 Ken Gilmer
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,12 +7,18 @@
  *
  * Contributors:
  *     Ken Gilmer - initial API and implementation
- *     Ioana Grigoropol (Intel) - adapt class for remote support
  *******************************************************************************/
 package org.yocto.bc.bitbake;
 
 import java.io.IOException;
-import java.net.URI;
+
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
  * Represents the bitbake environment of a recipe package.
@@ -21,25 +27,24 @@ import java.net.URI;
  */
 public class BBRecipe extends BBSession {
 	private final BBSession session;
-	private final URI fileURI;
+	private final String filePath;
 
-	public BBRecipe(BBSession session, URI filePath) throws IOException {
-		super(session.shell, session.pinfo.getOriginalURI());
+	public BBRecipe(BBSession session, String filePath) throws IOException {
+		super(session.shell, session.pinfo.getRootPath());
 		this.session = session;
-		this.fileURI = filePath;
-		this.parsingCmd = "DISABLE_SANITY_CHECKS=\"1\" bitbake -e -b " + filePath.getPath() + " >& " + BB_ENV_FILE;
+		this.filePath = filePath;
+		this.parsingCmd = "DISABLE_SANITY_CHECKS=1 bitbake -e -b " + filePath;
 	}
 	
 	@Override
 	public void initialize() throws Exception {
 		if (this.size() == 0) {
-			//System.out.println("Failed to parse " + fileURI);
+			//System.out.println("Failed to parse " + filePath);
 			//throw new IOException("Failed to parse " + filePath);
 		}
 	}
 
-	@Override
-	protected URI getDefaultDepends() {
-		return this.fileURI;
+	protected String getDefaultDepends() {
+		return this.filePath;
 	}
 }

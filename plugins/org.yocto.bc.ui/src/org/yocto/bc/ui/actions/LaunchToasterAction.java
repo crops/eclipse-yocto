@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.yocto.bc.ui.actions;
 
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
+import java.net.URL;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -21,39 +18,37 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
 
-import org.yocto.bc.ui.builder.BitbakeCommanderNature;
 
+public class LaunchToasterAction  {
+    private static final String DIALOG_TITLE  = "Launch Toaster";
 
-public class LaunchHobAction  {
-    private static final String DIALOG_TITLE  = "Launch HOB";
-	
 	public void run(IAction action) {
 		IResource resource = getSelectedResource();
 		if (resource == null)
 			return;
 
 		IProject project = resource.getProject();
-		LaunchHobDialog hobDialog = new LaunchHobDialog(new Shell(), DIALOG_TITLE, project);
-		hobDialog.open();
-		String buildDir = hobDialog.getBuildDir();
-	
-		if (buildDir != null) {			
+		LaunchToasterDialog toaster_dialog = new LaunchToasterDialog(new Shell(), DIALOG_TITLE, project);
+		toaster_dialog.open();
+		URL toaster_url = toaster_dialog.get_toaster_url();
+
+		if (toaster_url != null) {
 			try {
-				BitbakeCommanderNature.launchHob(project,buildDir);
+				final IWebBrowser browser = PlatformUI.getWorkbench().getBrowserSupport().createBrowser("yocto");
+				browser.openURL(toaster_url);
 			} catch (Exception e){
 				System.out.println(e.getMessage());
 			}
 		}
-		
 	}
 
-	public void dispose() {
-
-	}
-	
 	private IResource getSelectedResource() {
 		IWorkbench iworkbench = PlatformUI.getWorkbench();
 		if (iworkbench == null){

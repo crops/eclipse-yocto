@@ -28,15 +28,15 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="org.yocto.bc.ui.command.launchHob"
+            id="org.yocto.bc.ui.command.launchToaster"
             name="%command.name">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.yocto.bc.ui.actions.LaunchHobHandler"
-            commandId="org.yocto.bc.ui.command.launchHob">
+            class="org.yocto.bc.ui.actions.LaunchToasterHandler"
+            commandId="org.yocto.bc.ui.command.launchToaster">
       </handler>
    </extension>
    <extension
@@ -44,8 +44,8 @@
       <menuContribution
             locationURI="menu:project">
          <command
-               commandId="org.yocto.bc.ui.command.launchHob"
-               id="hob"
+               commandId="org.yocto.bc.ui.command.launchToaster"
+               id="toaster"
                label="%command.label.0"
                mnemonic="%command.mnemonic"
                style="push">

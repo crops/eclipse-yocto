@@ -15,22 +15,20 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.core.commands.IHandler;
 
-public class LaunchHobHandler implements IHandler {
+public class LaunchToasterHandler implements IHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		LaunchHobAction a = new LaunchHobAction();
+		LaunchToasterAction a = new LaunchToasterAction();
 		a.run(null);
 		return null;
 	}
 
 	public void addHandlerListener(IHandlerListener handlerListener) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public void dispose() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	public boolean isEnabled() {
@@ -45,6 +43,5 @@ public class LaunchHobHandler implements IHandler {
 
 	public void removeHandlerListener(IHandlerListener handlerListener) {
 		// TODO Auto-generated method stub
-		
 	}
 }

@@ -54,11 +54,9 @@ public class OptionsPage extends FiniteStateWizardPage {
 	private Text txtInit;
 	private ValidationListener validationListener;
 	private Text txtProjectName;
-	private Button gitButton;
 
 	protected OptionsPage(Map model) {
 		super("Options", model);
-		//setTitle("Create new yocto bitbake project");
 		setMessage("Enter these parameters to create new Yocto Project BitBake commander project");
 	}
 
@@ -109,24 +107,6 @@ public class OptionsPage extends FiniteStateWizardPage {
 				handleBrowse();
 			}
 		});
-
-		//Label lblGit = new Label(projectNameComp, SWT.None);
-		//lblGit.setText("Clone from &Git Repository?");
-
-		Composite gitComposite = new Composite(projectNameComp, SWT.NONE);
-		gd = new GridData(GridData.VERTICAL_ALIGN_END
-				| GridData.FILL_HORIZONTAL);
-		gd.horizontalIndent = 0;
-		gitComposite.setLayoutData(gd);
-		gl = new GridLayout(1, false);
-		gl.marginWidth = 0;
-		gitComposite.setLayout(gl);
-
-		gitButton = new Button(gitComposite, SWT.CHECK);
-		gitButton.setText("Clone from Yocto Project &Git Repository");
-		gitButton.setEnabled(true);
-		gitButton.addSelectionListener(validationListener);
-
 		setControl(top);
 	}
 
@@ -152,7 +132,6 @@ public class OptionsPage extends FiniteStateWizardPage {
 	protected void updateModel() {
 		model.put(InstallWizard.INSTALL_DIRECTORY, txtProjectLocation.getText()+File.separator+txtProjectName.getText());
 		model.put(InstallWizard.PROJECT_NAME, txtProjectName.getText());
-		model.put(InstallWizard.GIT_CLONE, new Boolean(gitButton.getSelection()));
 	}
 
 	private boolean isValidProjectName(String projectName) {
@@ -187,20 +166,11 @@ public class OptionsPage extends FiniteStateWizardPage {
 			return false;
 		}
 
-		String projectPath = projectLoc + File.separator+txtProjectName.getText();
-		File git_dir=new File(projectPath);
-		if(!gitButton.getSelection()) {
-			if(!git_dir.isDirectory() || !git_dir.exists()) {
-				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " does not exist, please select git clone.");
-				return false;
-			}else if(!new File(projectPath + File.separator + InstallWizard.VALIDATION_FILE).exists()) {
-				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " seems invalid, please use other directory or project name.");
-				return false;
-			}
-		}else {
-			// git check
-			if(git_dir.exists()) {
-				setErrorMessage("Directory " + txtProjectLocation.getText()+File.separator+txtProjectName.getText() + " exists, please unselect git clone.");
+		String projectPath = projectLoc + txtProjectName.getText();
+		File prj_dir=new File(projectPath);
+		if(!prj_dir.isDirectory() || !prj_dir.exists()) {
+			if(!new File(projectPath + File.separator + InstallWizard.VALIDATION_FILE).exists()) {
+				setErrorMessage("Directory " + txtProjectLocation.getText() + txtProjectName.getText() + " is an invalid poky directory.");
 				return false;
 			}
 		}
@@ -216,9 +186,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 			setErrorMessage("Run into error while trying to validate entries!");
 			return false;
 		}
-		setErrorMessage(null);
-		setMessage("All the entries are valid, press \"Finish\" to start the process, "+
-				"this will take a while. Please don't interrupt till there's output in the Yocto Console window...");
+		setErrorMessage("Press the 'Finish' button to create your project");
 		return true;
 	}
 	

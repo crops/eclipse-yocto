@@ -69,8 +69,6 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String PROJECT_NAME = "Project Name";
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";
 	protected static final String DEFAULT_INSTALL_DIR = "~/yocto";
-	
-	protected static final String GIT_CLONE = "Git Clone";
 	public static final String VALIDATION_FILE = DEFAULT_INIT_SCRIPT;
 
 	private Map model;
@@ -152,28 +150,6 @@ public class InstallWizard extends FiniteStateWizard implements
 		}
 
 		try {
-			if (((Boolean)options.get(GIT_CLONE)).booleanValue()) {
-				String []git_clone_cmd = {"git", "clone", "--progress", "git://git.pokylinux.org/poky.git", install_dir};
-				final Pattern pattern = Pattern.compile("^Receiving objects:\\s*(\\d+)%.*");
-
-				this.getContainer().run(true,true,
-						new LongtimeRunningTask("Checking out Yocto git repository",
-							git_clone_cmd, null, null,
-							cmdOut,
-							new ICalculatePercentage() {
-								public float calWorkloadDone(String info) throws IllegalArgumentException {
-									Matcher m=pattern.matcher(info.trim());
-									if(m.matches()) {
-										return new Float(m.group(1)) / 100;
-									}else {
-										throw new IllegalArgumentException();
-									}
-								}
-							}
-						)
-				);
-			}
-
 			if (!cmdOut.hasError()) {
 
 				String initPath = install_dir + "/"

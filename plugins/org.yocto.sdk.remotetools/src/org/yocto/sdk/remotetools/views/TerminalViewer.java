@@ -29,8 +29,6 @@
  *********************************************************************************/
 package org.yocto.sdk.remotetools.views;
 
-import org.yocto.sdk.remotetools.Messages;
-
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -45,6 +43,7 @@ import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ViewPart;
+import org.yocto.sdk.remotetools.Messages;
 
 public class TerminalViewer extends ViewPart implements ISelectionListener,
         SelectionListener, ISelectionChangedListener/*,

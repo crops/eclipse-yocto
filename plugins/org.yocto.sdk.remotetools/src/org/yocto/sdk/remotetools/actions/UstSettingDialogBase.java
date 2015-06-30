@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 
-import org.yocto.sdk.remotetools.Activator;
-import org.yocto.sdk.remotetools.Messages;
-import org.yocto.sdk.remotetools.SWTFactory;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -24,10 +24,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.linuxtools.tmf.core.TmfProjectNature;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
+import org.yocto.sdk.remotetools.Activator;
+import org.yocto.sdk.remotetools.Messages;
+import org.yocto.sdk.remotetools.SWTFactory;
 
 
 public class UstSettingDialogBase extends BaseSettingDialog {

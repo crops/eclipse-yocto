@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
 import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.terminals.ui.TerminalServiceHelper;

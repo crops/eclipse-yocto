@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#setup Yocto Eclipse plug-in build environment for Luna
+#setup Yocto Eclipse plug-in build environment for Mars
 #comment out the following line if you wish to use your own http proxy settings
 #export http_proxy=http://proxy.yourproxyinfo.com:8080
 

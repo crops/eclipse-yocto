@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#setup Yocto Eclipse plug-in build environment for Luna
+#setup Yocto Eclipse plug-in build environment for Mars
 #comment out the following line if you wish to use your own http proxy settings
 #export http_proxy=http://proxy.yourproxyinfo.com:8080
 
@@ -69,8 +69,8 @@ fi
 
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
-ep_ver="4.4.1"
-ep_date="-201409250400"
+ep_ver="4.5"
+ep_date="-201506032000"
 P2_disabled=false
 P2_no_dropins=false
 
@@ -222,52 +222,43 @@ update_feature_remote()
 #Main Site
 if [[ "$1" = "--upstream" ]]
 then
-        MAIN_SITE="http://download.eclipse.org/releases/luna"
+        MAIN_SITE="http://download.eclipse.org/releases/mars"
+        DEPRECATED_SITE="http://download.eclipse.org/releases/luna"
 else
-        MAIN_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
+        MAIN_SITE="http://downloads.yoctoproject.org/eclipse/mars/"
+        DEPRECATED_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
 fi
 
 #Update Site - always use updates from upstream
-UPDATE_SITE="http://download.eclipse.org/eclipse/updates/4.4"
+UPDATE_SITE="http://download.eclipse.org/eclipse/updates/4.5"
 
 #CDT related
 echo -e "\nPlease wait. Installing CDT.SDK.FEATURE.GROUP"
-CDTFEAT="8.5.0"
+CDTFEAT="8.7.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
 
 echo -e "\nPlease wait. Installing CDT.LAUNCH.REMOTE.FEATURE.GROUP"
-CDTREMOTEVER="8.5.0"
+CDTREMOTEVER="8.7.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
 
-#RSE SDK
-
+#RSE
 echo -e "\nPlease wait. Installing RSE.FEATURE.GROUP"
-RSEVER="3.5.0"
+RSEVER="3.7.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.rse.feature.group ${RSEVER}
 
-echo -e "\nPlease wait. Installing TM.TERMINAL.SDK.FEATURE.GROUP"
-TMVER="3.3.1"
-update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.sdk.feature.group ${TMVER}
+#echo -e "\nPlease wait. Installing RSE.TERMINALS.FEATURE.GROUP"
+TMVER="1.2.0"
+update_feature_remote ${DEPRECATED_SITE} org.eclipse.rse.terminals.feature.group ${TMVER}
 
 #AUTOTOOLS
 echo -e "\nPlease wait. Installing AUTOTOOLS.FEATURE.GROUP"
-ATVER="8.5.0"
+ATVER="8.7.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
 
-
 #Lttng2 
-TMF_CTF_REL="3.1.0"
-echo -e "\nPlease wait. Installing TMF.CTF.FEATURE.GROUP"
-update_feature_remote ${MAIN_SITE} org.eclipse.linuxtools.tmf.ctf.feature.group ${TMF_CTF_REL}
-
-#PTP RDT
-echo -e "\nPlease wait. Installing PTP.FEATURE.GROUP"
-PTPVER="8.0.0"
-update_feature_remote ${MAIN_SITE} org.eclipse.ptp.feature.group ${PTPVER}
-
-echo -e "\nPlease wait. Installing PTP.RDT.FEATURE.GROUP"
-RDTVER="8.0.0"
-update_feature_remote ${MAIN_SITE} org.eclipse.ptp.rdt.feature.group ${RDTVER}
+TMF_CTF_REL="1.0.0"
+echo -e "\nPlease wait. Installing TRACECOMPASS.LTTNG2.UST.FEATURE.GROUP"
+update_feature_remote ${MAIN_SITE} org.eclipse.tracecompass.lttng2.ust.feature.group ${TMF_CTF_REL}
 
 echo -e "\nPlease wait. Installing OSGI.COMPATIBILITY.PLUGINS.FEATURE.FEATURE.GROUP"
 COMPAT_VER="1.0.0"

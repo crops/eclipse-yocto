@@ -21,13 +21,10 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
 import org.eclipse.rse.ui.SystemBasePlugin;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
-import org.yocto.remote.utils.ShellSession;
-import org.yocto.remote.utils.RemoteHelper;
 import org.yocto.remote.utils.CommonHelper;
+import org.yocto.remote.utils.RemoteHelper;
+import org.yocto.remote.utils.ShellSession;
 
 public class SystemtapModel extends BaseModel {
 	protected static final String DEFAULT_INIT_SCRIPT = "oe-init-build-env";

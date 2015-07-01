@@ -221,8 +221,12 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 
 		if (srcuriText.getText().length() == 0) {
 			updateStatus("SRC_URI can't be empty");
+			return ;
+		} else if (!element.is_src_uri_valid(srcuriText.getText())) {
+			updateStatus("Invalid SRC_URI");
+			return ;
 		}
-		
+
 		updateStatus(null);
 	}
 

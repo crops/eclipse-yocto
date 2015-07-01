@@ -29,6 +29,8 @@ public class BitbakeRecipeUIElement {
 	private String sha256sum;
 	private String metaDir;
 	private ArrayList inheritance;
+	private String[] valid_src_uris = {"file://", "bzr://", "git://", "osc://", "repo://",
+			"ccrc://","http://","https://","ftp://","cvs://","hg://","p4://","ssh://","svn://"};
 
 	public BitbakeRecipeUIElement()
 	{
@@ -141,5 +143,14 @@ public class BitbakeRecipeUIElement {
 	
 	public void setMetaDir(String value) {
 		metaDir = value;
+	}
+
+	public boolean is_src_uri_valid(String value) {
+		for(int i=0; i < valid_src_uris.length; i++) {
+			if (value.startsWith(valid_src_uris[i])) {
+					return true ;
+			}
+		}
+		return false ;
 	}
 }

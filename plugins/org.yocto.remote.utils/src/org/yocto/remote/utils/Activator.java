@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.yocto.remote.utils;
 
-import java.util.logging.Logger;
-
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.yocto.sdk.ide.preferences.LoggerConstants;
-import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -27,7 +23,6 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	public static Logger logger ;
 
 	/**
 	 * The constructor
@@ -43,8 +38,6 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		logger = YoctoSDKUtils.registerLogger(LoggerConstants.RU_LOGGER_NAME, LoggerConstants.RU_LOG_FILE) ;
-
 	}
 
 	/*
@@ -55,7 +48,6 @@ public class Activator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		YoctoSDKUtils.unRegisterLogger(logger, LoggerConstants.RU_LOG_FILE) ;
 	}
 
 	/**

@@ -53,6 +53,7 @@ public class SystemtapHandler extends AbstractHandler {
 		if(setting.open() == BaseSettingDialog.OK) {
 
 			String metadata_location = ((SystemtapSettingDialog)setting).getMetadataLocation();
+                        String builddir_location = ((SystemtapSettingDialog)setting).getBuilddirLocation();
 			String remote_host = ((SystemtapSettingDialog)setting).getRemoteHost();
 			String user_id = ((SystemtapSettingDialog)setting).getUserID();
 			String systemtap_script = ((SystemtapSettingDialog)setting).getSystemtapScript();
@@ -66,7 +67,7 @@ public class SystemtapHandler extends AbstractHandler {
 			if (terminalSubSystem != null) {
 				TerminalsUI terminalsUI = TerminalsUI.getInstance();
 				TerminalViewer terminalViewer = terminalsUI.activateTerminalsView();
-				SystemtapModel op = new SystemtapModel(metadata_location,remote_host, user_id, systemtap_script,
+				SystemtapModel op = new SystemtapModel(metadata_location,builddir_location,remote_host, user_id, systemtap_script,
 						systemtap_args,window.getShell().getDisplay());
 				try {
 					op.setHost(host);

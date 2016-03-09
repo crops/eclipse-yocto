@@ -46,6 +46,7 @@ public class ShellSession {
 	private String shellPath = null;
 	private final String initCmd;
 	private final File root;
+        private final File builddir;
 
 	private OutputStreamWriter out;
 
@@ -68,8 +69,9 @@ public class ShellSession {
 		return sb.toString();
 	}
 
-	public ShellSession(int shellType, File root, String initCmd, OutputStream out) throws IOException {
+	public ShellSession(int shellType, File root, File builddir, String initCmd, OutputStream out) throws IOException {
 		this.root = root;
+                this.builddir = builddir;
 		this.initCmd  = initCmd;
 		if (out == null) {
 			this.out = new OutputStreamWriter(null);
@@ -93,7 +95,7 @@ public class ShellSession {
 		}
 
 		if (initCmd != null) {
-			execute("source " + initCmd);
+			execute("source " + initCmd + " " + builddir.getAbsolutePath());
 		}
 	}
 

@@ -45,19 +45,33 @@ public class YoctoSDKCMakeProjectNature extends YoctoSDKProjectNature {
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 
 		String ccString = YoctoSDKUtils.getEnvValue(project, "CC");
+		String ccFlagsString = "";
 
 		if (!ccString.equals("") && !ccString.equals(" ")) {
 			ccString.trim();
-			ccString = ccString.split(" ")[0];
+			String[] ccSplitString = ccString.split(" ");
+			ccString = ccSplitString[0];
+
+			for(int i=1; i<ccSplitString.length; i++) {
+				if(ccSplitString[i].indexOf("sysroot")<0)
+					ccFlagsString+=ccSplitString[i] + " ";
+			}
 		}
 
 		env.addVariable("OECMAKE_C_COMPILER", ccString,
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		String cxxString = YoctoSDKUtils.getEnvValue(project, "CXX");
+		String cxxFlagsString = "";
 
 		if (!cxxString.equals("") && !cxxString.equals(" ")) {
 			cxxString.trim();
-			cxxString = cxxString.split(" ")[0];
+			String[] cxxSplitString = cxxString.split(" ");
+			cxxString = cxxSplitString[0];
+
+			for(int i=1; i<cxxSplitString.length; i++) {
+				if(cxxSplitString[i].indexOf("sysroot")<0)
+					cxxFlagsString+=cxxSplitString[i] +  " ";
+			}
 		}
 
 		env.addVariable("OECMAKE_CXX_COMPILER", cxxString,
@@ -65,8 +79,8 @@ public class YoctoSDKCMakeProjectNature extends YoctoSDKProjectNature {
 
 		String hostCCArchString = YoctoSDKUtils.getEnvValue(project, "HOST_CC_ARCH");
 		String toolchainOptionsString = YoctoSDKUtils.getEnvValue(project, "TOOLCHAIN_OPTIONS");
-		String cppFlagsString = YoctoSDKUtils.getEnvValue(project, "CPPFLAGS");
-		String cxxFlagsString = YoctoSDKUtils.getEnvValue(project, "CXXFLAGS");
+		String cppFlagsString = YoctoSDKUtils.getEnvValue(project, "CPPFLAGS") + " " + ccFlagsString;
+		cxxFlagsString = YoctoSDKUtils.getEnvValue(project, "CXXFLAGS") + " " + cxxFlagsString;
 		String selectedOptimizationString = YoctoSDKUtils.getEnvValue(project, "SELECTED_OPTIMIZATION");
 		env.addVariable("OECMAKE_C_FLAGS", hostCCArchString + " " + toolchainOptionsString + " " + cppFlagsString,
 				IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);

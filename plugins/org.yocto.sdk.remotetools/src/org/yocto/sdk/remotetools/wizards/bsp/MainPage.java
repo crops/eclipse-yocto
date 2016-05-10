@@ -275,7 +275,7 @@ public class MainPage extends WizardPage {
 				File outputDirectory = new File(outputDir);
 				if (outputDirectory.exists()){
 					status = new Status(IStatus.ERROR, "not_used", 0,
-							"Your BSP output directory points to an exiting directory!", null);
+							"Your BSP output directory points to an existing directory!", null);
 				}
 			}
 		} else if (buildDir.startsWith(metadataLoc) && !bspName.isEmpty()) {

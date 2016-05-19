@@ -166,17 +166,17 @@ public class OptionsPage extends FiniteStateWizardPage {
 			return false;
 		}
 
-		String projectPath = projectLoc + txtProjectName.getText();
+		String projectPath = new File(projectLoc,txtProjectName.getText()).getPath();
 		File prj_dir=new File(projectPath);
 		if(!prj_dir.isDirectory() || !prj_dir.exists()) {
 			if(!new File(projectPath + File.separator + InstallWizard.VALIDATION_FILE).exists()) {
-				setErrorMessage("Directory " + txtProjectLocation.getText() + txtProjectName.getText() + " is an invalid poky directory.");
+				setErrorMessage("Directory " + projectPath + " is an invalid poky directory.");
 				return false;
 			}
 		}
 
 		try {
-			URI location = new URI("file://" + txtProjectLocation.getText()+File.separator+txtProjectName.getText());
+			URI location = new URI("file://" + projectPath);
 			IStatus status = ResourcesPlugin.getWorkspace().validateProjectLocationURI(proj, location);
 			if (!status.isOK()) {
 				setErrorMessage(status.getMessage());

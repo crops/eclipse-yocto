@@ -3,8 +3,8 @@
    <topic label="Yocto Project Quick Start">
       <link toc="html/yocto-project-qs-toc.xml"/>
    </topic>
-   <topic label="Yocto·Project·Application·Developer&apos;s·Guide">
-      <link toc="html/adt-manual-toc.xml"/>
+   <topic label="Yocto Project Software Development Kit (SDK) Developer&apos;s Guide">
+      <link toc="html/sdk-manual-toc.xml"/>
    </topic>
    <topic label="Yocto Project Development Manual">
       <link toc="html/dev-manual-toc.xml"/>

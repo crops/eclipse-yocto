@@ -53,12 +53,12 @@
 		<br />
 		<br />
 		<strong>
-			Yocto Project Application Developer's Guide:
+			Yocto Project Software Development Kit (SDK) Developer's Guide:
 		</strong>
 		<br />
 		<br />
-			This manual shows you how to setup and use the Application Development
-			Toolkit (ADT) and stand-alone cross-development toolchains so you can
+			This manual shows you how to setup and use the Software Development
+			Kit (SDK) and stand-alone cross-development toolchains so you can
 			develop user-space applications.
 		<br />
 		<br />
@@ -72,7 +72,7 @@
 				git://git.yoctoproject.org/yocto-docs
 			</a>
 		<br />
-			<em>Commit:</em> @COMMIT_ID-adt-manual@
+			<em>Commit:</em> @COMMIT_ID-sdk-manual@
 		<br />
 		<br />
 		<strong>

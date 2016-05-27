@@ -8,7 +8,7 @@
 			primary="true">
 		</toc>
 		<toc
-			file="html/adt-manual-toc.xml"
+			file="html/sdk-manual-toc.xml"
 			primary="false">
 		</toc>
 		<toc

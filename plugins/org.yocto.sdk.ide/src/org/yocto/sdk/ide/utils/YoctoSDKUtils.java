@@ -223,9 +223,12 @@ public class YoctoSDKUtils {
 						if (sValue.startsWith("\"") && sValue.endsWith("\""))
 							sValue = sValue.substring(sValue.indexOf('"') + 1, sValue.lastIndexOf('"'));
 						/* If PATH ending with $PATH, we need to join with current system path */
-						if (sKey.equalsIgnoreCase("PATH")) {
-							if (sValue.lastIndexOf("$PATH") >= 0)
+						if (sKey.equalsIgnoreCase("PATH") && (sValue.lastIndexOf("$PATH") >= 0)) {
+							if (envMap.containsKey(sKey)) {
+								sValue = sValue.substring(0, sValue.lastIndexOf("$PATH")) + envMap.get(sKey);
+							} else {
 								sValue = sValue.substring(0, sValue.lastIndexOf("$PATH")) + System.getenv("PATH");
+							}
 						}
 
 						if(sValue.toUpperCase().contains("$SDKTARGETSYSROOT")) {

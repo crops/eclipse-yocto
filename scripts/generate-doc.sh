@@ -81,7 +81,7 @@ fi
 # build and copy
 cd documentation
 for DOC in ${DOCS}; do
-	make DOC=${DOC} eclipse
+	make DOC=${DOC} eclipse || fail $? "make DOC=${DOC} eclipse"
 	cp -rf ${DOC}/eclipse/html/* ${DOC_HTML_DIR}
 	cp -f ${DOC}/eclipse/${DOC}-toc.xml ${DOC_HTML_DIR}
 done

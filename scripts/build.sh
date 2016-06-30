@@ -130,7 +130,7 @@ cd ${TOP}
 
 # generate and add documentation
 echo -e "\nGenerate Yocto documentation\n"
-${GIT_DIR}/scripts/generate-doc.sh ${DOC_REF} ${GIT_DIR}
+${GIT_DIR}/scripts/generate-doc.sh ${DOC_REF} ${GIT_DIR} || fail $? "generate documentation"
 
 #build 
 java -jar ${LAUNCHER} -application org.eclipse.ant.core.antRunner -buildfile ${BUILDFILE} -DbaseLocation=${ECLIPSE_BASE} -Dbuilder=${GIT_DIR}/features/org.yocto.bc.headless.build -DbuildDirectory=${BUILD_DIR} -DotherSrcDirectory=${GIT_DIR} -DbuildId=${RELEASE} || fail $? "normal build"

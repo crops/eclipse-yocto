@@ -69,12 +69,12 @@ fi
 
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
-ep_ver="4.5"
-ep_date="-201506032000"
+ep_ver="4.5.2"
+ep_date="-201602121500"
 P2_disabled=false
 P2_no_dropins=false
 
-if [ ! -f eclipse/plugins/org.eclipse.swt_3.103.1.v20140903-1938.jar ]; then
+if [ ! -f eclipse/plugins/org.eclipse.swt_3.104.2.v20160212-1350.jar ]; then
 
   pushd .
 
@@ -224,8 +224,10 @@ if [[ "$1" = "--upstream" ]]
 then
         MAIN_SITE="http://download.eclipse.org/releases/mars"
         DEPRECATED_SITE="http://download.eclipse.org/releases/luna"
+        TM_SITE="http://download.eclipse.org/tm/updates/4.0/GA"
 else
         MAIN_SITE="http://downloads.yoctoproject.org/eclipse/mars/"
+        TM_SITE="http://downloads.yoctoproject.org/tm/updates/4.0/"
         DEPRECATED_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
 fi
 
@@ -234,25 +236,39 @@ UPDATE_SITE="http://download.eclipse.org/eclipse/updates/4.5"
 
 #CDT related
 echo -e "\nPlease wait. Installing CDT.SDK.FEATURE.GROUP"
-CDTFEAT="8.7.0"
+CDTFEAT="8.8.1"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
 
 echo -e "\nPlease wait. Installing CDT.LAUNCH.REMOTE.FEATURE.GROUP"
-CDTREMOTEVER="8.7.0"
+CDTREMOTEVER="8.8.1"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
 
-#RSE
-echo -e "\nPlease wait. Installing RSE.FEATURE.GROUP"
-RSEVER="3.7.0"
-update_feature_remote ${MAIN_SITE} org.eclipse.rse.feature.group ${RSEVER}
+#TM Terminal (was RSE) related
+echo -e "\nPlease wait. Installing TM.TERMINAL.FEATURE.FEATURE.GROUP"
+TMTERMVER="4.0.0"
+update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.feature.feature.group ${TMTERMVER}
 
-#echo -e "\nPlease wait. Installing RSE.TERMINALS.FEATURE.GROUP"
-TMVER="1.2.0"
-update_feature_remote ${DEPRECATED_SITE} org.eclipse.rse.terminals.feature.group ${TMVER}
+echo -e "\nPlease wait. Installing TM.TERMINAL.VIEW.RSE.FEATURE.GROUP"
+TMTERMVIEWRSEVER="4.0.0"
+update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.view.rse.feature.feature.group ${TMTERMVIEWRSEVER}
+
+echo -e "\nPlease wait. Installing TM.TERMINAL.CONTROL.FEATURE.GROUP"
+TMCONTROLVER="4.0.0"
+update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.control.feature.feature.group ${TMCONTROLVER}
+
+#RSE_SDK
+echo -e "\nPlease wait. Installing RSE.SDK.FEATURE.GROUP"
+RSESDKVER="3.7.0"
+update_feature_remote ${TM_SITE} org.eclipse.rse.sdk.feature.group ${RSESDKVER}
+
+#RSE_TERMINALS
+echo -e "\nPlease wait. Installing RSE.TERMINALS.FEATURE.GROUP"
+RSETERMVER="3.8.0"
+update_feature_remote ${TM_SITE} org.eclipse.rse.terminals.feature.group ${RSETERMVER}
 
 #AUTOTOOLS
 echo -e "\nPlease wait. Installing AUTOTOOLS.FEATURE.GROUP"
-ATVER="8.7.0"
+ATVER="8.8.1"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
 
 #Lttng2 

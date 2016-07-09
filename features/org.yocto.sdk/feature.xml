@@ -13,7 +13,7 @@
 <feature
       id="org.yocto.sdk"
       label="%featureName"
-      version="1.4.0.qualifier"
+      version="1.4.1.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -60,8 +60,6 @@
       <import plugin="org.eclipse.rse.files.ui" version="3.1.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.rse.subsystems.shells.core" version="3.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.launch.remote" version="2.2.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.tm.terminal" version="3.0.1" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.rse.terminals.ui" version="1.0.100" match="greaterOrEqual"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.ui.forms"/>
       <import plugin="org.eclipse.jface.text"/>
@@ -69,6 +67,9 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.core.filesystem"/>
+      <import feature="org.eclipse.rse" version="3.7.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.tm.terminal.control.feature" version="4.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.rse.terminals" version="3.7.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin

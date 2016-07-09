@@ -9,8 +9,7 @@ Require-Bundle: org.eclipse.ui,
  org.yocto.sdk.ide;bundle-version="1.4.1",
  org.eclipse.rse.core;bundle-version="3.3.100",
  org.eclipse.rse.subsystems.terminals.core;bundle-version="1.0.300";visibility:=reexport,
- org.eclipse.rse.ui,
- org.eclipse.rse.terminals.ui;bundle-version="1.3.0";visibility:=reexport
+ org.eclipse.rse.ui
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.eclipse.core.internal.filesystem,

@@ -69,7 +69,7 @@
       <import plugin="org.eclipse.core.filesystem"/>
       <import feature="org.eclipse.rse" version="3.7.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.tm.terminal.control.feature" version="4.0.0" match="greaterOrEqual"/>
-      <import feature="org.eclipse.rse.terminals" version="3.7.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.rse.terminals" version="3.8.0.201505221634" match="greaterOrEqual"/>
    </requires>
 
    <plugin

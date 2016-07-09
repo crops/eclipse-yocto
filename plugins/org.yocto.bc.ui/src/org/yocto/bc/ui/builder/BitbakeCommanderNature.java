@@ -34,19 +34,19 @@ public class BitbakeCommanderNature implements IProjectNature {
 	public static final String BUILD_DIR_KEY = "org.yocto.bc.ui.builder.BitbakeCommander.BuildDir";
 	private IProject project;
 
-	public static void launchHob(IProject project, String buildDir) {
+	public static void launchToaster(IProject project, String buildDir) {
 		try {
 			ILaunchManager lManager = DebugPlugin.getDefault().getLaunchManager();
 			ILaunchConfigurationType configType = 
 				lManager.getLaunchConfigurationType("org.eclipse.ui.externaltools.ProgramLaunchConfigurationType");
-			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, "hob");
+			ILaunchConfigurationWorkingCopy w_copy = configType.newInstance(null, "toaster");
 			ArrayList<String> listValue = new ArrayList<String>();
 			listValue.add(new String("org.eclipse.ui.externaltools.launchGroup"));
 			w_copy.setAttribute("org.eclipse.debug.ui.favoriteGroups", listValue);		
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_LOCATION", "/usr/bin/xterm");
 
 			String init_script = project.getLocationURI().getPath() + "/oe-init-build-env ";
-			String argument = "-e \"source " + init_script + buildDir + ";hob";// + ";bash\"";
+			String argument = "-e \"source " + init_script + buildDir + ";toaster";// + ";bash\"";
 
 			w_copy.setAttribute("org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS", argument);
 			w_copy.launch(ILaunchManager.RUN_MODE, null);

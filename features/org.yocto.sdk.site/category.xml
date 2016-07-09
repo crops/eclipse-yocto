@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature url="features/org.yocto.sdk_@featureVersion@.jar" id="org.yocto.sdk" version="@featureVersion@">
-      <category name="Yocto Project ADT"/>
+      <category name="Yocto Project SDK"/>
    </feature>
    <feature url="features/org.yocto.sdk.source_@featureVersion@.jar" id="org.yocto.sdk.source" version="@featureVersion@">
-      <category name="Yocto Project ADT"/>
+      <category name="Yocto Project SDK"/>
    </feature>
    <feature url="features/org.yocto.bc_@bcfeatureVersion@.jar" id="org.yocto.bc" version="@bcfeatureVersion@">
       <category name="Yocto Project Bitbake Commander"/>
@@ -12,7 +12,7 @@
    <feature url="features/org.yocto.doc_@docFeatureVersion@.jar" id="org.yocto.doc" version="@docFeatureVersion@">
       <category name="Yocto Project Documentation"/>
    </feature>
-   <category-def name="Yocto Project ADT" label="Yocto Project ADT Plug-in"/>
+   <category-def name="Yocto Project SDK" label="Yocto Project SDK Plug-in"/>
    <category-def name="Yocto Project Bitbake Commander" label="Yocto Project Bitbake Commander Plug-in"/>
    <category-def name="Yocto Project Documentation" label="Yocto Project Documentation plug-in"/>
    <repository-reference location="http://download.eclipse.org/tm/updates/4.0/" enabled="true" />

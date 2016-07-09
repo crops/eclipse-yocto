@@ -128,7 +128,7 @@ public class LaunchToasterDialog extends Dialog {
 			{
 				for (int i = 0; i < buildSpec.length; i++) {
 					ICommand cmd = buildSpec[i];
-					if (cmd.getBuilderName().equalsIgnoreCase(BitbakeBuilder.HOB_BUILD_ID))
+					if (cmd.getBuilderName().equalsIgnoreCase(BitbakeBuilder.TOASTER_BUILD_ID))
 					{
 						Map<String, String> args = cmd.getArguments();
 						if ((args != null) && !args.isEmpty())

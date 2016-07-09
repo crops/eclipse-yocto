@@ -52,7 +52,7 @@ public class YoctoSDKPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		logger = YoctoSDKUtils.registerLogger(LoggerConstants.ADT_LOGGER_NAME, LoggerConstants.ADT_LOG_FILE) ;
+		logger = YoctoSDKUtils.registerLogger(LoggerConstants.SDK_LOGGER_NAME, LoggerConstants.SDK_LOG_FILE) ;
 	}
 
 	/*
@@ -62,7 +62,7 @@ public class YoctoSDKPlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		YoctoSDKUtils.unRegisterLogger(logger, LoggerConstants.ADT_LOG_FILE) ;
+		YoctoSDKUtils.unRegisterLogger(logger, LoggerConstants.SDK_LOG_FILE) ;
 	}
 
 	/**

@@ -49,8 +49,8 @@ public class YoctoSDKChecker {
 				"Poky.Qemu.Kernel.Empty", true),
 		QEMU_KERNEL_NONEXIST(
 				"Poky.Qemu.Kernel.Nonexist", true),
-		WRONG_ADT_VERSION(
-				"Poky.ADT.Sysroot.Wrongversion", false),
+		WRONG_SDK_VERSION(
+				"Poky.SDK.Sysroot.Wrongversion", false),
 		ENV_SETUP_SCRIPT_NONEXIST(
 				"Poky.Env.Script.Nonexist", false),
 		TOOLCHAIN_NO_SYSROOT(
@@ -211,7 +211,7 @@ public class YoctoSDKChecker {
 					}
 
 					if (!bVersion)
-						return SDKCheckResults.WRONG_ADT_VERSION;
+						return SDKCheckResults.WRONG_SDK_VERSION;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

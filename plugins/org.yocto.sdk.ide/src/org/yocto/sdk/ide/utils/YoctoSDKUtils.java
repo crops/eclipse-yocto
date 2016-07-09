@@ -496,7 +496,7 @@ public class YoctoSDKUtils {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("Logging is not enabled. Set ENABLE_ADT_LOGS=1 environment variable to enable the logger") ;
+			System.out.println("Logging is not enabled. Set ENABLE_SDK_LOGS=1 environment variable to enable the logger") ;
 		}
 		return logger ;
 	}

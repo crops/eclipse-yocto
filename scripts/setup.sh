@@ -227,7 +227,7 @@ then
         TM_SITE="http://download.eclipse.org/tm/updates/4.0/GA"
 else
         MAIN_SITE="http://downloads.yoctoproject.org/eclipse/mars/"
-        TM_SITE="http://downloads.yoctoproject.org/tm/updates/4.0/"
+        TM_SITE="http://downloads.yoctoproject.org/eclipse/tm/updates/4.0/"
         DEPRECATED_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
 fi
 

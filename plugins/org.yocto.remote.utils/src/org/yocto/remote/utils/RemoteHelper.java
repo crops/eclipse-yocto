@@ -43,7 +43,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.rse.core.IRSECoreRegistry;
 import org.eclipse.rse.core.IRSECoreStatusCodes;
@@ -76,6 +76,7 @@ import org.eclipse.rse.subsystems.terminals.core.ITerminalServiceSubSystem;
 import org.eclipse.rse.ui.RSEUIPlugin;
 import org.eclipse.ui.console.MessageConsole;
 
+@SuppressWarnings("restriction")
 public class RemoteHelper {
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
 	private final static String CMD_DELIMITER = ";"; //$NON-NLS-1$
@@ -235,7 +236,7 @@ public class RemoteHelper {
 		try {
 			fileService = getConnectedRemoteFileService(
 							connection,
-							new SubProgressMonitor(monitor, 5));
+							SubMonitor.convert(monitor, 5));
 			InputStream  inputStream = FileLocator.openStream(
 				    Activator.getDefault().getBundle(), new Path(locaPathInPlugin), false);
 			Path remotePath = new Path(remoteExePath);
@@ -255,12 +256,12 @@ public class RemoteHelper {
 			bos.close();
 			fileService.upload(tempFile, remotePath.removeLastSegments(1)
 					.toString(), remotePath.lastSegment(), true, null, null,
-					new SubProgressMonitor(monitor, 80));
+					SubMonitor.convert(monitor, 80));
 			// Need to change the permissions to match the original file
 			// permissions because of a bug in upload
 			remoteShellExec(
 					connection,
-					"", "chmod", "+x " + spaceEscapify(remotePath.toString()), new SubProgressMonitor(monitor, 5)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					"", "chmod", "+x " + spaceEscapify(remotePath.toString()), SubMonitor.convert(monitor, 5)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		} finally {
 			monitor.done();
@@ -278,18 +279,18 @@ public class RemoteHelper {
 		try {
 			fileService = getConnectedRemoteFileService(
 							connection,
-							new SubProgressMonitor(monitor, 10));
+							SubMonitor.convert(monitor, 10));
 			File file = new File(localExePath);
 			monitor.worked(5);
 			Path remotePath = new Path(remoteExePath);
 			fileService.download(remotePath.removeLastSegments(1).toString(),
 					remotePath.lastSegment(),file,true, null,
-					new SubProgressMonitor(monitor, 85));
+					SubMonitor.convert(monitor, 85));
 			// Need to change the permissions to match the original file
 			// permissions because of a bug in upload
 			//RemoteApplication p = remoteShellExec(
 			//		config,
-			//		"", "chmod", "+x " + spaceEscapify(remotePath.toString()), new SubProgressMonitor(monitor, 5)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			//		"", "chmod", "+x " + spaceEscapify(remotePath.toString()), SubMonitor.convert(monitor, 5)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			//Thread.sleep(500);
 			//p.destroy();
 
@@ -340,14 +341,14 @@ public class RemoteHelper {
 		try {
 			shellService = (IShellService) getConnectedShellService(
 							connection,
-							new SubProgressMonitor(monitor, 7));
+							SubMonitor.convert(monitor, 7));
 
 			// This is necessary because runCommand does not actually run the
 			// command right now.
 			String env[] = new String[0];
 			try {
 				IHostShell hostShell = shellService.launchShell(
-						"", env, new SubProgressMonitor(monitor, 3)); //$NON-NLS-1$
+						"", env, SubMonitor.convert(monitor, 3)); //$NON-NLS-1$
 				hostShell.writeToShell(remoteCommand);
 				p = new HostShellProcessAdapter(hostShell);
 			} catch (Exception e) {
@@ -530,12 +531,12 @@ public class RemoteHelper {
 
 		IShellService shellService;
 		try {
-			shellService = (IShellService) getConnectedShellService(connection, new SubProgressMonitor(monitor, 7));
+			shellService = (IShellService) getConnectedShellService(connection, SubMonitor.convert(monitor, 7));
 
 			String env[] = getRemoteMachine(connection).prepareEnvString(monitor);
 
 			try {
-				IHostShell hostShell = shellService.runCommand(cmd.getInitialDirectory(), remoteCommand, env, new SubProgressMonitor(monitor, 3));
+				IHostShell hostShell = shellService.runCommand(cmd.getInitialDirectory(), remoteCommand, env, SubMonitor.convert(monitor, 3));
 				return hostShell;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -551,9 +552,9 @@ public class RemoteHelper {
 		monitor.beginTask(Messages.InfoDownload, 100);
 
 		try {
-			IFileService fileService = getConnectedRemoteFileService(connection, new SubProgressMonitor(monitor, 10));
+			IFileService fileService = getConnectedRemoteFileService(connection, SubMonitor.convert(monitor, 10));
 			Path remotePath = new Path(remoteFilePath);
-			IHostFile remoteFile = fileService.getFile(remotePath.removeLastSegments(1).toString(), remotePath.lastSegment(), new SubProgressMonitor(monitor, 5));
+			IHostFile remoteFile = fileService.getFile(remotePath.removeLastSegments(1).toString(), remotePath.lastSegment(), SubMonitor.convert(monitor, 5));
 			return remoteFile;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -568,7 +569,7 @@ public class RemoteHelper {
 		monitor.beginTask(Messages.InfoDownload, 100);
 
 		try {
-			IFileService fileService = getConnectedRemoteFileService(connection, new SubProgressMonitor(monitor, 10));
+			IFileService fileService = getConnectedRemoteFileService(connection, SubMonitor.convert(monitor, 10));
 
 			return fileService.getInputStream(parentPath, remoteFilePath, false, monitor);
 		} catch (Exception e) {
@@ -649,7 +650,7 @@ public class RemoteHelper {
 		ISystemRegistry sr = RSECorePlugin.getTheSystemRegistry();
 		ISubSystemConfiguration[] configurations = sr.getSubSystemConfigurationsBySystemType(getSSHSystemType(), true);
 		
-		ArrayList configList = new ArrayList();
+		ArrayList<ISubSystemConfigurator> configList = new ArrayList<ISubSystemConfigurator>();
 		for (int i = 0; i < configurations.length; i++){
 			ISubSystemConfiguration configuration = configurations[i];
 			

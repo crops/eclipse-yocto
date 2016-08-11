@@ -17,14 +17,12 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.services.local.shells.LocalShellService;
-import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 import org.eclipse.rse.services.files.IFileService;
 import org.eclipse.rse.services.shells.IHostShell;
 import org.eclipse.rse.services.shells.IShellService;
@@ -32,6 +30,7 @@ import org.eclipse.rse.subsystems.files.core.servicesubsystem.IFileServiceSubSys
 import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
 import org.eclipse.ui.console.MessageConsole;
 
+@SuppressWarnings("restriction")
 public class RemoteMachine {
 	public static final String PROXY = "proxy";
 
@@ -76,11 +75,11 @@ public class RemoteMachine {
 
 			environment = new HashMap<String, String>();
 
-			IShellService shellService = getShellService(new SubProgressMonitor(monitor, 7));
+			IShellService shellService = getShellService(SubMonitor.convert(monitor, 7));
 
 			ProcessStreamBuffer buffer = null;
 			try {
-				SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 3);
+				SubMonitor subMonitor = SubMonitor.convert(monitor, 3);
 				IHostShell hostShell = shellService.runCommand("", "env" + " ; echo " + RemoteHelper.TERMINATOR + "; exit;", new String[]{}, subMonitor);
 				buffer = RemoteHelper.processOutput(subMonitor, hostShell, cmdHandler);
 				for(int i = 0; i < buffer.getOutputLines().size(); i++) {

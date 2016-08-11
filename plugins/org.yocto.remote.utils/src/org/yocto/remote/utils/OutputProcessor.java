@@ -21,6 +21,7 @@ import org.eclipse.rse.internal.services.shells.TerminalServiceHostShell;
 import org.eclipse.rse.services.shells.HostShellProcessAdapter;
 import org.eclipse.rse.services.shells.IHostShell;
 
+@SuppressWarnings("restriction")
 public abstract class OutputProcessor{
 	private static final int ERROR_BUFFER = 1;
 	private static final int OUTPUT_BUFFER = 2;
@@ -37,6 +38,7 @@ public abstract class OutputProcessor{
 		this.cmdHandler = cmdHandler;
 		this.task = task;
 	}
+
 	public ProcessStreamBuffer processOutput() throws Exception{
 		if (hostShell == null)
 			throw new Exception("An error has occured while trying to run remote command!");

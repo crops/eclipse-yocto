@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tm.internal.terminal.control.ITerminalViewControl;
 import org.eclipse.tm.internal.terminal.provisional.api.ITerminalConnector;
 
+@SuppressWarnings("restriction")
 abstract public class TerminalHandler extends AbstractHandler {
 
 

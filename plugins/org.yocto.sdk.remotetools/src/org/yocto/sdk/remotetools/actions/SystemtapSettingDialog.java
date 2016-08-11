@@ -219,6 +219,7 @@ public class SystemtapSettingDialog extends Dialog {
 	
  	@Override
 	protected void okPressed() {
+		@SuppressWarnings("unused")
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
 		metadata_location = metadataLocationText.getText();
 		if ( (metadata_location == null) || metadata_location.isEmpty()) {

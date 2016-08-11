@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
@@ -74,10 +74,10 @@ public class PowertopModel extends BaseModel {
 		try {
 			//running powertop
 			monitor.subTask("Generating powertop data file remotely");
-			generateData(new SubProgressMonitor(monitor,30));
+			generateData(SubMonitor.convert(monitor,30));
 			//download datafile
 			monitor.subTask("Downloading powertop data file");
-			getDataFile(new SubProgressMonitor(monitor,30));
+			getDataFile(SubMonitor.convert(monitor,30));
 			//show it in the powertop view
 			display.syncExec(new Runnable() {
 				public void run() {

@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -118,7 +118,7 @@ public class OprofileModel extends BaseModel {
 			monitor.beginTask("Starting oprofile", 100);	
 			//start oprofile-server
 			monitor.subTask("Starting oprofile-server");
-			startServer(new SubProgressMonitor(monitor,80));
+			startServer(SubMonitor.convert(monitor,80));
 			
 			//start local oprofile-viewer
 			monitor.subTask("oprofile-viewer is running locally");
@@ -140,7 +140,7 @@ public class OprofileModel extends BaseModel {
 				//stop oprofile-server
 				if(stopServer) {
 					monitor.subTask("Stopping oprofile-viewer");
-					stopServer(new SubProgressMonitor(monitor,30));
+					stopServer(SubMonitor.convert(monitor,30));
 				}
 			}
 		}catch (InterruptedException e){

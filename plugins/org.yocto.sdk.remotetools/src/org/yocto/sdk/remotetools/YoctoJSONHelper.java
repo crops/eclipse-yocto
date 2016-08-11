@@ -32,6 +32,7 @@ public class YoctoJSONHelper {
 		try {
 			
 			JSONObject obj = (JSONObject)JSONValue.parse(new FileReader(PROPERTIES_FILE));
+			@SuppressWarnings("unchecked")
 			Set<String> keys = obj.keySet();
 			if (!keys.isEmpty()) {
 				Iterator<String> iter = keys.iterator();
@@ -57,8 +58,13 @@ public class YoctoJSONHelper {
 		return properties;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void createBspJSONFile(HashSet<YoctoBspPropertyElement> properties) {
 		try {
+			/* should be JSONObject<String, Object> obj = new JSONObject<String, Object>();
+			 * but upstream json-simple would have to change.
+			 * See http://stackoverflow.com/questions/16415436/json-and-generics-in-java-type-safety-warning
+			 */
 			JSONObject obj = new JSONObject();
 			if (!properties.isEmpty()) {
 				Iterator<YoctoBspPropertyElement> it = properties.iterator();

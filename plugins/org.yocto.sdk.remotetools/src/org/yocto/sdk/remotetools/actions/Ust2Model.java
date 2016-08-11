@@ -25,7 +25,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.ui.IWorkbenchWindow;
 
@@ -46,6 +46,7 @@ public class Ust2Model extends BaseModel {
 	
 	private String prj_name;
 	
+	@SuppressWarnings("unused")
 	private IWorkbenchWindow window;
 	
 	public Ust2Model(IHost host, String trace, String project, IWorkbenchWindow window) {
@@ -89,6 +90,7 @@ public class Ust2Model extends BaseModel {
 		String traceName = localFile.substring(0,localFile.length()-LOCAL_FILE_SUFFIX.length());
 		
 		IWorkspaceRoot wsroot = ResourcesPlugin.getWorkspace().getRoot();
+		@SuppressWarnings("unused")
 		IPath full_path = wsroot.getFullPath();
 		IProject project = wsroot.getProject(prj_name);
 		IFolder traceFolder = project.getFolder(TRACE_FOLDER_NAME);
@@ -111,6 +113,7 @@ public class Ust2Model extends BaseModel {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private String[] generateViewerParam() throws Exception {
 		String viewerParam=new String(LOCAL_EXEC);
 		int i;
@@ -135,23 +138,20 @@ public class Ust2Model extends BaseModel {
 	@Override
 	public void process(IProgressMonitor monitor)
 			throws InvocationTargetException, InterruptedException {
-		// TODO Auto-generated method stub
-		
-		String datafile;
-		
+
 		monitor.beginTask("Running ust", 100);		
 		try {
 			//preparing remote trace
 			
 			monitor.subTask("Preparing user space lttng data file remotely");
-			generateData(new SubProgressMonitor(monitor,30));
+			generateData(SubMonitor.convert(monitor,30));
 			
 			//download datafile to local
 			monitor.subTask("Downloading user space lttng data file");
-			getDataFile(new SubProgressMonitor(monitor,30));
+			getDataFile(SubMonitor.convert(monitor,30));
 			
 			//extract datafile and import to lttng project
-			importToProject(new SubProgressMonitor(monitor,30));
+			importToProject(SubMonitor.convert(monitor,30));
 				
 		}catch (InterruptedException e){
 			throw e;

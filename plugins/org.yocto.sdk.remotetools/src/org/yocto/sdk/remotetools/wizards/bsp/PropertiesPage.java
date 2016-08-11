@@ -442,6 +442,7 @@ public class PropertiesPage extends WizardPage {
 	}
 
 	private void updateKernelValues(final String value, String property) {
+		@SuppressWarnings("unused")
 		String build_dir = "";
 		if ((bspElem.getBuildLoc() == null) || bspElem.getBuildLoc().isEmpty())
 			build_dir = bspElem.getMetadataLoc()+"/build";

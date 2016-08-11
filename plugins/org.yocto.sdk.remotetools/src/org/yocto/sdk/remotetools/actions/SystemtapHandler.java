@@ -9,6 +9,7 @@
  * Intel - initial API and implementation
  *******************************************************************************/
 package org.yocto.sdk.remotetools.actions;
+
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -34,6 +35,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.yocto.remote.utils.RemoteHelper;
 
+@SuppressWarnings("restriction")
 public class SystemtapHandler extends AbstractHandler {
 	protected SystemtapSettingDialog setting;
 	protected String changeTerm="export TERM=vt100;";

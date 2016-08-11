@@ -38,7 +38,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
+// import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tm.internal.terminal.control.ITerminalViewControl;
 import org.eclipse.tm.internal.terminal.control.actions.TerminalActionClearAll;
 import org.eclipse.tm.internal.terminal.control.actions.TerminalActionCopy;
@@ -59,7 +59,8 @@ public class TerminalViewTab extends Composite {
 
 	private IPropertyChangeListener propertyChangeListener;
 
-	private Menu menu;
+	//  Only used in commented out code
+	//  Menu menu;
 
 	private boolean fMenuAboutToShow;
 
@@ -193,6 +194,7 @@ public class TerminalViewTab extends Composite {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public void updateTheme(final ITerminalViewControl control) {
 		if (control != null) {
 			IThemeManager mgr = PlatformUI.getWorkbench().getThemeManager();

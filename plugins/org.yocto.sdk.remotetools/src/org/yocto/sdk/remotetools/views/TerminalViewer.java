@@ -131,7 +131,8 @@ public class TerminalViewer extends ViewPart implements ISelectionListener,
             pagebook.showPage(noTabShownLabel);
     }
     
-    private void showTabsPage(){
+    @SuppressWarnings("unused")
+	private void showTabsPage(){
         pagebook.showPage(tabFolder);
     }
 

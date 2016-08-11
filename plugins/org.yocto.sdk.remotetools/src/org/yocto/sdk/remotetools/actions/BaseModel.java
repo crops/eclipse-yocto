@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.rse.core.model.IHost;
 import org.yocto.remote.utils.RemoteHelper;
@@ -84,23 +84,23 @@ abstract public class BaseModel implements IRunnableWithProgress {
 			monitor.beginTask(RUN_MSG + taskName, WORKLOAD);
 
 			monitor.subTask(INIT_MSG + taskName + DOTS);
-			init(new SubProgressMonitor(monitor, INIT_PERCENT));
+			init(SubMonitor.convert(monitor, INIT_PERCENT));
 
 			monitor.subTask(PRE_PROCESS_MSG + taskName + DOTS);
-			preProcess(new SubProgressMonitor(monitor, PRE_PROCESS_PERCENT));
+			preProcess(SubMonitor.convert(monitor, PRE_PROCESS_PERCENT));
 
 			monitor.subTask(PROCESS_MSG + taskName + DOTS);
-			process(new SubProgressMonitor(monitor, PROCESS_PERCENT));
+			process(SubMonitor.convert(monitor, PROCESS_PERCENT));
 
 			monitor.subTask(POST_PROCESS_MSG + taskName + DOTS);
-			postProcess(new SubProgressMonitor(monitor, POST_PROCESS_PERCENT));
+			postProcess(SubMonitor.convert(monitor, POST_PROCESS_PERCENT));
 		} catch (InterruptedException e){
 			throw new InterruptedException("User cancelled!");
 		} catch (InvocationTargetException e) {
 			throw e;
 		} finally {
 			monitor.subTask(CLEAN_MSG + taskName + DOTS);
-			clean(new SubProgressMonitor(monitor, CLEAN_PERCENT));
+			clean(SubMonitor.convert(monitor, CLEAN_PERCENT));
 			monitor.done();
 		}
 	}

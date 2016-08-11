@@ -85,6 +85,7 @@ public class BaseFileView extends ViewPart {
 					if(line!=null)
 						elements.add(line);
 				}while(line!=null);
+				in.close();
 			}catch (Exception e) {
 				e.printStackTrace();
 			}

@@ -21,6 +21,7 @@ import org.yocto.sdk.ide.YoctoUIElement;
 import org.yocto.sdk.ide.utils.ProjectPreferenceUtils;
 import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 
+@SuppressWarnings("restriction")
 public class YoctoSDKAutotoolsProjectNature extends YoctoSDKProjectNature {
 	public static final  String YoctoSDK_AUTOTOOLS_NATURE_ID = YoctoSDKPlugin.getUniqueIdentifier() + ".YoctoSDKAutotoolsNature";
 

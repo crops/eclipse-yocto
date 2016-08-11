@@ -11,7 +11,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.rse.subsystems.terminals.core;bundle-version="1.0.300";visibility:=reexport,
  org.eclipse.rse.ui
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.eclipse.core.internal.filesystem,
  org.eclipse.core.internal.resources,
  org.eclipse.core.resources,

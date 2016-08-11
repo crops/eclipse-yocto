@@ -6,4 +6,4 @@ Bundle-Version: 1.4.1.qualifier
 Bundle-ClassPath: org.yocto.doc.user
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.help
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

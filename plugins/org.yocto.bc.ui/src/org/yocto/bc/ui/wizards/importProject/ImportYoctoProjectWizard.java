@@ -44,17 +44,14 @@ public class ImportYoctoProjectWizard extends FiniteStateWizard  implements IImp
 	public static final String KEY_INITPATH = "INITPATH";
 	protected static final String KEY_PINFO = "PINFO";
 	
-	private Map projectModel;
-	private IWorkbench workbench;
-	private IStructuredSelection selection;
-	
+	private Map<String, Object> projectModel;
 	private MessageConsole myConsole;
 	
 	public ImportYoctoProjectWizard() {
-		projectModel = new Hashtable();
+		projectModel = new Hashtable<String, Object>();
 	}
 	
-	public Map getModel() {
+	public Map<String, Object> getModel() {
 		return projectModel;
 	}
 	
@@ -100,8 +97,6 @@ public class ImportYoctoProjectWizard extends FiniteStateWizard  implements IImp
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		this.workbench = workbench;
-		this.selection = selection;
 		this.setNeedsProgressMonitor(true);
 		setWindowTitle("BitBake Commander Project");
 		

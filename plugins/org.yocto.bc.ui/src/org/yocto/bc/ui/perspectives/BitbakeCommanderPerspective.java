@@ -15,8 +15,6 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.console.IConsoleConstants;
 
-import org.yocto.bc.ui.views.RecipeView;
-
 public class BitbakeCommanderPerspective implements IPerspectiveFactory {
 
 	private IPageLayout factory;
@@ -37,10 +35,9 @@ public class BitbakeCommanderPerspective implements IPerspectiveFactory {
 	}
 
 	private void addPerspectiveShortcuts() {
-		// factory.addPerspectiveShortcut("org.eclipse.team.ui.TeamSynchronizingPerspective");
-		// //NON-NLS-1
-		// factory.addPerspectiveShortcut("org.eclipse.team.cvs.ui.cvsPerspective");
-		// //NON-NLS-1
+		//factory.addPerspectiveShortcut("org.eclipse.team.ui.TeamSynchronizingPerspective"); //NON-NLS-1
+		// TODO: add egit perspective instead
+		//factory.addPerspectiveShortcut("org.eclipse.team.cvs.ui.cvsPerspective"); //$NON-NLS-1$
 		factory.addPerspectiveShortcut("org.eclipse.ui.resourcePerspective"); // NON-NLS-1
 	}
 
@@ -54,7 +51,7 @@ public class BitbakeCommanderPerspective implements IPerspectiveFactory {
 		
 		IFolderLayout topLeft = factory.createFolder("topLeft", // NON-NLS-1
 				IPageLayout.LEFT, 0.25f, factory.getEditorArea());
-		topLeft.addView(IPageLayout.ID_RES_NAV);
+		topLeft.addView(IPageLayout.ID_PROJECT_EXPLORER);
 		//llu detach RecipeView
 		//topLeft.addView(RecipeView.ID_VIEW); // NON-NLS-1
 		
@@ -72,7 +69,7 @@ public class BitbakeCommanderPerspective implements IPerspectiveFactory {
 		factory.addShowViewShortcut("org.eclipse.team.ui.GenericHistoryView"); // NON-NLS-1
 		factory.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 		// factory.addShowViewShortcut(JavaUI.ID_PACKAGES);
-		factory.addShowViewShortcut(IPageLayout.ID_RES_NAV);
+		factory.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
 		// factory.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
 		// factory.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 	}

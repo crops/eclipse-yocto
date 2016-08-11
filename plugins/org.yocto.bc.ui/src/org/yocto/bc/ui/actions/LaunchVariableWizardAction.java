@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.builder.BitbakeCommanderNature;
 import org.yocto.bc.ui.wizards.variable.VariableWizard;
@@ -35,7 +34,7 @@ import org.yocto.bc.ui.wizards.variable.VariableWizard;
 public class LaunchVariableWizardAction implements IWorkbenchWindowActionDelegate {
 
 	private IWorkbenchWindow window;
-	private Map session;
+	private Map<String, Object> session;
 
 	public void dispose() {
 	}

@@ -14,8 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,28 +26,21 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.yocto.bc.ui.builder.BitbakeBuilder;
-import org.yocto.bc.ui.builder.BitbakeCommanderNature;
 
 public class LaunchToasterDialog extends Dialog {
-	private String title;
-	private Button buildButton;
 	private Combo toaster_url;
 	private IProject project;
-	private Shell shell;
 	private URL toaster_server;
 
 	public LaunchToasterDialog(Shell parentShell, String dialogTitle, IProject project) {
         super(parentShell);
-        this.shell = parentShell;
         this.project = project;
-        this.title = dialogTitle;
         setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -68,7 +59,6 @@ public class LaunchToasterDialog extends Dialog {
 	}
 
 	private void createComposite(Composite composite) throws Exception{
-		Label root_label, sysroot_label;
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		GridLayout layout = new GridLayout(2, false);
 		composite.setLayout(layout);
@@ -102,6 +92,7 @@ public class LaunchToasterDialog extends Dialog {
 		return toaster_server ;
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isSubDirectory(File baseDir, File subDir) throws IOException {
 		baseDir = baseDir.getCanonicalFile();
 		subDir = subDir.getCanonicalFile();
@@ -116,6 +107,7 @@ public class LaunchToasterDialog extends Dialog {
 		return false;
 	}
 
+	@SuppressWarnings("unused")
 	private void initializeBuildCombo()
 	{
 		ArrayList<String> items = new ArrayList<String> ();
@@ -133,9 +125,9 @@ public class LaunchToasterDialog extends Dialog {
 						Map<String, String> args = cmd.getArguments();
 						if ((args != null) && !args.isEmpty())
 						{
-							Iterator entries = args.entrySet().iterator();
+							Iterator<Entry<String, String>> entries = args.entrySet().iterator();
 							while (entries.hasNext()) {
-								Entry thisEntry = (Entry) entries.next();
+								Entry<String, String> thisEntry = (Entry<String, String>) entries.next();
 								String key = (String)thisEntry.getKey();
 							}
 						}
@@ -147,6 +139,7 @@ public class LaunchToasterDialog extends Dialog {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private String[] getValues(String value) {
 		if ((value != null) && !value.isEmpty())
 		{

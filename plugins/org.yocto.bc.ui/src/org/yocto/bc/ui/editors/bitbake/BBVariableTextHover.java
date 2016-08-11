@@ -24,7 +24,7 @@ import org.yocto.bc.ui.Activator;
 
 class BBVariableTextHover implements ITextHover {
 	private final BBSession session;
-	private volatile Map envMap;
+	private volatile Map<String, Object> envMap;
 
 	public BBVariableTextHover(BBSession session, String file) {
 		this.session = session;

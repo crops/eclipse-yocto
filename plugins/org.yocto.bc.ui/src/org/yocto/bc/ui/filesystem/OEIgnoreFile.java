@@ -64,11 +64,6 @@ public class OEIgnoreFile implements IFileStore {
 		return new FileInfo(file.getName());
 	}
 
-	public Object getAdapter(Class adapter) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public IFileStore getChild(IPath path) {
 		// TODO Auto-generated method stub
 		return null;
@@ -126,6 +121,12 @@ public class OEIgnoreFile implements IFileStore {
 	}
 
 	public IFileStore getFileStore(IPath path) {
+		return null;
+	}
+
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	

@@ -1,6 +1,6 @@
 package org.yocto.bc.ui.wizards.variable;
 
-import java.util.Comparator;
+//import java.util.Comparator;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -9,7 +9,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
+//import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,7 +35,7 @@ public class VariablePage extends FiniteStateWizardPage {
 	private TableColumn c1;
 	private TableColumn c2;
 
-	protected VariablePage(Map model) {
+	protected VariablePage(Map<String, Object> model) {
 		super("Yocto Project BitBake Commander", model);
 		setTitle("Yocto Project BitBake Variable Viewer");
 		setDescription("Sort and fitler global BitBake variables by name or value.");
@@ -71,7 +71,7 @@ public class VariablePage extends FiniteStateWizardPage {
 		c1.setWidth(200);
 		c1.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				((VariableViewerSorter) viewer.getSorter()).doSort(0);
+				//((VariableViewerSorter) viewer.getSorter()).doSort(0);
 				viewer.refresh();
 			}
 		});
@@ -81,14 +81,13 @@ public class VariablePage extends FiniteStateWizardPage {
 		c2.setWidth(200);
 		c2.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				((VariableViewerSorter) viewer.getSorter()).doSort(1);
+				//((VariableViewerSorter) viewer.getSorter()).doSort(1);
 				viewer.refresh();
 			}
 		});
 
 		viewer.setContentProvider(new VariableContentProvider());
 		viewer.setLabelProvider(new VariableLabelProvider());
-		viewer.setSorter(new VariableViewerSorter());
 
 		viewer.setFilters(new ViewerFilter[] {new MapViewerFilter()});
 		setControl(top);
@@ -186,6 +185,7 @@ public class VariablePage extends FiniteStateWizardPage {
 	 * A tableviewer sorter found on the internet.
 	 *
 	 */
+	/* deprecated
 	class VariableViewerSorter extends ViewerSorter {
 		private static final int ASCENDING = 0;
 
@@ -226,6 +226,7 @@ public class VariablePage extends FiniteStateWizardPage {
 			return rc;
 		}
 	}
+	*/
 	
 	/**
 	 * A filter for the name/value model.

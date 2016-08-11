@@ -14,12 +14,15 @@ import java.net.URL;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.yocto.bc.ui.Activator;
 
 /**
  * An example showing how to control when an element is decorated. This example
@@ -68,8 +71,8 @@ public class ReadOnly implements ILightweightLabelDecorator {
 		ResourceAttributes attrs = resource.getResourceAttributes();
 		if(attrs!=null) {
 			if (attrs.isReadOnly()){
-				URL url = Platform.find(
-						Platform.getBundle("org.yocto.bc.ui"), new Path(iconPath)); //NON-NLS-1
+				Bundle bundle = FrameworkUtil.getBundle(Activator.class);
+				URL url = FileLocator.find(bundle, new Path(iconPath), null);
 	
 				if (url == null)
 					return;

@@ -1,20 +1,13 @@
 package org.yocto.bc.ui.wizards.install;
 
-import java.io.IOException;
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,16 +16,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
-import org.yocto.bc.ui.wizards.FiniteStateWizard;
 import org.yocto.bc.ui.wizards.FiniteStateWizardPage;
-import org.yocto.bc.ui.wizards.FiniteStateWizardPage.ValidationListener;
 
 /**
  * Select which flavor of OE is to be installed.
@@ -45,17 +35,13 @@ import org.yocto.bc.ui.wizards.FiniteStateWizardPage.ValidationListener;
  */
 public class OptionsPage extends FiniteStateWizardPage {
 
-	private Map vars;
-	private Composite c1;
 	private Composite top;
-	private List controlList;
-	private boolean controlsCreated = false;
 	private Text txtProjectLocation;
 	private Text txtInit;
 	private ValidationListener validationListener;
 	private Text txtProjectName;
 
-	protected OptionsPage(Map model) {
+	protected OptionsPage(Map<String, Object> model) {
 		super("Options", model);
 		setMessage("Enter these parameters to create new Yocto Project BitBake commander project");
 	}
@@ -67,8 +53,6 @@ public class OptionsPage extends FiniteStateWizardPage {
 		top.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		GridData gdFillH = new GridData(GridData.FILL_HORIZONTAL);
-		GridData gdVU = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
-
 		Composite projectNameComp = new Composite(top, SWT.NONE);
 		GridData gdProjName = new GridData(GridData.FILL_HORIZONTAL);
 		projectNameComp.setLayoutData(gdProjName);
@@ -190,6 +174,7 @@ public class OptionsPage extends FiniteStateWizardPage {
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private class FileOpenSelectionAdapter extends SelectionAdapter {
 		@Override
 		public void widgetSelected(SelectionEvent e) {

@@ -12,14 +12,6 @@ package org.yocto.bc.bitbake;
 
 import java.io.IOException;
 
-import org.eclipse.jface.preference.JFacePreferences;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
-
 /**
  * Represents the bitbake environment of a recipe package.
  * @author kgilmer
@@ -46,5 +38,9 @@ public class BBRecipe extends BBSession {
 
 	protected String getDefaultDepends() {
 		return this.filePath;
+	}
+
+	public BBSession getSession() {
+		return session;
 	}
 }

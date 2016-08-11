@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.yocto.bc.ui.wizards;
 
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.swt.widgets.Text;
 import java.util.ArrayList;
 
 public class BitbakeRecipeUIElement {
@@ -28,7 +26,7 @@ public class BitbakeRecipeUIElement {
 	private String md5sum;
 	private String sha256sum;
 	private String metaDir;
-	private ArrayList inheritance;
+	private ArrayList<String> inheritance;
 	private String[] valid_src_uris = {"file://", "bzr://", "git://", "osc://", "repo://",
 			"ccrc://","http://","https://","ftp://","cvs://","hg://","p4://","ssh://","svn://"};
 
@@ -45,7 +43,7 @@ public class BitbakeRecipeUIElement {
 		this.srcuri = "";
 		this.md5sum = "";
 		this.sha256sum = "";
-		this.inheritance = new ArrayList();
+		this.inheritance = new ArrayList<String>();
 		this.metaDir = "";
 	}
 

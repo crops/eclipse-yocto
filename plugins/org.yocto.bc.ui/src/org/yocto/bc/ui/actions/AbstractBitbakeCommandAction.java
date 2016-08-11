@@ -32,7 +32,6 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 import org.yocto.bc.bitbake.BBLanguageHelper;
 import org.yocto.bc.bitbake.BBSession;
-import org.yocto.bc.bitbake.ICommandResponseHandler;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.builder.BitbakeCommanderNature;
 
@@ -55,12 +54,12 @@ public abstract class AbstractBitbakeCommandAction implements IWorkbenchWindowAc
 	protected IFile recipe;
 	protected BBSession bbs;
 
-	private Color commandColor, responseColor, errorColor;
+	private Color commandColor, errorColor;
 	private boolean errorOccurred = false;
 
 	public AbstractBitbakeCommandAction() {
 		commandColor = JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR);
-		responseColor = JFaceResources.getColorRegistry().get(JFacePreferences.HYPERLINK_COLOR);
+		JFaceResources.getColorRegistry().get(JFacePreferences.HYPERLINK_COLOR);
 		errorColor = JFaceResources.getColorRegistry().get(JFacePreferences.ERROR_COLOR);
 	}
 

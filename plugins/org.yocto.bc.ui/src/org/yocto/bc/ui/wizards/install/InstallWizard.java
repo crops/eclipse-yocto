@@ -19,8 +19,6 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,6 +38,7 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.wizards.FiniteStateWizard;
@@ -71,11 +70,11 @@ public class InstallWizard extends FiniteStateWizard implements
 	protected static final String DEFAULT_INSTALL_DIR = "~/yocto";
 	public static final String VALIDATION_FILE = DEFAULT_INIT_SCRIPT;
 
-	private Map model;
+	private Map<String, Object> model;
 	private MessageConsole myConsole;
 
 	public InstallWizard() {
-		this.model = new Hashtable();
+		this.model = new Hashtable<String, Object>();
 		model.put(INSTALL_DIRECTORY, DEFAULT_INSTALL_DIR);
 		model.put(INIT_SCRIPT, DEFAULT_INIT_SCRIPT);
 		
@@ -108,7 +107,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	}
 
 	public InstallWizard(IStructuredSelection selection) {
-		model = new Hashtable();
+		model = new Hashtable<String, Object>();
 	}
 
 	/*
@@ -132,7 +131,7 @@ public class InstallWizard extends FiniteStateWizard implements
 	}
 
 	@Override
-	public Map getModel() {
+	public Map<String, Object> getModel() {
 		return model;
 	}
 
@@ -143,7 +142,7 @@ public class InstallWizard extends FiniteStateWizard implements
 
 		WizardPage page = (WizardPage) getPage("Options");
 		page.setPageComplete(true);
-		Map options = (Map) model;
+		Map<String, Object> options = (Map<String, Object>) model;
 		String install_dir = "";
 		if (options.containsKey(INSTALL_DIRECTORY)) {
 			install_dir = (String) options.get(INSTALL_DIRECTORY);
@@ -189,6 +188,7 @@ public class InstallWizard extends FiniteStateWizard implements
 		public float calWorkloadDone(String info) throws IllegalArgumentException;
 	}
 
+	@SuppressWarnings("unused")
 	private class LongtimeRunningTask implements IRunnableWithProgress {
 		private String []cmdArray;
 		private String []envp;
@@ -306,6 +306,7 @@ public class InstallWizard extends FiniteStateWizard implements
 			}
 		}
 
+		@SuppressWarnings("unused")
 		public void printDialog(String msg) {
 			try {
 				myConsoleStream.println(msg);
@@ -331,6 +332,7 @@ public class InstallWizard extends FiniteStateWizard implements
 			}
 		}
 
+		@SuppressWarnings("unused")
 		public void printCmd(String cmd) {
 			try {
 				myConsoleStream.println(cmd);

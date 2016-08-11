@@ -16,7 +16,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -30,21 +29,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Iterator;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -71,7 +65,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	
 	private ISelection selection;
 	private String metaDirLoc;
-	private ArrayList inheritance;
+	private ArrayList<String> inheritance;
 
 	public NewBitBakeFileRecipeWizardPage(ISelection selection) {
 		super("wizardPage");
@@ -79,7 +73,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 		setDescription("Create a new BitBake recipe.");
 		this.selection = selection;
 		element = new BitbakeRecipeUIElement();
-		inheritance = new ArrayList();
+		inheritance = new ArrayList<String>();
 	}
 
 	public void createControl(Composite parent) {
@@ -324,7 +318,6 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 				else if (file.getName().equalsIgnoreCase("setup.py"))
 					inheritance.add("disutils");
 				else {
-					String pattern = "configure.[ac|.in]";
 					if (file.getName().equalsIgnoreCase("configure.ac") || file.getName().equalsIgnoreCase("configure.in"))
 						inheritance.add("autotools");
 					else
@@ -499,7 +492,7 @@ public class NewBitBakeFileRecipeWizardPage extends WizardPage {
 	
 	private void updateSrcuri(HashMap<String, String> mirrorsMap, String src_uri) {
 		Set<String> mirrors = mirrorsMap.keySet();
-		Iterator iter = mirrors.iterator();
+		Iterator<String> iter = mirrors.iterator();
 		String mirror_key = null;
 
 	    while (iter.hasNext()) {

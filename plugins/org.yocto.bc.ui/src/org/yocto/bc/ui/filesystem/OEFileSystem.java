@@ -36,11 +36,11 @@ public class OEFileSystem extends FileSystem {
 		return ref;
 	}
 
-	private Map fileStoreCache;
+	private Map<URI, OEFile> fileStoreCache;
 
 	public OEFileSystem() {
 		ref = this;
-		fileStoreCache = new Hashtable();
+		fileStoreCache = new Hashtable<URI, OEFile>();
 	}
 	
 	@Override
@@ -62,7 +62,7 @@ public class OEFileSystem extends FileSystem {
 				throw new RuntimeException("Invalid local.conf: TMPDIR or DL_DIR or SSTATE_DIR undefined.");
 			}
 			
-			List ignoreList = new ArrayList();
+			List<Object> ignoreList = new ArrayList<Object>();
 
 			//These directories are ignored because they contain too many files for Eclipse to handle efficiently.
 			ignoreList.add(config.get("TMPDIR"));

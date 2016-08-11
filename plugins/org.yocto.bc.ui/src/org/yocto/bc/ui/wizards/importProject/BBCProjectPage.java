@@ -64,7 +64,7 @@ public class BBCProjectPage extends FiniteStateWizardPage {
 	private ValidationListener validationListener;
 	private Text txtProjectName;
 
-	public BBCProjectPage(Map model) {
+	public BBCProjectPage(Map<String, Object> model) {
 		super(PAGE_TITLE, model);
 		setTitle("Create new Yocto Project BitBake Commander project");
 		setMessage("Enter information to create a BitBake Commander project.");

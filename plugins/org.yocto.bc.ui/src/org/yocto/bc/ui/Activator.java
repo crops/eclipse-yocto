@@ -19,7 +19,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -35,7 +34,6 @@ import org.yocto.bc.bitbake.BBSession;
 import org.yocto.bc.bitbake.ProjectInfoHelper;
 import org.yocto.bc.bitbake.ShellSession;
 import org.yocto.bc.ui.model.ProjectInfo;
-import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
 
 public class Activator extends AbstractUIPlugin {
 
@@ -46,16 +44,16 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	private static Map shellMap;
-	private static Map projInfoMap;
-	private static Hashtable bbSessionMap;
-	private static Hashtable bbRecipeMap;
+	private static Map<String, ShellSession> shellMap;
+	private static Map<String, ProjectInfo> projInfoMap;
+	private static Hashtable<String,BBSession> bbSessionMap;
+	private static Hashtable<String,BBRecipe> bbRecipeMap;
 
 	private IResourceChangeListener listener = new BCResourceChangeListener();
 
 	public static BBRecipe getBBRecipe(BBSession session, String filePath) throws IOException {
 		if (bbRecipeMap == null) {
-			bbRecipeMap = new Hashtable();
+			bbRecipeMap = new Hashtable<String, BBRecipe>();
 		}
 
 		String key = session.getProjInfoRoot() + filePath;
@@ -76,7 +74,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static BBSession getBBSession(String projectRoot, Writer out) throws IOException {
 		if (bbSessionMap == null) {
-			bbSessionMap = new Hashtable();
+			bbSessionMap = new Hashtable<String, BBSession>();
 		}
 		
 		BBSession bbs = (BBSession) bbSessionMap.get(projectRoot);
@@ -97,7 +95,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static BBSession getBBSession(String projectRoot) throws IOException {
 		if (bbSessionMap == null) {
-			bbSessionMap = new Hashtable();
+			bbSessionMap = new Hashtable<String, BBSession>();
 		}
 		
 		BBSession bbs = (BBSession) bbSessionMap.get(projectRoot);
@@ -132,7 +130,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static ProjectInfo getProjInfo(String location) throws CoreException, InvocationTargetException, InterruptedException {
 		if (projInfoMap == null) {
-			projInfoMap = new Hashtable();
+			projInfoMap = new Hashtable<String, ProjectInfo>();
 		}
 
 		ProjectInfo pi = (ProjectInfo) projInfoMap.get(location);
@@ -151,19 +149,20 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public static void notifyAllBBSession(IResource[] added, IResource[] removed, IResource[] changed) {
-		Iterator iter;
+		Iterator<BBRecipe> recipe_iter;
+		Iterator<BBSession> session_iter;
 		if(bbRecipeMap != null) {
-			iter = bbRecipeMap.values().iterator();
-			while(iter.hasNext()) {
-				BBRecipe p = (BBRecipe)iter.next();
+			recipe_iter = bbRecipeMap.values().iterator();
+			while(recipe_iter.hasNext()) {
+				BBRecipe p = (BBRecipe)recipe_iter.next();
 				p.changeNotified(added, removed, changed);
 			}
 		}
 
 		if(bbSessionMap != null) {
-			iter= bbSessionMap.values().iterator();
-			while(iter.hasNext()) {
-				BBSession p = (BBSession)iter.next();
+			session_iter= bbSessionMap.values().iterator();
+			while(session_iter.hasNext()) {
+				BBSession p = (BBSession)session_iter.next();
 				p.changeNotified(added, removed, changed);
 			}
 		}
@@ -176,7 +175,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	private static ShellSession getShellSession(String absolutePath, Writer out) throws IOException {
 		if (shellMap == null) {
-			shellMap = new Hashtable();
+			shellMap = new Hashtable<String, ShellSession>();
 		}
 		
 		ShellSession ss = (ShellSession) shellMap.get(absolutePath);
@@ -190,7 +189,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void putProjInfo(String location, ProjectInfo pinfo) {
 		if (projInfoMap == null) {
-			projInfoMap = new Hashtable();
+			projInfoMap = new Hashtable<String, ProjectInfo>();
 		}
 		
 		

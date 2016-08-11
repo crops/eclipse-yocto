@@ -13,14 +13,11 @@ package org.yocto.bc.bitbake;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.yocto.bc.ui.model.ProjectInfo;
 
 /**
  * A helper class for ProjectInfo related tasks.

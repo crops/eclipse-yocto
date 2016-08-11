@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.yocto.bc.ui.wizards.newproject;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,7 +29,6 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
-import org.yocto.bc.bitbake.ProjectInfoHelper;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.builder.BitbakeCommanderNature;
 import org.yocto.bc.ui.model.ProjectInfo;
@@ -47,7 +45,7 @@ public class CreateBBCProjectOperation extends WorkspaceModifyOperation {
 	public static final QualifiedName BBC_PROJECT_INIT = new QualifiedName(null, "BBC_PROJECT_INIT");
 	public static void addNatureToProject(IProject proj, String nature_id, IProgressMonitor monitor) throws CoreException {
 		IProjectDescription desc = proj.getDescription();
-		Vector natureIds = new Vector();
+		Vector<String> natureIds = new Vector<String>();
 		
 		natureIds.add(nature_id);
 		natureIds.addAll(Arrays.asList(desc.getNatureIds()));

@@ -12,15 +12,15 @@ import org.yocto.bc.ui.wizards.FiniteStateWizard;
  */
 public class VariableWizard extends FiniteStateWizard {
 
-	private Map model;
+	private Map<String, Object> model;
 
-	public VariableWizard(Map model) {
+	public VariableWizard(Map<String, Object> model) {
 		this.model = model;
 		setWindowTitle("Yocto Project BitBake Commander");
 	}
 
 	public VariableWizard(IStructuredSelection selection) {
-		model = new Hashtable();
+		model = new Hashtable<String, Object>();
 	}
 	
 	@Override
@@ -29,7 +29,7 @@ public class VariableWizard extends FiniteStateWizard {
 	}
 	
 	@Override
-	public Map getModel() {
+	public Map<String, Object> getModel() {
 		return model;
 	}
 

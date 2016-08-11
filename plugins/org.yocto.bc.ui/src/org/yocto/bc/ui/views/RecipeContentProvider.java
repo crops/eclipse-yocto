@@ -15,9 +15,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -30,9 +30,8 @@ class RecipeContentProvider implements IStructuredContentProvider {
 	}
 
 	public Object[] getElements(Object parent) {
-		List recipes = new ArrayList();
+		List<IPath> recipes = new ArrayList<IPath>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		IProjectNature nature = null;
 		for (int i = 0; i < projects.length; ++i) {
 			try {
 				if (projects[i].isOpen() && projects[i].hasNature(BitbakeCommanderNature.NATURE_ID)) {
@@ -50,7 +49,7 @@ class RecipeContentProvider implements IStructuredContentProvider {
 		return recipes.toArray();
 	}
 
-	private Collection getRecipesFromProject(IProject project) throws Exception {
+	private Collection<IPath> getRecipesFromProject(IProject project) throws Exception {
 		BBSession session = Activator.getBBSession(project.getLocationURI().getPath(), null);
 		return session.getRecipeFiles(project);
 	}

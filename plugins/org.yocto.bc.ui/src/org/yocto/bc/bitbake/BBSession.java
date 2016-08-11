@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,12 +30,12 @@ import java.util.concurrent.locks.Lock;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -53,7 +52,7 @@ import org.yocto.bc.ui.model.ProjectInfo;
  * @author kgilmer
  *
  */
-public class BBSession implements IBBSessionListener, IModelElement, Map {
+public class BBSession implements IBBSessionListener, IModelElement, Map<String, Object> {
 	public static final int TYPE_VARIABLE_ASSIGNMENT = 1;
 	public static final int TYPE_UNKNOWN = 2;
 	public static final int TYPE_STATEMENT = 3;
@@ -61,8 +60,8 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	
 	protected final ProjectInfo pinfo;
 	protected final ShellSession shell;
-	protected Map properties = null;
-	protected List <String> depends = null;
+	protected Map<String, Object> properties = null;
+	protected List<String> depends = null;
 	protected boolean initialized = false;
 	protected MessageConsole sessionConsole;
 	private final ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
@@ -78,15 +77,15 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		this.parsingCmd = "DISABLE_SANITY_CHECKS=1 bitbake -e";
 	}
 
-	private Collection adapttoIPath(List<File> asList, IProject project) {
+	private Collection<IPath> adapttoIPath(List<File> asList, IProject project) {
 
-		List pathList = new ArrayList();
+		List<IPath> pathList = new ArrayList<IPath>();
 
-		for (Iterator i = asList.iterator(); i.hasNext();) {
+		for (Iterator<File> i = asList.iterator(); i.hasNext();) {
 			File f = (File) i.next();
 			IFile ff = project.getFile(stripLeading(f.toString(), project.getLocationURI().getPath()));
 			if (ff.exists()) {
-				pathList.add(ff);
+				pathList.add((IPath) ff);
 			}
 		}
 
@@ -143,7 +142,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	public Set entrySet() {
+	public Set<java.util.Map.Entry<String, Object>> entrySet() {
 		try {
 			checkValidAndLock(true);
 			return properties.entrySet();
@@ -184,7 +183,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	 * @param fileExtension
 	 * @param project
 	 */
-	private void findRecipes(File rootDir, List recipes, final String fileExtension, IProject project) {
+	private void findRecipes(File rootDir, List<IPath> recipes, final String fileExtension, IProject project) {
 		File[] children = rootDir.listFiles(new FileFilter() {
 
 			public boolean accept(File pathname) {
@@ -212,11 +211,11 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	private Collection findRecipes(List paths, IProject project) {
-		List recipes = new ArrayList();
+	private Collection<IPath> findRecipes(List<IPath> paths, IProject project) {
+		List<IPath> recipes = new ArrayList<IPath>();
 
-		for (Iterator i = paths.iterator(); i.hasNext();) {
-			String rawPath = (String) i.next();
+		for (Iterator<IPath> i = paths.iterator(); i.hasNext();) {
+			String rawPath = i.next().toString();
 			String[] elems = rawPath.split("\\*/\\*");
 
 			if (elems.length == 2) {
@@ -242,7 +241,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	private List getBitBakeKeywords() {
+	private List<String> getBitBakeKeywords() {
 		return Arrays.asList(BBLanguageHelper.BITBAKE_KEYWORDS);
 	}
 
@@ -276,7 +275,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			return TYPE_VARIABLE_ASSIGNMENT;
 		}
 
-		for (Iterator i = getBitBakeKeywords().iterator(); i.hasNext();) {
+		for (Iterator<String> i = getBitBakeKeywords().iterator(); i.hasNext();) {
 			if (line.startsWith((String) i.next())) {
 				return TYPE_STATEMENT;
 			}
@@ -289,14 +288,14 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		return TYPE_UNKNOWN;
 	}
 
-	public Collection getRecipeFiles(IProject project) {
+	public Collection<IPath> getRecipeFiles(IProject project) {
 		try {
 			checkValidAndLock(true);
 			if (!initialized) {
 				throw new RuntimeException(this.getClass().getName() + " is not initialized.");
 			}
 			String bbfiles = (String) this.properties.get("BBFILES");
-			List paths = parseBBFiles(bbfiles);
+			List<IPath> paths = parseBBFiles(bbfiles);
 			return findRecipes(paths, project);
 		} catch (Exception e) {
 			return null;
@@ -415,7 +414,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 	
-	public Set keySet() {
+	public Set<String> keySet() {
 		try {
 			checkValidAndLock(true);
 			return properties.keySet();
@@ -427,12 +426,12 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	protected void parse(String content, Map outMap) throws Exception {
+	protected void parse(String content, Map<String, Object> env) throws Exception {
 		BufferedReader reader = new BufferedReader(new StringReader(content));
 		String line;
 		boolean inLine = false;
 		StringBuffer sb = null;
-		Stack blockStack = new Stack();
+		Stack<Object> blockStack = new Stack<Object>();
 
 		while ((line = reader.readLine()) != null) {
 			String trimmed = line.trim();
@@ -468,25 +467,25 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 				line = sb.toString();
 			}
 
-			parseLine(line, outMap);
+			parseLine(line, env);
 		}
 	}
 	
-	private void parseAdditiveAssignment(String line, String operator, Map mo) throws Exception {
+	private void parseAdditiveAssignment(String line, String operator, Map<String, Object> env) throws Exception {
 		String[] elems = splitAssignment(line, "\\+=");
 
 		if (elems.length != 2) {
 			throw new Exception("Unable to parse additive variable assignment in line: " + line);
 		}
 
-		if (!mo.containsKey(elems[0])) {
-			mo.put(elems[0].trim(), elems[1]);
+		if (!env.containsKey(elems[0])) {
+			env.put(elems[0].trim(), elems[1]);
 		} else {
-			String existing = (String) mo.get(elems[0]);
+			String existing = (String) env.get(elems[0]);
 			if (operator.equals("+=")) {
-				mo.put(elems[0], existing + elems[1]);
+				env.put(elems[0], existing + elems[1]);
 			} else {
-				mo.put(elems[0], elems[1] + existing);
+				env.put(elems[0], elems[1] + existing);
 			}
 		}
 	}
@@ -495,8 +494,8 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		return null;
 	}
 	
-	protected Map parseBBEnvironment(String bbOut) throws Exception {
-		Map env = new Hashtable();
+	protected Map<String, Object> parseBBEnvironment(String bbOut) throws Exception {
+		Map<String, Object> env = new Hashtable<String, Object>();
 		this.depends = new ArrayList<String>();
 
 		parse(bbOut, env);
@@ -512,41 +511,48 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		return env;
 	}
 
-	private List parseBBFiles(String bbfiles) {
-		return Arrays.asList(bbfiles.split(" "));
+	private List<IPath> parseBBFiles(String bbfiles) {
+		List<String> bbfiles_list = Arrays.asList(bbfiles.split(" "));
+		List<IPath> paths = new ArrayList<IPath>();
+
+		for (Iterator<String> i = bbfiles_list.iterator(); i.hasNext();) {
+			// TODO: check that path exists?
+			paths.add((IPath) i);
+		}
+		return paths;
 	}
 	
 	//Map delegate methods 
 
-	private void parseConditionalAssignment(String line, Map mo) throws Exception {
+	private void parseConditionalAssignment(String line, Map<String, Object> env) throws Exception {
 		String[] elems = splitAssignment(line, "\\?=");
 
 		if (elems.length != 2) {
 			throw new Exception("Unable to parse conditional variable assignment in line: " + line);
 		}
 
-		if (!mo.containsKey(elems[0].trim())) {
-			mo.put(elems[0].trim(), elems[1].trim());
+		if (!env.containsKey(elems[0].trim())) {
+			env.put(elems[0].trim(), elems[1].trim());
 		}
 	}
 
-	private void parseImmediateAssignment(String line, String delimiter, Map mo) throws Exception {
+	private void parseImmediateAssignment(String line, String delimiter, Map<String, Object> env) throws Exception {
 		String[] elems = splitAssignment(line, delimiter);
 
-		mo.put(elems[0], substitute(elems[1], mo));
+		env.put(elems[0], substitute(elems[1], env));
 	}
 
-	private void parseKeyValue(String line, String delimiter, Map mo) throws Exception {
+	private void parseKeyValue(String line, String delimiter, Map<String, Object> env) throws Exception {
 		String[] elems = splitAssignment(line, delimiter);
 
-		mo.put(elems[0], elems[1]);
+		env.put(elems[0], elems[1]);
 	}
 
-	private void parseLine(String line, Map mo) throws Exception {
+	private void parseLine(String line, Map<String, Object> env) throws Exception {
 
 		switch (getLineType(line)) {
 		case TYPE_VARIABLE_ASSIGNMENT:
-			parseVariableAssignment(line, mo);
+			parseVariableAssignment(line, env);
 			break;
 		case TYPE_STATEMENT:
 		case TYPE_FLAG:
@@ -560,41 +566,42 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		}
 	}
 
-	private void parseVariableAssignment(String line, Map mo) throws Exception {
+	private void parseVariableAssignment(String line, Map<String, Object> env) throws Exception {
 		if (line.contains("?=")) {
-			parseConditionalAssignment(line, mo);
+			parseConditionalAssignment(line, env);
 		} else if (line.contains("+=")) {
-			parseAdditiveAssignment(line, "+=", mo);
+			parseAdditiveAssignment(line, "+=", env);
 		} else if (line.contains("=+")) {
-			parseAdditiveAssignment(line, "=+", mo);
+			parseAdditiveAssignment(line, "=+", env);
 		} else if (line.contains(":=")) {
-			parseImmediateAssignment(line, ":=", mo);
+			parseImmediateAssignment(line, ":=", env);
 		} else {
-			parseKeyValue(line, "=", mo);
+			parseKeyValue(line, "=", env);
 		}
 
 	}
 
-	private List parseVars(String line) {
-		List l = new ArrayList();
+	private List<String> parseVars(String line) {
+		List<String> l = new ArrayList<String>();
 
 		int i = 0;
 
 		while ((i = line.indexOf("${", i)) > -1) {
 			int i2 = line.indexOf("}", i);
 
-			l.add(line.subSequence(i + 2, i2));
+			l.add((String) line.subSequence(i + 2, i2));
 			i++;
 		}
 
 		return l;
 	}
 
-	public Object put(Object arg0, Object arg1) {
+	public Object put(String arg0, Object arg1) {
 		throw new RuntimeException("BB configuration is read-only.");
 	}
 
-	public void putAll(Map arg0) {
+	@Override
+	public void putAll(Map<? extends String, ? extends Object> m) {
 		throw new RuntimeException("BB configuration is read-only.");
 	}
 
@@ -669,16 +676,16 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 	 * @param expression
 	 * @return Input string with any substitutions from this file.
 	 */
-	public String substitute(String expression, Map mo) {
+	public String substitute(String expression, Map<String, Object> env) {
 
-		List vars = parseVars(expression);
+		List<String> vars = parseVars(expression);
 
-		for (Iterator i = vars.iterator(); i.hasNext();) {
+		for (Iterator<String> i = vars.iterator(); i.hasNext();) {
 			String varName = (String) i.next();
 			String varToken = "${" + varName + "}";
 
-			if (mo.containsKey(varName)) {
-				expression = expression.replace(varToken, (String) mo.get(varName));
+			if (env.containsKey(varName)) {
+				expression = expression.replace(varToken, (String) env.get(varName));
 			} else if (System.getProperty(varName) != null) {
 				expression = expression.replace(varToken, System.getProperty(varName));
 			} else if (varName.toUpperCase().equals("HOME")) {
@@ -689,7 +696,7 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 		return expression;
 	}
 
-	public Collection values() {
+	public Collection<Object> values() {
 		try {
 			checkValidAndLock(true);
 			return properties.values();
@@ -723,4 +730,5 @@ public class BBSession implements IBBSessionListener, IModelElement, Map {
 			wlock.unlock();
 		}
 	}
+
 }

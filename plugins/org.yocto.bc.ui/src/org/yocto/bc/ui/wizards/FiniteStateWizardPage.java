@@ -13,13 +13,13 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
 public abstract class FiniteStateWizardPage extends WizardPage {
-    protected Map model = null;
+    protected Map<String, Object> model = null;
     protected FiniteStateWizard wizard = null;
     private static boolean previousState = false;
     /**
      * @param pageName
      */
-    protected FiniteStateWizardPage(String name, Map model) {
+    protected FiniteStateWizardPage(String name, Map<String, Object> model) {
         super(name);
         this.model = model;
         this.setPageComplete(false);

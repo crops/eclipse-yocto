@@ -47,10 +47,10 @@ public abstract class FiniteStateWizard extends Wizard {
     public void setCanFinish(boolean canFinish) {
       this.canFinish = canFinish;
     }
-    
+
     /**
      * Retrive the model object from the wizard.
      * @return
      */
-    public abstract Map getModel();
+    public abstract Map<String, Object> getModel();
 }

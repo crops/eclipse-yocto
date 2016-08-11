@@ -52,7 +52,7 @@ public class OEFile extends FileStore {
 	 * The java.io.File that this store represents.
 	 */
 	protected final File file;
-	private List ignorePaths;
+	private List<Object> ignorePaths;
 
 	/**
 	 * The absolute file system path of the file represented by this store.
@@ -67,7 +67,7 @@ public class OEFile extends FileStore {
 	 * @param file The file this local file represents
 	 * @param root 
 	 */
-	public OEFile(File file, List ignorePaths, String root) {
+	public OEFile(File file, List<Object> ignorePaths, String root) {
 		this.file = file;
 		this.ignorePaths = ignorePaths;
 		this.root = root;

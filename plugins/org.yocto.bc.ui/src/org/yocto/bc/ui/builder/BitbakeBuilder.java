@@ -36,6 +36,7 @@ public class BitbakeBuilder extends IncrementalProjectBuilder {
 		 * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core.resources.IResourceDelta)
 		 */
 		public boolean visit(IResourceDelta delta) throws CoreException {
+			@SuppressWarnings("unused")
 			IResource resource = delta.getResource();
 			switch (delta.getKind()) {
 			case IResourceDelta.ADDED:
@@ -98,6 +99,7 @@ public class BitbakeBuilder extends IncrementalProjectBuilder {
 
 	private SAXParserFactory parserFactory;
 
+	@SuppressWarnings("unused")
 	private void addMarker(IFile file, String message, int lineNumber,
 			int severity) {
 		try {
@@ -119,7 +121,7 @@ public class BitbakeBuilder extends IncrementalProjectBuilder {
 	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
+	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor)
 			throws CoreException {
 		if (kind == FULL_BUILD) {
 			fullBuild(monitor);
@@ -146,6 +148,7 @@ public class BitbakeBuilder extends IncrementalProjectBuilder {
 		}
 	}*/
 
+	@SuppressWarnings("unused")
 	private void deleteMarkers(IFile file) {
 		try {
 			file.deleteMarkers(MARKER_TYPE, false, IResource.DEPTH_ZERO);
@@ -161,6 +164,7 @@ public class BitbakeBuilder extends IncrementalProjectBuilder {
 		}*/
 	}
 
+	@SuppressWarnings("unused")
 	private SAXParser getParser() throws ParserConfigurationException,
 			SAXException {
 		if (parserFactory == null) {

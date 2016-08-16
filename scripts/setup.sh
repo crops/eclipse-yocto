@@ -227,8 +227,8 @@ then
         TM_SITE="http://download.eclipse.org/tm/updates/4.0/GA"
         TM_TERMINAL_SITE="http://download.eclipse.org/tm/terminal/marketplace"
 else
-        MAIN_SITE="http://downloads.yoctoproject.org/eclipse/mars/"
-        DEPRECATED_SITE="http://downloads.yoctoproject.org/eclipse/luna/ftp.osuosl.org/pub/eclipse/releases/luna"
+        MAIN_SITE="http://downloads.yoctoproject.org/eclipse/neon/"
+        DEPRECATED_SITE="http://downloads.yoctoproject.org/eclipse/mars"
         TM_SITE="http://downloads.yoctoproject.org/eclipse/tm/updates/4.0/"
         TM_TERMINAL_SITE="http://downloads.yoctoproject.org/eclipse/tm/terminal/marketplace"
 fi

@@ -67,6 +67,29 @@ if [ "x$url" != "x" ]; then
     [ "x$port" != "x" ] && PROXY_PARAM="${PROXY_PARAM} -Dhttp.proxyPort=$port"
 fi
 
+echo "#### Checking that Java is available ####"
+if type -p java; then
+    echo java found in PATH
+    _java=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
+    echo java found in JAVA_HOME
+    _java="$JAVA_HOME/bin/java"
+else
+    err_exit 2 "no java"
+fi
+echo "#### Checking that the appropriate Java version is available ####"
+JAVA_VER_STRING=1.8
+JAVA_VER_INT=001008
+if [[ "$_java" ]]; then
+    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    echo java version as string = $version
+    version_int=$(echo "$version" | awk -F. '{printf("%03d%03d",$1,$2);}')
+    echo java version as integer = $version_int
+    if [ $version_int -lt $JAVA_VER_INT ]; then
+        err_exit 1 "Java version must be $JAVA_VER_STRING+"
+    fi
+fi
+
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
 ep_ver="4.6"

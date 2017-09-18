@@ -23,7 +23,7 @@ while getopts ":h" opt; do
   esac
 done
 
-err_exit() 
+err_exit()
 {
   echo "[FAILED $1]$2"
   exit $1
@@ -35,7 +35,7 @@ case ${uname_s}${uname_m} in
   Linuxppc*) ep_arch=linux-gtk-ppc
              cdt_arch=linux.ppc
              ;;
-  Linuxx86_64*) ep_arch=linux-gtk-x86_64 
+  Linuxx86_64*) ep_arch=linux-gtk-x86_64
                 cdt_arch=linux.x86_64
                 ;;
   Linuxi*86) ep_arch=linux-gtk
@@ -92,12 +92,12 @@ fi
 
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
-ep_ver="4.6.2"
-ep_date="-201611241400"
+ep_ver="4.7"
+ep_date="-201706120950"
 P2_disabled=false
 P2_no_dropins=false
 
-if [ ! -f eclipse/plugins/org.eclipse.swt_3.105.2.v20161122-0613.jar ]; then
+if [ ! -f eclipse/plugins/org.eclipse.swt_3.106.0.v20170608-0516.jar ]; then
 
   pushd .
 
@@ -130,7 +130,7 @@ if [ ! -f eclipse/plugins/org.eclipse.swt_3.105.2.v20161122-0613.jar ]; then
   popd
 
   if [ ! -d eclipse -o -h eclipse ]; then
-    if [ -e eclipse ]; then 
+    if [ -e eclipse ]; then
       rm eclipse
     fi
     ln -s eclipse-${ep_ver}-${ep_arch}/eclipse eclipse
@@ -150,7 +150,7 @@ if [ ! -f eclipse/startup.jar ]; then
   LAUNCHER="`ls org.eclipse.equinox.launcher_*.jar | sort | tail -1`"
 
   if [ "x${LAUNCHER}" != "x" ]; then
-    echo "eclipse LAUNCHER=${LAUNCHER}" 
+    echo "eclipse LAUNCHER=${LAUNCHER}"
     ln -s plugins/${LAUNCHER} ../startup.jar
   else
     echo "Eclipse: NO startup.jar LAUNCHER FOUND!"
@@ -245,64 +245,66 @@ update_feature_remote()
 #Main Site
 if [[ "$1" = "--upstream" ]]
 then
-        MAIN_SITE="http://download.eclipse.org/releases/neon"
-        DEPRECATED_SITE="http://download.eclipse.org/releases/mars"
-        TM_SITE="http://download.eclipse.org/tm/updates/4.0/GA"
+        MAIN_SITE="http://download.eclipse.org/releases/oxygen"
+        DEPRECATED_SITE="http://download.eclipse.org/releases/neon"
+        TM_SITE="http://download.eclipse.org/tm/updates/4.0"
         TM_TERMINAL_SITE="http://download.eclipse.org/tm/terminal/marketplace"
 else
-        MAIN_SITE="http://downloads.yoctoproject.org/eclipse/neon/"
-        DEPRECATED_SITE="http://downloads.yoctoproject.org/eclipse/mars"
+        MAIN_SITE="http://downloads.yoctoproject.org/eclipse/oxygen/"
+        DEPRECATED_SITE="http://downloads.yoctoproject.org/eclipse/neon"
         TM_SITE="http://downloads.yoctoproject.org/eclipse/tm/updates/4.0/"
         TM_TERMINAL_SITE="http://downloads.yoctoproject.org/eclipse/tm/terminal/marketplace"
 fi
 
 #Update Site - always use updates from upstream
-UPDATE_SITE="http://download.eclipse.org/eclipse/updates/4.6"
+UPDATE_SITE="http://download.eclipse.org/eclipse/updates/4.7"
 
 #CDT related
 echo -e "\nPlease wait. Installing CDT.SDK.FEATURE.GROUP"
-CDTFEAT="9.2.0"
+CDTFEAT="9.3.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
 
 echo -e "\nPlease wait. Installing CDT.LAUNCH.REMOTE.FEATURE.GROUP"
-CDTREMOTEVER="9.2.0"
+CDTREMOTEVER="9.3.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
 
 #TM Terminal (was RSE) related
 echo -e "\nPlease wait. Installing TM.TERMINAL.FEATURE.FEATURE.GROUP"
-TMTERMVER="4.1.0"
-update_feature_remote ${TM_TERMINAL_SITE} org.eclipse.tm.terminal.feature.feature.group ${TMTERMVER}
+TMTERMVER="4.3.0"
+update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.feature.feature.group ${TMTERMVER}
 
 echo -e "\nPlease wait. Installing TM.TERMINAL.VIEW.RSE.FEATURE.GROUP"
-TMTERMVIEWRSEVER="4.1.0"
-update_feature_remote ${TM_TERMINAL_SITE} org.eclipse.tm.terminal.view.rse.feature.feature.group ${TMTERMVIEWRSEVER}
+TMTERMVIEWRSEVER="4.3.0"
+update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.view.rse.feature.feature.group ${TMTERMVIEWRSEVER}
 
 echo -e "\nPlease wait. Installing TM.TERMINAL.CONTROL.FEATURE.GROUP"
-TMCONTROLVER="4.1.0"
+TMCONTROLVER="4.3.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.tm.terminal.control.feature.feature.group ${TMCONTROLVER}
 
 #RSE_SDK
 echo -e "\nPlease wait. Installing RSE.SDK.FEATURE.GROUP"
 RSESDKVER="3.7.0"
 update_feature_remote ${TM_SITE} org.eclipse.rse.sdk.feature.group ${RSESDKVER}
+#echo -e "\nSkipping RSE.SDK.FEATURE.GROUP"
 
-#RSE_TERMINALS
+RSE_TERMINALS
 echo -e "\nPlease wait. Installing RSE.TERMINALS.FEATURE.GROUP"
 RSETERMVER="3.8.0"
 update_feature_remote ${TM_SITE} org.eclipse.rse.terminals.feature.group ${RSETERMVER}
+#echo -e "\nSkipping RSE.TERMINALS.FEATURE.GROUP"
 
 #AUTOTOOLS
 echo -e "\nPlease wait. Installing AUTOTOOLS.FEATURE.GROUP"
-ATVER="9.2.0"
+ATVER="9.3.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
 
 #Lttng2
-TMF_CTF_REL="2.2.0"
+TMF_CTF_REL="3.0.0"
 echo -e "\nPlease wait. Installing TRACECOMPASS.LTTNG2.UST.FEATURE.GROUP"
 update_feature_remote ${MAIN_SITE} org.eclipse.tracecompass.lttng2.ust.feature.group ${TMF_CTF_REL}
 
 echo -e "\nPlease wait. Installing OSGI.COMPATIBILITY.PLUGINS.FEATURE.FEATURE.GROUP"
-COMPAT_VER="1.0.0"
+COMPAT_VER="1.1.0"
 update_feature_remote ${UPDATE_SITE} org.eclipse.osgi.compatibility.plugins.feature.feature.group ${COMPAT_VER}
 
 echo -e "\nYour build environment is successfully created."

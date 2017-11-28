@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,."/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,build/org.eclipse.cdt.autotools.core"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,build/org.eclipse.cdt.autotools.ui"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,core/org.eclipse.cdt.core"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,debug/org.eclipse.cdt.debug.core"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,debug/org.eclipse.cdt.debug.ui"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,launch/org.eclipse.cdt.docker.launcher"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,dsf/org.eclipse.cdt.dsf"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,dsf-gdb/org.eclipse.cdt.dsf.gdb"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,dsf-gdb/org.eclipse.cdt.dsf.gdb.ui"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,dsf/org.eclipse.cdt.dsf.ui"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,debug/org.eclipse.cdt.gdb"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,launch/org.eclipse.cdt.launch"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,cross/org.eclipse.cdt.launch.remote"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,build/org.eclipse.cdt.make.core"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,build/org.eclipse.cdt.make.ui"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,build/org.eclipse.cdt.managedbuilder.core"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,build/org.eclipse.cdt.managedbuilder.gnu.ui"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,build/org.eclipse.cdt.managedbuilder.ui"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,remote/org.eclipse.cdt.remote.core"/>
+<project reference="1.0,https://git.eclipse.org/r/cdt/org.eclipse.cdt,master,core/org.eclipse.cdt.ui"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.bc"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.bc.headless.build"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.bc.ui"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.cmake.managedbuilder"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.doc"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.doc.headless.build"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.doc.user"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.remote.utils"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.sdk"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.sdk.headless.build"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.sdk.ide"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.sdk.ide.doc.user"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,releng/org.yocto.sdk.releng"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.sdk.remotetools"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.sdk.site"/>
+</provider>
+<workingSets editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" id="1511906282161_1" label="CDT" name="CDT">
+<item elementID="=org.eclipse.cdt.launch" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.managedbuilder.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.launch.remote" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.managedbuilder.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.make.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.managedbuilder.gnu.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.autotools.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.debug.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.dsf.gdb.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.remote.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.docker.launcher" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.dsf.gdb" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.dsf" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.dsf.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.gdb" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.autotools.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.make.core" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.eclipse.cdt.debug.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+</workingSets>
+<workingSets editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" id="1511906457640_6" label="Poky-Other" name="Poky-Other">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.yocto.sdk.site" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/eclipse-poky-contrib" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.yocto.bc" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.yocto.bc.headless.build" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.yocto.doc" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.yocto.doc.headless.build" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.yocto.sdk" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/org.yocto.sdk.headless.build" type="4"/>
+<item elementID="=org.yocto.sdk.releng" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+</workingSets>
+<workingSets editPageId="org.eclipse.jdt.ui.JavaWorkingSetPage" id="1511906305321_2" label="Poky-Plugins" name="Poky-Plugins">
+<item elementID="=org.yocto.remote.utils" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.yocto.cmake.managedbuilder" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.yocto.sdk.ide.doc.user" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.yocto.bc.ui" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.yocto.doc.user" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.yocto.sdk.remotetools" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+<item elementID="=org.yocto.sdk.ide" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
+</workingSets>
+</psf>

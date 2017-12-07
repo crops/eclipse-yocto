@@ -15,10 +15,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.ui.ide,
  org.eclipse.ui.console,
- org.eclipse.core.filesystem,
- org.yocto.remote.utils
+ org.eclipse.core.filesystem
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Import-Package: org.eclipse.rse.core.model,
- org.eclipse.rse.services.clientserver.messages,
- org.eclipse.rse.services.files

@@ -11,19 +11,13 @@
  *******************************************************************************/
 package org.yocto.bc.ui.wizards.install;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.IWorkbench;
@@ -38,13 +32,12 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-
+import org.yocto.bc.bitbake.ICommandResponseHandler;
 import org.yocto.bc.ui.Activator;
 import org.yocto.bc.ui.model.ProjectInfo;
 import org.yocto.bc.ui.wizards.FiniteStateWizard;
 import org.yocto.bc.ui.wizards.newproject.BBConfigurationInitializeOperation;
 import org.yocto.bc.ui.wizards.newproject.CreateBBCProjectOperation;
-import org.yocto.remote.utils.ICommandResponseHandler;
 
 /**
  * A wizard for installing a fresh copy of an OE system.
@@ -186,112 +179,6 @@ public class InstallWizard extends FiniteStateWizard implements
 
 	private interface ICalculatePercentage {
 		public float calWorkloadDone(String info) throws IllegalArgumentException;
-	}
-
-	@SuppressWarnings("unused")
-	private class LongtimeRunningTask implements IRunnableWithProgress {
-		private String []cmdArray;
-		private String []envp;
-		private File dir;
-		private ICommandResponseHandler handler;
-		private Process p;
-		private String taskName;
-		static public final int TOTALWORKLOAD=100;
-		private int reported_workload;
-		ICalculatePercentage cal;
-
-		public LongtimeRunningTask(String taskName,
-				String []cmdArray, String []envp, File dir,
-				ICommandResponseHandler handler,
-				ICalculatePercentage calculator) {
-			this.taskName=taskName;
-			this.cmdArray=cmdArray;
-			this.envp=envp;
-			this.dir=dir;
-			this.handler=handler;
-			this.p=null;
-			this.cal=calculator;
-		}
-
-		private void reportProgress(IProgressMonitor monitor,String info) {
-			if(cal == null) {
-				monitor.worked(1);
-			}else {
-				float percentage;
-				try {
-					percentage=cal.calWorkloadDone(info);
-				} catch (IllegalArgumentException e) {
-					//can't get percentage
-					return;
-				}
-				int delta=(int) (TOTALWORKLOAD * percentage - reported_workload);
-				if( delta > 0 ) {
-					monitor.worked(delta);
-					reported_workload += delta;
-				}
-			}
-		}
-
-		synchronized public void run(IProgressMonitor monitor)
-				throws InvocationTargetException, InterruptedException {
-
-			boolean cancel=false;
-			reported_workload=0;
-
-			try {
-				monitor.beginTask(taskName, TOTALWORKLOAD);
-
-				p=Runtime.getRuntime().exec(cmdArray,envp,dir);
-				BufferedReader inbr = new BufferedReader(new InputStreamReader(p.getInputStream()));
-				BufferedReader errbr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-				String info;
-				while (!cancel) {
-					if(monitor.isCanceled())
-					{
-						cancel=true;
-						throw new InterruptedException("User Cancelled");
-					}
-
-					info=null;
-					//reading stderr
-					while (errbr.ready()) {
-						info=errbr.readLine();
-						//some application using stderr to print out information
-						handler.response(info, false);
-					}
-					//reading stdout
-					while (inbr.ready()) {
-						info=inbr.readLine();
-						handler.response(info, false);
-					}
-
-					//report progress
-					if(info!=null)
-						reportProgress(monitor,info);
-
-					//check if exit
-					try {
-						int exitValue=p.exitValue();
-						if (exitValue != 0) {
-							handler.response(
-									taskName + " failed with the return value " + new Integer(exitValue).toString(),
-									true);
-						}
-						break;
-					}catch (IllegalThreadStateException e) {
-					}
-
-					Thread.sleep(500);
-				}
-			} catch (IOException e) {
-				throw new InvocationTargetException(e);
-			} finally {
-				monitor.done();
-				if (p != null ) {
-					p.destroy();
-				}
-			}
-		}
 	}
 
 	private class BCCommandResponseHandler implements ICommandResponseHandler {

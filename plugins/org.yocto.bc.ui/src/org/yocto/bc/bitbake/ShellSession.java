@@ -19,8 +19,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 
-import org.yocto.remote.utils.ICommandResponseHandler;
-
 /**
  * A class for Linux shell sessions.
  * @author kgilmer

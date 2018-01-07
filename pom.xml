@@ -49,6 +49,7 @@
 		<module>plugins/org.yocto.sdk.remotetools</module>
 		<module>plugins/org.yocto.doc.user</module>
 		<module>features/org.yocto.sdk</module>
+		<module>features/org.yocto.utils</module>
 <!--
 		<module>releng/org.yocto.sdk.target.ui.tests</module>
 -->

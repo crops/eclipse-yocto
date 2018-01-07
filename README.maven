@@ -1,0 +1,43 @@
+
+Phases and Goals
+================
+
+If you are trying to figure out what phases and goals exist, run the following:
+$ mvn fr.jcgay.maven.plugins:buildplan-maven-plugin:list
+
+If you only want to run one particular goal for one particular plugin:
+$ mvn exec:exec -rf :org.yocto.doc.user
+But, this seems to fail because we need to resolve the parent target first.
+
+
+Mass Version Update (for bump or release)
+=========================================
+
+Let us assume all the plugins and pom.xml are currently at "1.4.1-SNAPSHOT".
+
+
+Scenario: bump to "1.4.2-SNAPSHOT"
+----------------------------------
+
+If we want to change the version of the plugin(s) to "1.4.2-SNAPSHOT", this requires
+multiple locations to be updated from "1.4.1-SNAPSHOT" to "1.4.2-SNAPSHOT".
+
+To very easily update all the project's versions, run the following command:
+$ mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion="1.4.2-SNAPSHOT"
+
+This is smart enough to update:
+  (1) all the pom.xml files (parent and children),
+  (2) all the individual prjects META-INF/MANIFEST.MF
+
+Scenario: release  "1.5.0"
+----------------------------------
+If we want to create a "1.5.0" release, we want to update multiple locations to "1.5.0".
+
+To very easily update all the project's versions, run the following command:
+$ mvn org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion="1.5.0"
+
+TODO: tagging procedure
+At that point, a tag could (should) be created. We need to work with release engineering on
+how that happens. Currently, a tag is created very late in the release cycle by the release
+engineer. Perhaps we could create a tag for the Eclipse plugin version to indicate the branch
+is ready to release. After the release of YP is done, we could bump "master" to the next -SNAPSHOT.

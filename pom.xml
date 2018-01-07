@@ -48,6 +48,7 @@
 		<module>plugins/org.yocto.remote.utils</module>
 		<module>plugins/org.yocto.sdk.remotetools</module>
 		<module>plugins/org.yocto.doc.user</module>
+		<module>features/org.yocto.sdk</module>
 <!--
 		<module>releng/org.yocto.sdk.target.ui.tests</module>
 -->
@@ -182,6 +183,26 @@
 								<phase>verify</phase>
 							</execution>
 						</executions>
+					</plugin>
+					<!-- enable source feature generation -->
+					<plugin>
+						<groupId>org.eclipse.tycho.extras</groupId>
+						<artifactId>tycho-source-feature-plugin</artifactId>
+						<version>${tycho.extras.version}</version>
+						<executions>
+							<execution>
+								<id>source-feature</id>
+								<phase>package</phase>
+								<goals>
+									<goal>source-feature</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<excludes>
+							<!-- provide plug-ins not containing any source code -->
+							</excludes>
+						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.eclipse.tycho</groupId>

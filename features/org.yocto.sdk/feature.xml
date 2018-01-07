@@ -32,10 +32,11 @@
       <update label="%updateSiteName" url="http://yoctoproject.org/downloads/eclipse-plugin/"/>
    </url>
 
+<!--
    <includes
          id="org.yocto.sdk.source"
          version="0.0.0"/>
-
+-->
    <requires>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.osgi"/>

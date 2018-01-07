@@ -41,6 +41,7 @@
 	<modules>
 
 		<module>releng/org.yocto.sdk.releng</module>
+		<module>plugins/org.yocto.sdk.ide</module>
 <!--
 		<module>releng/org.yocto.sdk.target.ui.tests</module>
 -->

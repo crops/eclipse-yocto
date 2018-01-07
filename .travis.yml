@@ -16,6 +16,12 @@ addons:
   apt:
     packages:
     - fluxbox
+    - make
+    - xsltproc
+    - docbook-utils
+    - fop
+    - dblatex
+    - xmlto
 
 before_script:
   - export DISPLAY=:99.0

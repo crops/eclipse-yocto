@@ -50,6 +50,7 @@
 		<module>plugins/org.yocto.doc.user</module>
 		<module>features/org.yocto.sdk</module>
 		<module>features/org.yocto.utils</module>
+		<module>features/org.yocto.doc</module>
 <!--
 		<module>releng/org.yocto.sdk.target.ui.tests</module>
 -->

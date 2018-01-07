@@ -15,6 +15,7 @@
 	<help-docs-eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.7</help-docs-eclipserun-repo>
 	<tycho.scmUrl>scm:git:https://github.com/crops/eclipse-poky.git</tycho.scmUrl>
 	<base.test.vmargs>-Xms256m -Xmx512m -ea</base.test.vmargs>
+        <yocto-docs-branch-name>master</yocto-docs-branch-name>
     </properties>
 
 	<groupId>org.yocto</groupId>
@@ -46,6 +47,7 @@
 		<module>plugins/org.yocto.cmake.managedbuilder</module>
 		<module>plugins/org.yocto.remote.utils</module>
 		<module>plugins/org.yocto.sdk.remotetools</module>
+		<module>plugins/org.yocto.doc.user</module>
 <!--
 		<module>releng/org.yocto.sdk.target.ui.tests</module>
 -->
@@ -326,7 +328,7 @@
 							<groupId>org.yocto.releng</groupId>
 							<artifactId>poky</artifactId>
 							<classifier>${target-platform}</classifier>
-							<version>1.4.1-SNAPSHOT</version>
+							<version>${project.version}</version>
 						</artifact>
 					</target>
 				</configuration>
@@ -401,6 +403,39 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.8</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.6.0</version>
+					<executions>
+						<execution>
+                                                <id>generate-docs</id>
+						<phase>generate-sources</phase>
+							<goals>
+								<goal>exec</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<executable>sh</executable>
+						<workingDirectory>${project.parent.basedir}/scripts/</workingDirectory>
+						<arguments>
+							<!-- Generate and add eclipse help from yocto's documentation
+							     Usage: scripts/generate-doc.sh BRANCH_NAME | TAG_NAME PLUGIN_FOLDER
+
+								Options:
+								-h - display this help and exit
+								TAG_NAME - tag to build the documentation upon
+								BRANCH_NAME - branch to build the documentation upon
+								PLUGIN_FOLDER - root folder of the eclipse-poky project
+                                                        -->
+							<argument>generate-doc.sh</argument>
+							<argument>${yocto-docs-branch-name}</argument>
+							<argument>${project.basedir}/../../</argument>
+						</arguments>
+						<skip>true</skip>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>

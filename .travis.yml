@@ -1,0 +1,24 @@
+# Although this looks like it does nothing,
+# a default behavior in Travis CI is to
+# call "mvn install...", so this is actually
+# enough to build the project
+#
+# https://docs.travis-ci.com/user/languages/java/
+#
+language: java
+
+jdk:
+  - oraclejdk8
+
+env: DISPLAY=:99.0
+
+addons:
+  apt:
+    packages:
+    - fluxbox
+
+before_script:
+  - export DISPLAY=:99.0
+  - Xvfb :99.0 -extension RANDR > /dev/null &
+  - fluxbox &
+  - sleep 10

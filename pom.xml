@@ -45,6 +45,7 @@
 		<module>plugins/org.yocto.sdk.ide.doc.user</module>
 		<module>plugins/org.yocto.cmake.managedbuilder</module>
 		<module>plugins/org.yocto.remote.utils</module>
+		<module>plugins/org.yocto.sdk.remotetools</module>
 <!--
 		<module>releng/org.yocto.sdk.target.ui.tests</module>
 -->

@@ -1,0 +1,116 @@
+Developer's Workspace Setup
+
+This readme describes how to setup a development environment for developming
+and testing the eclipse-poky plugins.
+
+For the time being we recommend using Linux for eclipse-poky development,
+so all of the instructions below should be done on an appropriate Linux distribution.
+
+Prerequisites
+
+1) Install Java Development Kit (jdk) 8+.
+
+If you already have Java 8+ installed on your system you can
+skip to step 2.  To check type:
+
+$ java -version
+
+and if it responds with
+
+java version "1.8.0_102"
+Java(TM) SE Runtime Environment (build 1.8.0_102-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.102-b14, mixed mode)
+
+With a version >= 1.8.0 then you already have what you need.
+
+If not installed, download from:
+
+https://java.com/en/download/
+
+and install as appropriate for your system.
+
+Other impls may be used if desired, but they must support JDK 8.
+
+2) Install Maven
+
+If you already have Maven 3.3.9+ installed you may skip to
+step 3.
+
+If not installed, download from:
+
+http://maven.apache.org/download.cgi
+
+Install instructions are here
+
+http://maven.apache.org/install.html
+
+2a) Configure Maven for Proxy
+
+If you have a proxy, see
+
+https://maven.apache.org/guides/mini/guide-proxies.html
+and
+https://maven.apache.org/settings.html
+
+and consult your local network admin for the appropriate proxy info.
+
+2) Install Eclipse
+
+a) Download Eclipse Oxygen.2 or more recent release.   For poky plugin development
+three  components are required:   i) Eclipse Java SDK, ii) Eclipse PDE;
+iii) Maven 2 Eclipse (m2e).   All three of these components are present in
+the package named 'Eclipse IDE for Eclipse Committers'.  All of the packages
+are listed here:
+
+https://www.eclipse.org/downloads/packages
+
+Download the 'Eclipse IDE for Eclipse Committers' and expand into a new directory
+(e.g. ~/eclipse.oxygen.2) on your local disk.
+
+3) Clone the eclipse-poky git repo
+
+By default, eclipse's git client (egit) uses ~/git for accessing git repos, so it's
+generally a good idea to create and use ~/git for the following clone command.
+
+In ~git type:
+
+$ git clone git://git.yoctoproject.org/eclipse-poky-contrib
+
+When complete, change to the timo/maven branch (temporary)
+
+$ git checkout timo/maven
+
+4) Import Project Set into Eclipse workspace
+
+Open a terminal, navigate to ~/eclipse.oxygen.2 and type:
+
+$ ./eclipse
+
+Create a new workspace (e.g. workspace.eclipse-poky)
+
+From main menu:
+
+File->Import...->Team->Team Project Set->Next
+
+Select File radio button and choose 'Browse' button on right
+
+Browse to ~/git/eclipse-poky-contrib/releng/org.yocto.sdk.releng/projectsets
+
+and choose 'pokywithrse.psf' and Finish
+
+This should result in approximately 11 projects appearing in
+your workspace.  Some will have compiler errors.
+
+5) Resolve Target Platform
+
+In the Eclipse Package Explorer view (or Projects view) navigate
+to org.yocto.sdk.releng/targets directory and open (double click)
+this file:  pokywithrse.target
+
+Once this file is opened, you should see in the message bar: "Resolving
+Poky with R...inition" with a percentage.  This will take some time
+(possibly minutes depending upon the speed of your internet connection)
+
+When the resolving is complete, choose 'Set as Target Platform' link in
+upper right of the Target Definition Editor.  This should result in
+the workspace projects being rebuilt without errors.

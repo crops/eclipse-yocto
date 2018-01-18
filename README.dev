@@ -1,6 +1,6 @@
-Developer's Workspace Setup
+Eclipse Poky Developer's Workspace Setup
 
-This readme describes how to setup a development environment for developming
+This readme describes how to setup a development environment for developing
 and testing the eclipse-poky plugins.
 
 For the time being we recommend using Linux for eclipse-poky development,
@@ -101,16 +101,19 @@ and choose 'pokywithrse.psf' and Finish
 This should result in approximately 11 projects appearing in
 your workspace.  Some will have compiler errors.
 
-5) Resolve Target Platform
+5) Resolve and Set Target Platform
 
 In the Eclipse Package Explorer view (or Projects view) navigate
-to org.yocto.sdk.releng/targets directory and open (double click)
+to org.yocto.sdk.releng/ directory and open (double click)
 this file:  pokywithrse.target
 
-Once this file is opened, you should see in the message bar: "Resolving
-Poky with R...inition" with a percentage.  This will take some time
-(possibly minutes depending upon the speed of your internet connection)
+Once this file is opened with the 'Target Definition' edito, you should
+see in the message bar: "Resolving Poky with R...inition" with a percentage.
+This will take some time (possibly minutes depending upon the speed of your
+internet connection)
 
 When the resolving is complete, choose 'Set as Target Platform' link in
 upper right of the Target Definition Editor.  This should result in
 the workspace projects being rebuilt without errors.
+
+You are now setup to build, run, debug Eclipse-Poky plugins

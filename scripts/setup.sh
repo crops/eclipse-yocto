@@ -92,12 +92,12 @@ fi
 
 # prepare the base Eclipse installation in folder "eclipse"
 ep_rel="R-"
-ep_ver="4.7"
-ep_date="-201706120950"
+ep_ver="4.7.2"
+ep_date="-201711300510"
 P2_disabled=false
 P2_no_dropins=false
 
-if [ ! -f eclipse/plugins/org.eclipse.swt_3.106.0.v20170608-0516.jar ]; then
+if [ ! -f eclipse/plugins/org.eclipse.swt_3.106.2.v20171129-0543.jar ]; then
 
   pushd .
 
@@ -261,12 +261,17 @@ UPDATE_SITE="http://download.eclipse.org/eclipse/updates/4.7"
 
 #CDT related
 echo -e "\nPlease wait. Installing CDT.SDK.FEATURE.GROUP"
-CDTFEAT="9.3.0"
+CDTFEAT="9.4.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.sdk.feature.group ${CDTFEAT}
 
 echo -e "\nPlease wait. Installing CDT.LAUNCH.REMOTE.FEATURE.GROUP"
-CDTREMOTEVER="9.3.0"
+CDTREMOTEVER="9.4.0"
 update_feature_remote ${MAIN_SITE} org.eclipse.cdt.launch.remote.feature.group ${CDTREMOTEVER}
+
+#AUTOTOOLS
+echo -e "\nPlease wait. Installing AUTOTOOLS.FEATURE.GROUP"
+ATVER="9.4.0"
+update_feature_remote ${MAIN_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
 
 #TM Terminal (was RSE) related
 echo -e "\nPlease wait. Installing TM.TERMINAL.FEATURE.FEATURE.GROUP"
@@ -287,24 +292,19 @@ RSESDKVER="3.7.0"
 update_feature_remote ${TM_SITE} org.eclipse.rse.sdk.feature.group ${RSESDKVER}
 #echo -e "\nSkipping RSE.SDK.FEATURE.GROUP"
 
-RSE_TERMINALS
+#RSE_TERMINALS
 echo -e "\nPlease wait. Installing RSE.TERMINALS.FEATURE.GROUP"
 RSETERMVER="3.8.0"
 update_feature_remote ${TM_SITE} org.eclipse.rse.terminals.feature.group ${RSETERMVER}
 #echo -e "\nSkipping RSE.TERMINALS.FEATURE.GROUP"
 
-#AUTOTOOLS
-echo -e "\nPlease wait. Installing AUTOTOOLS.FEATURE.GROUP"
-ATVER="9.3.0"
-update_feature_remote ${MAIN_SITE} org.eclipse.cdt.autotools.feature.group ${ATVER}
-
 #Lttng2
-TMF_CTF_REL="3.0.0"
+TMF_CTF_REL="3.2.0"
 echo -e "\nPlease wait. Installing TRACECOMPASS.LTTNG2.UST.FEATURE.GROUP"
 update_feature_remote ${MAIN_SITE} org.eclipse.tracecompass.lttng2.ust.feature.group ${TMF_CTF_REL}
 
 echo -e "\nPlease wait. Installing OSGI.COMPATIBILITY.PLUGINS.FEATURE.FEATURE.GROUP"
-COMPAT_VER="1.1.0"
+COMPAT_VER="1.1.1"
 update_feature_remote ${UPDATE_SITE} org.eclipse.osgi.compatibility.plugins.feature.feature.group ${COMPAT_VER}
 
 echo -e "\nYour build environment is successfully created."

@@ -11,7 +11,7 @@
 	</parent>
 
 	<groupId>org.yocto.releng</groupId>
-	<artifactId>poky</artifactId>
+	<artifactId>pokywithrse</artifactId>
 	<packaging>eclipse-target-definition</packaging>
 	<name>Yocto Project Eclipse Poky Target</name>
 
@@ -31,9 +31,9 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>targets/pokywithrse.target</file>
+									<file>pokywithrse.target</file>
 									<type>target</type>
-									<classifier>poky</classifier>
+									<classifier>pokywithrse</classifier>
 								</artifact>
 							</artifacts>
 						</configuration>

@@ -11,7 +11,7 @@
     <properties>
 	<tycho-version>1.0.0</tycho-version>
 	<tycho-extras-version>1.0.0</tycho-extras-version>
-	<target-platform>poky</target-platform>
+	<target-platform>pokywithrse</target-platform>
 	<help-docs-eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.7</help-docs-eclipserun-repo>
 	<tycho.scmUrl>scm:git:https://github.com/crops/eclipse-poky.git</tycho.scmUrl>
 	<base.test.vmargs>-Xms256m -Xmx512m -ea</base.test.vmargs>
@@ -349,7 +349,7 @@
 					<target>
 						<artifact>
 							<groupId>org.yocto.releng</groupId>
-							<artifactId>poky</artifactId>
+							<artifactId>pokywithrse</artifactId>
 							<classifier>${target-platform}</classifier>
 							<version>${project.version}</version>
 						</artifact>

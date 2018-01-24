@@ -116,4 +116,37 @@ When the resolving is complete, choose 'Set as Target Platform' link in
 upper right of the Target Definition Editor.  This should result in
 the workspace projects being rebuilt without errors.
 
+If errors still remain in the workspace projects...
+
+6) The first time that Eclipse is installed, the maven 2 Eclipse plugin (m2e) has
+to install the tycho plugins.   If this is the case, you will see errors like
+these in the Eclipse Problems view:
+
+-------------------
+Description     Resource        Path    Location        Type
+Plugin execution not covered by lifecycle configuration: org.eclipse.tycho:tycho-compiler-plugin:1.0.0:compile (execution: default-compile, phase: compile)     pom.xml /org.yocto.cmake.managedbuilder line 8  Maven Project Build Lifecycle Mapping Problem
+-------------------
+
+If you see errors such as these after resolving and setting the target platform
+then you can install the necessary tycho maven plugins by:
+
+1) Go to the Eclipse Problems view
+2) Select the first error as above
+3) Hit Ctrl-1 (quick fix)
+4) Select 'Discover m2e connectors'
+5) Select Finish -> Next -> Next -> Accept license agreement -> Finish
+
+After restart you might need to clean and rebuild all projects, and this
+should result in a compile with all workspace errors gone.
+
+If it does not, please report to ecilpse-poky mailing list at
+
+https://lists.yoctoproject.org/listinfo/eclipse-poky
+
+or open bug
+
+https://bugzilla.yoctoproject.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&product=Eclipse+Plugin&content=
+
+It should install the Tycho maven plugins and restart Eclipse.
+
 You are now setup to build, run, debug Eclipse-Poky plugins

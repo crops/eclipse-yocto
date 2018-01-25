@@ -228,8 +228,12 @@ update_feature_remote()
       done
   else
       #only has minimum version requirement
-      local max_remote_ver="`get_version $1 $2 'max'`"
-      [ "$max_remote_ver" \> "$3" ] || [ "$max_remote_ver" = "$3" ] && installIU=$max_remote_ver
+      for i in $all_versions; do
+        if [ "$i" \> "$3" ] || [ "$i" = "$3" ]; then
+          installIU=$i
+          break
+        fi
+      done
   fi
 
   [ "x$installIU" = "x" ] && err_exit 1 "Can NOT find candidates of $2 version($3, $4) at $1!"

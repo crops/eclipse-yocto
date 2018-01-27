@@ -188,13 +188,22 @@ Part V. Sharing with the Community
 V.1 Sending Patches to the Mailing List
 
   Any changes to the eclipse-poky plugin should be sent as patches to
-  the Yocto Project mailing list (yocto@yoctoproject.org), with
+  the Eclipse Poky  mailing list (eclipse-poky@yoctoproject.org), with
 
-    --subject-prefix="eclipse-poky][PATCH"
+    --subject-prefix="<eclipse-revision>][PATCH"
+
+  where <eclipse-revision> might be "neon" or "oxygen". Also if, the bug
+  affects a particular Yocto Project release, include the release name
+  in the subject prefix:
+
+    --subject-prefix="<eclipse-revision>][<yocto-project-release-name>][PATCH"
+
+  where <yocto-project-release-name> might be "morty", "pyro" or "rocko" for
+  instance.
 
   This is a subscriber only list, so you will need to sign up for access at:
 
-    https://lists.yoctoproject.org/listinfo/yocto
+    https://lists.yoctoproject.org/listinfo/eclipse-poky
 
   Patches should follow the same guidelines that are used for other parts of
   the Yocto Project and Open Embedded code-base:

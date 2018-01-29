@@ -13,7 +13,7 @@ m4_define([$(projectName)_api_version],
           [$(projectName)_version_major.$(projectName)_version_minor])
 
 AC_INIT($(projectName), $(projectName)_version)
-AM_INIT_AUTOMAKE($(projectName), $(projectName)_version)
+AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
 
 # Checks for programs.

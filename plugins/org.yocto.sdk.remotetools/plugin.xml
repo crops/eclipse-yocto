@@ -69,11 +69,6 @@
             id="org.yocto.sdk.remotetools.command.systemtap"
             name="%command.name.systemtap">
       </command>
-      <command
-            categoryId="org.yocto.sdk.remotetools.commands.category"
-            id="org.yocto.sdk.remotetools.command.yoctobsp"
-            name="%command.name.yoctobsp">
-      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -116,15 +111,6 @@
                label="%command.name.ust.20"
                style="push">
          </command>
-         <separator
-               name="org.yocto.sdk.remotetools.separator2"
-               visible="true">
-         </separator>
-         <command
-               commandId="org.yocto.sdk.remotetools.command.yoctobsp"
-               label="%command.name.yoctobsp"
-               style="push">
-         </command>
       </menuContribution>
    </extension>
    <extension
@@ -152,10 +138,6 @@
       <handler
             class="org.yocto.sdk.remotetools.actions.Ust2Handler"
             commandId="org.yocto.sdk.remotetools.command.ust2">
-      </handler>
-      <handler
-            class="org.yocto.sdk.remotetools.actions.YoctoBspHandler"
-            commandId="org.yocto.sdk.remotetools.command.yoctobsp">
       </handler>
    </extension>
 

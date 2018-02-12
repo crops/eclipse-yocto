@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,plugins/org.yocto.cmake.managedbuilder"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,features/org.yocto.doc"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,plugins/org.yocto.doc.user"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,plugins/org.yocto.remote.utils"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,features/org.yocto.sdk"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,plugins/org.yocto.sdk.ide"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,plugins/org.yocto.sdk.ide.doc.user"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,plugins/org.yocto.sdk.remotetools"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,features/org.yocto.utils"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,releng/org.yocto.sdk.releng"/>
-<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,timo/maven,."/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.cmake.managedbuilder"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.doc"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.doc.user"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.remote.utils"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.sdk"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.sdk.ide"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.sdk.ide.doc.user"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,plugins/org.yocto.sdk.remotetools"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,features/org.yocto.utils"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,releng/org.yocto.sdk.releng"/>
+<project reference="1.0,ssh://git@push.yoctoproject.org/eclipse-poky-contrib,master,."/>
 </provider>
 <workingSets editPageId="org.eclipse.ui.resourceWorkingSetPage" id="1515432086327_1" label="poky-parent" name="poky-parent">
 <item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/poky-parent" type="4"/>

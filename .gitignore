@@ -19,3 +19,7 @@ plugins/org.yocto.doc.user/html/sdk-manual-toc.xml
 plugins/org.yocto.doc.user/html/sdk-manual/
 plugins/org.yocto.doc.user/html/yocto-project-qs-toc.xml
 plugins/org.yocto.doc.user/html/yocto-project-qs/
+org.yocto*.zip
+patches/
+eclipse-*-linux-gtk-x86_64/
+*.log

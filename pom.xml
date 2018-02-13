@@ -11,6 +11,8 @@
     <properties>
 	<tycho-version>1.0.0</tycho-version>
 	<tycho-extras-version>1.0.0</tycho-extras-version>
+	<!-- to find the target platform, this must match the one of the classifiers
+	in the releng/org.yocto.sdk.releng/pom.xml -->
 	<target-platform>pokywithrse</target-platform>
 	<help-docs-eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.7</help-docs-eclipserun-repo>
 	<tycho.scmUrl>scm:git:https://github.com/crops/eclipse-poky.git</tycho.scmUrl>
@@ -45,8 +47,10 @@
 		<module>plugins/org.yocto.sdk.ide</module>
 		<module>plugins/org.yocto.sdk.ide.doc.user</module>
 		<module>plugins/org.yocto.cmake.managedbuilder</module>
+		<!-- removed since they have dependencies on RSE
 		<module>plugins/org.yocto.remote.utils</module>
 		<module>plugins/org.yocto.sdk.remotetools</module>
+		-->
 		<module>plugins/org.yocto.doc.user</module>
 		<module>features/org.yocto.sdk</module>
 		<module>features/org.yocto.utils</module>
@@ -349,7 +353,7 @@
 					<target>
 						<artifact>
 							<groupId>org.yocto.releng</groupId>
-							<artifactId>pokywithrse</artifactId>
+							<artifactId>${target-platform}</artifactId>
 							<classifier>${target-platform}</classifier>
 							<version>${project.version}</version>
 						</artifact>

@@ -41,14 +41,7 @@
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.rse.core"/>
-      <import plugin="org.eclipse.rse.ui"/>
-      <import plugin="org.eclipse.rse.services"/>
       <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.rse.subsystems.files.core"/>
-      <import plugin="org.eclipse.rse.subsystems.processes.core"/>
-      <import plugin="org.eclipse.rse.processes.ui"/>
-      <import plugin="org.eclipse.rse.subsystems.terminals.core"/>
       <import plugin="org.eclipse.cdt.ui" version="5.1.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.core" version="5.1.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources" version="3.5.1" match="greaterOrEqual"/>
@@ -58,8 +51,6 @@
       <import plugin="org.eclipse.cdt.autotools.ui" version="1.0.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.managedbuilder.ui" version="5.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.expressions" version="3.4.100" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.rse.files.ui" version="3.1.1" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.rse.subsystems.shells.core" version="3.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.launch.remote" version="2.2.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.ui.forms"/>
@@ -72,20 +63,6 @@
 
    <plugin
          id="org.yocto.sdk.ide"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.yocto.remote.utils"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.yocto.sdk.remotetools"
          download-size="0"
          install-size="0"
          version="0.0.0"

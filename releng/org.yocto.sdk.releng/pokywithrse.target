@@ -31,11 +31,11 @@
 <repository location="http://download.eclipse.org/linuxtools/update-docker-3.2.0"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.tracecompass.btf.feature.group" version="3.2.0.201712061002"/>
-<unit id="org.eclipse.tracecompass.gdbtrace.feature.group" version="3.2.0.201712061002"/>
-<unit id="org.eclipse.tracecompass.lttng2.kernel.feature.group" version="3.2.0.201712061002"/>
-<unit id="org.eclipse.tracecompass.lttng2.ust.feature.group" version="3.2.0.201712061002"/>
-<unit id="org.eclipse.tracecompass.tmf.pcap.feature.group" version="3.2.0.201712061002"/>
+<unit id="org.eclipse.tracecompass.btf.feature.group" version="3.3.0.201802151000"/>
+<unit id="org.eclipse.tracecompass.gdbtrace.feature.group" version="3.3.0.201802151000"/>
+<unit id="org.eclipse.tracecompass.lttng2.kernel.feature.group" version="3.3.0.201802151000"/>
+<unit id="org.eclipse.tracecompass.lttng2.ust.feature.group" version="3.3.0.201802151000"/>
+<unit id="org.eclipse.tracecompass.tmf.pcap.feature.group" version="3.3.0.201802151000"/>
 <repository location="http://download.eclipse.org/tracecompass/oxygen/stable/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">

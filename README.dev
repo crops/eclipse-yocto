@@ -96,7 +96,7 @@ Select File radio button and choose 'Browse' button on right
 
 Browse to ~/git/eclipse-poky-contrib/releng/org.yocto.sdk.releng/projectsets
 
-and choose 'pokywithrse.psf' and Finish
+and choose 'poky.psf' and Finish
 
 This should result in approximately 11 projects appearing in
 your workspace.  Some will have compiler errors.
@@ -105,7 +105,7 @@ your workspace.  Some will have compiler errors.
 
 In the Eclipse Package Explorer view (or Projects view) navigate
 to org.yocto.sdk.releng/ directory and open (double click)
-this file:  pokywithrse.target
+this file:  poky.target
 
 Once this file is opened with the 'Target Definition' edito, you should
 see in the message bar: "Resolving Poky with R...inition" with a percentage.

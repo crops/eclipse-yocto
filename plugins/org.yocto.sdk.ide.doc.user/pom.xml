@@ -7,7 +7,7 @@
   <description>Yocto Project SDK User Documentation (Cheatsheets) plugin</description>
   <parent>
 	<groupId>org.yocto</groupId>
-	<artifactId>poky-parent</artifactId>
+	<artifactId>eclipse-yocto-parent</artifactId>
 	<version>1.4.1-SNAPSHOT</version>
 	<relativePath>../../pom.xml</relativePath>
   </parent>

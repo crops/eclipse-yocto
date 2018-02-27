@@ -13,18 +13,18 @@
 	<tycho-extras-version>1.0.0</tycho-extras-version>
 	<!-- to find the target platform, this must match the one of the classifiers
 	in the releng/org.yocto.sdk.releng/pom.xml -->
-	<target-platform>poky</target-platform>
+	<target-platform>eclipse-yocto</target-platform>
 	<help-docs-eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.7</help-docs-eclipserun-repo>
-	<tycho.scmUrl>scm:git:https://github.com/crops/eclipse-poky.git</tycho.scmUrl>
+	<tycho.scmUrl>scm:git:https://github.com/crops/eclipse-yocto.git</tycho.scmUrl>
 	<base.test.vmargs>-Xms256m -Xmx512m -ea</base.test.vmargs>
         <yocto-docs-branch-name>master</yocto-docs-branch-name>
     </properties>
 
 	<groupId>org.yocto</groupId>
-	<artifactId>poky-parent</artifactId>
+	<artifactId>eclipse-yocto-parent</artifactId>
 	<version>1.4.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Eclipse Poky Parent</name>
+	<name>Eclipse Yocto Parent</name>
 
 
 	<licenses>
@@ -105,11 +105,11 @@
 	</pluginRepositories>
 	<profiles>
 		<profile>
-			<id>eclipsePokyRepo</id>
+			<id>eclipseYoctoRepo</id>
 			<repositories>
 				<repository>
-					<id>poky.repo</id>
-					<url>${poky-site}</url>
+					<id>eclipse-yocto.repo</id>
+					<url>${eclipse-yocto-site}</url>
 					<layout>p2</layout>
 				</repository>
 			</repositories>
@@ -455,7 +455,7 @@
 								-h - display this help and exit
 								TAG_NAME - tag to build the documentation upon
 								BRANCH_NAME - branch to build the documentation upon
-								PLUGIN_FOLDER - root folder of the eclipse-poky project
+								PLUGIN_FOLDER - root folder of the eclipse-yocto project
                                                         -->
 							<argument>generate-doc.sh</argument>
 							<argument>${yocto-docs-branch-name}</argument>

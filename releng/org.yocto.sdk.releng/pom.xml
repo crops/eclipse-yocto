@@ -5,15 +5,15 @@
 
 	<parent>
 		<groupId>org.yocto</groupId>
-		<artifactId>poky-parent</artifactId>
+		<artifactId>eclipse-yocto-parent</artifactId>
 		<version>1.4.1-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<groupId>org.yocto.releng</groupId>
-	<artifactId>poky</artifactId>
+	<artifactId>eclipse-yocto</artifactId>
 	<packaging>eclipse-target-definition</packaging>
-	<name>Yocto Project Eclipse Poky Target</name>
+	<name>Yocto Project Eclipse Yocto Target</name>
 
 	<build>
 		<plugins>
@@ -31,9 +31,9 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>poky.target</file>
+									<file>eclipse-yocto.target</file>
 									<type>target</type>
-									<classifier>poky</classifier>
+									<classifier>eclipse-yocto</classifier>
 								</artifact>
 							</artifacts>
 						</configuration>

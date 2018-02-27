@@ -28,7 +28,7 @@ I-3. Proxy Settings (If you're behind some firewall)
 
 I-4. Get the Source Code for the Yocto Project Eclipse Plugin
 
-  git clone git://git.yoctoproject.org/eclipse-poky.git
+  git clone git://git.yoctoproject.org/eclipse-yocto.git
 
   The scripts used for building, including on the auto builder, are under
   the "scripts" directory.
@@ -187,8 +187,8 @@ Part V. Sharing with the Community
 
 V.1 Sending Patches to the Mailing List
 
-  Any changes to the eclipse-poky plugin should be sent as patches to
-  the Eclipse Poky  mailing list (eclipse-poky@yoctoproject.org), with
+  Any changes to the eclipse-yocto plugin should be sent as patches to
+  the Eclipse Yocto  mailing list (eclipse-yocto@yoctoproject.org), with
 
     --subject-prefix="<eclipse-revision>][PATCH"
 
@@ -203,23 +203,23 @@ V.1 Sending Patches to the Mailing List
 
   This is a subscriber only list, so you will need to sign up for access at:
 
-    https://lists.yoctoproject.org/listinfo/eclipse-poky
+    https://lists.yoctoproject.org/listinfo/eclipse-yocto
 
   Patches should follow the same guidelines that are used for other parts of
   the Yocto Project and Open Embedded code-base:
 
     http://www.openembedded.org/wiki/How_to_submit_a_patch_to_OpenEmbedded
 
-  Note that code included in the eclipse-poky plugin should be under the EPL
+  Note that code included in the eclipse-yocto plugin should be under the EPL
   (Eclipse Public License) or a compatible license.
 
-V.2 Sharing Code in the eclipse-poky-contrib Repository
+V.2 Sharing Code in the eclipse-yocto-contrib Repository
 
   Similar to other -contrib repositories in the Yocto Project, there is
-  an eclipse-poky-contrib repository created for community members to be
+  an eclipse-yocto-contrib repository created for community members to be
   able to share work-in-progress code or code for pull-requests.
 
-    http://git.yoctoproject.org/cgit/cgit.cgi/eclipse-poky-contrib/
+    http://git.yoctoproject.org/cgit/cgit.cgi/eclipse-yocto-contrib/
 
   To request access, follow the same instructions as for poky-contrib:
 

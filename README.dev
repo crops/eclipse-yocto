@@ -1,9 +1,9 @@
-Eclipse Poky Developer's Workspace Setup
+Eclipse Yocto Developer's Workspace Setup
 
 This readme describes how to setup a development environment for developing
-and testing the eclipse-poky plugins.
+and testing the eclipse-yocto plugins.
 
-For the time being we recommend using Linux for eclipse-poky development,
+For the time being we recommend using Linux for eclipse-yocto development,
 so all of the instructions below should be done on an appropriate Linux distribution.
 
 Prerequisites
@@ -56,7 +56,7 @@ and consult your local network admin for the appropriate proxy info.
 
 2) Install Eclipse
 
-a) Download Eclipse Oxygen.2 or more recent release.   For poky plugin development
+a) Download Eclipse Oxygen.2 or more recent release.   For eclipse-yocto plugin development
 three  components are required:   i) Eclipse Java SDK, ii) Eclipse PDE;
 iii) Maven 2 Eclipse (m2e).   All three of these components are present in
 the package named 'Eclipse IDE for Eclipse Committers'.  All of the packages
@@ -67,14 +67,14 @@ https://www.eclipse.org/downloads/packages
 Download the 'Eclipse IDE for Eclipse Committers' and expand into a new directory
 (e.g. ~/eclipse.oxygen.2) on your local disk.
 
-3) Clone the eclipse-poky git repo
+3) Clone the eclipse-yocto git repo
 
 By default, eclipse's git client (egit) uses ~/git for accessing git repos, so it's
 generally a good idea to create and use ~/git for the following clone command.
 
 In ~git type:
 
-$ git clone git://git.yoctoproject.org/eclipse-poky-contrib
+$ git clone git://git.yoctoproject.org/eclipse-yocto-contrib
 
 When complete, change to the timo/maven branch (temporary)
 
@@ -86,7 +86,7 @@ Open a terminal, navigate to ~/eclipse.oxygen.2 and type:
 
 $ ./eclipse
 
-Create a new workspace (e.g. workspace.eclipse-poky)
+Create a new workspace (e.g. workspace.eclipse-yocto)
 
 From main menu:
 
@@ -94,9 +94,9 @@ File->Import...->Team->Team Project Set->Next
 
 Select File radio button and choose 'Browse' button on right
 
-Browse to ~/git/eclipse-poky-contrib/releng/org.yocto.sdk.releng/projectsets
+Browse to ~/git/eclipse-yocto-contrib/releng/org.yocto.sdk.releng/projectsets
 
-and choose 'poky.psf' and Finish
+and choose 'eclipse-yocto.psf' and Finish
 
 This should result in approximately 11 projects appearing in
 your workspace.  Some will have compiler errors.
@@ -105,10 +105,10 @@ your workspace.  Some will have compiler errors.
 
 In the Eclipse Package Explorer view (or Projects view) navigate
 to org.yocto.sdk.releng/ directory and open (double click)
-this file:  poky.target
+this file:  eclipse-yocto.target
 
 Once this file is opened with the 'Target Definition' edito, you should
-see in the message bar: "Resolving Poky with R...inition" with a percentage.
+see in the message bar: "Resolving Yocto with R...inition" with a percentage.
 This will take some time (possibly minutes depending upon the speed of your
 internet connection)
 
@@ -139,9 +139,9 @@ then you can install the necessary tycho maven plugins by:
 After restart you might need to clean and rebuild all projects, and this
 should result in a compile with all workspace errors gone.
 
-If it does not, please report to ecilpse-poky mailing list at
+If it does not, please report to ecilpse-yocto mailing list at
 
-https://lists.yoctoproject.org/listinfo/eclipse-poky
+https://lists.yoctoproject.org/listinfo/eclipse-yocto
 
 or open bug
 
@@ -149,4 +149,4 @@ https://bugzilla.yoctoproject.org/buglist.cgi?query_format=specific&order=releva
 
 It should install the Tycho maven plugins and restart Eclipse.
 
-You are now setup to build, run, debug Eclipse-Poky plugins
+You are now setup to build, run, debug eclipse-yocto plugins

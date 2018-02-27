@@ -52,7 +52,7 @@ public class YoctoUISetting {
 
 	private Button btnSDKRoot;
 	private Button btnQemu;
-	private Button btnPokyRoot;
+	private Button btnYoctoRoot;
 	private Button btnDevice;
 
 	private Button btnKernelLoc;
@@ -223,14 +223,14 @@ public class YoctoUISetting {
 		crossCompilerGroup.setLayoutData(gd);
 		crossCompilerGroup.setText("Cross Compiler Options:");		
 
-		if (yoctoUIElement.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+		if (yoctoUIElement.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE) {
 
 			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "Standalone pre-built toolchain", PreferenceConstants.SDK_MODE + "_1", true);
-			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Build system derived toolchain", PreferenceConstants.SDK_MODE + "_2", false);
+			btnYoctoRoot = (Button)addRadioButton(crossCompilerGroup, "Build system derived toolchain", PreferenceConstants.SDK_MODE + "_2", false);
 		}
 		else {
 			btnSDKRoot = (Button)addRadioButton(crossCompilerGroup, "Standalone pre-built toolchain", PreferenceConstants.SDK_MODE + "_1", false);
-			btnPokyRoot = (Button)addRadioButton(crossCompilerGroup, "Build system derived toolchain", PreferenceConstants.SDK_MODE + "_2", true);
+			btnYoctoRoot = (Button)addRadioButton(crossCompilerGroup, "Build system derived toolchain", PreferenceConstants.SDK_MODE + "_2", true);
 		}
 
 		root_label = new Label(crossCompilerGroup, SWT.NONE);
@@ -296,7 +296,7 @@ public class YoctoUISetting {
 		//we add the listener at the end for avoiding the useless event trigger when control
 		//changed or modified.
 		btnSDKRoot.addSelectionListener(fSelectionListener);
-		btnPokyRoot.addSelectionListener(fSelectionListener);
+		btnYoctoRoot.addSelectionListener(fSelectionListener);
 		btnQemu.addSelectionListener(fSelectionListener);
 		btnDevice.addSelectionListener(fSelectionListener);
 		targetArchCombo.addSelectionListener(fSelectionListener);
@@ -311,9 +311,9 @@ public class YoctoUISetting {
 	{
 		YoctoUIElement elem = new YoctoUIElement();
 		if (btnSDKRoot.getSelection())
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_SDK_MODE);
 		else
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_TREE_MODE);
 
 		if (btnQemu.getSelection())
 		{
@@ -336,12 +336,12 @@ public class YoctoUISetting {
 		elem.setStrTargetsArray(getTargetArray(elem));
 
 		btnSDKRoot.setSelection(false);
-		btnPokyRoot.setSelection(false);
-		if(elem.getEnumPokyMode().equals(YoctoUIElement.PokyMode.POKY_SDK_MODE)){
+		btnYoctoRoot.setSelection(false);
+		if(elem.getEnumYoctoMode().equals(YoctoUIElement.YoctoMode.YOCTO_SDK_MODE)){
 			btnSDKRoot.setSelection(true);
 		}
-		else if(elem.getEnumPokyMode().equals(YoctoUIElement.PokyMode.POKY_TREE_MODE)){
-			btnPokyRoot.setSelection(true);
+		else if(elem.getEnumYoctoMode().equals(YoctoUIElement.YoctoMode.YOCTO_TREE_MODE)){
+			btnYoctoRoot.setSelection(true);
 		}
 
 		btnQemu.setSelection(false);
@@ -385,7 +385,7 @@ public class YoctoUISetting {
 
 	public void setUIFormEnabledState(boolean isEnabled) {
 		btnSDKRoot.setEnabled(isEnabled);
-		btnPokyRoot.setEnabled(isEnabled);
+		btnYoctoRoot.setEnabled(isEnabled);
 
 		root_label.setEnabled(isEnabled);
 		textRootLoc.setEnabled(isEnabled);
@@ -455,7 +455,7 @@ public class YoctoUISetting {
 
 	private void controlChanged(Widget widget) {
 
-		if (widget == btnSDKRoot || widget == btnPokyRoot)
+		if (widget == btnSDKRoot || widget == btnYoctoRoot)
 		{
 
 			setTargetCombo(targetArchCombo);
@@ -499,7 +499,7 @@ public class YoctoUISetting {
 		ArrayList<String> arrTarget;
 		String sEnvFilePath = elem.getStrToolChainRoot();
 
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE)
+		if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE)
 		{
 			arrTarget = getTargetTripletList(sEnvFilePath);
 		}
@@ -540,7 +540,7 @@ public class YoctoUISetting {
 			}
 		}
 		//prompt user,if he use tree mode, maybe he hasn't bitbake meta-ide-support yet.
-		else if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_TREE_MODE)
+		else if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_TREE_MODE)
 		{
 			if (elem.getStrToolChainRoot().isEmpty())
 				return;

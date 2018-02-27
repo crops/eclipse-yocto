@@ -47,7 +47,7 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 	private static final String NEW_DIALOG_MESSAGE = "Preferences.Profile.New.Dialog.Message";
 	private static final String UPDATE_DIALOG_TITLE = "Preferences.Profile.Update.Dialog.Title";
 	private static final String UPDATE_DIALOG_MESSAGE = "Preferences.Profile.Update.Dialog.Message";
-	private static final String REVALIDATION_MESSAGE = "Poky.SDK.Revalidation.Message";
+	private static final String REVALIDATION_MESSAGE = "Yocto.SDK.Revalidation.Message";
 
 	private YoctoProfileSetting yoctoProfileSetting;
 	private YoctoUISetting yoctoUISetting;
@@ -212,11 +212,11 @@ public class YoctoSDKPreferencePage extends PreferencePage implements IWorkbench
 		resetProfileInAffectedProjects(selectedProfile);
 	}
 
-	/* Save IDE wide POKY Preference settings to a specific preference store */
+	/* Save IDE wide Yocto Preference settings to a specific preference store */
 	private void saveElemToStore(YoctoUIElement elem, IPreferenceStore store) {
 		store.setValue(PreferenceConstants.TARGET_ARCH_INDEX, elem.getIntTargetIndex());
 
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+		if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE) {
 			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
 		} else {
 			store.setValue(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);

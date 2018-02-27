@@ -33,29 +33,29 @@ public class YoctoSDKChecker {
 	public static enum SDKCheckResults {
 		SDK_PASS("", false),
 		TOOLCHAIN_LOCATION_EMPTY(
-				"Poky.SDK.Location.Empty", true),
+				"Yocto.SDK.Location.Empty", true),
 		TOOLCHAIN_LOCATION_NONEXIST(
-				"Poky.SDK.Location.Nonexist", true),
+				"Yocto.SDK.Location.Nonexist", true),
 		SDK_TARGET_EMPTY(
-				"Poky.SDK.Target.Empty", true),
+				"Yocto.SDK.Target.Empty", true),
 		SDK_NO_TARGET_SELECTED(
-				"Poky.SDK.No.Target.Selected", false),
+				"Yocto.SDK.No.Target.Selected", false),
 		SYSROOT_EMPTY(
-				"Poky.Sysroot.Empty", true),
+				"Yocto.Sysroot.Empty", true),
 		SYSROOT_NONEXIST(
-				"Poky.Sysroot.Nonexist", true),
+				"Yocto.Sysroot.Nonexist", true),
 		QEMU_KERNEL_EMPTY(
-				"Poky.Qemu.Kernel.Empty", true),
+				"Yocto.Qemu.Kernel.Empty", true),
 		QEMU_KERNEL_NONEXIST(
-				"Poky.Qemu.Kernel.Nonexist", true),
+				"Yocto.Qemu.Kernel.Nonexist", true),
 		WRONG_SDK_VERSION(
-				"Poky.SDK.Sysroot.Wrongversion", false),
+				"Yocto.SDK.Sysroot.Wrongversion", false),
 		ENV_SETUP_SCRIPT_NONEXIST(
-				"Poky.Env.Script.Nonexist", false),
+				"Yocto.Env.Script.Nonexist", false),
 		TOOLCHAIN_NO_SYSROOT(
-				"Poky.Toolchain.No.Sysroot", false),
+				"Yocto.Toolchain.No.Sysroot", false),
 		TOOLCHAIN_HOST_MISMATCH(
-				"Poky.Toolchain.Host.Mismatch", false);
+				"Yocto.Toolchain.Host.Mismatch", false);
 
 		private static final String DEFAULT_ADVICE = "Default.Advice";
 		private static final String ADVICE_SUFFIX = ".Advice";
@@ -84,10 +84,10 @@ public class YoctoSDKChecker {
 	};
 
 	public static enum SDKCheckRequestFrom {
-		Wizard("Poky.SDK.Error.Origin.Wizard"),
-		Menu("Poky.SDK.Error.Origin.Menu"),
-		Preferences("Poky.SDK.Error.Origin.Preferences"),
-		Other("Poky.SDK.Error.Origin.Other");
+		Wizard("Yocto.SDK.Error.Origin.Wizard"),
+		Menu("Yocto.SDK.Error.Origin.Menu"),
+		Preferences("Yocto.SDK.Error.Origin.Preferences"),
+		Other("Yocto.SDK.Error.Origin.Other");
 
 		private final String errorMessageID;
 
@@ -129,7 +129,7 @@ public class YoctoSDKChecker {
 				return SDKCheckResults.SYSROOT_NONEXIST;
 		}
 
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+		if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE) {
 			//Check for SDK compatible with the host arch
 			String platform = getPlatformArch();
 			String sysroot_dir_str = elem.getStrToolChainRoot() + "/" + SYSROOTS_DIR;
@@ -156,18 +156,18 @@ public class YoctoSDKChecker {
 		}
 
 		if (elem.getIntTargetIndex() < 0 || elem.getStrTarget().isEmpty()) {
-			//if this is poky tree mode, prompt user whether bitbake meta-ide-support is executed?
-			if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_TREE_MODE)
+			//if this is Yocto tree mode, prompt user whether bitbake meta-ide-support is executed?
+			if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_TREE_MODE)
 				return SDKCheckResults.ENV_SETUP_SCRIPT_NONEXIST;
 			else
 				return SDKCheckResults.SDK_TARGET_EMPTY;
 		} else {
 			String sFileName;
 
-			if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+			if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE) {
 				sFileName = elem.getStrToolChainRoot()+"/" + YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
 			} else {
-				//POKY TREE Mode
+				//YOCTO TREE Mode
 				sFileName = elem.getStrToolChainRoot() + YoctoSDKUtilsConstants.DEFAULT_TMP_PREFIX +
 						YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
 			}

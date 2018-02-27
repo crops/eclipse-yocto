@@ -35,7 +35,7 @@ import org.yocto.sdk.ide.preferences.PreferenceConstants;
 public class ProjectPreferenceUtils {
 	private static final String CONSOLE_MESSAGE  = "Menu.SDK.Console.Configure.Message";
 
-	/* Get POKY Preference settings from project's preference store */
+	/* Get Yocto Preference settings from project's preference store */
 	public static YoctoUIElement getElem(IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
@@ -55,9 +55,9 @@ public class ProjectPreferenceUtils {
 		}
 
 		if (projectNode.get(PreferenceConstants.SDK_MODE,"").equalsIgnoreCase(IPreferenceStore.TRUE)) {
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_SDK_MODE);
 		} else {
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_TREE_MODE);
 		}
 
 		if(projectNode.get(PreferenceConstants.TARGET_MODE,"").equalsIgnoreCase(IPreferenceStore.TRUE)) {
@@ -68,7 +68,7 @@ public class ProjectPreferenceUtils {
 		return elem;
 	}
 
-	/* Get POKY Preference settings from project's environment */
+	/* Get Yocto Preference settings from project's environment */
 	public static YoctoUIElement getElemFromProjectEnv(IProject project) {
 		YoctoUIElement elem = new YoctoUIElement();
 		elem.setStrToolChainRoot(YoctoSDKUtils.getEnvValue(project, PreferenceConstants.TOOLCHAIN_ROOT));
@@ -83,9 +83,9 @@ public class ProjectPreferenceUtils {
 		}
 
 		if (YoctoSDKUtils.getEnvValue(project, PreferenceConstants.SDK_MODE).equalsIgnoreCase(IPreferenceStore.TRUE)) {
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_SDK_MODE);
 		} else {
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_TREE_MODE);
 		}
 
 		if(YoctoSDKUtils.getEnvValue(project, PreferenceConstants.TARGET_MODE).equalsIgnoreCase(IPreferenceStore.TRUE)) {
@@ -129,7 +129,7 @@ public class ProjectPreferenceUtils {
 		return true;
 	}
 
-	/* Save POKY Preference settings to project's preference store */
+	/* Save Yocto Preference settings to project's preference store */
 	public static void saveElem(YoctoUIElement elem, IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);
 		IEclipsePreferences projectNode = projectScope.getNode(YoctoSDKUtilsConstants.PROJECT_SCOPE);
@@ -138,7 +138,7 @@ public class ProjectPreferenceUtils {
 		}
 
 		projectNode.putInt(PreferenceConstants.TARGET_ARCH_INDEX, elem.getIntTargetIndex());
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+		if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE) {
 			projectNode.put(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE);
 		} else {
 			projectNode.put(PreferenceConstants.SDK_MODE, IPreferenceStore.FALSE);
@@ -161,7 +161,7 @@ public class ProjectPreferenceUtils {
 		}
 	}
 
-	/* Save POKY Preference settings to project's environment */
+	/* Save Yocto Preference settings to project's environment */
 	public static void saveElemToProjectEnv(YoctoUIElement elem, IProject project) {
 		ConsoleOutputStream consoleOutStream = null;
 

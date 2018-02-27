@@ -39,7 +39,7 @@ import org.yocto.sdk.ide.utils.YoctoSDKUtils;
 public class YoctoSDKProjectPropertyPage extends PropertyPage implements
 		IWorkbenchPropertyPage {
 
-	private static final String REVALIDATION_MESSAGE = "Poky.SDK.Revalidation.Message";
+	private static final String REVALIDATION_MESSAGE = "Yocto.SDK.Revalidation.Message";
 
 	private YoctoProfileSetting yoctoProfileSetting;
 	private YoctoProjectSpecificSetting yoctoProjectSpecificSetting;

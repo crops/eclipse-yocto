@@ -11,10 +11,10 @@
 package org.yocto.sdk.ide;
 
 public class YoctoUIElement {
-	public enum PokyMode
+	public enum YoctoMode
 	{
-		POKY_SDK_MODE,
-		POKY_TREE_MODE
+		YOCTO_SDK_MODE,
+		YOCTO_TREE_MODE
 	};
 	public enum DeviceMode
 	{
@@ -28,14 +28,14 @@ public class YoctoUIElement {
 	private String strQemuKernelLoc;
 	private String strQemuOption;
 	private String strSysrootLoc;
-	private PokyMode enumPokyMode;
+	private YoctoMode enumYoctoMode;
 	private String strToolChainRoot;
 	private int intTargetIndex;	
 
 	public YoctoUIElement()
 	{
 		this.enumDeviceMode = DeviceMode.QEMU_MODE;
-		this.enumPokyMode = PokyMode.POKY_SDK_MODE;
+		this.enumYoctoMode = YoctoMode.YOCTO_SDK_MODE;
 		this.strToolChainRoot = "";
 		this.strQemuKernelLoc = "";
 		this.strQemuOption = "";
@@ -44,11 +44,11 @@ public class YoctoUIElement {
 		this.strTarget = "";
 	}
 
-	public PokyMode getEnumPokyMode() {
-		return enumPokyMode;
+	public YoctoMode getEnumYoctoMode() {
+		return enumYoctoMode;
 	}
-	public void setEnumPokyMode(PokyMode enumPokyMode) {
-		this.enumPokyMode = enumPokyMode;
+	public void setEnumYoctoMode(YoctoMode enumYoctoMode) {
+		this.enumYoctoMode = enumYoctoMode;
 	}
 	public String getStrToolChainRoot() {
 		return strToolChainRoot;
@@ -106,7 +106,7 @@ public class YoctoUIElement {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((enumDeviceMode == null) ? 0 : enumDeviceMode.hashCode());
-		result = prime * result + ((enumPokyMode == null) ? 0 : enumPokyMode.hashCode());
+		result = prime * result + ((enumYoctoMode == null) ? 0 : enumYoctoMode.hashCode());
 		result = prime * result + intTargetIndex;
 		result = prime * result + ((strQemuKernelLoc == null) ? 0 : strQemuKernelLoc.hashCode());
 		result = prime * result + ((strQemuOption == null) ? 0 : strQemuOption.hashCode());
@@ -127,7 +127,7 @@ public class YoctoUIElement {
 		YoctoUIElement other = (YoctoUIElement) obj;
 		if (enumDeviceMode != other.enumDeviceMode)
 			return false;
-		if (enumPokyMode != other.enumPokyMode)
+		if (enumYoctoMode != other.enumYoctoMode)
 			return false;
 		if (intTargetIndex != other.intTargetIndex)
 			return false;

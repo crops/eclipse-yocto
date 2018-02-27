@@ -82,7 +82,7 @@ public class YoctoSDKUtils {
 			return var.getValue();
 	}
 
-	/* Save project wide settings into ENV VARs including POKY preference settings
+	/* Save project wide settings into ENV VARs including Yocto preference settings
 	 * and Environment Script File export VARs
 	 */
 	private static void setEnvVars(ICProjectDescription cpdesc,
@@ -92,7 +92,7 @@ public class YoctoSDKUtils {
 		IContributedEnvironment env = manager.getContributedEnvironment();
 		String delimiter = manager.getDefaultDelimiter();
 
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE)
+		if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE)
 			env.addVariable(PreferenceConstants.SDK_MODE, IPreferenceStore.TRUE,
 					IEnvironmentVariable.ENVVAR_REPLACE, delimiter, ccdesc);
 		else
@@ -192,10 +192,10 @@ public class YoctoSDKUtils {
 	private static String getEnvironmentSetupFileFullPath(YoctoUIElement elem) {
 		String envSetupFile = "";
 
-		if (elem.getEnumPokyMode() == YoctoUIElement.PokyMode.POKY_SDK_MODE) {
+		if (elem.getEnumYoctoMode() == YoctoUIElement.YoctoMode.YOCTO_SDK_MODE) {
 			envSetupFile = elem.getStrToolChainRoot() + "/";
 		} else {
-			//POKY TREE Mode
+			//YOCTO TREE Mode
 			envSetupFile = elem.getStrToolChainRoot() + YoctoSDKUtilsConstants.DEFAULT_TMP_PREFIX;
 		}
 		envSetupFile += YoctoSDKUtilsConstants.DEFAULT_ENV_FILE_PREFIX + elem.getStrTarget();
@@ -403,13 +403,13 @@ public class YoctoSDKUtils {
 		return qemu_target;
 	}
 
-	/* Get IDE wide POKY Preference settings from a specific preference store */
+	/* Get IDE wide Yocto Preference settings from a specific preference store */
 	public static YoctoUIElement getElemFromStore(IPreferenceStore store) {
 		YoctoUIElement elem = new YoctoUIElement();
 		if (store.getString(PreferenceConstants.SDK_MODE).equals(IPreferenceStore.TRUE))
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_SDK_MODE);
 		else
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_TREE_MODE);
 
 		elem.setStrToolChainRoot(store.getString(PreferenceConstants.TOOLCHAIN_ROOT));
 		elem.setStrTarget(store.getString(PreferenceConstants.TOOLCHAIN_TRIPLET));
@@ -426,15 +426,15 @@ public class YoctoSDKUtils {
 		return elem;
 	}
 
-	/* Get default POKY Preference settings from the default preference store */
+	/* Get default Yocto Preference settings from the default preference store */
 	public static YoctoUIElement getDefaultElemFromDefaultStore()
 	{
 		IPreferenceStore store = YoctoSDKPlugin.getDefault().getPreferenceStore();
 		YoctoUIElement elem = new YoctoUIElement();
 		if (store.getDefaultString(PreferenceConstants.SDK_MODE).equals(IPreferenceStore.TRUE))
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_SDK_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_SDK_MODE);
 		else
-			elem.setEnumPokyMode(YoctoUIElement.PokyMode.POKY_TREE_MODE);
+			elem.setEnumYoctoMode(YoctoUIElement.YoctoMode.YOCTO_TREE_MODE);
 
 		elem.setStrToolChainRoot(store.getDefaultString(PreferenceConstants.TOOLCHAIN_ROOT));
 		elem.setStrTarget(store.getDefaultString(PreferenceConstants.TOOLCHAIN_TRIPLET));

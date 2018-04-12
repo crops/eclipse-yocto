@@ -9,12 +9,12 @@
 	<h2>About This Content</h2>
 
 	<p>
-		<em>December, 2012</em>
+		<em>April, 2018</em>
 	</p>
 	<h3>License</h3>
 
 	<p>
-		Copyright (c) 2010 Intel, Inc. and others.
+		Copyright (c) 2018 Intel, Inc. and others.
 		All rights reserved. This program and the accompanying materials
 		are made available under the terms of the Eclipse Public License v1.0
 		which accompanies this distribution, and is available at <br />
@@ -31,12 +31,13 @@
 		Redistributor's license for terms and conditions of use.</p>
 	<p>
 		<strong>
-			Yocto Project Quick Start
+			Yocto Project Quick Build
 		</strong>
 		<br />
 		<br />
-			This short document lets you get started with the Yocto Project
-			quickly and start building an image.
+			This short document steps you through the process for a typical image
+			build using the Yocto Project. You will use Yocto Project to build a
+			reference embedded OS called Poky.
 		<br />
 		<br />
 			<em>License:</em>
@@ -49,17 +50,69 @@
 				git://git.yoctoproject.org/yocto-docs
 			</a>
 		<br />
-			<em>Commit:</em> @COMMIT_ID-yocto-project-qs@
+			<em>Commit:</em> @COMMIT_ID-brief-yoctoprojectqs@
 		<br />
 		<br />
 		<strong>
-			Yocto Project Software Development Kit (SDK) Developer's Guide:
+			Yocto Project Overview and Concepts Manual:
+		</strong>
+		<br />
+		<br />
+			This manual introduces the Yocto Project by providing concepts,
+			software overviews, best-known-methods (BKMs), and any other
+			high-level introductory information suitable for a new Yocto
+			Project user.
+		<br />
+		<br />
+			<em>License:</em>
+			<a href="http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode">
+				http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode
+			</a>
+		<br />
+			<em>Source Code Repository:</em>
+			<a href="git://git.yoctoproject.org/yocto-docs">
+				git://git.yoctoproject.org/yocto-docs
+			</a>
+		<br />
+			<em>Commit:</em> @COMMIT_ID-overview-manual@
+		<br />
+		<br />
+		<strong>
+			Yocto Project Development Tasks Manual:
+		</strong>
+		<br />
+		<br />
+			This manual provides relevant procedures necessary for developing in
+			the Yocto Project environment (i.e. developing embedded Linux images
+			and user-space applications that run on targeted devices).
+		<br />
+		<br />
+			<em>License:</em>
+			<a href="http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode">
+				http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode
+			</a>
+		<br />
+			<em>Source Code Repository:</em>
+			<a href="git://git.yoctoproject.org/yocto-docs">
+				git://git.yoctoproject.org/yocto-docs
+			</a>
+		<br />
+			<em>Commit:</em> @COMMIT_ID-dev-manual@
+		<br />
+		<br />
+		<strong>
+			Yocto Project Application Development and the Extensible Software
+			Development Kit (eSDK):
 		</strong>
 		<br />
 		<br />
 			This manual shows you how to setup and use the Software Development
 			Kit (SDK) and stand-alone cross-development toolchains so you can
 			develop user-space applications.
+
+			This manual describes how to use the extensible SDK, popular Eclipse
+			IDE, and stand-alone cross-development toolchains used for user-space
+			application development.
 		<br />
 		<br />
 			<em>License:</em>
@@ -76,13 +129,15 @@
 		<br />
 		<br />
 		<strong>
-			Yocto Project Development Manual:
+			Yocto Project Board Support Package (BSP) Developer's Guide:
 		</strong>
 		<br />
 		<br />
-			This manual describes how to use the Yocto Project to develop
-			embedded Linux images and user-space applications to run on
-			targeted devices.
+			This manual presents information about BSP Layers, defines a structure
+			for components so that BSPs follow a commonly understood layout,
+			discusses how to customize a recipe for a BSP, addresses BSP licensing,
+			and provides information that shows you how to create a BSP Layer using
+			the bitbake-layers tool.
 		<br />
 		<br />
 			<em>License:</em>
@@ -95,7 +150,53 @@
 				git://git.yoctoproject.org/yocto-docs
 			</a>
 		<br />
-			<em>Commit:</em> @COMMIT_ID-dev-manual@
+			<em>Commit:</em> @COMMIT_ID-bsp-guide@
+		<br />
+		<br />
+		<strong>
+			Yocto Project Linux Kernel Development Manual:
+		</strong>
+		<br />
+		<br />
+			This manual describes how to set up your build host to support kernel
+			development, introduces the kernel development process, provides
+			background information on the Yocto Linux kernel Metadata,
+		<br />
+		<br />
+			<em>License:</em>
+			<a href="http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode">
+				http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode
+			</a>
+		<br />
+			<em>Source Code Repository:</em>
+			<a href="git://git.yoctoproject.org/yocto-docs">
+				git://git.yoctoproject.org/yocto-docs
+			</a>
+		<br />
+			<em>Commit:</em> @COMMIT_ID-kernel-dev@
+		<br />
+		<br />
+		<strong>
+			Yocto Project Profiling and Tracing Manual:
+		</strong>
+		<br />
+		<br />
+			This manual describes basic profiling and tracing tools usage.
+			The manual shows by example how to make use of these tools to examine
+			application and system behavior.
+		<br />
+		<br />
+			<em>License:</em>
+			<a href="http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode">
+				http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode
+			</a>
+		<br />
+			<em>Source Code Repository:</em>
+			<a href="git://git.yoctoproject.org/yocto-docs">
+				git://git.yoctoproject.org/yocto-docs
+			</a>
+		<br />
+			<em>Commit:</em> @COMMIT_ID-profile-manual@
 		<br />
 		<br />
 		<strong>
@@ -118,72 +219,5 @@
 			</a>
 		<br />
 			<em>Commit:</em> @COMMIT_ID-ref-manual@
-		<br />
-		<br />
-		<strong>
-			Yocto Project Board Support Package (BSP) Developer's Guide:
-		</strong>
-		<br />
-		<br />
-			This brief document defines a structure for BSP components.
-			Having a commonly understood layout encourages standardization.
-		<br />
-		<br />
-			<em>License:</em>
-			<a href="http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode">
-				http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode
-			</a>
-		<br />
-			<em>Source Code Repository:</em>
-			<a href="git://git.yoctoproject.org/yocto-docs">
-				git://git.yoctoproject.org/yocto-docs
-			</a>
-		<br />
-			<em>Commit:</em> @COMMIT_ID-bsp-guide@
-		<br />
-		<br />
-		<strong>
-			Yocto Project Linux Kernel Development Manual:
-		</strong>
-		<br />
-		<br />
-			  This document describes the architecture of the Yocto Project
-			  kernel and provides some work flow examples.
-		<br />
-		<br />
-			<em>License:</em>
-			<a href="http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode">
-				http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode
-			</a>
-		<br />
-			<em>Source Code Repository:</em>
-			<a href="git://git.yoctoproject.org/yocto-docs">
-				git://git.yoctoproject.org/yocto-docs
-			</a>
-		<br />
-			<em>Commit:</em> @COMMIT_ID-kernel-dev@
-				<br />
-		<br />
-		<strong>
-			Yocto Project Profiling and Tracing Manual:
-		</strong>
-		<br />
-		<br />
-			  This manual presents a set of common and generally useful
-			  tracing and profiling schemes along with their application
-			  (as appropriate) to each tool.
-		<br />
-		<br />
-			<em>License:</em>
-			<a href="http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode">
-				http://creativecommons.org/licenses/by-sa/2.0/uk/legalcode
-			</a>
-		<br />
-			<em>Source Code Repository:</em>
-			<a href="git://git.yoctoproject.org/yocto-docs">
-				git://git.yoctoproject.org/yocto-docs
-			</a>
-		<br />
-			<em>Commit:</em> @COMMIT_ID-profile-manual@
 	</p>
 </body>

@@ -53,8 +53,8 @@ cd ${DOC_DIR}
 git checkout $1 || fail $? "git checkout $1"
 COMMIT_ID=`git rev-parse HEAD`
 
-DOCS="sdk-manual kernel-dev \
-      bsp-guide ref-manual dev-manual profile-manual"
+DOCS="brief-yoctoprojectqs overview-manual dev-manual sdk-manual \
+      bsp-guide kernel-dev profile-manual ref-manual"
 
 # build and copy
 cd documentation

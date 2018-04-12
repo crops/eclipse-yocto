@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
  <toc label="Yocto Project Documentation">
-   <topic label="Yocto Project Quick Start">
-      <link toc="html/yocto-project-qs-toc.xml"/>
+   <topic label="Yocto Project Quick Build">
+      <link toc="html/brief-yoctoprojectqs-toc.xml"/>
    </topic>
-   <topic label="Yocto Project Software Development Kit (SDK) Developer&apos;s Guide">
-      <link toc="html/sdk-manual-toc.xml"/>
+   <topic label="Yocto Project Overview and Concepts Manual">
+      <link toc="html/overview-manual-toc.xml"/>
    </topic>
    <topic label="Yocto Project Development Manual">
       <link toc="html/dev-manual-toc.xml"/>
    </topic>
-   <topic label="Yocto Project Reference Manual">
-      <link toc="html/ref-manual-toc.xml"/>
+   <topic label="Yocto Project Application Development and the Extensible Software Development Kit (eSDK)">
+      <link toc="html/sdk-manual-toc.xml"/>
    </topic>
-   <topic label="Yocto Project Board Support Package Developer&apos;s Guide">
+   <topic label="Yocto Project Board Support Package (BSP) Developer&apos;s Guide">
       <link toc="html/bsp-guide-toc.xml"/>
    </topic>
    <topic label="Yocto Project Linux Kernel Development Manual">
@@ -20,5 +20,8 @@
    </topic>
    <topic label="Yocto Project Tracing and Profiling Manual">
       <link toc="html/profile-manual-toc.xml"/>
+   </topic>
+   <topic label="Yocto Project Reference Manual">
+      <link toc="html/ref-manual-toc.xml"/>
    </topic>
  </toc>

@@ -8,11 +8,11 @@
 			primary="true">
 		</toc>
 		<toc
-			file="html/sdk-manual-toc.xml"
+			file="html/brief-yoctoprojectqs-toc.xml"
 			primary="false">
 		</toc>
 		<toc
-			file="html/yocto-project-qs-toc.xml"
+			file="html/overview-manual-toc.xml"
 			primary="false">
 		</toc>
 		<toc
@@ -20,7 +20,7 @@
 			primary="false">
 		</toc>
 		<toc
-			file="html/ref-manual-toc.xml"
+			file="html/sdk-manual-toc.xml"
 			primary="false">
 		</toc>
 		<toc
@@ -31,9 +31,13 @@
 			file="html/kernel-dev-toc.xml"
 			primary="false">
 		</toc>
-  <toc
-        file="html/profile-manual-toc.xml"
-        primary="false">
-  </toc>
+		<toc
+			file="html/profile-manual-toc.xml"
+			primary="false">
+		</toc>
+		<toc
+			file="html/ref-manual-toc.xml"
+			primary="false">
+		</toc>
 	</extension>
 </plugin>
